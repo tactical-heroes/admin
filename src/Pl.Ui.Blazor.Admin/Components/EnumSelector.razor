@@ -1,0 +1,20 @@
+﻿@typeparam TEnum where TEnum : struct, Enum
+
+<MudSelect T="TEnum ?"
+           For="@For"
+           Value="@Value"
+           ValueChanged="@ValueChanged"
+           Label="@Label"
+           Variant="@Variant"
+           Dense="@Dense"
+           Clearable="@Clearable"
+           Disabled="@Disabled"
+           Class="@Class"
+           Style="@Style">
+    @foreach (var value in Enum.GetValues<TEnum>())
+    {
+        <MudSelectItem Value="@((TEnum?)value)">
+            @value.GetDisplayName()
+        </MudSelectItem>
+    }
+</MudSelect>

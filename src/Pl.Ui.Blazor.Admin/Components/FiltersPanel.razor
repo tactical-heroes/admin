@@ -1,0 +1,13 @@
+﻿<MudPaper Elevation="1" Outlined="true">
+    <MudExpansionPanels Elevation="0">
+        <MudExpansionPanel Text="@Title" Expanded="@Expanded" ExpandedChanged="ExpandedChanged">
+            @ChildContent
+
+            <MudStack Row Justify="Justify.FlexEnd">
+                <MudButton Variant="Variant.Text" StartIcon="@Icons.Material.Filled.Clear" OnClick="OnResetClicked">
+                    Сбросить
+                </MudButton>
+            </MudStack>
+        </MudExpansionPanel>
+    </MudExpansionPanels>
+</MudPaper>
