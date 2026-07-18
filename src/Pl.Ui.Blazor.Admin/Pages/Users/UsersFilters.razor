@@ -1,0 +1,20 @@
+﻿<MudGrid Spacing="2" AlignItems="AlignItems.Center">
+
+    <MudItem xs="12" sm="6" md="4" lg="3">
+        <MudTextField T="string"
+                      Value="@SearchParams.SearchQuery"
+                      ValueChanged="OnSearchChanged"
+                      Label="Поиск (ФИО / Email)"
+                      Variant="Variant.Outlined"
+                      Immediate="true"
+                      DebounceInterval="300"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      OnDebounceIntervalElapsed="OnSearchDebounced" />
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="4" lg="3">
+        <EnumSelector TEnum="Role" Value="@SearchParams.Role" ValueChanged="OnRoleChanged" Label="Роль" />
+    </MudItem>
+
+</MudGrid>
