@@ -37,7 +37,12 @@ dotnet run --project .\src\TacticalHeroes.Admin
 
 По умолчанию используется
 `https://dev.api.tactical-heroes.panixida.ru`. Адрес задаётся параметром
-`TacticalHeroesApi:BaseUrl`.
+`TacticalHeroesApi:BaseUrl` и может быть переопределён через environment variable:
+
+```powershell
+$env:TacticalHeroesApi__BaseUrl = "https://api.example.com"
+dotnet run --project .\src\TacticalHeroes.Admin
+```
 
 Dev API сейчас требует авторизацию и возвращает `401 Unauthorized` для Roles и
 Users. Авторизация сознательно не реализована на этом этапе; интерфейс показывает
@@ -48,7 +53,9 @@ Users. Авторизация сознательно не реализована
 OpenAPI-контракт хранится в `openapi/tactical-heroes.json`. При сборке проекта
 `TacticalHeroes.Admin.Api` MSBuild автоматически восстанавливает локальный Kiota
 tool, генерирует ветки Roles/Users в `obj` и подключает их к компиляции. Generated-
-исходники не хранятся в Git.
+исходники не хранятся в Git. В `servers` используется относительный URL `/`,
+поэтому сгенерированный клиент не привязан к окружению. Server render получает
+адрес API из `TacticalHeroesApi:BaseUrl`, а WASM обращается к same-origin YARP BFF.
 
 Чтобы обновить сам контракт:
 
@@ -70,6 +77,7 @@ docker build `
 
 docker run --rm `
   --publish 8080:8080 `
+  --env "TacticalHeroesApi__BaseUrl=https://api.example.com" `
   --name tactical-heroes-admin `
   tactical-heroes-admin:local
 ```

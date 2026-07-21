@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "https://dev.api.tactical-heroes.panixida.ru/"
+      "url": "/"
     }
   ],
   "paths": {
