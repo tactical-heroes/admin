@@ -1,7 +1,31 @@
-*.suo
-*.user
+# Build output
 [Bb]in/
 [Oo]bj/
+[Aa]rtifacts/
+
+# Generated code
+src/TacticalHeroes.Admin.Api/Generated/
+
+# IDE
 .vs/
-/UI/wwwroot/Uploads/
-.idea
+.idea/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Test and coverage output
+[Tt]est[Rr]esult*/
+[Cc]overage*/
+*.coverage
+*.coveragexml
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Operating system
+.DS_Store
+Thumbs.db
