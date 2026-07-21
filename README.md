@@ -59,3 +59,39 @@ Invoke-WebRequest `
 
 dotnet build .\TacticalHeroes.Admin.slnx
 ```
+
+## Docker
+
+```powershell
+docker build `
+  --file .\src\TacticalHeroes.Admin\Dockerfile `
+  --tag tactical-heroes-admin:local `
+  .
+
+docker run --rm `
+  --publish 8080:8080 `
+  --name tactical-heroes-admin `
+  tactical-heroes-admin:local
+```
+
+Контейнер запускает единый ASP.NET Core host: он отдаёт SSR, обслуживает
+Interactive Server, раздаёт WebAssembly и проксирует `/api` через YARP.
+
+Для Kubernetes ingress должен поддерживать WebSocket upgrade. При нескольких
+репликах на фазе Interactive Server нужна session affinity. В образе включена
+обработка `X-Forwarded-For` и `X-Forwarded-Proto` для TLS termination на ingress.
+
+## CI/CD
+
+GitHub Actions проверяет форматирование и Release-сборку. В pull request также
+собирается Docker-образ без публикации. После push в `development` или `main`
+образ публикуется с тегами `<run_number>` и
+`<development|production>-<run_number>`.
+
+Для reusable workflows должны быть настроены:
+
+- variables: `PROJECT_FOLDER=.`, `REGISTRY_URL`, `REGISTRY_IMAGE_PREFIX`,
+  `SERVICE_NAME`;
+- secrets: `REGISTRY_USER`, `REGISTRY_TOKEN`.
+
+`REGISTRY_TOKEN` должен иметь право публикации образов в выбранный registry.
