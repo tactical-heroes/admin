@@ -12,6 +12,8 @@ public static class ApiErrorMessage
                 "API требует авторизацию. Интерфейс готов, но доступ к данным будет закрыт до подключения входа.",
             ApiException { ResponseStatusCode: 403 } =>
                 "У текущего пользователя недостаточно прав для этого действия.",
+            ApiException { ResponseStatusCode: 400 } =>
+                "Проверьте заполненные поля: API отклонил переданные данные.",
             ApiException { ResponseStatusCode: 404 } =>
                 "Запрошенная сущность не найдена.",
             ApiException { ResponseStatusCode: 409 } =>

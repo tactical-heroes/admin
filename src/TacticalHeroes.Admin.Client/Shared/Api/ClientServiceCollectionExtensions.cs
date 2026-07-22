@@ -3,6 +3,7 @@ using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Http.HttpClientLibrary;
 using MudBlazor.Services;
 using TacticalHeroes.Admin.Api.Generated;
+using TacticalHeroes.Admin.Client.Entities.Authentication.Api;
 using TacticalHeroes.Admin.Client.Entities.Roles.Api;
 using TacticalHeroes.Admin.Client.Entities.Users.Api;
 
@@ -14,7 +15,8 @@ public static class ClientServiceCollectionExtensions
 
     public static IServiceCollection AddTacticalHeroesAdminClient(
         this IServiceCollection services,
-        Func<IServiceProvider, Uri> baseAddressFactory)
+        Func<IServiceProvider, Uri> baseAddressFactory,
+        Func<IServiceProvider, IAuthenticationProvider>? authenticationProviderFactory = null)
     {
         ArgumentNullException.ThrowIfNull(baseAddressFactory);
 
@@ -44,8 +46,10 @@ public static class ClientServiceCollectionExtensions
                 var httpClient = serviceProvider
                     .GetRequiredService<IHttpClientFactory>()
                     .CreateClient(ApiHttpClientName);
+                var authenticationProvider = authenticationProviderFactory?.Invoke(serviceProvider) ??
+                    new AnonymousAuthenticationProvider();
                 var requestAdapter = new HttpClientRequestAdapter(
-                    new AnonymousAuthenticationProvider(),
+                    authenticationProvider,
                     httpClient: httpClient)
                 {
                     BaseUrl = httpClient.BaseAddress!.AbsoluteUri.TrimEnd('/'),
@@ -56,6 +60,7 @@ public static class ClientServiceCollectionExtensions
 
         services.AddScoped<RolesApi>();
         services.AddScoped<UsersApi>();
+        services.AddScoped<AuthenticationApi>();
 
         return services;
     }

@@ -1,6 +1,6 @@
 @inherits LayoutComponentBase
 
-<MudThemeProvider Theme="_theme" />
+<MudThemeProvider Theme="@AppTheme.Current" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -18,6 +18,21 @@
             Tactical Heroes
         </MudText>
         <MudSpacer />
+        <AuthorizeView>
+            <Authorized Context="authentication">
+                <MudText Typo="Typo.body2" Class="current-user">
+                    @authentication.User.Identity?.Name
+                </MudText>
+                <form action="/authentication/logout" method="post" class="logout-form">
+                    <AntiforgeryToken />
+                    <input type="hidden" name="returnUrl" value="/" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Logout"
+                                   ButtonType="ButtonType.Submit"
+                                   Color="Color.Inherit"
+                                   aria-label="Выйти" />
+                </form>
+            </Authorized>
+        </AuthorizeView>
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen"
@@ -55,27 +70,6 @@
 
 @code {
     private bool _drawerOpen = true;
-
-    private readonly MudTheme _theme = new()
-    {
-        PaletteLight = new PaletteLight
-        {
-            Primary = "#D94F3D",
-            Secondary = "#68758A",
-            Background = "#F4F6F9",
-            Surface = "#FFFFFF",
-            AppbarBackground = "#17202D",
-            AppbarText = "#F7F9FC",
-            DrawerBackground = "#111923",
-            DrawerText = "#DDE5EF",
-            TextPrimary = "#1A2230",
-            TextSecondary = "#667085",
-        },
-        LayoutProperties = new LayoutProperties
-        {
-            DefaultBorderRadius = "10px",
-        },
-    };
 
     private void ToggleDrawer()
     {

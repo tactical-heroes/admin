@@ -8,7 +8,6 @@
     <KiotaOpenApiFile>$(RepositoryRoot)\openapi\tactical-heroes.json</KiotaOpenApiFile>
     <KiotaGeneratedDir>$(MSBuildProjectDirectory)\obj\$(Configuration)\$(TargetFramework)\Generated</KiotaGeneratedDir>
     <KiotaGeneratedClientFile>$(KiotaGeneratedDir)\TacticalHeroesApiClient.cs</KiotaGeneratedClientFile>
-    <KiotaToolDll>$(NuGetPackageRoot)/microsoft.openapi.kiota/1.34.1/tools/net10.0/any/kiota.dll</KiotaToolDll>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,7 +21,7 @@
           Outputs="$(KiotaGeneratedClientFile)">
     <Exec Command="dotnet tool restore"
           WorkingDirectory="$(RepositoryRoot)" />
-    <Exec Command="dotnet &quot;$(KiotaToolDll)&quot; generate --language CSharp --openapi &quot;$(KiotaOpenApiFile)&quot; --output &quot;$(KiotaGeneratedDir)&quot; --class-name TacticalHeroesApiClient --namespace-name TacticalHeroes.Admin.Api.Generated --clean-output --exclude-backward-compatible --include-path &quot;/api/v1/roles&quot; --include-path &quot;/api/v1/roles/**&quot; --include-path &quot;/api/v1/users&quot; --include-path &quot;/api/v1/users/**&quot; --log-level Error"
+    <Exec Command="dotnet tool run kiota -- generate --language CSharp --openapi &quot;$(KiotaOpenApiFile)&quot; --output &quot;$(KiotaGeneratedDir)&quot; --class-name TacticalHeroesApiClient --namespace-name TacticalHeroes.Admin.Api.Generated --clean-output --exclude-backward-compatible --include-path &quot;/api/v1/auth/**&quot; --include-path &quot;/api/v1/roles&quot; --include-path &quot;/api/v1/roles/**&quot; --include-path &quot;/api/v1/users&quot; --include-path &quot;/api/v1/users/**&quot; --log-level Error"
           WorkingDirectory="$(RepositoryRoot)" />
   </Target>
 

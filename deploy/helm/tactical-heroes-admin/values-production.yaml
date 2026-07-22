@@ -3,6 +3,7 @@ env:
     ASPNETCORE_ENVIRONMENT: Production
     DOTNET_ENVIRONMENT: Production
     TacticalHeroesApi__BaseUrl: https://api.tactical-heroes.panixida.ru
+    Authentication__OpenIdConnect__Authority: https://api.tactical-heroes.panixida.ru
 
 externalSecrets:
   openbao:

@@ -1,0 +1,74 @@
+@if (!string.IsNullOrWhiteSpace(ErrorMessage))
+{
+    <MudAlert Severity="Severity.Error"
+              Variant="Variant.Outlined"
+              Class="account-alert">
+        @ErrorMessage
+    </MudAlert>
+}
+
+@if (string.IsNullOrWhiteSpace(ReturnUrl))
+{
+    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="account-form-copy">
+        Начните защищённый OAuth-вход, чтобы перейти к форме с учётными данными.
+    </MudText>
+    <MudButton Href="/authentication/challenge?returnUrl=%2F"
+               Variant="Variant.Filled"
+               Color="Color.Primary"
+               Size="Size.Large"
+               FullWidth="true"
+               EndIcon="@Icons.Material.Filled.ArrowForward">
+        Продолжить вход
+    </MudButton>
+}
+else
+{
+    <form method="post"
+          action="/authentication/sign-in"
+          class="account-form">
+        <AntiforgeryToken />
+        <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
+
+        <label class="account-field">
+            <span>Email</span>
+            <input type="email"
+                   name="Email"
+                   autocomplete="username"
+                   inputmode="email"
+                   placeholder="admin@example.com"
+                   required />
+        </label>
+
+        <label class="account-field">
+            <span>Пароль</span>
+            <input type="password"
+                   name="Password"
+                   autocomplete="current-password"
+                   placeholder="Введите пароль"
+                   required />
+        </label>
+
+        <button type="submit" class="account-submit">
+            Войти
+            <span aria-hidden="true">→</span>
+        </button>
+    </form>
+}
+
+@code {
+    [Parameter]
+    public string? ReturnUrl { get; set; }
+
+    [Parameter]
+    public string? Error { get; set; }
+
+    private string? ErrorMessage => Error switch
+    {
+        "invalid_credentials" => "Неверный email или пароль.",
+        "forbidden" => "Аккаунт не подтверждён, заблокирован или временно заблокирован после неудачных попыток.",
+        "invalid_request" => "Ссылка входа устарела или повреждена. Начните вход заново.",
+        "unavailable" => "Сервис авторизации временно недоступен. Повторите попытку позже.",
+        "oauth" => "OAuth-вход не удалось завершить. Начните его заново.",
+        _ => null,
+    };
+}

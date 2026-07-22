@@ -1,4 +1,5 @@
 @page "/"
+@attribute [Authorize]
 
 <PageTitle>Главная · Tactical Heroes</PageTitle>
 
@@ -54,10 +55,3 @@
         </MudCard>
     </MudItem>
 </MudGrid>
-
-<MudAlert Severity="Severity.Info"
-          Variant="Variant.Outlined"
-          Class="auth-note">
-    Авторизация пока не подключена. Dev API отвечает 401 на административные методы,
-    поэтому экраны покажут данные после реализации входа.
-</MudAlert>

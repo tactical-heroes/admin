@@ -3,6 +3,9 @@ using TacticalHeroes.Admin.Client.Shared.Api;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
+builder.Services.AddAuthorizationCore();
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddAuthenticationStateDeserialization();
 builder.Services.AddTacticalHeroesAdminClient(
     _ => new Uri(builder.HostEnvironment.BaseAddress));
 

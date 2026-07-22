@@ -1,0 +1,78 @@
+@using System.ComponentModel.DataAnnotations
+@using TacticalHeroes.Admin.Client.Entities.Authentication.Api
+@using TacticalHeroes.Admin.Client.Shared.Api
+@inject AuthenticationApi AuthenticationApi
+
+@if (_requested)
+{
+    <MudAlert Severity="Severity.Success" Variant="Variant.Outlined">
+        Если аккаунт существует и ещё не подтверждён, запрос создан. Фактическая доставка писем в
+        текущем окружении не проверяется.
+    </MudAlert>
+}
+else
+{
+    @if (!string.IsNullOrWhiteSpace(_error))
+    {
+        <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Class="account-alert">
+            @_error
+        </MudAlert>
+    }
+
+    <EditForm Model="_model" OnValidSubmit="SubmitAsync" FormName="resend-confirmation">
+        <DataAnnotationsValidator />
+        <MudStack Spacing="3">
+            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                Повторно создадим запрос подтверждения без раскрытия существования аккаунта.
+            </MudText>
+            <MudTextField @bind-Value="_model.Email"
+                          For="@(() => _model.Email)"
+                          Label="Email"
+                          InputType="InputType.Email"
+                          Variant="Variant.Outlined"
+                          Disabled="_submitting" />
+            <MudButton ButtonType="ButtonType.Submit"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Size="Size.Large"
+                       FullWidth="true"
+                       Disabled="_submitting">
+                Отправить повторно
+            </MudButton>
+        </MudStack>
+    </EditForm>
+}
+
+@code {
+    private readonly EmailModel _model = new();
+    private bool _submitting;
+    private bool _requested;
+    private string? _error;
+
+    private async Task SubmitAsync()
+    {
+        _submitting = true;
+        _error = null;
+
+        try
+        {
+            await AuthenticationApi.ResendConfirmationEmailAsync(_model.Email);
+            _requested = true;
+        }
+        catch (Exception exception)
+        {
+            _error = ApiErrorMessage.FromException(exception);
+        }
+        finally
+        {
+            _submitting = false;
+        }
+    }
+
+    private sealed class EmailModel
+    {
+        [Required(ErrorMessage = "Укажите email.")]
+        [EmailAddress(ErrorMessage = "Укажите корректный email.")]
+        public string Email { get; set; } = string.Empty;
+    }
+}

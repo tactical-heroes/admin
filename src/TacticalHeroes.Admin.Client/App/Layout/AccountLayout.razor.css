@@ -1,0 +1,104 @@
+.account-layout {
+    display: grid;
+    min-height: 100vh;
+    grid-template-columns: minmax(360px, 0.9fr) minmax(520px, 1.1fr);
+    background: #f7f8fa;
+}
+
+.account-visual {
+    position: relative;
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    padding: 3rem;
+    background:
+        radial-gradient(circle at 15% 18%, rgba(237, 106, 87, 0.28), transparent 34%),
+        radial-gradient(circle at 90% 72%, rgba(69, 93, 130, 0.32), transparent 36%),
+        linear-gradient(145deg, #101822 0%, #182332 54%, #111923 100%);
+    color: #fff;
+}
+
+.account-brand {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.account-brand-mark {
+    display: grid;
+    width: 56px;
+    height: 56px;
+    place-items: center;
+    border-radius: 14px;
+    background: linear-gradient(145deg, #ed6a57, #b62f25);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    box-shadow: 0 14px 36px rgba(217, 79, 61, 0.32);
+}
+
+.account-brand ::deep .mud-typography-body2,
+.account-visual-copy ::deep .mud-typography-h6 {
+    color: #aeb9c8;
+}
+
+.account-visual-copy {
+    position: relative;
+    z-index: 1;
+    max-width: 580px;
+    padding-bottom: 4rem;
+}
+
+.account-visual-copy ::deep .mud-typography-h2 {
+    max-width: 540px;
+    margin-bottom: 1.4rem;
+    font-size: clamp(2.8rem, 5vw, 5.3rem);
+    font-weight: 750;
+    line-height: 0.98;
+    letter-spacing: -0.055em;
+}
+
+.account-grid {
+    position: absolute;
+    inset: 0;
+    opacity: 0.09;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.8) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.8) 1px, transparent 1px);
+    background-size: 54px 54px;
+    mask-image: linear-gradient(to bottom, transparent, black 20%, black 75%, transparent);
+}
+
+.account-content {
+    display: grid;
+    min-height: 100vh;
+    place-items: center;
+    padding: 3rem clamp(1.5rem, 6vw, 6rem);
+}
+
+@media (max-width: 959px) {
+    .account-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .account-visual {
+        min-height: 240px;
+        padding: 1.5rem;
+    }
+
+    .account-visual-copy {
+        padding: 3rem 0 0;
+    }
+
+    .account-visual-copy ::deep .mud-typography-h2 {
+        font-size: 2.6rem;
+    }
+
+    .account-content {
+        min-height: auto;
+        padding: 2rem 1rem 3rem;
+    }
+}
