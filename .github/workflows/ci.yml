@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [ main, development ]
+
+jobs:
+  format:
+    uses: PANiXiDA-Infrastructure/ci-cd/.github/workflows/dotnet-format.yml@main
+    secrets:
+      registry-user: ${{ secrets.REGISTRY_USER }}
+      registry-token: ${{ secrets.REGISTRY_TOKEN }}
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: ./global.json
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/global.json', '**/dotnet-tools.json') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+  validate-image:
+    if: ${{ github.event_name == 'pull_request' }}
+    needs: [ format, build ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./src/TacticalHeroes.Admin/Dockerfile
+          push: false
+          cache-from: type=gha,scope=${{ github.repository }}
+          cache-to: type=gha,mode=max,scope=${{ github.repository }}
+
+  resolve-env:
+    if: ${{ github.event_name != 'pull_request' && (github.ref_name == 'main' || github.ref_name == 'development') }}
+    uses: PANiXiDA-Infrastructure/ci-cd/.github/workflows/resolve-environment.yml@main
+
+  build-image:
+    if: ${{ github.event_name != 'pull_request' && (github.ref_name == 'main' || github.ref_name == 'development') }}
+    needs: [ format, build, resolve-env ]
+    uses: PANiXiDA-Infrastructure/ci-cd/.github/workflows/docker-build.yml@main
+    with:
+      service-folder: src/TacticalHeroes.Admin
+      image: |
+        ${{ vars.REGISTRY_IMAGE_PREFIX }}/${{ vars.SERVICE_NAME }}:${{ github.run_number }}
+        ${{ vars.REGISTRY_IMAGE_PREFIX }}/${{ vars.SERVICE_NAME }}:${{ needs.resolve-env.outputs.environment }}-${{ github.run_number }}
+    secrets:
+      registry-user: ${{ secrets.REGISTRY_USER }}
+      registry-token: ${{ secrets.REGISTRY_TOKEN }}

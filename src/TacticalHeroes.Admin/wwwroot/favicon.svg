@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Tactical Heroes">
+  <defs>
+    <linearGradient id="accent" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ed6a57"/>
+      <stop offset="1" stop-color="#b62f25"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#accent)"/>
+  <path d="M13 18h38v8H36v22h-8V26H13z" fill="#fff"/>
+  <path d="M42 29h8v19h-8z" fill="#fff"/>
+</svg>

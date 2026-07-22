@@ -1,0 +1,84 @@
+@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="_theme" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="0"
+               Class="app-bar">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                       Color="Color.Inherit"
+                       Edge="Edge.Start"
+                       OnClick="ToggleDrawer"
+                       aria-label="Открыть меню" />
+        <MudText Typo="Typo.subtitle1"
+                 Class="app-bar-title">
+            Tactical Heroes
+        </MudText>
+        <MudSpacer />
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_drawerOpen"
+               Variant="DrawerVariant.Responsive"
+               Breakpoint="Breakpoint.Md"
+               ClipMode="DrawerClipMode.Always"
+               Elevation="0"
+               Width="264px"
+               Class="app-drawer">
+        <div class="brand">
+            <div class="brand-mark">TH</div>
+            <div>
+                <MudText Typo="Typo.subtitle1">Control room</MudText>
+                <MudText Typo="Typo.caption"
+                         Class="brand-subtitle">
+                    Administration
+                </MudText>
+            </div>
+        </div>
+        <NavMenu />
+    </MudDrawer>
+
+    <MudMainContent>
+        <main class="page-content">
+            @Body
+        </main>
+    </MudMainContent>
+</MudLayout>
+
+<div id="blazor-error-ui" data-nosnippet>
+    Произошла непредвиденная ошибка.
+    <a href="." class="reload">Перезагрузить</a>
+    <button type="button" class="dismiss">×</button>
+</div>
+
+@code {
+    private bool _drawerOpen = true;
+
+    private readonly MudTheme _theme = new()
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#D94F3D",
+            Secondary = "#68758A",
+            Background = "#F4F6F9",
+            Surface = "#FFFFFF",
+            AppbarBackground = "#17202D",
+            AppbarText = "#F7F9FC",
+            DrawerBackground = "#111923",
+            DrawerText = "#DDE5EF",
+            TextPrimary = "#1A2230",
+            TextSecondary = "#667085",
+        },
+        LayoutProperties = new LayoutProperties
+        {
+            DefaultBorderRadius = "10px",
+        },
+    };
+
+    private void ToggleDrawer()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+}

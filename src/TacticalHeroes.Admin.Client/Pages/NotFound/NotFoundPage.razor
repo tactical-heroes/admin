@@ -1,0 +1,22 @@
+@page "/not-found"
+@layout MainLayout
+
+<PageTitle>Страница не найдена · Tactical Heroes</PageTitle>
+
+<div class="not-found">
+    <MudIcon Icon="@Icons.Material.Outlined.ExploreOff"
+             Size="Size.Large"
+             Color="Color.Secondary" />
+    <MudText Typo="Typo.h4" HtmlTag="h1">
+        Страница не найдена
+    </MudText>
+    <MudText Typo="Typo.body1" Color="Color.Secondary">
+        Проверьте адрес или вернитесь на главную.
+    </MudText>
+    <MudButton Href="/"
+               Variant="Variant.Filled"
+               Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.Home">
+        На главную
+    </MudButton>
+</div>

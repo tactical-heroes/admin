@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TacticalHeroes.Admin.Api/TacticalHeroes.Admin.Api.csproj" />
+    <Project Path="src/TacticalHeroes.Admin.Client/TacticalHeroes.Admin.Client.csproj" />
+    <Project Path="src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj" />
+  </Folder>
+</Solution>

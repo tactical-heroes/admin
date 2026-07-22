@@ -1,0 +1,28 @@
+<nav class="nav-shell" aria-label="Основная навигация">
+<MudNavMenu>
+    <MudText Typo="Typo.overline"
+             Class="nav-section-title">
+        Обзор
+    </MudText>
+    <MudNavLink Href="/"
+                Match="NavLinkMatch.All"
+                Icon="@Icons.Material.Filled.SpaceDashboard">
+        Главная
+    </MudNavLink>
+
+    <MudText Typo="Typo.overline"
+             Class="nav-section-title nav-section-spaced">
+        Identity
+    </MudText>
+    <MudNavLink Href="/roles"
+                Match="NavLinkMatch.Prefix"
+                Icon="@Icons.Material.Filled.Security">
+        Роли
+    </MudNavLink>
+    <MudNavLink Href="/users"
+                Match="NavLinkMatch.Prefix"
+                Icon="@Icons.Material.Filled.Group">
+        Пользователи
+    </MudNavLink>
+</MudNavMenu>
+</nav>

@@ -1,0 +1,39 @@
+.nav-shell {
+    padding: 1.25rem 0.75rem;
+}
+
+.nav-shell ::deep .nav-section-title {
+    display: block;
+    padding: 0 0.75rem 0.4rem;
+    color: #8390a2;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.nav-shell ::deep .nav-section-spaced {
+    margin-top: 1.25rem;
+}
+
+.nav-shell ::deep .mud-nav-link {
+    margin: 0.2rem 0;
+    padding: 0.7rem 0.8rem;
+    border-radius: 9px;
+    font-size: 0.95rem;
+}
+
+.nav-shell ::deep .mud-nav-link.active {
+    position: relative;
+    background: rgba(217, 79, 61, 0.16);
+    color: #ff8a78;
+}
+
+.nav-shell ::deep .mud-nav-link.active::before {
+    position: absolute;
+    top: 7px;
+    bottom: 7px;
+    left: 0;
+    width: 3px;
+    border-radius: 3px;
+    background: #f15b47;
+    content: "";
+}
