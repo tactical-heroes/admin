@@ -1,0 +1,114 @@
+replicaCount: 1
+
+nameOverride: ""
+fullnameOverride: ""
+component: admin
+
+image:
+  repository: ghcr.io/panixida/tactical-heroes/admin
+  pullPolicy: IfNotPresent
+  tag: "0"
+
+imagePullSecrets:
+  - name: tactical-heroes-admin-registry
+
+serviceAccount:
+  create: true
+  name: ""
+  automountServiceAccountToken: false
+
+container:
+  name: admin
+
+service:
+  type: ClusterIP
+  port: 80
+  containerPort: 8080
+
+env:
+  secretName: ""
+  values:
+    ASPNETCORE_HTTP_PORTS: "8080"
+    ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+
+externalSecrets:
+  enabled: true
+  secretStoreSyncWave: "-30"
+  syncWave: "-20"
+  refreshInterval: 1h
+  serviceAccount:
+    create: true
+    name: tactical-heroes-admin-external-secrets
+    syncWave: "-40"
+    automountServiceAccountToken: false
+  openbao:
+    server: http://openbao.secrets.svc.cluster.local:8200
+    path: secret
+    version: v2
+    authMountPath: kubernetes
+    role: tactical-heroes-admin-development
+  app:
+    enabled: false
+  registry:
+    enabled: true
+    targetName: tactical-heroes-admin-registry
+    remoteKey: applications/tactical-heroes-admin/registry
+    serverProperty: REGISTRY_URL
+    usernameProperty: REGISTRY_USER
+    passwordProperty: REGISTRY_TOKEN
+
+migrations:
+  enabled: false
+
+gateway:
+  enabled: true
+  name: core-platform
+  namespace: envoy-gateway-system
+  httpSectionName: http
+  httpsSectionName: ""
+  host: ""
+  redirectHttpToHttps: true
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
+
+probes:
+  startup:
+    enabled: true
+    tcpSocket:
+      port: http
+    failureThreshold: 30
+    periodSeconds: 5
+  readiness:
+    enabled: true
+    tcpSocket:
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 10
+  liveness:
+    enabled: true
+    tcpSocket:
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 20
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

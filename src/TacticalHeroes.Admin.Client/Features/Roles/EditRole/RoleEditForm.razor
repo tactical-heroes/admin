@@ -1,0 +1,71 @@
+@using TacticalHeroes.Admin.Client.Entities.Roles.Model
+
+<MudForm @ref="_form"
+         @bind-IsValid="_isValid">
+    <MudPaper Elevation="0" Class="edit-section">
+        <MudText Typo="Typo.h6" Class="section-title">
+            Основные данные
+        </MudText>
+        <MudTextField T="string"
+                      @bind-Value="Model.Name"
+                      Label="Название роли"
+                      Variant="Variant.Outlined"
+                      Required="true"
+                      RequiredError="Укажите название роли"
+                      MaxLength="100" />
+    </MudPaper>
+
+    <MudPaper Elevation="0" Class="edit-section">
+        <ClaimsEditor Claims="Model.Claims" />
+    </MudPaper>
+
+    <div class="form-actions">
+        <MudButton Href="/roles"
+                   Variant="Variant.Text"
+                   Disabled="Saving">
+            Отмена
+        </MudButton>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Save"
+                   Disabled="Saving"
+                   OnClick="SubmitAsync">
+            @if (Saving)
+            {
+                <MudProgressCircular Size="Size.Small"
+                                     Indeterminate="true"
+                                     Class="button-progress" />
+            }
+            Сохранить
+        </MudButton>
+    </div>
+</MudForm>
+
+@code {
+    private MudForm? _form;
+    private bool _isValid;
+
+    [Parameter, EditorRequired]
+    public RoleDetails Model { get; set; } = new();
+
+    [Parameter]
+    public bool Saving { get; set; }
+
+    [Parameter]
+    public EventCallback OnSave { get; set; }
+
+    private async Task SubmitAsync()
+    {
+        if (_form is null)
+        {
+            return;
+        }
+
+        await _form.ValidateAsync();
+
+        if (_isValid)
+        {
+            await OnSave.InvokeAsync();
+        }
+    }
+}
