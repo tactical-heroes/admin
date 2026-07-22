@@ -4,6 +4,8 @@ on:
   pull_request:
   push:
     branches: [ main, development ]
+    paths-ignore:
+      - deploy/helm/**/images-*.yaml
 
 jobs:
   format:
@@ -36,9 +38,20 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
+  helm:
+    uses: PANiXiDA-Infrastructure/ci-cd/.github/workflows/helm-validation.yml@main
+    with:
+      chart-repository: PANiXiDA-Infrastructure/ci-cd
+      chart-ref: main
+      helm-chart-path: charts/application
+      values-path: ${{ vars.HELM_VALUES_PATH }}
+      common-values-file: ${{ vars.HELM_COMMON_VALUES_FILE }}
+      development-release-name: ${{ vars.HELM_DEVELOPMENT_RELEASE_NAME }}
+      production-release-name: ${{ vars.HELM_PRODUCTION_RELEASE_NAME }}
+
   validate-image:
     if: ${{ github.event_name == 'pull_request' }}
-    needs: [ format, build ]
+    needs: [ format, build, helm ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -61,7 +74,7 @@ jobs:
 
   build-image:
     if: ${{ github.event_name != 'pull_request' && (github.ref_name == 'main' || github.ref_name == 'development') }}
-    needs: [ format, build, resolve-env ]
+    needs: [ format, build, helm, resolve-env ]
     uses: PANiXiDA-Infrastructure/ci-cd/.github/workflows/docker-build.yml@main
     with:
       service-folder: src/TacticalHeroes.Admin

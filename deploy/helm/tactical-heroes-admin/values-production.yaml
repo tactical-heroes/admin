@@ -1,0 +1,13 @@
+env:
+  values:
+    ASPNETCORE_ENVIRONMENT: Production
+    DOTNET_ENVIRONMENT: Production
+    TacticalHeroesApi__BaseUrl: https://api.tactical-heroes.panixida.ru
+
+externalSecrets:
+  openbao:
+    role: tactical-heroes-admin-production
+
+gateway:
+  host: tactical-heroes.panixida.ru
+  httpsSectionName: tactical-heroes-admin-https
