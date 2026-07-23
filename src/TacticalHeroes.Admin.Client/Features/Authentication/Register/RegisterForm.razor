@@ -1,0 +1,112 @@
+@using System.ComponentModel.DataAnnotations
+@using TacticalHeroes.Admin.Client.Entities.Authentication.Api
+@using TacticalHeroes.Admin.Client.Shared.Api
+@inject AuthenticationApi AuthenticationApi
+
+@if (_registered)
+{
+    <MudAlert Severity="Severity.Success" Variant="Variant.Outlined">
+        Аккаунт создан. Для входа его email должен быть подтверждён. Автоматическая доставка писем
+        сейчас не проверяется, поэтому для локального сценария подтверждение выполняется администратором.
+    </MudAlert>
+}
+else
+{
+    @if (!string.IsNullOrWhiteSpace(_error))
+    {
+        <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Class="account-alert">
+            @_error
+        </MudAlert>
+    }
+
+    <EditForm Model="_model" OnValidSubmit="SubmitAsync" FormName="register-account">
+        <DataAnnotationsValidator />
+        <MudStack Spacing="3">
+            <MudTextField @bind-Value="_model.Email"
+                          For="@(() => _model.Email)"
+                          Label="Email"
+                          InputType="InputType.Email"
+                          Variant="Variant.Outlined"
+                          Disabled="_submitting" />
+            <MudTextField @bind-Value="_model.UserName"
+                          For="@(() => _model.UserName)"
+                          Label="Имя пользователя"
+                          Variant="Variant.Outlined"
+                          Disabled="_submitting" />
+            <MudTextField @bind-Value="_model.Password"
+                          For="@(() => _model.Password)"
+                          Label="Пароль"
+                          InputType="InputType.Password"
+                          Variant="Variant.Outlined"
+                          HelperText="Минимум 8 символов: верхний и нижний регистр, цифра и специальный символ"
+                          Disabled="_submitting" />
+            <MudTextField @bind-Value="_model.PasswordConfirmation"
+                          For="@(() => _model.PasswordConfirmation)"
+                          Label="Повторите пароль"
+                          InputType="InputType.Password"
+                          Variant="Variant.Outlined"
+                          Disabled="_submitting" />
+            <MudButton ButtonType="ButtonType.Submit"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Size="Size.Large"
+                       FullWidth="true"
+                       Disabled="_submitting">
+                @if (_submitting)
+                {
+                    <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="button-progress" />
+                }
+                Создать аккаунт
+            </MudButton>
+        </MudStack>
+    </EditForm>
+}
+
+@code {
+    private readonly RegisterModel _model = new();
+    private bool _submitting;
+    private bool _registered;
+    private string? _error;
+
+    private async Task SubmitAsync()
+    {
+        _submitting = true;
+        _error = null;
+
+        try
+        {
+            await AuthenticationApi.RegisterAsync(
+                _model.Email,
+                _model.UserName,
+                _model.Password);
+            _registered = true;
+        }
+        catch (Exception exception)
+        {
+            _error = ApiErrorMessage.FromException(exception);
+        }
+        finally
+        {
+            _submitting = false;
+        }
+    }
+
+    private sealed class RegisterModel
+    {
+        [Required(ErrorMessage = "Укажите email.")]
+        [EmailAddress(ErrorMessage = "Укажите корректный email.")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Укажите имя пользователя.")]
+        [MinLength(2, ErrorMessage = "Имя пользователя слишком короткое.")]
+        public string UserName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Укажите пароль.")]
+        [MinLength(8, ErrorMessage = "Пароль должен содержать минимум 8 символов.")]
+        public string Password { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Повторите пароль.")]
+        [Compare(nameof(Password), ErrorMessage = "Пароли не совпадают.")]
+        public string PasswordConfirmation { get; set; } = string.Empty;
+    }
+}

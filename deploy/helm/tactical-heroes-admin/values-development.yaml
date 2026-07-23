@@ -3,6 +3,7 @@ env:
     ASPNETCORE_ENVIRONMENT: Development
     DOTNET_ENVIRONMENT: Development
     TacticalHeroesApi__BaseUrl: https://dev.api.tactical-heroes.panixida.ru
+    Authentication__OpenIdConnect__Authority: https://dev.api.tactical-heroes.panixida.ru
 
 externalSecrets:
   openbao:

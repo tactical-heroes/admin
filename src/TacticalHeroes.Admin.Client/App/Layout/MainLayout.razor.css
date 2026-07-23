@@ -7,6 +7,19 @@
     letter-spacing: 0.02em;
 }
 
+.current-user {
+    max-width: 260px;
+    overflow: hidden;
+    color: #dce4ee;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.logout-form {
+    display: inline-flex;
+    margin-left: 0.35rem;
+}
+
 .app-drawer {
     border-right: 0 !important;
 }
