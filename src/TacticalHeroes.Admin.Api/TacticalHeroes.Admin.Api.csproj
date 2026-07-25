@@ -1,9 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" InitialTargets="PrepareTacticalHeroesApiClientForDesignTime">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <RepositoryRoot>$(MSBuildProjectDirectory)\..\..</RepositoryRoot>
     <KiotaOpenApiFile>$(RepositoryRoot)\openapi\tactical-heroes.json</KiotaOpenApiFile>
     <KiotaGeneratedDir>$(MSBuildProjectDirectory)\obj\$(Configuration)\$(TargetFramework)\Generated</KiotaGeneratedDir>
@@ -11,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Kiota.Bundle" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Kiota.Bundle" />
   </ItemGroup>
 
   <Target Name="GenerateTacticalHeroesApiClient"

@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Json;
 using Microsoft.Net.Http.Headers;
 
 namespace TacticalHeroes.Admin.Infrastructure.Authentication;
