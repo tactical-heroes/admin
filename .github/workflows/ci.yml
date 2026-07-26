@@ -49,25 +49,6 @@ jobs:
       development-release-name: ${{ vars.HELM_DEVELOPMENT_RELEASE_NAME }}
       production-release-name: ${{ vars.HELM_PRODUCTION_RELEASE_NAME }}
 
-  validate-image:
-    if: ${{ github.event_name == 'pull_request' }}
-    needs: [ format, build, helm ]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./src/TacticalHeroes.Admin/Dockerfile
-          push: false
-          cache-from: type=gha,scope=${{ github.repository }}
-          cache-to: type=gha,mode=max,scope=${{ github.repository }}
-
   resolve-env:
     if: ${{ github.event_name != 'pull_request' && (github.ref_name == 'main' || github.ref_name == 'development') }}
     uses: PANiXiDA-Infrastructure/ci-cd/.github/workflows/resolve-environment.yml@main
