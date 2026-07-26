@@ -14,6 +14,12 @@ jobs:
       registry-user: ${{ secrets.REGISTRY_USER }}
       registry-token: ${{ secrets.REGISTRY_TOKEN }}
 
+  tests:
+    uses: PANiXiDA-Infrastructure/ci-cd/.github/workflows/dotnet-tests.yml@main
+    secrets:
+      registry-user: ${{ secrets.REGISTRY_USER }}
+      registry-token: ${{ secrets.REGISTRY_TOKEN }}
+
   helm:
     uses: PANiXiDA-Infrastructure/ci-cd/.github/workflows/helm-validation.yml@main
     with:
@@ -31,7 +37,7 @@ jobs:
 
   build:
     if: ${{ github.event_name != 'pull_request' && (github.ref_name == 'main' || github.ref_name == 'development') }}
-    needs: [ format, helm, resolve-env ]
+    needs: [ format, tests, helm, resolve-env ]
     uses: PANiXiDA-Infrastructure/ci-cd/.github/workflows/docker-build.yml@main
     with:
       service-folder: ${{ vars.SERVICE_FOLDER }}
@@ -41,3 +47,14 @@ jobs:
     secrets:
       registry-user: ${{ secrets.REGISTRY_USER }}
       registry-token: ${{ secrets.REGISTRY_TOKEN }}
+
+  notify:
+    if: ${{ always() && github.event_name != 'pull_request' && (github.ref_name == 'main' || github.ref_name == 'development') }}
+    needs: [ build ]
+    uses: PANiXiDA-Infrastructure/ci-cd/.github/workflows/notify-telegram.yml@main
+    with:
+      event-name: ${{ github.event_name }}
+    secrets:
+      telegram-bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      telegram-chat-id: ${{ vars.TELEGRAM_CHAT_ID }}
+      github-token: ${{ secrets.REGISTRY_TOKEN }}

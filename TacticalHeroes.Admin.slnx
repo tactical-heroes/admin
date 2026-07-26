@@ -19,4 +19,7 @@
     <Project Path="src/TacticalHeroes.Admin.Client/TacticalHeroes.Admin.Client.csproj" />
     <Project Path="src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TacticalHeroes.Admin.Client.ComponentTests/TacticalHeroes.Admin.Client.ComponentTests.csproj" />
+  </Folder>
 </Solution>
