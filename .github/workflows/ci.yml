@@ -14,7 +14,7 @@ jobs:
       registry-user: ${{ secrets.REGISTRY_USER }}
       registry-token: ${{ secrets.REGISTRY_TOKEN }}
 
-  build:
+  compile:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -53,12 +53,12 @@ jobs:
     if: ${{ github.event_name != 'pull_request' && (github.ref_name == 'main' || github.ref_name == 'development') }}
     uses: PANiXiDA-Infrastructure/ci-cd/.github/workflows/resolve-environment.yml@main
 
-  build-image:
+  build:
     if: ${{ github.event_name != 'pull_request' && (github.ref_name == 'main' || github.ref_name == 'development') }}
-    needs: [ format, build, helm, resolve-env ]
+    needs: [ format, compile, helm, resolve-env ]
     uses: PANiXiDA-Infrastructure/ci-cd/.github/workflows/docker-build.yml@main
     with:
-      service-folder: src/TacticalHeroes.Admin
+      service-folder: ${{ vars.SERVICE_FOLDER }}
       image: |
         ${{ vars.REGISTRY_IMAGE_PREFIX }}/${{ vars.SERVICE_NAME }}:${{ github.run_number }}
         ${{ vars.REGISTRY_IMAGE_PREFIX }}/${{ vars.SERVICE_NAME }}:${{ needs.resolve-env.outputs.environment }}-${{ github.run_number }}
