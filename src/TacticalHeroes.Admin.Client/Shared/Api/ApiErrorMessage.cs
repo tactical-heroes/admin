@@ -1,4 +1,6 @@
 using Microsoft.Kiota.Abstractions;
+using Microsoft.Kiota.Abstractions.Serialization;
+using TacticalHeroes.Admin.Api.Generated.Models;
 
 namespace TacticalHeroes.Admin.Client.Shared.Api;
 
@@ -8,6 +10,14 @@ public static class ApiErrorMessage
     {
         return exception switch
         {
+            ApiException { ResponseStatusCode: >= 500 } =>
+                "API временно недоступен. Попробуйте повторить запрос позже.",
+            HttpValidationProblemDetails validationProblem
+                when GetValidationMessage(validationProblem) is { } message =>
+                message,
+            ProblemDetails problem
+                when GetServerMessage(problem.Detail) is { } message =>
+                message,
             ApiException { ResponseStatusCode: 401 } =>
                 "API требует авторизацию. Интерфейс готов, но доступ к данным будет закрыт до подключения входа.",
             ApiException { ResponseStatusCode: 403 } =>
@@ -18,8 +28,6 @@ public static class ApiErrorMessage
                 "Запрошенная сущность не найдена.",
             ApiException { ResponseStatusCode: 409 } =>
                 "Изменения конфликтуют с текущим состоянием данных.",
-            ApiException { ResponseStatusCode: >= 500 } =>
-                "API временно недоступен. Попробуйте повторить запрос позже.",
             HttpRequestException =>
                 "Не удалось подключиться к Tactical Heroes API.",
             TaskCanceledException =>
@@ -27,5 +35,62 @@ public static class ApiErrorMessage
             _ =>
                 "Не удалось выполнить запрос. Повторите попытку.",
         };
+    }
+
+    private static string? GetValidationMessage(
+        HttpValidationProblemDetails problem)
+    {
+        var messages = problem.Errors?.AdditionalData.Values
+            .SelectMany(GetMessages)
+            .Select(message => message.Trim())
+            .Where(message => !string.IsNullOrWhiteSpace(message))
+            .Distinct(StringComparer.Ordinal)
+            .ToArray() ?? [];
+
+        return messages.Length > 0
+            ? string.Join(" ", messages)
+            : GetServerMessage(problem.Detail);
+    }
+
+    private static IEnumerable<string> GetMessages(object? value)
+    {
+        switch (value)
+        {
+            case string message:
+                yield return message;
+                break;
+            case UntypedString message:
+                var text = message.GetValue();
+                if (text is not null)
+                {
+                    yield return text;
+                }
+
+                break;
+            case UntypedArray messages:
+                foreach (var item in messages.GetValue())
+                {
+                    foreach (var message in GetMessages(item))
+                    {
+                        yield return message;
+                    }
+                }
+
+                break;
+            case IEnumerable<string> messages:
+                foreach (var message in messages)
+                {
+                    yield return message;
+                }
+
+                break;
+        }
+    }
+
+    private static string? GetServerMessage(string? message)
+    {
+        return string.IsNullOrWhiteSpace(message)
+            ? null
+            : message.Trim();
     }
 }
