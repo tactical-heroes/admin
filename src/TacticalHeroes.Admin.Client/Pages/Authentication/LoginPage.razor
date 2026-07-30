@@ -6,38 +6,27 @@
 @using TacticalHeroes.Admin.Client.Features.Authentication.Register
 @using TacticalHeroes.Admin.Client.Features.Authentication.ResendConfirmation
 
-<PageTitle>Вход · Tactical Heroes</PageTitle>
+<PageTitle>@Title</PageTitle>
 
-<MudPaper Elevation="0" Class="account-panel">
-    <div class="account-panel-header">
-        <MudText Typo="Typo.overline" Color="Color.Primary">SECURE ACCESS</MudText>
-        <MudText Typo="Typo.h4">Добро пожаловать</MudText>
-        <MudText Typo="Typo.body2" Color="Color.Secondary">
-            Вход выполняется через OAuth 2.0 / OpenID Connect с PKCE и PAR.
-        </MudText>
-    </div>
-
-    <MudTabs @bind-ActivePanelIndex="_activeTab"
-             Rounded="true"
-             ApplyEffectsToContainer="true">
-        <MudTabPanel Text="Вход" Icon="@Icons.Material.Filled.Login" Class="account-tab-panel">
+<AuthenticationShell>
+    @switch (NormalizedMode)
+    {
+        case "register":
+            <RegisterForm ReturnUrl="@ReturnUrl" />
+            break;
+        case "confirmation":
+            <ResendConfirmationForm ReturnUrl="@ReturnUrl" />
+            break;
+        case "recover":
+            <ForgotPasswordForm ReturnUrl="@ReturnUrl" />
+            break;
+        default:
             <LoginForm ReturnUrl="@ReturnUrl" Error="@Error" />
-        </MudTabPanel>
-        <MudTabPanel Text="Регистрация" Icon="@Icons.Material.Filled.PersonAdd" Class="account-tab-panel">
-            <RegisterForm />
-        </MudTabPanel>
-        <MudTabPanel Text="Подтверждение" Icon="@Icons.Material.Filled.MarkEmailRead" Class="account-tab-panel">
-            <ResendConfirmationForm />
-        </MudTabPanel>
-        <MudTabPanel Text="Восстановление" Icon="@Icons.Material.Filled.Key" Class="account-tab-panel">
-            <ForgotPasswordForm />
-        </MudTabPanel>
-    </MudTabs>
-</MudPaper>
+            break;
+    }
+</AuthenticationShell>
 
 @code {
-    private int _activeTab;
-
     [SupplyParameterFromQuery(Name = "returnUrl")]
     public string? ReturnUrl { get; set; }
 
@@ -47,14 +36,19 @@
     [SupplyParameterFromQuery(Name = "mode")]
     public string? Mode { get; set; }
 
-    protected override void OnParametersSet()
+    private string NormalizedMode => Mode?.ToLowerInvariant() switch
     {
-        _activeTab = Mode?.ToLowerInvariant() switch
-        {
-            "register" => 1,
-            "confirmation" => 2,
-            "recover" => 3,
-            _ => 0,
-        };
-    }
+        "register" => "register",
+        "confirmation" => "confirmation",
+        "recover" => "recover",
+        _ => "login",
+    };
+
+    private string Title => NormalizedMode switch
+    {
+        "register" => "Регистрация · Tactical Heroes",
+        "confirmation" => "Подтверждение email · Tactical Heroes",
+        "recover" => "Восстановление доступа · Tactical Heroes",
+        _ => "Вход · Tactical Heroes",
+    };
 }

@@ -1,0 +1,27 @@
+<section class="auth-shell">
+    <span class="auth-shell-corner auth-shell-corner-top-left" aria-hidden="true"></span>
+    <span class="auth-shell-corner auth-shell-corner-top-right" aria-hidden="true"></span>
+    <span class="auth-shell-corner auth-shell-corner-bottom-right" aria-hidden="true"></span>
+    <span class="auth-shell-corner auth-shell-corner-bottom-left" aria-hidden="true"></span>
+
+    <header class="auth-brand">
+        <img class="auth-brand-emblem"
+             src="auth/tactical-heroes-emblem.png"
+             alt="" />
+        <div class="auth-brand-title" aria-label="Tactical Heroes">
+            <span>Tactical</span>
+            <span>Heroes</span>
+        </div>
+    </header>
+
+    <div class="auth-title-separator" aria-hidden="true"></div>
+
+    <div class="auth-content">
+        @ChildContent
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; } = null!;
+}

@@ -1,61 +1,94 @@
 @if (!string.IsNullOrWhiteSpace(ErrorMessage))
 {
-    <MudAlert Severity="Severity.Error"
-              Variant="Variant.Outlined"
-              Class="account-alert">
+    <div class="auth-feedback auth-feedback--error" role="alert">
         @ErrorMessage
-    </MudAlert>
+    </div>
 }
 
-@if (string.IsNullOrWhiteSpace(ReturnUrl))
-{
-    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="account-form-copy">
-        Начните защищённый OAuth-вход, чтобы перейти к форме с учётными данными.
-    </MudText>
-    <MudButton Href="/authentication/challenge?returnUrl=%2F"
-               Variant="Variant.Filled"
-               Color="Color.Primary"
-               Size="Size.Large"
-               FullWidth="true"
-               EndIcon="@Icons.Material.Filled.ArrowForward">
-        Продолжить вход
-    </MudButton>
-}
-else
-{
-    <form method="post"
-          action="/authentication/sign-in"
-          class="account-form">
-        <AntiforgeryToken />
-        <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
+<div class="auth-form">
+    <header class="auth-form-header">
+        <MudIcon Icon="@Icons.Material.Outlined.Login" Class="auth-state-icon" />
+        <h1 class="auth-form-title">Вход в панель</h1>
+        <p class="auth-form-copy">Используйте учётную запись Tactical Heroes.</p>
+    </header>
 
-        <label class="account-field">
-            <span>Email</span>
-            <input type="email"
-                   name="Email"
-                   autocomplete="username"
-                   inputmode="email"
-                   placeholder="admin@example.com"
-                   required />
-        </label>
-
-        <label class="account-field">
-            <span>Пароль</span>
-            <input type="password"
-                   name="Password"
-                   autocomplete="current-password"
-                   placeholder="Введите пароль"
-                   required />
-        </label>
-
-        <button type="submit" class="account-submit">
-            Войти
+    @if (string.IsNullOrWhiteSpace(ReturnUrl))
+    {
+        <a class="auth-command"
+           href="/authentication/challenge?returnUrl=%2F">
+            Продолжить вход
             <span aria-hidden="true">→</span>
-        </button>
-    </form>
-}
+        </a>
+    }
+    else
+    {
+        <form method="post"
+              action="/authentication/sign-in"
+              class="auth-form">
+            <AntiforgeryToken />
+            <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
+
+            <div class="auth-field">
+                <label for="login-email">Email</label>
+                <span class="auth-input-shell">
+                    <MudIcon Icon="@Icons.Material.Outlined.Email" Class="auth-field-icon" />
+                    <input class="auth-input"
+                           id="login-email"
+                           type="email"
+                           name="Email"
+                           autocomplete="username"
+                           inputmode="email"
+                           placeholder="Введите email"
+                           required />
+                </span>
+            </div>
+
+            <div class="auth-field">
+                <label for="login-password">Пароль</label>
+                <span class="auth-input-shell">
+                    <MudIcon Icon="@Icons.Material.Outlined.Lock" Class="auth-field-icon" />
+                    <input class="auth-input"
+                           id="login-password"
+                           type="@(_showPassword ? "text" : "password")"
+                           name="Password"
+                           autocomplete="current-password"
+                           placeholder="Введите пароль"
+                           required />
+                    <button class="auth-password-toggle"
+                            type="button"
+                            aria-label="@(_showPassword ? "Скрыть пароль" : "Показать пароль")"
+                            @onclick="TogglePasswordVisibility">
+                        <MudIcon Icon="@(_showPassword ? Icons.Material.Outlined.VisibilityOff : Icons.Material.Outlined.Visibility)" />
+                    </button>
+                </span>
+            </div>
+
+            <div class="auth-option-row">
+                <a class="auth-link" href="@BuildModeHref("recover")">Забыли пароль?</a>
+            </div>
+
+            <button type="submit" class="auth-command">
+                Войти
+                <span aria-hidden="true">→</span>
+            </button>
+        </form>
+    }
+
+    <div class="auth-form-footer">
+        <p>
+            Нет аккаунта?
+            <a class="auth-link" href="@BuildModeHref("register")">Зарегистрироваться</a>
+        </p>
+        <p class="auth-form-footer-secondary">
+            Не пришло письмо?
+            <a class="auth-link" href="@BuildModeHref("confirmation")">Отправить повторно</a>
+        </p>
+    </div>
+</div>
 
 @code {
+    private bool _showPassword;
+
     [Parameter]
     public string? ReturnUrl { get; set; }
 
@@ -71,4 +104,16 @@ else
         "oauth" => "OAuth-вход не удалось завершить. Начните его заново.",
         _ => null,
     };
+
+    private void TogglePasswordVisibility()
+    {
+        _showPassword = !_showPassword;
+    }
+
+    private string BuildModeHref(string mode)
+    {
+        return string.IsNullOrWhiteSpace(ReturnUrl)
+            ? $"/login?mode={mode}"
+            : $"/login?mode={mode}&returnUrl={Uri.EscapeDataString(ReturnUrl)}";
+    }
 }

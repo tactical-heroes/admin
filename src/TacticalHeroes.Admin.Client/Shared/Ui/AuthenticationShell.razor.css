@@ -1,0 +1,464 @@
+.auth-shell {
+    position: relative;
+    width: min(760px, 100%);
+    min-height: min(840px, calc(100dvh - 48px));
+    overflow: hidden;
+    padding: clamp(1.75rem, 3.4vh, 2.6rem) clamp(1.5rem, 3vw, 2.8rem) 2rem;
+    border: 1px solid rgba(188, 132, 57, 0.76);
+    background:
+        radial-gradient(circle at 50% 0, rgba(118, 76, 28, 0.10), transparent 34%),
+        linear-gradient(145deg, rgba(15, 14, 12, 0.98), rgba(5, 6, 6, 0.97));
+    box-shadow:
+        0 28px 80px rgba(0, 0, 0, 0.72),
+        inset 0 0 48px rgba(0, 0, 0, 0.72);
+    color: #d8c8aa;
+}
+
+.auth-shell::before,
+.auth-shell::after {
+    position: absolute;
+    z-index: 0;
+    content: "";
+    pointer-events: none;
+}
+
+.auth-shell::before {
+    inset: 8px;
+    border: 1px solid rgba(90, 59, 25, 0.72);
+}
+
+.auth-shell::after {
+    inset: 18px;
+    border: 1px solid rgba(65, 46, 29, 0.72);
+}
+
+.auth-shell-corner {
+    position: absolute;
+    z-index: 2;
+    width: 46px;
+    height: 46px;
+    color: #b0782f;
+    pointer-events: none;
+}
+
+.auth-shell-corner::after {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: currentColor;
+    box-shadow: 0 0 8px rgba(202, 133, 45, 0.35);
+    content: "";
+    transform: rotate(45deg);
+}
+
+.auth-shell-corner-top-left {
+    top: 0;
+    left: 0;
+    border-top: 2px solid currentColor;
+    border-left: 2px solid currentColor;
+}
+
+.auth-shell-corner-top-left::after {
+    top: 15px;
+    left: 15px;
+}
+
+.auth-shell-corner-top-right {
+    top: 0;
+    right: 0;
+    border-top: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+}
+
+.auth-shell-corner-top-right::after {
+    top: 15px;
+    right: 15px;
+}
+
+.auth-shell-corner-bottom-right {
+    right: 0;
+    bottom: 0;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+}
+
+.auth-shell-corner-bottom-right::after {
+    right: 15px;
+    bottom: 15px;
+}
+
+.auth-shell-corner-bottom-left {
+    bottom: 0;
+    left: 0;
+    border-bottom: 2px solid currentColor;
+    border-left: 2px solid currentColor;
+}
+
+.auth-shell-corner-bottom-left::after {
+    bottom: 15px;
+    left: 15px;
+}
+
+.auth-brand,
+.auth-title-separator,
+.auth-content {
+    position: relative;
+    z-index: 1;
+}
+
+.auth-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(1rem, 2.5vw, 2rem);
+}
+
+.auth-brand-emblem {
+    display: block;
+    width: clamp(92px, 11vw, 126px);
+    height: clamp(92px, 11vw, 126px);
+    object-fit: contain;
+    filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.72));
+}
+
+.auth-brand-title {
+    display: grid;
+    color: #e8c976;
+    font-family: "TH Cinzel", Georgia, serif;
+    font-size: clamp(2.2rem, 4vw, 3.35rem);
+    font-weight: 700;
+    letter-spacing: 0.055em;
+    line-height: 0.95;
+    text-transform: uppercase;
+    text-shadow:
+        0 2px 0 #4b240c,
+        0 0 18px rgba(221, 147, 47, 0.28);
+}
+
+.auth-title-separator {
+    width: 84%;
+    height: 26px;
+    margin: 0.6rem auto 0.35rem;
+    background: url("/auth/title-separator.png") center / 100% 100% no-repeat;
+    opacity: 0.72;
+}
+
+.auth-content {
+    width: min(620px, 100%);
+    margin: 0 auto;
+    padding-top: clamp(1.4rem, 3vh, 2.2rem);
+}
+
+.auth-content ::deep .auth-form {
+    display: grid;
+    gap: 0.95rem;
+}
+
+.auth-content ::deep .auth-form-header {
+    display: grid;
+    justify-items: center;
+    margin-bottom: 0.35rem;
+    text-align: center;
+}
+
+.auth-content ::deep .auth-state-icon {
+    margin-bottom: 0.55rem;
+    color: #c79a50;
+    font-size: 2.65rem;
+    filter: drop-shadow(0 0 10px rgba(198, 132, 51, 0.22));
+}
+
+.auth-content ::deep .auth-form-title {
+    margin: 0;
+    color: #d9b965;
+    font-family: "TH Cinzel", Georgia, serif;
+    font-size: clamp(1.35rem, 2.3vw, 1.75rem);
+    font-weight: 700;
+    letter-spacing: 0.045em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.72);
+}
+
+.auth-content ::deep .auth-form-title:focus {
+    outline: none;
+}
+
+.auth-content ::deep .auth-form-copy {
+    max-width: 510px;
+    margin: 0.65rem 0 0;
+    color: #b8ab95;
+    font-family: "TH Cormorant", Georgia, serif;
+    font-size: 1.22rem;
+    font-weight: 500;
+    line-height: 1.35;
+}
+
+.auth-content ::deep .auth-field {
+    display: grid;
+    gap: 0.35rem;
+    color: #ded0b7;
+    font-family: "TH Cormorant", Georgia, serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.auth-content ::deep .auth-input-shell {
+    position: relative;
+    display: flex;
+    min-height: 58px;
+    align-items: center;
+    background: rgba(7, 8, 8, 0.86) url("/auth/text-field-frame.png") center / 100% 100% no-repeat;
+    transition:
+        filter 150ms ease,
+        transform 150ms ease;
+}
+
+.auth-content ::deep .auth-input-shell:focus-within {
+    filter: drop-shadow(0 0 6px rgba(210, 148, 62, 0.32));
+}
+
+.auth-content ::deep .auth-field-icon {
+    position: absolute;
+    z-index: 1;
+    left: 1.15rem;
+    color: #b78a43;
+    font-size: 1.45rem;
+}
+
+.auth-content ::deep .auth-input {
+    width: 100%;
+    height: 58px;
+    padding: 0 3.5rem;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #e4d8c2;
+    caret-color: #d49a44;
+    font-family: "TH Cormorant", Georgia, serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.auth-content ::deep .auth-input::placeholder {
+    color: #817a70;
+    opacity: 1;
+    font-weight: 500;
+}
+
+.auth-content ::deep .auth-input:-webkit-autofill,
+.auth-content ::deep .auth-input:-webkit-autofill:hover,
+.auth-content ::deep .auth-input:-webkit-autofill:focus {
+    box-shadow: 0 0 0 1000px #101111 inset;
+    -webkit-text-fill-color: #e4d8c2;
+}
+
+.auth-content ::deep .auth-password-toggle {
+    position: absolute;
+    z-index: 1;
+    right: 0.85rem;
+    display: grid;
+    width: 2.4rem;
+    height: 2.4rem;
+    place-items: center;
+    border: 0;
+    background: transparent;
+    color: #a98347;
+    cursor: pointer;
+}
+
+.auth-content ::deep .auth-password-toggle:hover {
+    color: #e2bd76;
+}
+
+.auth-content ::deep .auth-password-toggle .mud-icon-root {
+    font-size: 1.35rem;
+}
+
+.auth-content ::deep .validation-message {
+    color: #e48261;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 0.75rem;
+    line-height: 1.3;
+}
+
+.auth-content ::deep .auth-helper {
+    margin: -0.2rem 0 0;
+    color: #8f887c;
+    font-family: "TH Cormorant", Georgia, serif;
+    font-size: 1rem;
+    line-height: 1.25;
+}
+
+.auth-content ::deep .auth-option-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-height: 1.75rem;
+}
+
+.auth-content ::deep .auth-link {
+    color: #cda454;
+    font-family: "TH Cormorant", Georgia, serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    text-decoration-color: rgba(205, 164, 84, 0.55);
+    text-underline-offset: 0.2em;
+    transition: color 140ms ease;
+}
+
+.auth-content ::deep .auth-link:hover {
+    color: #f1cb74;
+}
+
+.auth-content ::deep .auth-command {
+    position: relative;
+    display: flex;
+    width: 100%;
+    min-height: 68px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.25rem;
+    padding: 0.6rem 2.5rem;
+    border: 14px solid transparent;
+    border-image: url("/auth/primary-command-frame.png") 86 150 stretch;
+    outline: none;
+    background:
+        radial-gradient(circle at 50% 0, rgba(197, 72, 48, 0.46), transparent 50%),
+        linear-gradient(180deg, #8d2d21, #641c16);
+    color: #f2e6d2;
+    cursor: pointer;
+    font-family: "TH Cormorant", Georgia, serif;
+    font-size: clamp(1.3rem, 2.2vw, 1.65rem);
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    line-height: 1;
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+    text-shadow: 0 2px 3px rgba(0, 0, 0, 0.75);
+    transition:
+        filter 150ms ease,
+        transform 150ms ease;
+}
+
+.auth-content ::deep .auth-command:hover:not(:disabled) {
+    filter: brightness(1.13) drop-shadow(0 0 8px rgba(215, 107, 51, 0.36));
+    transform: translateY(-1px);
+}
+
+.auth-content ::deep .auth-command:active:not(:disabled) {
+    filter: brightness(0.94);
+    transform: translateY(1px);
+}
+
+.auth-content ::deep .auth-command:disabled {
+    cursor: wait;
+    filter: grayscale(0.6) brightness(0.72);
+}
+
+.auth-content ::deep .auth-form-footer {
+    display: grid;
+    gap: 0.35rem;
+    margin-top: 0.2rem;
+    color: #9f978a;
+    font-family: "TH Cormorant", Georgia, serif;
+    font-size: 1.12rem;
+    text-align: center;
+}
+
+.auth-content ::deep .auth-form-footer p {
+    margin: 0;
+}
+
+.auth-content ::deep .auth-form-footer-secondary,
+.auth-content ::deep .auth-form-footer-secondary .auth-link {
+    font-size: 1rem;
+}
+
+.auth-content ::deep .auth-feedback {
+    display: grid;
+    justify-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.2rem;
+    border: 1px solid rgba(168, 121, 54, 0.55);
+    background: rgba(91, 61, 25, 0.18);
+    color: #d8c8aa;
+    font-family: "TH Cormorant", Georgia, serif;
+    font-size: 1.15rem;
+    line-height: 1.35;
+    text-align: center;
+}
+
+.auth-content ::deep .auth-feedback--error {
+    border-color: rgba(196, 82, 55, 0.62);
+    background: rgba(112, 31, 23, 0.22);
+    color: #efb49d;
+}
+
+.auth-content ::deep .auth-feedback--success {
+    border-color: rgba(156, 142, 68, 0.62);
+    background: rgba(74, 78, 32, 0.2);
+    color: #d9d3a4;
+}
+
+.auth-content ::deep .auth-progress {
+    width: 2.5rem;
+    height: 2.5rem;
+    margin: 1.5rem auto;
+    border: 2px solid rgba(183, 138, 67, 0.25);
+    border-top-color: #c89a4e;
+    border-radius: 50%;
+    animation: auth-spin 800ms linear infinite;
+}
+
+@keyframes auth-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 900px) {
+    .auth-shell {
+        min-height: auto;
+        padding: 1.5rem 1rem 1.4rem;
+    }
+
+    .auth-brand-emblem {
+        width: 82px;
+        height: 82px;
+    }
+
+    .auth-brand-title {
+        font-size: clamp(1.8rem, 7vw, 2.6rem);
+    }
+
+    .auth-content {
+        padding-top: 1.4rem;
+    }
+}
+
+@media (max-width: 520px) {
+    .auth-brand {
+        gap: 0.65rem;
+    }
+
+    .auth-brand-emblem {
+        width: 68px;
+        height: 68px;
+    }
+
+    .auth-brand-title {
+        font-size: 1.7rem;
+    }
+
+    .auth-content ::deep .auth-form-copy {
+        font-size: 1.08rem;
+    }
+
+    .auth-content ::deep .auth-command {
+        min-height: 62px;
+        padding-inline: 1.25rem;
+        font-size: 1.2rem;
+    }
+}
