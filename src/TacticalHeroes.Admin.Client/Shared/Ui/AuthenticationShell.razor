@@ -16,80 +16,12 @@
 
     <div class="auth-title-separator" aria-hidden="true"></div>
 
-    <nav class="auth-navigation" aria-label="Сценарии авторизации">
-        <a href="@BuildHref(AuthenticationView.Login)"
-           class="@GetTabClass(AuthenticationView.Login)"
-           aria-current="@GetAriaCurrent(AuthenticationView.Login)">
-            Вход
-        </a>
-        <a href="@BuildHref(AuthenticationView.Register)"
-           class="@GetTabClass(AuthenticationView.Register)"
-           aria-current="@GetAriaCurrent(AuthenticationView.Register)">
-            Регистрация
-        </a>
-        <a href="@BuildHref(AuthenticationView.Confirmation)"
-           class="@GetTabClass(AuthenticationView.Confirmation)"
-           aria-current="@GetAriaCurrent(AuthenticationView.Confirmation)">
-            Подтверждение
-        </a>
-        <a href="@BuildHref(AuthenticationView.Recovery)"
-           class="@GetTabClass(AuthenticationView.Recovery)"
-           aria-current="@GetAriaCurrent(AuthenticationView.Recovery)">
-            Восстановление
-        </a>
-    </nav>
-
     <div class="auth-content">
         @ChildContent
     </div>
 </section>
 
 @code {
-    [Parameter]
-    public AuthenticationView ActiveView { get; set; }
-
-    [Parameter]
-    public string? ReturnUrl { get; set; }
-
     [Parameter, EditorRequired]
     public RenderFragment ChildContent { get; set; } = null!;
-
-    private string GetTabClass(AuthenticationView view)
-    {
-        return view == ActiveView
-            ? "auth-navigation-link auth-navigation-link-active"
-            : "auth-navigation-link";
-    }
-
-    private string? GetAriaCurrent(AuthenticationView view)
-    {
-        return view == ActiveView ? "page" : null;
-    }
-
-    private string BuildHref(AuthenticationView view)
-    {
-        List<string> parameters = [];
-
-        var mode = view switch
-        {
-            AuthenticationView.Register => "register",
-            AuthenticationView.Confirmation => "confirmation",
-            AuthenticationView.Recovery => "recover",
-            _ => null,
-        };
-
-        if (mode is not null)
-        {
-            parameters.Add($"mode={mode}");
-        }
-
-        if (!string.IsNullOrWhiteSpace(ReturnUrl))
-        {
-            parameters.Add($"returnUrl={Uri.EscapeDataString(ReturnUrl)}");
-        }
-
-        return parameters.Count == 0
-            ? "/login"
-            : $"/login?{string.Join("&", parameters)}";
-    }
 }

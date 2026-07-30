@@ -5,37 +5,23 @@ namespace TacticalHeroes.Admin.Client.ComponentTests.Shared.Ui;
 public sealed class AuthenticationShellTests : BunitContext
 {
     [Fact]
-    public void Render_Should_MarkRequestedViewAsActive_When_ViewIsProvided()
+    public void Render_Should_ShowBrandAndChildContent_When_ContentIsProvided()
     {
         var component = Render<AuthenticationShell>(parameters => parameters
-            .Add(shell => shell.ActiveView, AuthenticationView.Confirmation)
-            .AddChildContent("<p>Confirmation form</p>"));
+            .AddChildContent("<p class=\"test-content\">Login form</p>"));
 
-        var activeLink = component.Find(".auth-navigation-link-active");
-
-        activeLink.TextContent.Trim().ShouldBe("Подтверждение");
-        activeLink.GetAttribute("aria-current").ShouldBe("page");
+        component.Find(".auth-brand-title").TextContent.ShouldContain("Tactical");
+        component.Find(".auth-brand-title").TextContent.ShouldContain("Heroes");
+        component.Find(".test-content").TextContent.ShouldBe("Login form");
     }
 
     [Fact]
-    public void Render_Should_PreserveReturnUrl_When_NavigatingBetweenViews()
+    public void Render_Should_NotShowGlobalNavigation_When_ContentIsProvided()
     {
-        const string returnUrl = "/connect/authorize?client_id=admin&scope=openid";
-
         var component = Render<AuthenticationShell>(parameters => parameters
-            .Add(shell => shell.ActiveView, AuthenticationView.Login)
-            .Add(shell => shell.ReturnUrl, returnUrl)
             .AddChildContent("<p>Login form</p>"));
 
-        var links = component.FindAll(".auth-navigation-link");
-
-        links[0].GetAttribute("href")
-            .ShouldBe("/login?returnUrl=%2Fconnect%2Fauthorize%3Fclient_id%3Dadmin%26scope%3Dopenid");
-        links[1].GetAttribute("href")
-            .ShouldBe("/login?mode=register&returnUrl=%2Fconnect%2Fauthorize%3Fclient_id%3Dadmin%26scope%3Dopenid");
-        links[2].GetAttribute("href")
-            .ShouldBe("/login?mode=confirmation&returnUrl=%2Fconnect%2Fauthorize%3Fclient_id%3Dadmin%26scope%3Dopenid");
-        links[3].GetAttribute("href")
-            .ShouldBe("/login?mode=recover&returnUrl=%2Fconnect%2Fauthorize%3Fclient_id%3Dadmin%26scope%3Dopenid");
+        component.FindAll("nav").ShouldBeEmpty();
+        component.FindAll(".auth-navigation-link").ShouldBeEmpty();
     }
 }

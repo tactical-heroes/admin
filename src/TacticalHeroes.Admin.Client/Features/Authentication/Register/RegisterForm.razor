@@ -14,8 +14,9 @@
             </p>
         </header>
         <div class="auth-feedback auth-feedback--success" role="status">
-            Если письмо не пришло, запросите его повторно на вкладке «Подтверждение».
+            Если письмо не пришло, запросите его повторно.
         </div>
+        <a class="auth-command" href="@ConfirmationHref">Отправить письмо повторно</a>
     </div>
 }
 else
@@ -115,6 +116,13 @@ else
         <button type="submit" class="auth-command" disabled="@_submitting">
             @(_submitting ? "Создаём аккаунт…" : "Создать аккаунт")
         </button>
+
+        <div class="auth-form-footer">
+            <p>
+                Уже есть аккаунт?
+                <a class="auth-link" href="@LoginHref">Войти</a>
+            </p>
+        </div>
     </EditForm>
 }
 
@@ -125,6 +133,13 @@ else
     private bool _showPassword;
     private bool _showPasswordConfirmation;
     private string? _error;
+
+    [Parameter]
+    public string? ReturnUrl { get; set; }
+
+    private string LoginHref => BuildLoginHref();
+
+    private string ConfirmationHref => BuildLoginHref("confirmation");
 
     private async Task SubmitAsync()
     {
@@ -157,6 +172,25 @@ else
     private void TogglePasswordConfirmationVisibility()
     {
         _showPasswordConfirmation = !_showPasswordConfirmation;
+    }
+
+    private string BuildLoginHref(string? mode = null)
+    {
+        List<string> parameters = [];
+
+        if (!string.IsNullOrWhiteSpace(mode))
+        {
+            parameters.Add($"mode={mode}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(ReturnUrl))
+        {
+            parameters.Add($"returnUrl={Uri.EscapeDataString(ReturnUrl)}");
+        }
+
+        return parameters.Count == 0
+            ? "/login"
+            : $"/login?{string.Join("&", parameters)}";
     }
 
     private sealed class RegisterModel

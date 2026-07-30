@@ -8,17 +8,17 @@
 
 <PageTitle>@Title</PageTitle>
 
-<AuthenticationShell ActiveView="@ActiveView" ReturnUrl="@ReturnUrl">
-    @switch (ActiveView)
+<AuthenticationShell>
+    @switch (NormalizedMode)
     {
-        case AuthenticationView.Register:
-            <RegisterForm />
+        case "register":
+            <RegisterForm ReturnUrl="@ReturnUrl" />
             break;
-        case AuthenticationView.Confirmation:
-            <ResendConfirmationForm />
+        case "confirmation":
+            <ResendConfirmationForm ReturnUrl="@ReturnUrl" />
             break;
-        case AuthenticationView.Recovery:
-            <ForgotPasswordForm />
+        case "recover":
+            <ForgotPasswordForm ReturnUrl="@ReturnUrl" />
             break;
         default:
             <LoginForm ReturnUrl="@ReturnUrl" Error="@Error" />
@@ -36,19 +36,19 @@
     [SupplyParameterFromQuery(Name = "mode")]
     public string? Mode { get; set; }
 
-    private AuthenticationView ActiveView => Mode?.ToLowerInvariant() switch
+    private string NormalizedMode => Mode?.ToLowerInvariant() switch
     {
-        "register" => AuthenticationView.Register,
-        "confirmation" => AuthenticationView.Confirmation,
-        "recover" => AuthenticationView.Recovery,
-        _ => AuthenticationView.Login,
+        "register" => "register",
+        "confirmation" => "confirmation",
+        "recover" => "recover",
+        _ => "login",
     };
 
-    private string Title => ActiveView switch
+    private string Title => NormalizedMode switch
     {
-        AuthenticationView.Register => "Регистрация · Tactical Heroes",
-        AuthenticationView.Confirmation => "Подтверждение email · Tactical Heroes",
-        AuthenticationView.Recovery => "Восстановление доступа · Tactical Heroes",
+        "register" => "Регистрация · Tactical Heroes",
+        "confirmation" => "Подтверждение email · Tactical Heroes",
+        "recover" => "Восстановление доступа · Tactical Heroes",
         _ => "Вход · Tactical Heroes",
     };
 }

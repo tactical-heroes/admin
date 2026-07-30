@@ -63,12 +63,27 @@
                 </span>
             </div>
 
+            <div class="auth-option-row">
+                <a class="auth-link" href="@BuildModeHref("recover")">Забыли пароль?</a>
+            </div>
+
             <button type="submit" class="auth-command">
                 Войти
                 <span aria-hidden="true">→</span>
             </button>
         </form>
     }
+
+    <div class="auth-form-footer">
+        <p>
+            Нет аккаунта?
+            <a class="auth-link" href="@BuildModeHref("register")">Зарегистрироваться</a>
+        </p>
+        <p class="auth-form-footer-secondary">
+            Не пришло письмо?
+            <a class="auth-link" href="@BuildModeHref("confirmation")">Отправить повторно</a>
+        </p>
+    </div>
 </div>
 
 @code {
@@ -93,5 +108,12 @@
     private void TogglePasswordVisibility()
     {
         _showPassword = !_showPassword;
+    }
+
+    private string BuildModeHref(string mode)
+    {
+        return string.IsNullOrWhiteSpace(ReturnUrl)
+            ? $"/login?mode={mode}"
+            : $"/login?mode={mode}&returnUrl={Uri.EscapeDataString(ReturnUrl)}";
     }
 }
