@@ -131,10 +131,10 @@
     font-weight: 700;
     letter-spacing: 0.055em;
     line-height: 0.95;
+    text-rendering: geometricPrecision;
     text-transform: uppercase;
-    text-shadow:
-        0 2px 0 #4b240c,
-        0 0 18px rgba(221, 147, 47, 0.28);
+    text-shadow: 0 1px 0 #4b240c;
+    -webkit-font-smoothing: antialiased;
 }
 
 .auth-title-separator {
@@ -171,7 +171,8 @@
     margin-bottom: 0.55rem;
     color: #c79a50;
     font-size: 2.65rem;
-    filter: drop-shadow(0 0 10px rgba(198, 132, 51, 0.22));
+    filter: none;
+    shape-rendering: geometricPrecision;
 }
 
 .auth-content ::deep .auth-form-title {
@@ -182,8 +183,10 @@
     font-weight: 700;
     letter-spacing: 0.045em;
     line-height: 1.2;
+    text-rendering: geometricPrecision;
     text-transform: uppercase;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.72);
+    text-shadow: 0 1px 0 rgba(52, 28, 11, 0.88);
+    -webkit-font-smoothing: antialiased;
 }
 
 .auth-content ::deep .auth-form-title:focus {
@@ -321,21 +324,17 @@
 
 .auth-content ::deep .auth-command {
     position: relative;
-    isolation: isolate;
     display: flex;
     width: 100%;
     min-height: 68px;
     align-items: center;
     justify-content: center;
     margin-top: 0.25rem;
-    overflow: hidden;
     padding: 0.75rem 2.5rem;
-    border: 1px solid rgba(213, 158, 70, 0.82);
+    border: 0;
     outline: none;
-    background:
-        radial-gradient(circle at 50% 0, rgba(185, 62, 41, 0.36), transparent 52%),
-        linear-gradient(180deg, #7f281e, #591712);
-    color: #f2e6d2;
+    background: #090908 url("/auth/primary-command-frame.png") center / 100% 100% no-repeat;
+    color: #f0dcae;
     cursor: pointer;
     font-family: "TH Cormorant", Georgia, serif;
     font-size: clamp(1.3rem, 2.2vw, 1.65rem);
@@ -344,23 +343,13 @@
     line-height: 1;
     text-align: center;
     text-decoration: none;
+    text-rendering: geometricPrecision;
     text-transform: uppercase;
-    text-shadow: 0 2px 3px rgba(0, 0, 0, 0.75);
+    text-shadow: 0 1px 0 #000;
     transition:
         filter 150ms ease,
         transform 150ms ease;
-}
-
-.auth-content ::deep .auth-command::before {
-    position: absolute;
-    z-index: -1;
-    inset: 0;
-    background: url("/auth/primary-command-frame.png") center / 100% 100% no-repeat;
-    content: "";
-    filter: contrast(1.8) brightness(0.78);
-    mix-blend-mode: screen;
-    opacity: 0.9;
-    pointer-events: none;
+    -webkit-font-smoothing: antialiased;
 }
 
 .auth-content ::deep .auth-command:hover:not(:disabled) {
@@ -415,6 +404,10 @@
     border-color: rgba(196, 82, 55, 0.62);
     background: rgba(112, 31, 23, 0.22);
     color: #efb49d;
+}
+
+.auth-content ::deep .auth-feedback--login {
+    margin-bottom: 2.65rem;
 }
 
 .auth-content ::deep .auth-feedback--success {
@@ -487,6 +480,10 @@
 
     .auth-content ::deep .auth-command {
         min-height: 60px;
+    }
+
+    .auth-content ::deep .auth-feedback--login {
+        margin-bottom: 0.8rem;
     }
 }
 
