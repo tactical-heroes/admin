@@ -19,7 +19,6 @@
             <div class="auth-feedback auth-feedback--error" role="alert">
                 Запросите новое письмо подтверждения.
             </div>
-            <a class="auth-command" href="/login?mode=confirmation">Запросить новую ссылку</a>
         }
         else if (!_processed)
         {
@@ -40,7 +39,6 @@
             <div class="auth-feedback auth-feedback--success" role="status">
                 Теперь можно войти в Tactical Heroes.
             </div>
-            <a class="auth-command" href="/authentication/challenge?returnUrl=%2F">Перейти ко входу</a>
         }
         else
         {
@@ -50,7 +48,6 @@
                 <p class="auth-form-copy">Ссылка могла устареть или уже быть использована.</p>
             </header>
             <div class="auth-feedback auth-feedback--error" role="alert">@_error</div>
-            <a class="auth-command" href="/login?mode=confirmation">Запросить новую ссылку</a>
         }
     </div>
 </AuthenticationShell>

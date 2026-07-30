@@ -349,29 +349,6 @@
     line-height: 1.25;
 }
 
-.auth-content ::deep .auth-option-row {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    min-height: 1.75rem;
-}
-
-.auth-content ::deep .auth-link,
-.auth-content ::deep .auth-return-link {
-    color: #cda454;
-    font-family: "TH Cormorant", Georgia, serif;
-    font-size: 1.15rem;
-    font-weight: 600;
-    text-decoration-color: rgba(205, 164, 84, 0.55);
-    text-underline-offset: 0.2em;
-    transition: color 140ms ease;
-}
-
-.auth-content ::deep .auth-link:hover,
-.auth-content ::deep .auth-return-link:hover {
-    color: #f1cb74;
-}
-
 .auth-content ::deep .auth-command {
     position: relative;
     display: flex;
@@ -416,14 +393,6 @@
 .auth-content ::deep .auth-command:disabled {
     cursor: wait;
     filter: grayscale(0.6) brightness(0.72);
-}
-
-.auth-content ::deep .auth-form-footer {
-    margin: 0.2rem 0 0;
-    color: #9f978a;
-    font-family: "TH Cormorant", Georgia, serif;
-    font-size: 1.12rem;
-    text-align: center;
 }
 
 .auth-content ::deep .auth-feedback {
