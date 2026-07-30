@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="bunit" />
+        <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
+        <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
+        <PackageReference Include="Shouldly" />
+        <PackageReference Include="xunit.v3.mtp-v2" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\TacticalHeroes.Admin.Client\TacticalHeroes.Admin.Client.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="Bunit" />
+        <Using Include="Shouldly" />
+        <Using Include="Xunit" />
+    </ItemGroup>
+</Project>

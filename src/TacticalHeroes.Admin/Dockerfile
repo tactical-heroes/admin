@@ -7,13 +7,14 @@ EXPOSE 8080
 ENV ASPNETCORE_HTTP_PORTS=8080
 ENV ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS publish
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 COPY ["global.json", "."]
-COPY ["dotnet-tools.json", "."]
-COPY ["TacticalHeroes.Admin.slnx", "."]
+COPY ["Directory.Packages.props", "."]
+COPY ["Directory.Build.props", "."]
+COPY ["Directory.Build.targets", "."]
 COPY ["src/TacticalHeroes.Admin.Api/TacticalHeroes.Admin.Api.csproj", "src/TacticalHeroes.Admin.Api/"]
 COPY ["src/TacticalHeroes.Admin.Client/TacticalHeroes.Admin.Client.csproj", "src/TacticalHeroes.Admin.Client/"]
 COPY ["src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj", "src/TacticalHeroes.Admin/"]
@@ -22,11 +23,11 @@ RUN dotnet restore "./src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj"
 
 COPY . .
 WORKDIR "/src/src/TacticalHeroes.Admin"
-RUN dotnet publish "./TacticalHeroes.Admin.csproj" \
-    --configuration $BUILD_CONFIGURATION \
-    --no-restore \
-    --output /app/publish \
-    /p:UseAppHost=false
+RUN dotnet build "./TacticalHeroes.Admin.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./TacticalHeroes.Admin.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
