@@ -32,6 +32,20 @@ public sealed class AuthenticationApi(TacticalHeroesApiClient client)
             cancellationToken: cancellationToken);
     }
 
+    public Task ConfirmEmailAsync(
+        Guid userId,
+        string emailConfirmationToken,
+        CancellationToken cancellationToken = default)
+    {
+        return client.Api.V1.Auth.ConfirmEmail.PostAsync(
+            new ConfirmEmailRequest
+            {
+                UserId = userId,
+                EmailConfirmationToken = emailConfirmationToken,
+            },
+            cancellationToken: cancellationToken);
+    }
+
     public Task RequestPasswordResetAsync(
         string email,
         CancellationToken cancellationToken = default)
