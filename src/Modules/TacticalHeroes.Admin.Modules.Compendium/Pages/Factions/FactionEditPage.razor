@@ -1,5 +1,5 @@
-@page "/factions/new"
-@page "/factions/{Id:guid}"
+@attribute [Route(CompendiumRoutes.CreateFaction)]
+@attribute [Route(CompendiumRoutes.FactionTemplate)]
 @attribute [Authorize]
 @attribute [StreamRendering]
 @using TacticalHeroes.Admin.Api.Errors
@@ -16,7 +16,7 @@
 <PageHeader Title="@HeaderTitle"
             Subtitle="@HeaderSubtitle">
     <Actions>
-        <MudButton Href="/factions"
+        <MudButton Href="@CompendiumRoutes.Factions"
                    Variant="Variant.Text"
                    StartIcon="@Icons.Material.Filled.ArrowBack">
             К списку
@@ -154,7 +154,7 @@ else if (Faction is not null)
                 Snackbar.Add("Фракция создана", Severity.Success);
             }
 
-            Navigation.NavigateTo("/factions");
+            Navigation.NavigateTo(CompendiumRoutes.Factions);
         }
         catch (Exception exception)
         {
@@ -179,7 +179,7 @@ else if (Faction is not null)
         {
             await FactionsApi.DeleteAsync(id);
             Snackbar.Add("Фракция удалена", Severity.Success);
-            Navigation.NavigateTo("/factions");
+            Navigation.NavigateTo(CompendiumRoutes.Factions);
         }
         catch (Exception exception)
         {

@@ -17,7 +17,7 @@ public static class CompendiumAdminModule
             [
                 new(
                     "Фракции",
-                    "/factions",
+                    CompendiumRoutes.Factions,
                     Icons.Material.Filled.Flag),
             ]),
     ];

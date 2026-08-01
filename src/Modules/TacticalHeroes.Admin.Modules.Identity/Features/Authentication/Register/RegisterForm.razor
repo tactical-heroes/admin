@@ -137,9 +137,11 @@ else
     [Parameter]
     public string? ReturnUrl { get; set; }
 
-    private string LoginHref => BuildLoginHref();
+    private string LoginHref => IdentityRoutes.LoginPage(ReturnUrl);
 
-    private string ConfirmationHref => BuildLoginHref("confirmation");
+    private string ConfirmationHref => IdentityRoutes.LoginPage(
+        ReturnUrl,
+        LoginMode.Confirmation);
 
     private async Task SubmitAsync()
     {
@@ -172,25 +174,6 @@ else
     private void TogglePasswordConfirmationVisibility()
     {
         _showPasswordConfirmation = !_showPasswordConfirmation;
-    }
-
-    private string BuildLoginHref(string? mode = null)
-    {
-        List<string> parameters = [];
-
-        if (!string.IsNullOrWhiteSpace(mode))
-        {
-            parameters.Add($"mode={mode}");
-        }
-
-        if (!string.IsNullOrWhiteSpace(ReturnUrl))
-        {
-            parameters.Add($"returnUrl={Uri.EscapeDataString(ReturnUrl)}");
-        }
-
-        return parameters.Count == 0
-            ? "/login"
-            : $"/login?{string.Join("&", parameters)}";
     }
 
     private sealed class RegisterModel

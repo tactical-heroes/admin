@@ -77,9 +77,7 @@ else
     [Parameter]
     public string? ReturnUrl { get; set; }
 
-    private string LoginHref => string.IsNullOrWhiteSpace(ReturnUrl)
-        ? "/login"
-        : $"/login?returnUrl={Uri.EscapeDataString(ReturnUrl)}";
+    private string LoginHref => IdentityRoutes.LoginPage(ReturnUrl);
 
     private async Task SubmitAsync()
     {

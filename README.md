@@ -56,6 +56,8 @@ dotnet run --project src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj --laun
 The ASP.NET Core host renders one application on the server, serves the
 WebAssembly client, and proxies browser API requests through YARP. UI modules
 are Razor Class Libraries registered explicitly by the client shell; they are
-not separate SPAs or deployments. Kiota client code is generated from
+not separate SPAs or deployments. The shell and each module expose route
+contracts with route templates and typed URL builders; components do not own
+raw internal route strings. Kiota client code is generated from
 `openapi/tactical-heroes.json` into the API project's intermediate output during
 the build and is not committed to the repository.

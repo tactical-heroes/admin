@@ -1,4 +1,4 @@
-@page "/"
+@attribute [Route(AdminRoutes.Home)]
 @attribute [Authorize]
 
 <PageTitle>Главная · Tactical Heroes</PageTitle>
@@ -22,7 +22,7 @@
                 </MudText>
             </MudCardContent>
             <MudCardActions>
-                <MudButton Href="/roles"
+                <MudButton Href="@IdentityRoutes.Roles"
                            Variant="Variant.Text"
                            EndIcon="@Icons.Material.Filled.ArrowForward">
                     Открыть роли
@@ -46,7 +46,7 @@
                 </MudText>
             </MudCardContent>
             <MudCardActions>
-                <MudButton Href="/users"
+                <MudButton Href="@IdentityRoutes.Users"
                            Variant="Variant.Text"
                            EndIcon="@Icons.Material.Filled.ArrowForward">
                     Открыть пользователей

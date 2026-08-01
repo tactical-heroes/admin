@@ -1,4 +1,4 @@
-@page "/not-found"
+@attribute [Route(AdminRoutes.NotFound)]
 @layout MainLayout
 
 <PageTitle>Страница не найдена · Tactical Heroes</PageTitle>
@@ -13,7 +13,7 @@
     <MudText Typo="Typo.body1" Color="Color.Secondary">
         Проверьте адрес или вернитесь на главную.
     </MudText>
-    <MudButton Href="/"
+    <MudButton Href="@AdminRoutes.Home"
                Variant="Variant.Filled"
                Color="Color.Primary"
                StartIcon="@Icons.Material.Filled.Home">
