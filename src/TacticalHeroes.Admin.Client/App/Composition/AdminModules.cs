@@ -15,12 +15,14 @@ public static class AdminModules
 
     public static IReadOnlyList<AdminNavigationGroup> NavigationGroups { get; } =
     [
+        .. CompendiumAdminModule.NavigationGroups,
         .. IdentityAdminModule.NavigationGroups,
     ];
 
     internal static IServiceCollection AddAdminModules(
         this IServiceCollection services)
     {
+        services.AddCompendiumAdminModule();
         services.AddIdentityAdminModule();
 
         return services;

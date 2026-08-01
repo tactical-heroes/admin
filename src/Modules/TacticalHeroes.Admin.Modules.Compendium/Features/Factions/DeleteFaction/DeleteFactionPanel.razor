@@ -1,0 +1,84 @@
+@if (!_confirming)
+{
+    <MudPaper Elevation="0" Class="danger-section">
+        <div>
+            <MudText Typo="Typo.subtitle1" Class="danger-title">
+                Удаление фракции
+            </MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                Фракция будет удалена без возможности восстановления.
+            </MudText>
+        </div>
+        <MudButton Class="delete-request"
+                   Variant="Variant.Outlined"
+                   Color="Color.Error"
+                   StartIcon="@Icons.Material.Outlined.Delete"
+                   Disabled="Deleting"
+                   OnClick="RequestConfirmation">
+            Удалить
+        </MudButton>
+    </MudPaper>
+}
+else
+{
+    <MudAlert Severity="Severity.Error"
+              Variant="Variant.Outlined"
+              Class="delete-confirmation">
+        <MudStack Spacing="2">
+            <MudText Typo="Typo.subtitle1">
+                Удалить «@FactionName»?
+            </MudText>
+            <MudText Typo="Typo.body2">
+                Это действие нельзя отменить.
+            </MudText>
+            <MudStack Row="true" Justify="Justify.FlexEnd" Spacing="2">
+                <MudButton Variant="Variant.Text"
+                           Disabled="Deleting"
+                           OnClick="CancelConfirmation">
+                    Отмена
+                </MudButton>
+                <MudButton Class="delete-confirm"
+                           Variant="Variant.Filled"
+                           Color="Color.Error"
+                           Disabled="Deleting"
+                           OnClick="ConfirmAsync">
+                    @if (Deleting)
+                    {
+                        <MudProgressCircular Size="Size.Small"
+                                             Indeterminate="true"
+                                             Class="button-progress" />
+                    }
+                    Удалить фракцию
+                </MudButton>
+            </MudStack>
+        </MudStack>
+    </MudAlert>
+}
+
+@code {
+    private bool _confirming;
+
+    [Parameter, EditorRequired]
+    public string FactionName { get; set; } = string.Empty;
+
+    [Parameter]
+    public bool Deleting { get; set; }
+
+    [Parameter]
+    public EventCallback OnDelete { get; set; }
+
+    private void RequestConfirmation()
+    {
+        _confirming = true;
+    }
+
+    private void CancelConfirmation()
+    {
+        _confirming = false;
+    }
+
+    private async Task ConfirmAsync()
+    {
+        await OnDelete.InvokeAsync();
+    }
+}

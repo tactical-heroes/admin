@@ -9,7 +9,11 @@ public sealed class ProjectReferenceDependencyTests
         {
             ["TacticalHeroes.Admin.Api"] = [],
             ["TacticalHeroes.Admin.Shared"] = [],
-            ["TacticalHeroes.Admin.Modules.Compendium"] = [],
+            ["TacticalHeroes.Admin.Modules.Compendium"] =
+            [
+                "TacticalHeroes.Admin.Api",
+                "TacticalHeroes.Admin.Shared",
+            ],
             ["TacticalHeroes.Admin.Modules.Identity"] =
             [
                 "TacticalHeroes.Admin.Api",

@@ -30,6 +30,7 @@
     <Project Path="tests/TacticalHeroes.Admin.Shared.ComponentTests/TacticalHeroes.Admin.Shared.ComponentTests.csproj" />
   </Folder>
   <Folder Name="/tests/Modules/">
+    <Project Path="tests/Modules/TacticalHeroes.Admin.Modules.Compendium.ComponentTests/TacticalHeroes.Admin.Modules.Compendium.ComponentTests.csproj" />
     <Project Path="tests/Modules/TacticalHeroes.Admin.Modules.Identity.ComponentTests/TacticalHeroes.Admin.Modules.Identity.ComponentTests.csproj" />
   </Folder>
 </Solution>
