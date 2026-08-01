@@ -6,10 +6,6 @@
         Главная
     </MudNavLink>
 
-    <MudText Typo="Typo.overline"
-             Class="nav-section-title nav-section-spaced">
-        Модули
-    </MudText>
     @foreach (var group in AdminModules.NavigationGroups)
     {
         <details class="nav-module" open="@IsCurrentGroup(group)">

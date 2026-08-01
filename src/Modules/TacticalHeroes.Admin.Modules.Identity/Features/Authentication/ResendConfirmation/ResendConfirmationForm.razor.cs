@@ -42,8 +42,8 @@ public partial class ResendConfirmationForm
 
     private sealed class EmailModel
     {
-        [Required(ErrorMessage = "Укажите электронную почту.")]
-        [EmailAddress(ErrorMessage = "Укажите корректную электронную почту.")]
+        [Required(ErrorMessage = "Укажите email.")]
+        [EmailAddress(ErrorMessage = "Укажите корректный email.")]
         public string Email { get; set; } = string.Empty;
     }
 }

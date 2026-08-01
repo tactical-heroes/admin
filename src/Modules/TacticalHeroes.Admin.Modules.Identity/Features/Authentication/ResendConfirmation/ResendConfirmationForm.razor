@@ -24,7 +24,7 @@ else
 
         <header class="auth-form-header">
             <MudIcon Icon="@Icons.Material.Outlined.MarkEmailUnread" Class="auth-state-icon" />
-            <h1 class="auth-form-title">Подтверждение электронной почты</h1>
+            <h1 class="auth-form-title">Подтверждение email</h1>
             <p class="auth-form-copy">
                 Запросите новое письмо, если предыдущая ссылка не пришла или уже истекла.
             </p>
@@ -36,7 +36,7 @@ else
         }
 
         <div class="auth-field">
-            <label for="confirmation-email">Электронная почта</label>
+            <label for="confirmation-email">Email</label>
             <span class="auth-input-shell">
                 <MudIcon Icon="@Icons.Material.Outlined.Email" Class="auth-field-icon" />
                 <InputText class="auth-input"
@@ -45,7 +45,7 @@ else
                            type="email"
                            inputmode="email"
                            autocomplete="email"
-                           placeholder="Введите электронную почту"
+                           placeholder="Введите email"
                            disabled="@_submitting" />
             </span>
             <ValidationMessage For="@(() => _model.Email)" />
