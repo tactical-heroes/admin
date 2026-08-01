@@ -50,4 +50,4 @@ app.MapRazorComponents<App>()
         CompendiumAdminModule.Assembly,
         IdentityAdminModule.Assembly);
 
-app.Run();
+await app.RunAsync();
