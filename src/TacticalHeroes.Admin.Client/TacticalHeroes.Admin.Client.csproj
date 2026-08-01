@@ -25,7 +25,7 @@
 			Outputs="$(KiotaGeneratedClientFile)">
 		<Exec Command="dotnet tool restore"
 			  WorkingDirectory="$(RepositoryRoot)" />
-		<Exec Command="dotnet tool run kiota -- generate --language CSharp --openapi &quot;$(KiotaOpenApiFile)&quot; --output &quot;$(KiotaGeneratedDir)&quot; --class-name TacticalHeroesApiClient --namespace-name TacticalHeroes.Admin.Api.Generated --clean-output --exclude-backward-compatible --include-path &quot;/api/v1/auth/**&quot; --include-path &quot;/api/v1/roles&quot; --include-path &quot;/api/v1/roles/**&quot; --include-path &quot;/api/v1/users&quot; --include-path &quot;/api/v1/users/**&quot; --log-level Error"
+		<Exec Command="dotnet tool run kiota -- generate --language CSharp --openapi &quot;$(KiotaOpenApiFile)&quot; --output &quot;$(KiotaGeneratedDir)&quot; --class-name TacticalHeroesApiClient --namespace-name TacticalHeroes.Admin.Api.Generated --clean-output --exclude-backward-compatible --log-level Error"
 			  WorkingDirectory="$(RepositoryRoot)" />
 	</Target>
 
