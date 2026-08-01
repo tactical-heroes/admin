@@ -1,4 +1,4 @@
-@page "/users"
+@attribute [Route(IdentityRoutes.Users)]
 @attribute [Authorize]
 @attribute [StreamRendering]
 @using TacticalHeroes.Admin.Api.Errors
@@ -107,7 +107,7 @@ else if (Page is not null)
                 </MudTd>
                 <MudTd Class="actions-column">
                     <MudIconButton Icon="@Icons.Material.Outlined.Edit"
-                                   Href="@($"/users/{context.Id}")"
+                                   Href="@IdentityRoutes.User(context.Id)"
                                    Color="Color.Primary"
                                    Size="Size.Small"
                                    aria-label="Редактировать пользователя" />

@@ -1,4 +1,4 @@
-@page "/roles/{Id:guid}"
+@attribute [Route(IdentityRoutes.RoleTemplate)]
 @attribute [Authorize]
 @attribute [StreamRendering]
 @using TacticalHeroes.Admin.Api.Errors
@@ -14,7 +14,7 @@
 <PageHeader Title="Редактирование роли"
             Subtitle="Измените название и claims роли">
     <Actions>
-        <MudButton Href="/roles"
+        <MudButton Href="@IdentityRoutes.Roles"
                    Variant="Variant.Text"
                    StartIcon="@Icons.Material.Filled.ArrowBack">
             К списку
@@ -104,7 +104,7 @@ else if (Role is not null)
         {
             await RolesApi.UpdateAsync(Role);
             Snackbar.Add("Роль сохранена", Severity.Success);
-            Navigation.NavigateTo("/roles");
+            Navigation.NavigateTo(IdentityRoutes.Roles);
         }
         catch (Exception exception)
         {

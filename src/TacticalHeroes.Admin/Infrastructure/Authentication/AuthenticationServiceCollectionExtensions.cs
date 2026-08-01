@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using TacticalHeroes.Admin.Client.App.Routing;
+using TacticalHeroes.Admin.Modules.Identity;
 
 namespace TacticalHeroes.Admin.Infrastructure.Authentication;
 
@@ -30,8 +31,8 @@ internal static class AuthenticationServiceCollectionExtensions
                 options.Cookie.HttpOnly = true;
                 options.Cookie.SameSite = SameSiteMode.Lax;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                options.LoginPath = "/login";
-                options.AccessDeniedPath = "/login";
+                options.LoginPath = IdentityRoutes.Login;
+                options.AccessDeniedPath = IdentityRoutes.Login;
                 options.ExpireTimeSpan = TimeSpan.FromHours(8);
                 options.SlidingExpiration = true;
             })
@@ -42,7 +43,7 @@ internal static class AuthenticationServiceCollectionExtensions
                 options.ClientId = settings.ClientId;
                 options.CallbackPath = settings.CallbackPath;
                 options.SignedOutCallbackPath = settings.SignedOutCallbackPath;
-                options.SignedOutRedirectUri = "/";
+                options.SignedOutRedirectUri = AdminRoutes.Home;
                 options.RequireHttpsMetadata = settings.RequireHttpsMetadata;
                 options.ResponseType = OpenIdConnectResponseType.Code;
                 options.UsePkce = true;
@@ -76,8 +77,7 @@ internal static class AuthenticationServiceCollectionExtensions
                     OnRemoteFailure = context =>
                     {
                         context.HandleResponse();
-                        context.Response.Redirect(
-                            QueryHelpers.AddQueryString("/login", "error", "oauth"));
+                        context.Response.Redirect(IdentityRoutes.LoginPage(error: LoginError.OAuth));
                         return Task.CompletedTask;
                     },
                 };

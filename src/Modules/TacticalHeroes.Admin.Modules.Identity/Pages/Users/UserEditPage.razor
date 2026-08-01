@@ -1,4 +1,4 @@
-@page "/users/{Id:guid}"
+@attribute [Route(IdentityRoutes.UserTemplate)]
 @attribute [Authorize]
 @attribute [StreamRendering]
 @using TacticalHeroes.Admin.Api.Errors
@@ -14,7 +14,7 @@
 <PageHeader Title="Редактирование пользователя"
             Subtitle="Измените аккаунт, статус и claims">
     <Actions>
-        <MudButton Href="/users"
+        <MudButton Href="@IdentityRoutes.Users"
                    Variant="Variant.Text"
                    StartIcon="@Icons.Material.Filled.ArrowBack">
             К списку
@@ -114,7 +114,7 @@ else if (User is not null && Statuses is not null)
         {
             await UsersApi.UpdateAsync(User);
             Snackbar.Add("Пользователь сохранён", Severity.Success);
-            Navigation.NavigateTo("/users");
+            Navigation.NavigateTo(IdentityRoutes.Users);
         }
         catch (Exception exception)
         {

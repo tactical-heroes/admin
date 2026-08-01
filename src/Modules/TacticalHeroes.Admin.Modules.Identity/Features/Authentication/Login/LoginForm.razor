@@ -15,7 +15,7 @@
     @if (string.IsNullOrWhiteSpace(ReturnUrl))
     {
         <a class="auth-command"
-           href="/authentication/challenge?returnUrl=%2F">
+           href="@IdentityRoutes.Challenge()">
             Продолжить вход
             <span aria-hidden="true">→</span>
         </a>
@@ -23,7 +23,7 @@
     else
     {
         <form method="post"
-              action="/authentication/sign-in"
+              action="@IdentityRoutes.AuthenticationSignIn"
               class="auth-form">
             <AntiforgeryToken />
             <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
@@ -64,7 +64,7 @@
             </div>
 
             <div class="auth-option-row">
-                <a class="auth-link" href="@BuildModeHref("recover")">Забыли пароль?</a>
+                <a class="auth-link" href="@BuildModeHref(LoginMode.Recover)">Забыли пароль?</a>
             </div>
 
             <button type="submit" class="auth-command">
@@ -77,11 +77,11 @@
     <div class="auth-form-footer">
         <p>
             Нет аккаунта?
-            <a class="auth-link" href="@BuildModeHref("register")">Зарегистрироваться</a>
+            <a class="auth-link" href="@BuildModeHref(LoginMode.Register)">Зарегистрироваться</a>
         </p>
         <p class="auth-form-footer-secondary">
             Не пришло письмо?
-            <a class="auth-link" href="@BuildModeHref("confirmation")">Отправить повторно</a>
+            <a class="auth-link" href="@BuildModeHref(LoginMode.Confirmation)">Отправить повторно</a>
         </p>
     </div>
 </div>
@@ -110,10 +110,8 @@
         _showPassword = !_showPassword;
     }
 
-    private string BuildModeHref(string mode)
+    private string BuildModeHref(LoginMode mode)
     {
-        return string.IsNullOrWhiteSpace(ReturnUrl)
-            ? $"/login?mode={mode}"
-            : $"/login?mode={mode}&returnUrl={Uri.EscapeDataString(ReturnUrl)}";
+        return IdentityRoutes.LoginPage(ReturnUrl, mode);
     }
 }

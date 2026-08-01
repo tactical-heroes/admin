@@ -19,11 +19,11 @@ public static class IdentityAdminModule
             [
                 new(
                     "Роли",
-                    "/roles",
+                    IdentityRoutes.Roles,
                     Icons.Material.Filled.Security),
                 new(
                     "Пользователи",
-                    "/users",
+                    IdentityRoutes.Users,
                     Icons.Material.Filled.Group),
             ]),
     ];

@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
+using TacticalHeroes.Admin.Client.App.Routing;
+using TacticalHeroes.Admin.Modules.Identity;
 
 namespace TacticalHeroes.Admin.Infrastructure.Authentication;
 
@@ -9,15 +10,13 @@ internal static class AuthenticationEndpointRouteBuilderExtensions
 {
     internal static IEndpointRouteBuilder MapAdminAuthentication(this IEndpointRouteBuilder endpoints)
     {
-        var group = endpoints.MapGroup("/authentication");
-
-        group.MapGet(
-                "/challenge",
+        endpoints.MapGet(
+                IdentityRoutes.AuthenticationChallenge,
                 (string? returnUrl) => TypedResults.Challenge(GetAuthenticationProperties(returnUrl)))
             .AllowAnonymous();
 
-        group.MapPost(
-                "/sign-in",
+        endpoints.MapPost(
+                IdentityRoutes.AuthenticationSignIn,
                 async Task<IResult> (
                     [FromForm] SignInForm form,
                     HttpContext httpContext,
@@ -27,7 +26,7 @@ internal static class AuthenticationEndpointRouteBuilderExtensions
                     var returnUrl = NormalizeAuthorizeReturnUrl(form.ReturnUrl, httpContext.Request);
                     if (returnUrl is null)
                     {
-                        return RedirectToLogin(error: "invalid_request", returnUrl: null);
+                        return RedirectToLogin(error: LoginError.InvalidRequest, returnUrl: null);
                     }
 
                     var result = await gateway.SignInAsync(
@@ -52,8 +51,8 @@ internal static class AuthenticationEndpointRouteBuilderExtensions
                 })
             .AllowAnonymous();
 
-        group.MapPost(
-            "/logout",
+        endpoints.MapPost(
+            IdentityRoutes.AuthenticationLogout,
             ([FromForm] string? returnUrl) => TypedResults.SignOut(
                 GetAuthenticationProperties(returnUrl),
                 [
@@ -64,25 +63,19 @@ internal static class AuthenticationEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    private static IResult RedirectToLogin(string error, string? returnUrl)
+    private static IResult RedirectToLogin(LoginError error, string? returnUrl)
     {
-        var parameters = new Dictionary<string, string?>
-        {
-            ["error"] = error,
-            ["returnUrl"] = returnUrl,
-        };
-
-        return TypedResults.Redirect(QueryHelpers.AddQueryString("/login", parameters));
+        return TypedResults.Redirect(IdentityRoutes.LoginPage(returnUrl, error: error));
     }
 
-    private static string GetErrorCode(IdentityLoginStatus status)
+    private static LoginError GetErrorCode(IdentityLoginStatus status)
     {
         return status switch
         {
-            IdentityLoginStatus.InvalidCredentials => "invalid_credentials",
-            IdentityLoginStatus.Forbidden => "forbidden",
-            IdentityLoginStatus.InvalidRequest => "invalid_request",
-            _ => "unavailable",
+            IdentityLoginStatus.InvalidCredentials => LoginError.InvalidCredentials,
+            IdentityLoginStatus.Forbidden => LoginError.Forbidden,
+            IdentityLoginStatus.InvalidRequest => LoginError.InvalidRequest,
+            _ => LoginError.Unavailable,
         };
     }
 
@@ -122,7 +115,7 @@ internal static class AuthenticationEndpointRouteBuilderExtensions
     {
         if (string.IsNullOrWhiteSpace(returnUrl))
         {
-            returnUrl = "/";
+            returnUrl = AdminRoutes.Home;
         }
         else if (!Uri.IsWellFormedUriString(returnUrl, UriKind.Relative))
         {

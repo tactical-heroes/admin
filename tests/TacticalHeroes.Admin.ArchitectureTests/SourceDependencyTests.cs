@@ -96,6 +96,47 @@ public sealed class SourceDependencyTests
         violations.ShouldBeEmpty();
     }
 
+    [Fact(DisplayName = "Application components use route contracts")]
+    public void ComponentRoutes_Should_UseContracts_When_ApplicationComponentsAreScanned()
+    {
+        string repositoryRoot = RepositoryPaths.FindRoot();
+        string[] applicationRoots =
+        [
+            Path.Combine(repositoryRoot, "src", "TacticalHeroes.Admin.Client"),
+            Path.Combine(repositoryRoot, "src", "Modules"),
+        ];
+        Regex rawRouteRegex = new(
+            "@page\\s+\"|(?:Href|href|action)\\s*=\\s*\"/|NavigateTo\\(\\s*\"/",
+            RegexOptions.CultureInvariant);
+        List<string> violations = [];
+
+        foreach (string applicationRoot in applicationRoots)
+        {
+            foreach (string sourcePath in Directory.EnumerateFiles(
+                         applicationRoot,
+                         "*.razor",
+                         SearchOption.AllDirectories))
+            {
+                if (sourcePath.Contains(
+                        $"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}",
+                        StringComparison.OrdinalIgnoreCase) ||
+                    sourcePath.Contains(
+                        $"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (rawRouteRegex.IsMatch(File.ReadAllText(sourcePath)))
+                {
+                    violations.Add(Path.GetRelativePath(repositoryRoot, sourcePath));
+                }
+            }
+        }
+
+        violations.ShouldBeEmpty();
+    }
+
     private static IEnumerable<string> EnumerateSourceFiles(string root)
     {
         return Directory

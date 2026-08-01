@@ -3,9 +3,8 @@
 @code {
     protected override void OnInitialized()
     {
-        var returnUrl = Uri.EscapeDataString(Navigation.Uri);
         Navigation.NavigateTo(
-            $"/authentication/challenge?returnUrl={returnUrl}",
+            IdentityRoutes.Challenge(Navigation.Uri),
             forceLoad: true);
     }
 }
