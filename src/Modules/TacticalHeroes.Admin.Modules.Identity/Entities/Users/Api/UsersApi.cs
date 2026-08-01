@@ -90,10 +90,37 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
             .ToArray() ?? [];
     }
 
+    public async Task<Guid> CreateAsync(
+        UserDetails user,
+        CancellationToken cancellationToken = default)
+    {
+        var request = new CreateUserRequest
+        {
+            Email = user.Email.Trim(),
+            UserName = user.UserName.Trim(),
+            Password = user.Password,
+            IsConfirmed = user.IsConfirmed,
+            Status = user.Status,
+            Claims = user.Claims.Select(ToApiClaim).ToList(),
+        };
+        var response = await client.Api.V1.Users.PostAsync(
+            request,
+            cancellationToken: cancellationToken)
+            ?? throw new InvalidOperationException("The users API returned an empty response.");
+
+        return response.Id
+            ?? throw new InvalidOperationException("The users API did not return the created identifier.");
+    }
+
     public Task UpdateAsync(
         UserDetails user,
         CancellationToken cancellationToken = default)
     {
+        if (user.Id == Guid.Empty)
+        {
+            throw new InvalidOperationException("A user identifier is required for update.");
+        }
+
         var request = new UpdateUserRequest
         {
             Email = user.Email.Trim(),
@@ -105,6 +132,14 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
 
         return client.Api.V1.Users[user.Id].PutAsync(
             request,
+            cancellationToken: cancellationToken);
+    }
+
+    public Task DeleteAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        return client.Api.V1.Users[id].DeleteAsync(
             cancellationToken: cancellationToken);
     }
 

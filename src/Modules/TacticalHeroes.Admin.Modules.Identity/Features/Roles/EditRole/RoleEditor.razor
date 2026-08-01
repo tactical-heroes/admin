@@ -23,6 +23,7 @@ else if (!string.IsNullOrWhiteSpace(LoadError))
 else if (Role is not null)
 {
     <RoleEditForm Model="Role"
-                  Saving="_saving"
+                  IsNew="IsNew"
+                  Busy="_saving"
                   OnSave="SaveAsync" />
 }

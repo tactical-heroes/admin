@@ -6,9 +6,20 @@
 <PageTitle>Пользователи · Tactical Heroes</PageTitle>
 
 <PageHeader Title="Пользователи"
-            Subtitle="Управление аккаунтами Tactical Heroes" />
+            Subtitle="Управление аккаунтами Tactical Heroes">
+    <Actions>
+        <MudButton Href="@IdentityRoutes.CreateUser"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add">
+            Добавить пользователя
+        </MudButton>
+    </Actions>
+</PageHeader>
 
 <UserListWidget PageNumber="CurrentPageNumber"
+                PageSize="CurrentPageSize"
                 Email="@Email"
                 EmailChanged="ApplyEmailFilter"
-                PageNumberChanged="ChangePage" />
+                PageNumberChanged="ChangePage"
+                PageSizeChanged="ChangePageSize" />

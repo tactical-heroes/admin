@@ -1,0 +1,23 @@
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">Подтверждение удаления</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.body1">
+            Удалить @EntityType «@EntityName»?
+        </MudText>
+        <div class="warning-text">
+            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                Действие нельзя отменить.
+            </MudText>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">
+            Отмена
+        </MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="Confirm">
+            Удалить
+        </MudButton>
+    </DialogActions>
+</MudDialog>

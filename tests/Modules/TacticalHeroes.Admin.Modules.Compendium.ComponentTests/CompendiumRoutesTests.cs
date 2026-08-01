@@ -19,4 +19,12 @@ public sealed class CompendiumRoutesTests
 
         route.ShouldBe("/factions?page=4");
     }
+
+    [Fact(DisplayName = "Builds factions route from page size")]
+    public void FactionsPage_Should_IncludePageSize_When_PageSizeIsNotDefault()
+    {
+        string route = CompendiumRoutes.FactionsPage(pageNumber: 2, pageSize: 50);
+
+        route.ShouldBe("/factions?page=2&pageSize=50");
+    }
 }

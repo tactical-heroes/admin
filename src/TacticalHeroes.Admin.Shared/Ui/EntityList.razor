@@ -1,0 +1,113 @@
+@typeparam TItem
+
+<div class="entity-list-host">
+<MudPaper Elevation="0" Class="entity-list">
+    <div class="list-toolbar">
+        <MudButton Variant="Variant.Text"
+                   Color="Color.Default"
+                   StartIcon="@(_filtersExpanded
+                       ? Icons.Material.Filled.ExpandLess
+                       : Icons.Material.Filled.ExpandMore)"
+                   Disabled="Loading"
+                   OnClick="ToggleFilters">
+            Фильтры
+        </MudButton>
+        <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                       Color="Color.Default"
+                       Disabled="Loading"
+                       OnClick="OnRefresh"
+                       aria-label="@RefreshLabel" />
+    </div>
+
+    <MudCollapse Expanded="_filtersExpanded">
+        <div class="filters-panel">
+            @if (Filters is null)
+            {
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    Для этого списка дополнительные фильтры не предусмотрены.
+                </MudText>
+            }
+            else
+            {
+                <div class="filters-content">
+                    @Filters
+                </div>
+            }
+            <div class="filters-actions">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Disabled="@(Loading || !HasFilters)"
+                           OnClick="OnApplyFilters">
+                    Применить
+                </MudButton>
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Default"
+                           Disabled="@(Loading || !HasFilters || !HasActiveFilters)"
+                           OnClick="OnResetFilters">
+                    Сбросить
+                </MudButton>
+            </div>
+        </div>
+    </MudCollapse>
+
+    @if (Loading && Items is null)
+    {
+        <div class="loading-shell">
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle"
+                         Height="52px"
+                         Class="skeleton-row" />
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle"
+                         Height="52px"
+                         Class="skeleton-row" />
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle"
+                         Height="52px" />
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(LoadError))
+    {
+        <MudAlert Severity="Severity.Warning"
+                  Variant="Variant.Outlined"
+                  Square="true">
+            <MudStack Row="true"
+                      AlignItems="AlignItems.Center"
+                      Justify="Justify.SpaceBetween">
+                <span>@LoadError</span>
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Warning"
+                           Disabled="Loading"
+                           OnClick="OnRefresh">
+                    Повторить
+                </MudButton>
+            </MudStack>
+        </MudAlert>
+    }
+    else if (Items is not null)
+    {
+        <MudTable T="TItem"
+                  Items="Items"
+                  Hover="true"
+                  Loading="Loading"
+                  Elevation="0"
+                  Class="list-table">
+            <HeaderContent>
+                @HeaderContent
+            </HeaderContent>
+            <RowTemplate>
+                @RowTemplate(context)
+            </RowTemplate>
+            <NoRecordsContent>
+                <div class="empty-table">@EmptyText</div>
+            </NoRecordsContent>
+        </MudTable>
+
+        <ListPagination PageNumber="PageNumber"
+                        PageSize="PageSize"
+                        TotalPages="TotalPages"
+                        TotalCount="TotalCount"
+                        VisibleItemCount="Items.Count"
+                        Disabled="Loading"
+                        PageNumberChanged="OnPageNumberChanged"
+                        PageSizeChanged="OnPageSizeChanged" />
+    }
+</MudPaper>
+</div>

@@ -1,27 +1,5 @@
-.edit-section {
-    margin-bottom: 1rem;
-    padding: 1.4rem;
-    border: 1px solid #e4e8ef;
-}
-
-.section-title {
-    margin-bottom: 1rem;
-    font-weight: 700;
-}
-
-.confirmed-field {
+.user-edit-form ::deep .confirmed-field {
     display: flex;
     align-items: center;
     min-height: 56px;
-}
-
-.form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
-    padding-top: 0.5rem;
-}
-
-.button-progress {
-    margin-right: 0.5rem;
 }

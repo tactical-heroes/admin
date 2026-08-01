@@ -1,0 +1,38 @@
+<div class="list-pagination">
+    <div class="pagination-summary">
+        <MudText Typo="Typo.caption" Color="Color.Secondary">
+            Страница @CurrentPage из @PageCount
+        </MudText>
+        <MudText Typo="Typo.caption" Color="Color.Secondary">
+            Показано @VisibleItemCount из @TotalCount
+        </MudText>
+    </div>
+    <div class="pagination-controls">
+        <MudSelect T="int"
+                   Value="PageSize"
+                   ValueChanged="ChangePageSizeAsync"
+                   Label="Строк на странице"
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense"
+                   Disabled="Disabled"
+                   Class="page-size-select">
+            @foreach (int pageSizeOption in PaginationOptions.PageSizes)
+            {
+                <MudSelectItem T="int" Value="pageSizeOption">
+                    @pageSizeOption
+                </MudSelectItem>
+            }
+        </MudSelect>
+        <MudPagination Count="PageCount"
+                       Selected="CurrentPage"
+                       SelectedChanged="PageNumberChanged"
+                       BoundaryCount="1"
+                       MiddleCount="5"
+                       ShowFirstButton="true"
+                       ShowLastButton="true"
+                       ShowPreviousButton="true"
+                       ShowNextButton="true"
+                       Disabled="Disabled"
+                       Size="Size.Small" />
+    </div>
+</div>

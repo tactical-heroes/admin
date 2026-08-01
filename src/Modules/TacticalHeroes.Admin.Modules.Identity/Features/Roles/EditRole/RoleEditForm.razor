@@ -3,10 +3,7 @@
 
 <MudForm @ref="_form"
          @bind-IsValid="_isValid">
-    <MudPaper Elevation="0" Class="edit-section">
-        <MudText Typo="Typo.h6" Class="section-title">
-            Основные данные
-        </MudText>
+    <EditSection Title="Основные данные">
         <MudTextField T="string"
                       @bind-Value="Model.Name"
                       Label="Название роли"
@@ -14,30 +11,14 @@
                       Required="true"
                       RequiredError="Укажите название роли"
                       MaxLength="100" />
-    </MudPaper>
+    </EditSection>
 
-    <MudPaper Elevation="0" Class="edit-section">
+    <EditSection Title="Доступ">
         <ClaimsEditor Claims="Model.Claims" />
-    </MudPaper>
+    </EditSection>
 
-    <div class="form-actions">
-        <MudButton Href="@IdentityRoutes.Roles"
-                   Variant="Variant.Text"
-                   Disabled="Saving">
-            Отмена
-        </MudButton>
-        <MudButton Variant="Variant.Filled"
-                   Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.Save"
-                   Disabled="Saving"
-                   OnClick="SubmitAsync">
-            @if (Saving)
-            {
-                <MudProgressCircular Size="Size.Small"
-                                     Indeterminate="true"
-                                     Class="button-progress" />
-            }
-            Сохранить
-        </MudButton>
-    </div>
+    <EditFormActions CancelHref="@IdentityRoutes.Roles"
+                     IsNew="IsNew"
+                     Busy="Busy"
+                     OnSubmit="SubmitAsync" />
 </MudForm>

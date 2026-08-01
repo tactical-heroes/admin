@@ -13,7 +13,10 @@ public partial class RoleEditForm
     public RoleDetails Model { get; set; } = new();
 
     [Parameter]
-    public bool Saving { get; set; }
+    public bool IsNew { get; set; }
+
+    [Parameter]
+    public bool Busy { get; set; }
 
     [Parameter]
     public EventCallback OnSave { get; set; }

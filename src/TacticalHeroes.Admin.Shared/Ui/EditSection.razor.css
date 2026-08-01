@@ -1,0 +1,10 @@
+.edit-section-host ::deep .edit-section {
+    margin-bottom: 1rem;
+    padding: 1.4rem;
+    border: 1px solid #e4e8ef;
+}
+
+.edit-section-host ::deep .section-title {
+    margin-bottom: 1rem;
+    font-weight: 700;
+}

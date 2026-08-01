@@ -10,11 +10,11 @@ public sealed class RouteStateConventionTests
             new Dictionary<string, string[]>(StringComparer.Ordinal)
             {
                 ["src/Modules/TacticalHeroes.Admin.Modules.Compendium/Pages/Factions/FactionsPage.razor.cs"] =
-                    ["page"],
+                    ["page", "pageSize"],
                 ["src/Modules/TacticalHeroes.Admin.Modules.Identity/Pages/Roles/RolesPage.razor.cs"] =
-                    ["page"],
+                    ["page", "pageSize"],
                 ["src/Modules/TacticalHeroes.Admin.Modules.Identity/Pages/Users/UsersPage.razor.cs"] =
-                    ["page", "email"],
+                    ["page", "email", "pageSize"],
             };
         List<string> violations = [];
 

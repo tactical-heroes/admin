@@ -1,5 +1,3 @@
-@using TacticalHeroes.Admin.Modules.Compendium.Features.Factions.DeleteFaction
-
 @if (_loading && Faction is null)
 {
     <MudSkeleton SkeletonType="SkeletonType.Rectangle"
@@ -26,13 +24,6 @@ else if (Faction is not null)
 {
     <FactionEditForm Model="Faction"
                      IsNew="@IsNew"
-                     Busy="@(_saving || _deleting)"
+                     Busy="_saving"
                      OnSave="SaveAsync" />
-
-    @if (Faction.Id.HasValue)
-    {
-        <DeleteFactionPanel FactionName="@Faction.Name"
-                            Deleting="_deleting"
-                            OnDelete="DeleteAsync" />
-    }
 }

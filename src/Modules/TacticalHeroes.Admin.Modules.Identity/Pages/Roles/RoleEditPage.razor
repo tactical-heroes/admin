@@ -1,12 +1,13 @@
+@attribute [Route(IdentityRoutes.CreateRole)]
 @attribute [Route(IdentityRoutes.RoleTemplate)]
 @attribute [Authorize]
 @attribute [StreamRendering]
 @using TacticalHeroes.Admin.Modules.Identity.Features.Roles.EditRole
 
-<PageTitle>Редактирование роли · Tactical Heroes</PageTitle>
+<PageTitle>@PageTitleText</PageTitle>
 
-<PageHeader Title="Редактирование роли"
-            Subtitle="Измените название и атрибуты доступа роли">
+<PageHeader Title="@HeaderTitle"
+            Subtitle="@HeaderSubtitle">
     <Actions>
         <MudButton Href="@IdentityRoutes.Roles"
                    Variant="Variant.Text"
@@ -16,4 +17,4 @@
     </Actions>
 </PageHeader>
 
-<RoleEditor Id="Id" Saved="NavigateToList" />
+<RoleEditor Id="Id" Completed="NavigateToList" />

@@ -24,6 +24,7 @@ else if (User is not null && Statuses is not null)
 {
     <UserEditForm Model="User"
                   Statuses="Statuses"
-                  Saving="_saving"
+                  IsNew="IsNew"
+                  Busy="_saving"
                   OnSave="SaveAsync" />
 }

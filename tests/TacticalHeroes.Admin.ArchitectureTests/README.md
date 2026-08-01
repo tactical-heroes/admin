@@ -60,7 +60,7 @@ TacticalHeroes.Admin.Api       -> ничего
 TacticalHeroes.Admin.Shared    -> ничего
 Modules/*                      -> Api, Shared
 TacticalHeroes.Admin.Client    -> Modules/*, Api, Shared
-TacticalHeroes.Admin           -> Client, Modules/*
+TacticalHeroes.Admin           -> Client, Modules/*, Shared
 ```
 
 7. `ProjectReferences_Should_MatchAllowedDependencies_When_ProductionProjectsAreLoaded`
@@ -83,10 +83,10 @@ TacticalHeroes.Admin           -> Client, Modules/*
     через типизированные route contracts.
 
 11. `ListPages_Should_UseQueryParameters_When_ListStateIsDefined` — номер
-    страницы списков фракций, ролей и пользователей читается из query string
-    через `SupplyParameterFromQuery`; email-фильтр пользователей также является
-    query-параметром. Такое состояние можно восстановить при обновлении страницы
-    или передать ссылкой.
+    страницы и размер страницы списков фракций, ролей и пользователей читаются
+    из query string через `SupplyParameterFromQuery`; email-фильтр пользователей
+    также является query-параметром. Такое состояние можно восстановить при
+    обновлении страницы или передать ссылкой.
 
 ## Razor-компоненты
 
@@ -100,3 +100,16 @@ TacticalHeroes.Admin           -> Client, Modules/*
     `.razor.cs` должен иметь соответствующий `.razor` и объявлять partial class
     с именем компонента; каждый `.razor.css` также должен принадлежать
     существующему Razor-компоненту.
+
+## Единый вид списков
+
+14. `ListWidgets_Should_UseSharedComponents_When_AdminListsAreScanned` — списки
+    фракций, ролей и пользователей используют общий `EntityList` и единые
+    действия строки `EntityRowActions`, не создавая собственные таблицы.
+
+15. `ListWidgets_Should_NotExposeIdentifiers_When_AdminListsAreScanned` — в
+    пользовательской разметке списков запрещены колонки с техническим ID.
+
+16. `ListPages_Should_ExposeHeaderAndCreateAction_When_AdminListsAreScanned` —
+    каждая страница списка содержит общий заголовок с пояснением и действие
+    создания сущности.
