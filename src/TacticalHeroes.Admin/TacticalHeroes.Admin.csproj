@@ -7,9 +7,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" />
-    <PackageReference Include="Yarp.ReverseProxy" />
-    <ProjectReference Include="..\TacticalHeroes.Admin.Client\TacticalHeroes.Admin.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
+    <PackageReference Include="Yarp.ReverseProxy" />
+    <ProjectReference Include="..\Modules\TacticalHeroes.Admin.Modules.Compendium\TacticalHeroes.Admin.Modules.Compendium.csproj" />
+    <ProjectReference Include="..\Modules\TacticalHeroes.Admin.Modules.Identity\TacticalHeroes.Admin.Modules.Identity.csproj" />
+    <ProjectReference Include="..\TacticalHeroes.Admin.Client\TacticalHeroes.Admin.Client.csproj" />
   </ItemGroup>
 
 </Project>

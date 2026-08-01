@@ -16,7 +16,11 @@ COPY ["global.json", "."]
 COPY ["Directory.Packages.props", "."]
 COPY ["Directory.Build.props", "."]
 COPY ["Directory.Build.targets", "."]
+COPY ["src/TacticalHeroes.Admin.Api/TacticalHeroes.Admin.Api.csproj", "src/TacticalHeroes.Admin.Api/"]
 COPY ["src/TacticalHeroes.Admin.Client/TacticalHeroes.Admin.Client.csproj", "src/TacticalHeroes.Admin.Client/"]
+COPY ["src/TacticalHeroes.Admin.Shared/TacticalHeroes.Admin.Shared.csproj", "src/TacticalHeroes.Admin.Shared/"]
+COPY ["src/Modules/TacticalHeroes.Admin.Modules.Compendium/TacticalHeroes.Admin.Modules.Compendium.csproj", "src/Modules/TacticalHeroes.Admin.Modules.Compendium/"]
+COPY ["src/Modules/TacticalHeroes.Admin.Modules.Identity/TacticalHeroes.Admin.Modules.Identity.csproj", "src/Modules/TacticalHeroes.Admin.Modules.Identity/"]
 COPY ["src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj", "src/TacticalHeroes.Admin/"]
 
 RUN dotnet restore "./src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj"

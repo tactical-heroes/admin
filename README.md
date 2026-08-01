@@ -43,14 +43,19 @@ dotnet run --project src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj --laun
 ## Repository Layout
 
 - `src/TacticalHeroes.Admin/` - ASP.NET Core host and same-origin YARP gateway.
-- `src/TacticalHeroes.Admin.Client/` - Interactive Auto UI and generated Kiota client.
-- `tests/` - component tests.
+- `src/TacticalHeroes.Admin.Client/` - Interactive Auto application shell, routing, layouts, and module composition.
+- `src/Modules/` - flat set of module RCL projects; Identity owns account administration and Compendium owns faction administration.
+- `src/TacticalHeroes.Admin.Api/` - generated Kiota client and shared API transport primitives.
+- `src/TacticalHeroes.Admin.Shared/` - reusable presentation primitives without domain dependencies.
+- `tests/` - module component, API unit, shared component, and architecture tests.
 - `openapi/` - pinned Tactical Heroes API contract.
 - `deploy/helm/` - Helm deployment values.
 
 ## Initialization Notes
 
-The ASP.NET Core host renders the application on the server, serves the
-WebAssembly client, and proxies browser API requests through YARP. Kiota client
-code is generated from `openapi/tactical-heroes.json` into the client project's
-intermediate output during the build and is not committed to the repository.
+The ASP.NET Core host renders one application on the server, serves the
+WebAssembly client, and proxies browser API requests through YARP. UI modules
+are Razor Class Libraries registered explicitly by the client shell; they are
+not separate SPAs or deployments. Kiota client code is generated from
+`openapi/tactical-heroes.json` into the API project's intermediate output during
+the build and is not committed to the repository.

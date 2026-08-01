@@ -1,4 +1,5 @@
 <Router AppAssembly="typeof(Program).Assembly"
+        AdditionalAssemblies="AdminModules.Assemblies"
         NotFoundPage="typeof(Pages.NotFound.NotFoundPage)">
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="routeData"

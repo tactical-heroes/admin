@@ -1,0 +1,32 @@
+using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
+using MudBlazor;
+using TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Api;
+using TacticalHeroes.Admin.Shared.Navigation;
+
+namespace TacticalHeroes.Admin.Modules.Compendium;
+
+public static class CompendiumAdminModule
+{
+    public static Assembly Assembly { get; } = typeof(CompendiumAdminModule).Assembly;
+
+    public static IReadOnlyList<AdminNavigationGroup> NavigationGroups { get; } =
+    [
+        new(
+            "Compendium",
+            [
+                new(
+                    "Фракции",
+                    "/factions",
+                    Icons.Material.Filled.Flag),
+            ]),
+    ];
+
+    public static IServiceCollection AddCompendiumAdminModule(
+        this IServiceCollection services)
+    {
+        services.AddScoped<FactionsApi>();
+
+        return services;
+    }
+}

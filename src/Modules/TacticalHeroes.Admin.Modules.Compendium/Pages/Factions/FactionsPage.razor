@@ -1,0 +1,159 @@
+@page "/factions"
+@attribute [Authorize]
+@attribute [StreamRendering]
+@using TacticalHeroes.Admin.Api.Errors
+@using TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Api
+@using TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Model
+@using TacticalHeroes.Admin.Shared.Model
+@inject FactionsApi FactionsApi
+
+<PageTitle>Фракции · Tactical Heroes</PageTitle>
+
+<PageHeader Title="Фракции"
+            Subtitle="Управление игровыми фракциями Compendium">
+    <Actions>
+        <MudButton Href="/factions/new"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add">
+            Добавить фракцию
+        </MudButton>
+    </Actions>
+</PageHeader>
+
+@if (_loading && Page is null)
+{
+    <MudPaper Elevation="0" Class="table-shell loading-shell">
+        <MudSkeleton SkeletonType="SkeletonType.Rectangle"
+                     Height="64px"
+                     Class="skeleton-row" />
+        <MudSkeleton SkeletonType="SkeletonType.Rectangle"
+                     Height="64px"
+                     Class="skeleton-row" />
+        <MudSkeleton SkeletonType="SkeletonType.Rectangle"
+                     Height="64px" />
+    </MudPaper>
+}
+else if (!string.IsNullOrWhiteSpace(LoadError))
+{
+    <MudAlert Severity="Severity.Warning"
+              Variant="Variant.Outlined">
+        <MudStack Row="true"
+                  AlignItems="AlignItems.Center"
+                  Justify="Justify.SpaceBetween">
+            <span>@LoadError</span>
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Warning"
+                       Disabled="_loading"
+                       OnClick="RetryAsync">
+                Повторить
+            </MudButton>
+        </MudStack>
+    </MudAlert>
+}
+else if (Page is not null)
+{
+    <MudPaper Elevation="0" Class="table-shell">
+        <div class="table-toolbar">
+            <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                           Color="Color.Default"
+                           Disabled="_loading"
+                           OnClick="RetryAsync"
+                           aria-label="Обновить список фракций" />
+        </div>
+        <MudTable T="FactionSummary"
+                  Items="Page.Items"
+                  Hover="true"
+                  Loading="_loading"
+                  Elevation="0">
+            <HeaderContent>
+                <MudTh>Название</MudTh>
+                <MudTh>Описание</MudTh>
+                <MudTh>ID</MudTh>
+                <MudTh Class="actions-column"></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Название">
+                    <MudText Typo="Typo.body2" Class="entity-name">
+                        @context.Name
+                    </MudText>
+                </MudTd>
+                <MudTd DataLabel="Описание">
+                    <MudText Typo="Typo.body2" Class="entity-description">
+                        @context.Description
+                    </MudText>
+                </MudTd>
+                <MudTd DataLabel="ID">
+                    <code class="entity-id">@context.Id</code>
+                </MudTd>
+                <MudTd Class="actions-column">
+                    <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                                   Href="@($"/factions/{context.Id}")"
+                                   Color="Color.Primary"
+                                   Size="Size.Small"
+                                   aria-label="Редактировать фракцию" />
+                </MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <div class="empty-table">Фракции не найдены</div>
+            </NoRecordsContent>
+        </MudTable>
+
+        <div class="table-footer">
+            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                Всего: @Page.TotalCount
+            </MudText>
+            @if (Page.TotalPages > 1)
+            {
+                <MudPagination Count="Page.TotalPages"
+                               Selected="Page.PageNumber"
+                               SelectedChanged="LoadPageAsync"
+                               Disabled="_loading"
+                               Size="Size.Small" />
+            }
+        </div>
+    </MudPaper>
+}
+
+@code {
+    private const int PageSize = 10;
+    private bool _loading;
+
+    [PersistentState(AllowUpdates = true)]
+    public PageResult<FactionSummary>? Page { get; set; }
+
+    [PersistentState(AllowUpdates = true)]
+    public string? LoadError { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Page is null && LoadError is null)
+        {
+            await LoadPageAsync(pageNumber: 1);
+        }
+    }
+
+    private async Task RetryAsync()
+    {
+        await LoadPageAsync(Page?.PageNumber ?? 1);
+    }
+
+    private async Task LoadPageAsync(int pageNumber)
+    {
+        _loading = true;
+        LoadError = null;
+
+        try
+        {
+            Page = await FactionsApi.GetPageAsync(pageNumber, PageSize);
+        }
+        catch (Exception exception)
+        {
+            LoadError = ApiErrorMessage.FromException(exception);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

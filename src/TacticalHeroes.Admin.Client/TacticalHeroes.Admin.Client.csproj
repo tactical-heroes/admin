@@ -1,43 +1,22 @@
-<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly" InitialTargets="PrepareTacticalHeroesApiClientForDesignTime">
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
 	<PropertyGroup>
 		<NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
 		<StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
 		<BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
-		<RepositoryRoot>$(MSBuildProjectDirectory)\..\..</RepositoryRoot>
-		<KiotaOpenApiFile>$(RepositoryRoot)\openapi\tactical-heroes.json</KiotaOpenApiFile>
-		<KiotaGeneratedDir>$(MSBuildProjectDirectory)\obj\$(Configuration)\$(TargetFramework)\Generated</KiotaGeneratedDir>
-		<KiotaGeneratedClientFile>$(KiotaGeneratedDir)\TacticalHeroesApiClient.cs</KiotaGeneratedClientFile>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" />
-		<PackageReference Include="Microsoft.Extensions.Http" />
-		<PackageReference Include="Microsoft.Kiota.Bundle" />
 		<PackageReference Include="MudBlazor" />
 	</ItemGroup>
 
-	<Target Name="GenerateTacticalHeroesApiClient"
-			BeforeTargets="CoreCompile"
-			Condition="'$(BuildingInsideVisualStudio)' != 'true' or '$(DesignTimeBuild)' != 'true'"
-			Inputs="$(KiotaOpenApiFile);$(MSBuildProjectFullPath);$(RepositoryRoot)\dotnet-tools.json"
-			Outputs="$(KiotaGeneratedClientFile)">
-		<Exec Command="dotnet tool restore"
-			  WorkingDirectory="$(RepositoryRoot)" />
-		<Exec Command="dotnet tool run kiota -- generate --language CSharp --openapi &quot;$(KiotaOpenApiFile)&quot; --output &quot;$(KiotaGeneratedDir)&quot; --class-name TacticalHeroesApiClient --namespace-name TacticalHeroes.Admin.Api.Generated --clean-output --exclude-backward-compatible --log-level Error"
-			  WorkingDirectory="$(RepositoryRoot)" />
-	</Target>
+	<ItemGroup>
+		<ProjectReference Include="..\Modules\TacticalHeroes.Admin.Modules.Compendium\TacticalHeroes.Admin.Modules.Compendium.csproj" />
+		<ProjectReference Include="..\Modules\TacticalHeroes.Admin.Modules.Identity\TacticalHeroes.Admin.Modules.Identity.csproj" />
+		<ProjectReference Include="..\TacticalHeroes.Admin.Api\TacticalHeroes.Admin.Api.csproj" />
+		<ProjectReference Include="..\TacticalHeroes.Admin.Shared\TacticalHeroes.Admin.Shared.csproj" />
+	</ItemGroup>
 
-	<Target Name="PrepareTacticalHeroesApiClientForDesignTime"
-			Condition="'$(DesignTimeBuild)' == 'true' and '$(BuildingInsideVisualStudio)' != 'true'"
-			DependsOnTargets="AddGeneratedTacticalHeroesApiClient" />
-
-	<Target Name="AddGeneratedTacticalHeroesApiClient"
-			BeforeTargets="CoreCompile"
-			DependsOnTargets="GenerateTacticalHeroesApiClient">
-		<ItemGroup>
-			<Compile Include="$(KiotaGeneratedDir)\**\*.cs" />
-		</ItemGroup>
-	</Target>
 </Project>

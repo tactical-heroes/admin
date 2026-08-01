@@ -1,0 +1,84 @@
+@using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Model
+
+<MudStack Spacing="2">
+    <MudStack Row="true"
+              AlignItems="AlignItems.Center"
+              Justify="Justify.SpaceBetween">
+        <div>
+            <MudText Typo="Typo.subtitle1">Claims</MudText>
+            <MudText Typo="Typo.caption"
+                     Color="Color.Secondary">
+                Пары типа и значения, назначенные сущности
+            </MudText>
+        </div>
+        <MudButton Variant="Variant.Text"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   OnClick="AddClaim">
+            Добавить
+        </MudButton>
+    </MudStack>
+
+    @if (Claims.Count == 0)
+    {
+        <div class="empty-claims">
+            <MudIcon Icon="@Icons.Material.Outlined.KeyOff"
+                     Size="Size.Large"
+                     Color="Color.Secondary" />
+            <MudText Typo="Typo.body2"
+                     Color="Color.Secondary">
+                Claims пока не добавлены
+            </MudText>
+        </div>
+    }
+    else
+    {
+        @foreach (var claim in Claims)
+        {
+            <MudGrid @key="claim"
+                     Spacing="2"
+                     Class="claim-row">
+                <MudItem xs="12" md="5">
+                    <MudTextField T="string"
+                                  @bind-Value="claim.Type"
+                                  Label="Тип"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Required="true"
+                                  RequiredError="Укажите тип claim" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField T="string"
+                                  @bind-Value="claim.Value"
+                                  Label="Значение"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Required="true"
+                                  RequiredError="Укажите значение claim" />
+                </MudItem>
+                <MudItem xs="12" md="1"
+                         Class="claim-remove">
+                    <MudIconButton Icon="@Icons.Material.Outlined.Delete"
+                                   Color="Color.Error"
+                                   OnClick="@(() => RemoveClaim(claim))"
+                                   aria-label="Удалить claim" />
+                </MudItem>
+            </MudGrid>
+        }
+    }
+</MudStack>
+
+@code {
+    [Parameter, EditorRequired]
+    public IList<ClaimValue> Claims { get; set; } = [];
+
+    private void AddClaim()
+    {
+        Claims.Add(new ClaimValue());
+    }
+
+    private void RemoveClaim(ClaimValue claim)
+    {
+        Claims.Remove(claim);
+    }
+}

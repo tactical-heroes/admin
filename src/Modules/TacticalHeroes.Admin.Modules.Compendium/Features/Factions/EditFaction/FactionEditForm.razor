@@ -1,0 +1,81 @@
+@using TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Model
+
+<MudForm @ref="_form"
+         @bind-IsValid="_isValid">
+    <MudPaper Elevation="0" Class="edit-section">
+        <MudText Typo="Typo.h6" Class="section-title">
+            Основные данные
+        </MudText>
+        <MudStack Spacing="3">
+            <MudTextField T="string"
+                          @bind-Value="Model.Name"
+                          Label="Название фракции"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          RequiredError="Укажите название фракции"
+                          MaxLength="128" />
+            <MudTextField T="string"
+                          @bind-Value="Model.Description"
+                          Label="Описание"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          RequiredError="Укажите описание фракции"
+                          MaxLength="2000"
+                          Lines="8" />
+        </MudStack>
+    </MudPaper>
+
+    <div class="form-actions">
+        <MudButton Href="/factions"
+                   Variant="Variant.Text"
+                   Disabled="Busy">
+            Отмена
+        </MudButton>
+        <MudButton Class="save-action"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@(IsNew ? Icons.Material.Filled.Add : Icons.Material.Filled.Save)"
+                   Disabled="Busy"
+                   OnClick="SubmitAsync">
+            @if (Busy)
+            {
+                <MudProgressCircular Size="Size.Small"
+                                     Indeterminate="true"
+                                     Class="button-progress" />
+            }
+            @(IsNew ? "Создать" : "Сохранить")
+        </MudButton>
+    </div>
+</MudForm>
+
+@code {
+    private MudForm? _form;
+    private bool _isValid;
+
+    [Parameter, EditorRequired]
+    public FactionDetails Model { get; set; } = new();
+
+    [Parameter]
+    public bool IsNew { get; set; }
+
+    [Parameter]
+    public bool Busy { get; set; }
+
+    [Parameter]
+    public EventCallback OnSave { get; set; }
+
+    private async Task SubmitAsync()
+    {
+        if (_form is null)
+        {
+            return;
+        }
+
+        await _form.ValidateAsync();
+
+        if (_isValid)
+        {
+            await OnSave.InvokeAsync();
+        }
+    }
+}

@@ -10,19 +10,20 @@
         Главная
     </MudNavLink>
 
-    <MudText Typo="Typo.overline"
-             Class="nav-section-title nav-section-spaced">
-        Identity
-    </MudText>
-    <MudNavLink Href="/roles"
-                Match="NavLinkMatch.Prefix"
-                Icon="@Icons.Material.Filled.Security">
-        Роли
-    </MudNavLink>
-    <MudNavLink Href="/users"
-                Match="NavLinkMatch.Prefix"
-                Icon="@Icons.Material.Filled.Group">
-        Пользователи
-    </MudNavLink>
+    @foreach (var group in AdminModules.NavigationGroups)
+    {
+        <MudText Typo="Typo.overline"
+                 Class="nav-section-title nav-section-spaced">
+            @group.Title
+        </MudText>
+        @foreach (var item in group.Items)
+        {
+            <MudNavLink Href="@item.Href"
+                        Match="NavLinkMatch.Prefix"
+                        Icon="@item.Icon">
+                @item.Label
+            </MudNavLink>
+        }
+    }
 </MudNavMenu>
 </nav>

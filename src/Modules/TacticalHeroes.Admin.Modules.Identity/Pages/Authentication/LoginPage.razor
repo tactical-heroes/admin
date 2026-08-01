@@ -1,0 +1,55 @@
+@page "/login"
+@layout AccountLayout
+@attribute [AllowAnonymous]
+@using TacticalHeroes.Admin.Modules.Identity.Features.Authentication.ForgotPassword
+@using TacticalHeroes.Admin.Modules.Identity.Features.Authentication.Login
+@using TacticalHeroes.Admin.Modules.Identity.Features.Authentication.Register
+@using TacticalHeroes.Admin.Modules.Identity.Features.Authentication.ResendConfirmation
+@using TacticalHeroes.Admin.Modules.Identity.Widgets.Authentication
+
+<PageTitle>@Title</PageTitle>
+
+<AuthenticationShell>
+    @switch (NormalizedMode)
+    {
+        case "register":
+            <RegisterForm ReturnUrl="@ReturnUrl" />
+            break;
+        case "confirmation":
+            <ResendConfirmationForm ReturnUrl="@ReturnUrl" />
+            break;
+        case "recover":
+            <ForgotPasswordForm ReturnUrl="@ReturnUrl" />
+            break;
+        default:
+            <LoginForm ReturnUrl="@ReturnUrl" Error="@Error" />
+            break;
+    }
+</AuthenticationShell>
+
+@code {
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    public string? ReturnUrl { get; set; }
+
+    [SupplyParameterFromQuery(Name = "error")]
+    public string? Error { get; set; }
+
+    [SupplyParameterFromQuery(Name = "mode")]
+    public string? Mode { get; set; }
+
+    private string NormalizedMode => Mode?.ToLowerInvariant() switch
+    {
+        "register" => "register",
+        "confirmation" => "confirmation",
+        "recover" => "recover",
+        _ => "login",
+    };
+
+    private string Title => NormalizedMode switch
+    {
+        "register" => "Регистрация · Tactical Heroes",
+        "confirmation" => "Подтверждение email · Tactical Heroes",
+        "recover" => "Восстановление доступа · Tactical Heroes",
+        _ => "Вход · Tactical Heroes",
+    };
+}
