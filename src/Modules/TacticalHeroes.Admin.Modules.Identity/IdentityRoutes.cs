@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace TacticalHeroes.Admin.Modules.Identity;
 
 public static class IdentityRoutes
@@ -30,6 +32,29 @@ public static class IdentityRoutes
     public static string User(Guid id)
     {
         return $"{Users}/{id:D}";
+    }
+
+    public static string RolesPage(int pageNumber = 1)
+    {
+        ValidatePageNumber(pageNumber);
+
+        return BuildUri(
+            Roles,
+            ("page", pageNumber == 1
+                ? null
+                : pageNumber.ToString(CultureInfo.InvariantCulture)));
+    }
+
+    public static string UsersPage(string? email = null, int pageNumber = 1)
+    {
+        ValidatePageNumber(pageNumber);
+
+        return BuildUri(
+            Users,
+            ("email", string.IsNullOrWhiteSpace(email) ? null : email.Trim()),
+            ("page", pageNumber == 1
+                ? null
+                : pageNumber.ToString(CultureInfo.InvariantCulture)));
     }
 
     public static string LoginPage(
@@ -107,6 +132,17 @@ public static class IdentityRoutes
             LoginError.OAuth => "oauth",
             _ => throw new ArgumentOutOfRangeException(nameof(error), error, null),
         };
+    }
+
+    private static void ValidatePageNumber(int pageNumber)
+    {
+        if (pageNumber < 1)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(pageNumber),
+                pageNumber,
+                "Page number must be greater than zero.");
+        }
     }
 }
 

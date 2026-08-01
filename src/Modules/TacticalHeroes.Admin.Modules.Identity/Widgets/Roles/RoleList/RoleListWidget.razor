@@ -1,0 +1,89 @@
+@using TacticalHeroes.Admin.Modules.Identity.Entities.Roles.Model
+
+@if (_loading && Page is null)
+{
+    <MudPaper Elevation="0" Class="table-shell loading-shell">
+        <MudSkeleton SkeletonType="SkeletonType.Rectangle"
+                     Height="52px"
+                     Class="skeleton-row" />
+        <MudSkeleton SkeletonType="SkeletonType.Rectangle"
+                     Height="52px"
+                     Class="skeleton-row" />
+        <MudSkeleton SkeletonType="SkeletonType.Rectangle"
+                     Height="52px" />
+    </MudPaper>
+}
+else if (!string.IsNullOrWhiteSpace(LoadError))
+{
+    <MudAlert Severity="Severity.Warning"
+              Variant="Variant.Outlined">
+        <MudStack Row="true"
+                  AlignItems="AlignItems.Center"
+                  Justify="Justify.SpaceBetween">
+            <span>@LoadError</span>
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Warning"
+                       Disabled="_loading"
+                       OnClick="RetryAsync">
+                Повторить
+            </MudButton>
+        </MudStack>
+    </MudAlert>
+}
+else if (Page is not null)
+{
+    <MudPaper Elevation="0" Class="table-shell">
+        <div class="table-toolbar">
+            <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                           Color="Color.Default"
+                           Disabled="_loading"
+                           OnClick="RetryAsync"
+                           aria-label="Обновить список ролей" />
+        </div>
+        <MudTable T="RoleSummary"
+                  Items="Page.Items"
+                  Hover="true"
+                  Loading="_loading"
+                  Elevation="0">
+            <HeaderContent>
+                <MudTh>Название</MudTh>
+                <MudTh>ID</MudTh>
+                <MudTh Class="actions-column"></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Название">
+                    <MudText Typo="Typo.body2" Class="entity-name">
+                        @context.Name
+                    </MudText>
+                </MudTd>
+                <MudTd DataLabel="ID">
+                    <code class="entity-id">@context.Id</code>
+                </MudTd>
+                <MudTd Class="actions-column">
+                    <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                                   Href="@IdentityRoutes.Role(context.Id)"
+                                   Color="Color.Primary"
+                                   Size="Size.Small"
+                                   aria-label="Редактировать роль" />
+                </MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <div class="empty-table">Роли не найдены</div>
+            </NoRecordsContent>
+        </MudTable>
+
+        <div class="table-footer">
+            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                Всего: @Page.TotalCount
+            </MudText>
+            @if (Page.TotalPages > 1)
+            {
+                <MudPagination Count="Page.TotalPages"
+                               Selected="Page.PageNumber"
+                               SelectedChanged="ChangePageAsync"
+                               Disabled="_loading"
+                               Size="Size.Small" />
+            }
+        </div>
+    </MudPaper>
+}

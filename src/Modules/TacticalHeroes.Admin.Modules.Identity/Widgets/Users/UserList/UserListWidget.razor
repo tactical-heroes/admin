@@ -1,0 +1,123 @@
+@using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Model
+
+<MudPaper Elevation="0" Class="filter-bar">
+    <MudTextField T="string"
+                  @bind-Value="_emailFilter"
+                  Label="Поиск по email"
+                  Placeholder="user@example.com"
+                  Variant="Variant.Outlined"
+                  Margin="Margin.Dense"
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search"
+                  Clearable="true"
+                  Disabled="_loading" />
+    <div class="filter-actions">
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   Disabled="_loading"
+                   OnClick="SearchAsync">
+            Найти
+        </MudButton>
+        <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                       Color="Color.Default"
+                       Disabled="_loading"
+                       OnClick="RetryAsync"
+                       aria-label="Обновить список пользователей" />
+    </div>
+</MudPaper>
+
+@if (_loading && Page is null)
+{
+    <MudPaper Elevation="0" Class="table-shell loading-shell">
+        <MudSkeleton SkeletonType="SkeletonType.Rectangle"
+                     Height="52px"
+                     Class="skeleton-row" />
+        <MudSkeleton SkeletonType="SkeletonType.Rectangle"
+                     Height="52px"
+                     Class="skeleton-row" />
+        <MudSkeleton SkeletonType="SkeletonType.Rectangle"
+                     Height="52px" />
+    </MudPaper>
+}
+else if (!string.IsNullOrWhiteSpace(LoadError))
+{
+    <MudAlert Severity="Severity.Warning"
+              Variant="Variant.Outlined">
+        <MudStack Row="true"
+                  AlignItems="AlignItems.Center"
+                  Justify="Justify.SpaceBetween">
+            <span>@LoadError</span>
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Warning"
+                       Disabled="_loading"
+                       OnClick="RetryAsync">
+                Повторить
+            </MudButton>
+        </MudStack>
+    </MudAlert>
+}
+else if (Page is not null)
+{
+    <MudPaper Elevation="0" Class="table-shell">
+        <MudTable T="UserSummary"
+                  Items="Page.Items"
+                  Hover="true"
+                  Loading="_loading"
+                  Elevation="0">
+            <HeaderContent>
+                <MudTh>Пользователь</MudTh>
+                <MudTh>Email</MudTh>
+                <MudTh>Статус</MudTh>
+                <MudTh>Подтверждение</MudTh>
+                <MudTh Class="actions-column"></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Пользователь">
+                    <MudText Typo="Typo.body2" Class="entity-name">
+                        @context.UserName
+                    </MudText>
+                </MudTd>
+                <MudTd DataLabel="Email">@context.Email</MudTd>
+                <MudTd DataLabel="Статус">
+                    <MudChip T="string"
+                             Size="Size.Small"
+                             Variant="Variant.Outlined"
+                             Color="@GetStatusColor(context.Status)">
+                        @context.StatusDisplayName
+                    </MudChip>
+                </MudTd>
+                <MudTd DataLabel="Подтверждение">
+                    <MudIcon Icon="@(context.IsConfirmed
+                                      ? Icons.Material.Filled.CheckCircle
+                                      : Icons.Material.Outlined.Cancel)"
+                             Color="@(context.IsConfirmed ? Color.Success : Color.Secondary)"
+                             Size="Size.Small" />
+                </MudTd>
+                <MudTd Class="actions-column">
+                    <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                                   Href="@IdentityRoutes.User(context.Id)"
+                                   Color="Color.Primary"
+                                   Size="Size.Small"
+                                   aria-label="Редактировать пользователя" />
+                </MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <div class="empty-table">Пользователи не найдены</div>
+            </NoRecordsContent>
+        </MudTable>
+
+        <div class="table-footer">
+            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                Всего: @Page.TotalCount
+            </MudText>
+            @if (Page.TotalPages > 1)
+            {
+                <MudPagination Count="Page.TotalPages"
+                               Selected="Page.PageNumber"
+                               SelectedChanged="ChangePageAsync"
+                               Disabled="_loading"
+                               Size="Size.Small" />
+            }
+        </div>
+    </MudPaper>
+}
