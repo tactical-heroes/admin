@@ -1,0 +1,18 @@
+@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="@AdminTheme.Current" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<main class="account-layout">
+    <section class="account-content">
+        @Body
+    </section>
+</main>
+
+<div id="blazor-error-ui" data-nosnippet>
+    Произошла непредвиденная ошибка.
+    <a href="." class="reload">Перезагрузить</a>
+    <button type="button" class="dismiss">×</button>
+</div>

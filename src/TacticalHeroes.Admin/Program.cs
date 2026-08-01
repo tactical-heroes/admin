@@ -1,8 +1,9 @@
 using TacticalHeroes.Admin.Components;
-using TacticalHeroes.Admin.Client.Shared.Api;
+using TacticalHeroes.Admin.Client.App.Composition;
 using TacticalHeroes.Admin.Infrastructure.Api;
 using TacticalHeroes.Admin.Infrastructure.Authentication;
 using TacticalHeroes.Admin.Infrastructure.Proxy;
+using TacticalHeroes.Admin.Modules.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 var apiBaseUri = builder.Configuration.GetTacticalHeroesApiBaseUri();
@@ -43,6 +44,8 @@ app.MapAdminAuthentication();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(TacticalHeroes.Admin.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(
+        typeof(TacticalHeroes.Admin.Client._Imports).Assembly,
+        IdentityAdminModule.Assembly);
 
 app.Run();
