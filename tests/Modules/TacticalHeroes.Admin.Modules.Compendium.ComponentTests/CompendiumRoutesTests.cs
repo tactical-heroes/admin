@@ -11,4 +11,12 @@ public sealed class CompendiumRoutesTests
 
         route.ShouldBe("/factions/0dd33d34-7b22-4f9a-91fe-d1842b7776c5");
     }
+
+    [Fact(DisplayName = "Builds factions route from page")]
+    public void FactionsPage_Should_IncludePage_When_PageIsNotFirst()
+    {
+        string route = CompendiumRoutes.FactionsPage(pageNumber: 4);
+
+        route.ShouldBe("/factions?page=4");
+    }
 }

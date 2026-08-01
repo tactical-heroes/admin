@@ -1,101 +1,12 @@
 @attribute [Route(IdentityRoutes.ConfirmEmail)]
-@layout AccountLayout
 @attribute [AllowAnonymous]
-@using TacticalHeroes.Admin.Api.Errors
-@using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Api
+@layout AccountLayout
+@using TacticalHeroes.Admin.Modules.Identity.Features.Authentication.ConfirmEmail
 @using TacticalHeroes.Admin.Modules.Identity.Widgets.Authentication
-@inject AuthenticationApi AuthenticationApi
 
 <PageTitle>Подтверждение email · Tactical Heroes</PageTitle>
 
 <AuthenticationShell>
-    <div class="auth-form">
-        @if (!HasValidParameters)
-        {
-            <header class="auth-form-header">
-                <MudIcon Icon="@Icons.Material.Outlined.LinkOff" Class="auth-state-icon" />
-                <h1 class="auth-form-title">Ссылка недействительна</h1>
-                <p class="auth-form-copy">В ссылке не хватает данных для подтверждения email.</p>
-            </header>
-            <div class="auth-feedback auth-feedback--error" role="alert">
-                Запросите новое письмо подтверждения.
-            </div>
-            <a class="auth-command"
-               href="@(IdentityRoutes.LoginPage(mode: LoginMode.Confirmation))">
-                Запросить новую ссылку
-            </a>
-        }
-        else if (!_processed)
-        {
-            <header class="auth-form-header">
-                <MudIcon Icon="@Icons.Material.Outlined.MarkEmailUnread" Class="auth-state-icon" />
-                <h1 class="auth-form-title">Подтверждаем email</h1>
-                <p class="auth-form-copy">Проверяем одноразовую ссылку…</p>
-            </header>
-            <div class="auth-progress" role="status" aria-label="Подтверждение email"></div>
-        }
-        else if (string.IsNullOrWhiteSpace(_error))
-        {
-            <header class="auth-form-header">
-                <MudIcon Icon="@Icons.Material.Outlined.Verified" Class="auth-state-icon" />
-                <h1 class="auth-form-title">Email подтверждён</h1>
-                <p class="auth-form-copy">Аккаунт готов к использованию.</p>
-            </header>
-            <div class="auth-feedback auth-feedback--success" role="status">
-                Теперь можно войти в Tactical Heroes.
-            </div>
-            <a class="auth-command" href="@IdentityRoutes.Challenge()">Перейти ко входу</a>
-        }
-        else
-        {
-            <header class="auth-form-header">
-                <MudIcon Icon="@Icons.Material.Outlined.ErrorOutline" Class="auth-state-icon" />
-                <h1 class="auth-form-title">Не удалось подтвердить</h1>
-                <p class="auth-form-copy">Ссылка могла устареть или уже быть использована.</p>
-            </header>
-            <div class="auth-feedback auth-feedback--error" role="alert">@_error</div>
-            <a class="auth-command"
-               href="@(IdentityRoutes.LoginPage(mode: LoginMode.Confirmation))">
-                Запросить новую ссылку
-            </a>
-        }
-    </div>
+    <ConfirmEmailStatus UserId="UserId"
+                        EmailConfirmationToken="@EmailConfirmationToken" />
 </AuthenticationShell>
-
-@code {
-    private bool _processed;
-    private string? _error;
-
-    [SupplyParameterFromQuery(Name = "userId")]
-    public Guid? UserId { get; set; }
-
-    [SupplyParameterFromQuery(Name = "emailConfirmationToken")]
-    public string? EmailConfirmationToken { get; set; }
-
-    private bool HasValidParameters =>
-        UserId.HasValue && !string.IsNullOrWhiteSpace(EmailConfirmationToken);
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender || !HasValidParameters)
-        {
-            return;
-        }
-
-        try
-        {
-            await AuthenticationApi.ConfirmEmailAsync(
-                UserId!.Value,
-                EmailConfirmationToken!);
-        }
-        catch (Exception exception)
-        {
-            _error = ApiErrorMessage.FromException(exception);
-        }
-        finally
-        {
-            _processed = true;
-            StateHasChanged();
-        }
-    }
-}

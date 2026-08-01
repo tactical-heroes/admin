@@ -1,0 +1,29 @@
+@if (_loading && User is null)
+{
+    <MudSkeleton SkeletonType="SkeletonType.Rectangle"
+                 Height="360px" />
+}
+else if (!string.IsNullOrWhiteSpace(LoadError))
+{
+    <MudAlert Severity="Severity.Warning"
+              Variant="Variant.Outlined">
+        <MudStack Row="true"
+                  AlignItems="AlignItems.Center"
+                  Justify="Justify.SpaceBetween">
+            <span>@LoadError</span>
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Warning"
+                       Disabled="_loading"
+                       OnClick="LoadAsync">
+                Повторить
+            </MudButton>
+        </MudStack>
+    </MudAlert>
+}
+else if (User is not null && Statuses is not null)
+{
+    <UserEditForm Model="User"
+                  Statuses="Statuses"
+                  Saving="_saving"
+                  OnSave="SaveAsync" />
+}

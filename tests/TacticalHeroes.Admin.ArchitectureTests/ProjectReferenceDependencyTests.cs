@@ -54,6 +54,28 @@ public sealed class ProjectReferenceDependencyTests
         }
     }
 
+    [Fact(DisplayName = "Modules do not reference other module projects")]
+    public void ModuleReferences_Should_NotContainModules_When_ModuleProjectsAreLoaded()
+    {
+        string repositoryRoot = RepositoryPaths.FindRoot();
+        string modulesRoot = Path.Combine(repositoryRoot, "src", "Modules");
+        List<string> violations = [];
+
+        foreach (string projectPath in Directory.EnumerateFiles(
+                     modulesRoot,
+                     "*.csproj",
+                     SearchOption.AllDirectories))
+        {
+            violations.AddRange(GetProjectReferences(projectPath)
+                .Where(static reference => reference.StartsWith(
+                    "TacticalHeroes.Admin.Modules.",
+                    StringComparison.Ordinal))
+                .Select(reference => $"{Path.GetFileName(projectPath)} -> {reference}"));
+        }
+
+        violations.ShouldBeEmpty();
+    }
+
     private static string[] GetProjectReferences(string projectPath)
     {
         return XDocument

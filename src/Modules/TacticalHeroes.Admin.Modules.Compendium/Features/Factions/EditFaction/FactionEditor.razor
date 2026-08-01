@@ -1,0 +1,38 @@
+@using TacticalHeroes.Admin.Modules.Compendium.Features.Factions.DeleteFaction
+
+@if (_loading && Faction is null)
+{
+    <MudSkeleton SkeletonType="SkeletonType.Rectangle"
+                 Height="360px" />
+}
+else if (!string.IsNullOrWhiteSpace(LoadError))
+{
+    <MudAlert Severity="Severity.Warning"
+              Variant="Variant.Outlined">
+        <MudStack Row="true"
+                  AlignItems="AlignItems.Center"
+                  Justify="Justify.SpaceBetween">
+            <span>@LoadError</span>
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Warning"
+                       Disabled="_loading"
+                       OnClick="LoadAsync">
+                Повторить
+            </MudButton>
+        </MudStack>
+    </MudAlert>
+}
+else if (Faction is not null)
+{
+    <FactionEditForm Model="Faction"
+                     IsNew="@IsNew"
+                     Busy="@(_saving || _deleting)"
+                     OnSave="SaveAsync" />
+
+    @if (Faction.Id.HasValue)
+    {
+        <DeleteFactionPanel FactionName="@Faction.Name"
+                            Deleting="_deleting"
+                            OnDelete="DeleteAsync" />
+    }
+}

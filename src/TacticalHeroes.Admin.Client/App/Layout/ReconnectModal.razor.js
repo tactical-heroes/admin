@@ -1,4 +1,4 @@
-// Set up event handlers
+// Set up reconnect event handlers
 const reconnectModal = document.getElementById("components-reconnect-modal");
 reconnectModal.addEventListener("components-reconnect-state-changed", handleReconnectStateChanged);
 

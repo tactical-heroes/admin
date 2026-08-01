@@ -67,18 +67,3 @@
         }
     }
 </MudStack>
-
-@code {
-    [Parameter, EditorRequired]
-    public IList<ClaimValue> Claims { get; set; } = [];
-
-    private void AddClaim()
-    {
-        Claims.Add(new ClaimValue());
-    }
-
-    private void RemoveClaim(ClaimValue claim)
-    {
-        Claims.Remove(claim);
-    }
-}

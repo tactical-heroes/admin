@@ -1,18 +1,12 @@
 @attribute [Route(IdentityRoutes.UserTemplate)]
 @attribute [Authorize]
 @attribute [StreamRendering]
-@using TacticalHeroes.Admin.Api.Errors
-@using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Api
-@using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Model
 @using TacticalHeroes.Admin.Modules.Identity.Features.Users.EditUser
-@inject UsersApi UsersApi
-@inject ISnackbar Snackbar
-@inject NavigationManager Navigation
 
 <PageTitle>Редактирование пользователя · Tactical Heroes</PageTitle>
 
 <PageHeader Title="Редактирование пользователя"
-            Subtitle="Измените аккаунт, статус и claims">
+            Subtitle="Измените профиль, статус и claims пользователя">
     <Actions>
         <MudButton Href="@IdentityRoutes.Users"
                    Variant="Variant.Text"
@@ -22,107 +16,4 @@
     </Actions>
 </PageHeader>
 
-@if (_loading && User is null)
-{
-    <MudSkeleton SkeletonType="SkeletonType.Rectangle"
-                 Height="360px" />
-}
-else if (!string.IsNullOrWhiteSpace(LoadError))
-{
-    <MudAlert Severity="Severity.Warning"
-              Variant="Variant.Outlined">
-        <MudStack Row="true"
-                  AlignItems="AlignItems.Center"
-                  Justify="Justify.SpaceBetween">
-            <span>@LoadError</span>
-            <MudButton Variant="Variant.Text"
-                       Color="Color.Warning"
-                       Disabled="_loading"
-                       OnClick="LoadAsync">
-                Повторить
-            </MudButton>
-        </MudStack>
-    </MudAlert>
-}
-else if (User is not null && Statuses is not null)
-{
-    <UserEditForm Model="User"
-                  Statuses="Statuses"
-                  Saving="_saving"
-                  OnSave="SaveAsync" />
-}
-
-@code {
-    private bool _loading;
-    private bool _saving;
-
-    [Parameter]
-    public Guid Id { get; set; }
-
-    [PersistentState]
-    public UserDetails? User { get; set; }
-
-    [PersistentState]
-    public List<UserStatus>? Statuses { get; set; }
-
-    [PersistentState]
-    public string? LoadError { get; set; }
-
-    protected override async Task OnParametersSetAsync()
-    {
-        if ((User?.Id != Id || Statuses is null) && LoadError is null)
-        {
-            await LoadAsync();
-        }
-    }
-
-    private async Task LoadAsync()
-    {
-        _loading = true;
-        LoadError = null;
-
-        try
-        {
-            var userTask = UsersApi.GetAsync(Id);
-            var statusesTask = UsersApi.GetStatusesAsync();
-
-            await Task.WhenAll(userTask, statusesTask);
-
-            User = await userTask;
-            Statuses = (await statusesTask).ToList();
-        }
-        catch (Exception exception)
-        {
-            LoadError = ApiErrorMessage.FromException(exception);
-        }
-        finally
-        {
-            _loading = false;
-        }
-    }
-
-    private async Task SaveAsync()
-    {
-        if (User is null)
-        {
-            return;
-        }
-
-        _saving = true;
-
-        try
-        {
-            await UsersApi.UpdateAsync(User);
-            Snackbar.Add("Пользователь сохранён", Severity.Success);
-            Navigation.NavigateTo(IdentityRoutes.Users);
-        }
-        catch (Exception exception)
-        {
-            Snackbar.Add(ApiErrorMessage.FromException(exception), Severity.Error);
-        }
-        finally
-        {
-            _saving = false;
-        }
-    }
-}
+<UserEditor Id="Id" Saved="NavigateToList" />
