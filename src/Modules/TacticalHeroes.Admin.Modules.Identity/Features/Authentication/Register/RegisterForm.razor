@@ -5,7 +5,7 @@
             <MudIcon Icon="@Icons.Material.Outlined.MarkEmailRead" Class="auth-state-icon" />
             <h1 class="auth-form-title">Проверьте почту</h1>
             <p class="auth-form-copy">
-                Аккаунт создан. Перейдите по ссылке из письма, чтобы подтвердить email.
+                Аккаунт создан. Перейдите по ссылке из письма, чтобы подтвердить электронную почту.
             </p>
         </header>
         <div class="auth-feedback auth-feedback--success" role="status">
@@ -34,7 +34,7 @@ else
         }
 
         <div class="auth-field">
-            <label for="register-email">Email</label>
+            <label for="register-email">Электронная почта</label>
             <span class="auth-input-shell">
                 <MudIcon Icon="@Icons.Material.Outlined.Email" Class="auth-field-icon" />
                 <InputText class="auth-input"
@@ -43,7 +43,7 @@ else
                            type="email"
                            inputmode="email"
                            autocomplete="email"
-                           placeholder="Введите email"
+                           placeholder="Введите электронную почту"
                            disabled="@_submitting" />
             </span>
             <ValidationMessage For="@(() => _model.Email)" />

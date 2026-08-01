@@ -24,7 +24,7 @@ public partial class LoginPage
     private string Title => NormalizedMode switch
     {
         "register" => "Регистрация · Tactical Heroes",
-        "confirmation" => "Подтверждение email · Tactical Heroes",
+        "confirmation" => "Подтверждение электронной почты · Tactical Heroes",
         "recover" => "Восстановление доступа · Tactical Heroes",
         _ => "Вход · Tactical Heroes",
     };

@@ -13,7 +13,7 @@ public static class CompendiumAdminModule
     public static IReadOnlyList<AdminNavigationGroup> NavigationGroups { get; } =
     [
         new(
-            "Compendium",
+            "Справочник",
             [
                 new(
                     "Фракции",

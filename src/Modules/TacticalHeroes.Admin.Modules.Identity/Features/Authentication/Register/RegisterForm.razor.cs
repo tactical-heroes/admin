@@ -61,8 +61,8 @@ public partial class RegisterForm
 
     private sealed class RegisterModel
     {
-        [Required(ErrorMessage = "Укажите email.")]
-        [EmailAddress(ErrorMessage = "Укажите корректный email.")]
+        [Required(ErrorMessage = "Укажите электронную почту.")]
+        [EmailAddress(ErrorMessage = "Укажите корректную электронную почту.")]
         public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Укажите имя пользователя.")]

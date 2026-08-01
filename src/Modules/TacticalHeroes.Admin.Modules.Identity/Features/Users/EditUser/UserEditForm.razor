@@ -11,11 +11,11 @@
             <MudItem xs="12" md="6">
                 <MudTextField T="string"
                               @bind-Value="Model.Email"
-                              Label="Email"
+                              Label="Электронная почта"
                               InputType="InputType.Email"
                               Variant="Variant.Outlined"
                               Required="true"
-                              RequiredError="Укажите email" />
+                              RequiredError="Укажите электронную почту" />
             </MudItem>
             <MudItem xs="12" md="6">
                 <MudTextField T="string"
@@ -45,7 +45,7 @@
                 <MudSwitch T="bool"
                            @bind-Value="Model.IsConfirmed"
                            Color="Color.Success"
-                           Label="Email подтверждён" />
+                           Label="Электронная почта подтверждена" />
             </MudItem>
         </MudGrid>
     </MudPaper>

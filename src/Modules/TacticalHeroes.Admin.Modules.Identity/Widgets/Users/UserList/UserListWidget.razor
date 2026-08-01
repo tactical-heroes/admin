@@ -3,7 +3,7 @@
 <MudPaper Elevation="0" Class="filter-bar">
     <MudTextField T="string"
                   @bind-Value="_emailFilter"
-                  Label="Поиск по email"
+                  Label="Поиск по электронной почте"
                   Placeholder="user@example.com"
                   Variant="Variant.Outlined"
                   Margin="Margin.Dense"
@@ -66,7 +66,7 @@ else if (Page is not null)
                   Elevation="0">
             <HeaderContent>
                 <MudTh>Пользователь</MudTh>
-                <MudTh>Email</MudTh>
+                <MudTh>Электронная почта</MudTh>
                 <MudTh>Статус</MudTh>
                 <MudTh>Подтверждение</MudTh>
                 <MudTh Class="actions-column"></MudTh>
@@ -77,7 +77,7 @@ else if (Page is not null)
                         @context.UserName
                     </MudText>
                 </MudTd>
-                <MudTd DataLabel="Email">@context.Email</MudTd>
+                <MudTd DataLabel="Электронная почта">@context.Email</MudTd>
                 <MudTd DataLabel="Статус">
                     <MudChip T="string"
                              Size="Size.Small"

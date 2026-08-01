@@ -5,7 +5,7 @@
               AlignItems="AlignItems.Center"
               Justify="Justify.SpaceBetween">
         <div>
-            <MudText Typo="Typo.subtitle1">Claims</MudText>
+            <MudText Typo="Typo.subtitle1">Атрибуты доступа</MudText>
             <MudText Typo="Typo.caption"
                      Color="Color.Secondary">
                 Пары типа и значения, назначенные сущности
@@ -27,7 +27,7 @@
                      Color="Color.Secondary" />
             <MudText Typo="Typo.body2"
                      Color="Color.Secondary">
-                Claims пока не добавлены
+                Атрибуты пока не добавлены
             </MudText>
         </div>
     }
@@ -45,7 +45,7 @@
                                   Variant="Variant.Outlined"
                                   Margin="Margin.Dense"
                                   Required="true"
-                                  RequiredError="Укажите тип claim" />
+                                  RequiredError="Укажите тип атрибута" />
                 </MudItem>
                 <MudItem xs="12" md="6">
                     <MudTextField T="string"
@@ -54,14 +54,14 @@
                                   Variant="Variant.Outlined"
                                   Margin="Margin.Dense"
                                   Required="true"
-                                  RequiredError="Укажите значение claim" />
+                                  RequiredError="Укажите значение атрибута" />
                 </MudItem>
                 <MudItem xs="12" md="1"
                          Class="claim-remove">
                     <MudIconButton Icon="@Icons.Material.Outlined.Delete"
                                    Color="Color.Error"
                                    OnClick="@(() => RemoveClaim(claim))"
-                                   aria-label="Удалить claim" />
+                                   aria-label="Удалить атрибут" />
                 </MudItem>
             </MudGrid>
         }

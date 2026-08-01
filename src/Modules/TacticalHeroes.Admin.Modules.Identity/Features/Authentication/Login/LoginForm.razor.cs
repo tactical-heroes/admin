@@ -14,7 +14,7 @@ public partial class LoginForm
 
     private string? ErrorMessage => Error switch
     {
-        "invalid_credentials" => "Неверный email или пароль.",
+        "invalid_credentials" => "Неверная электронная почта или пароль.",
         "forbidden" => "Аккаунт не подтверждён, заблокирован или временно заблокирован после неудачных попыток.",
         "invalid_request" => "Ссылка входа устарела или повреждена. Начните вход заново.",
         "unavailable" => "Сервис авторизации временно недоступен. Повторите попытку позже.",
