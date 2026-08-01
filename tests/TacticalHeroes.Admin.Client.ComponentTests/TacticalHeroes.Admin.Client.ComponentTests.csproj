@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\src\TacticalHeroes.Admin.Api\TacticalHeroes.Admin.Api.csproj" />
         <ProjectReference Include="..\..\src\TacticalHeroes.Admin.Client\TacticalHeroes.Admin.Client.csproj" />
     </ItemGroup>
 
