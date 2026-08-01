@@ -9,6 +9,7 @@ public sealed class ProjectReferenceDependencyTests
         {
             ["TacticalHeroes.Admin.Api"] = [],
             ["TacticalHeroes.Admin.Shared"] = [],
+            ["TacticalHeroes.Admin.Modules.Compendium"] = [],
             ["TacticalHeroes.Admin.Modules.Identity"] =
             [
                 "TacticalHeroes.Admin.Api",
@@ -17,12 +18,14 @@ public sealed class ProjectReferenceDependencyTests
             ["TacticalHeroes.Admin.Client"] =
             [
                 "TacticalHeroes.Admin.Api",
+                "TacticalHeroes.Admin.Modules.Compendium",
                 "TacticalHeroes.Admin.Modules.Identity",
                 "TacticalHeroes.Admin.Shared",
             ],
             ["TacticalHeroes.Admin"] =
             [
                 "TacticalHeroes.Admin.Client",
+                "TacticalHeroes.Admin.Modules.Compendium",
                 "TacticalHeroes.Admin.Modules.Identity",
             ],
         };

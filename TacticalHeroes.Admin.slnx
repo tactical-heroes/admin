@@ -20,15 +20,16 @@
     <Project Path="src/TacticalHeroes.Admin.Shared/TacticalHeroes.Admin.Shared.csproj" />
     <Project Path="src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj" />
   </Folder>
-  <Folder Name="/src/Modules/Identity/">
-    <Project Path="src/Modules/Identity/TacticalHeroes.Admin.Modules.Identity/TacticalHeroes.Admin.Modules.Identity.csproj" />
+  <Folder Name="/src/Modules/">
+    <Project Path="src/Modules/TacticalHeroes.Admin.Modules.Compendium/TacticalHeroes.Admin.Modules.Compendium.csproj" />
+    <Project Path="src/Modules/TacticalHeroes.Admin.Modules.Identity/TacticalHeroes.Admin.Modules.Identity.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/TacticalHeroes.Admin.Api.UnitTests/TacticalHeroes.Admin.Api.UnitTests.csproj" />
     <Project Path="tests/TacticalHeroes.Admin.ArchitectureTests/TacticalHeroes.Admin.ArchitectureTests.csproj" />
     <Project Path="tests/TacticalHeroes.Admin.Shared.ComponentTests/TacticalHeroes.Admin.Shared.ComponentTests.csproj" />
   </Folder>
-  <Folder Name="/tests/Modules/Identity/">
-    <Project Path="tests/Modules/Identity/TacticalHeroes.Admin.Modules.Identity.ComponentTests/TacticalHeroes.Admin.Modules.Identity.ComponentTests.csproj" />
+  <Folder Name="/tests/Modules/">
+    <Project Path="tests/Modules/TacticalHeroes.Admin.Modules.Identity.ComponentTests/TacticalHeroes.Admin.Modules.Identity.ComponentTests.csproj" />
   </Folder>
 </Solution>

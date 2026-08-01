@@ -5,6 +5,7 @@ The admin is one Blazor Web App composed from module Razor Class Libraries:
 - `TacticalHeroes.Admin` owns the ASP.NET Core host, BFF concerns, and deployment.
 - `TacticalHeroes.Admin.Client` owns the application shell, routing, global layouts, providers, and explicit module composition.
 - `Modules/*` owns cohesive business UI areas. A module is not a separate SPA and must not reference another module directly.
+- Keep each module project directly under `src/Modules` and its test projects directly under `tests/Modules`; do not add a redundant per-module wrapper directory.
 - `TacticalHeroes.Admin.Api` owns generated Kiota code and transport-level API primitives.
 - `TacticalHeroes.Admin.Shared` owns reusable presentation primitives and must not contain domain-specific models or API adapters.
 - Keep the dependency direction `Host -> Client/Modules`, `Client -> Modules/Api/Shared`, `Modules -> Api/Shared`. `Api` and `Shared` must not depend on application or module projects.

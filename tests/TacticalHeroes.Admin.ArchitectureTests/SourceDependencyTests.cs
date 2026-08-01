@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace TacticalHeroes.Admin.ArchitectureTests;
 
-public sealed partial class SourceDependencyTests
+public sealed class SourceDependencyTests
 {
     private static readonly IReadOnlyDictionary<string, int> LayerRanks =
         new Dictionary<string, int>(StringComparer.Ordinal)
@@ -13,40 +13,45 @@ public sealed partial class SourceDependencyTests
             ["Pages"] = 4,
         };
 
-    [Fact(DisplayName = "Identity module follows FSD dependency direction")]
-    public void IdentitySources_Should_NotDependOnHigherLayers_When_ModuleIsScanned()
+    [Fact(DisplayName = "Modules follow FSD dependency direction")]
+    public void ModuleSources_Should_NotDependOnHigherLayers_When_ModulesAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
-        string moduleRoot = Path.Combine(
-            repositoryRoot,
-            "src",
-            "Modules",
-            "Identity",
-            "TacticalHeroes.Admin.Modules.Identity");
+        string modulesRoot = Path.Combine(repositoryRoot, "src", "Modules");
         List<string> violations = [];
 
-        foreach (string sourcePath in EnumerateSourceFiles(moduleRoot))
+        foreach (string moduleRoot in Directory.EnumerateDirectories(
+                     modulesRoot,
+                     "TacticalHeroes.Admin.Modules.*"))
         {
-            string sourceLayer = Path
-                .GetRelativePath(moduleRoot, sourcePath)
-                .Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)[0];
+            string moduleNamespace = Path.GetFileName(moduleRoot);
+            Regex layerReferenceRegex = new(
+                $@"{Regex.Escape(moduleNamespace)}\.(Pages|Widgets|Features|Entities)",
+                RegexOptions.CultureInvariant);
 
-            if (!LayerRanks.TryGetValue(sourceLayer, out int sourceRank))
+            foreach (string sourcePath in EnumerateSourceFiles(moduleRoot))
             {
-                continue;
-            }
+                string sourceLayer = Path
+                    .GetRelativePath(moduleRoot, sourcePath)
+                    .Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)[0];
 
-            string source = File.ReadAllText(sourcePath);
-
-            foreach (Match match in IdentityLayerReferenceRegex().Matches(source))
-            {
-                string targetLayer = match.Groups[1].Value;
-
-                if (LayerRanks[targetLayer] > sourceRank)
+                if (!LayerRanks.TryGetValue(sourceLayer, out int sourceRank))
                 {
-                    violations.Add(
-                        $"{Path.GetRelativePath(repositoryRoot, sourcePath)}: " +
-                        $"{sourceLayer} -> {targetLayer}");
+                    continue;
+                }
+
+                string source = File.ReadAllText(sourcePath);
+
+                foreach (Match match in layerReferenceRegex.Matches(source))
+                {
+                    string targetLayer = match.Groups[1].Value;
+
+                    if (LayerRanks[targetLayer] > sourceRank)
+                    {
+                        violations.Add(
+                            $"{Path.GetRelativePath(repositoryRoot, sourcePath)}: " +
+                            $"{sourceLayer} -> {targetLayer}");
+                    }
                 }
             }
         }
@@ -105,9 +110,4 @@ public sealed partial class SourceDependencyTests
                     $"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}",
                     StringComparison.OrdinalIgnoreCase));
     }
-
-    [GeneratedRegex(
-        @"TacticalHeroes\.Admin\.Modules\.Identity\.(Pages|Widgets|Features|Entities)",
-        RegexOptions.CultureInvariant)]
-    private static partial Regex IdentityLayerReferenceRegex();
 }

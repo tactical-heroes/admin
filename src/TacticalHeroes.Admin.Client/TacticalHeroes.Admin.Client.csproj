@@ -13,7 +13,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Modules\Identity\TacticalHeroes.Admin.Modules.Identity\TacticalHeroes.Admin.Modules.Identity.csproj" />
+		<ProjectReference Include="..\Modules\TacticalHeroes.Admin.Modules.Compendium\TacticalHeroes.Admin.Modules.Compendium.csproj" />
+		<ProjectReference Include="..\Modules\TacticalHeroes.Admin.Modules.Identity\TacticalHeroes.Admin.Modules.Identity.csproj" />
 		<ProjectReference Include="..\TacticalHeroes.Admin.Api\TacticalHeroes.Admin.Api.csproj" />
 		<ProjectReference Include="..\TacticalHeroes.Admin.Shared\TacticalHeroes.Admin.Shared.csproj" />
 	</ItemGroup>

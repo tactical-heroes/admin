@@ -1,4 +1,5 @@
 using System.Reflection;
+using TacticalHeroes.Admin.Modules.Compendium;
 using TacticalHeroes.Admin.Modules.Identity;
 using TacticalHeroes.Admin.Shared.Navigation;
 
@@ -8,6 +9,7 @@ public static class AdminModules
 {
     public static IReadOnlyList<Assembly> Assemblies { get; } =
     [
+        CompendiumAdminModule.Assembly,
         IdentityAdminModule.Assembly,
     ];
 

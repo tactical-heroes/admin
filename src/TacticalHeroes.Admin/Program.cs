@@ -3,6 +3,7 @@ using TacticalHeroes.Admin.Client.App.Composition;
 using TacticalHeroes.Admin.Infrastructure.Api;
 using TacticalHeroes.Admin.Infrastructure.Authentication;
 using TacticalHeroes.Admin.Infrastructure.Proxy;
+using TacticalHeroes.Admin.Modules.Compendium;
 using TacticalHeroes.Admin.Modules.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,6 +47,7 @@ app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(
         typeof(TacticalHeroes.Admin.Client._Imports).Assembly,
+        CompendiumAdminModule.Assembly,
         IdentityAdminModule.Assembly);
 
 app.Run();
