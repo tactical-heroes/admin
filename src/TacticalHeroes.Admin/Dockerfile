@@ -12,10 +12,10 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 COPY ["global.json", "."]
+COPY ["nuget.config", "."]
 COPY ["Directory.Packages.props", "."]
 COPY ["Directory.Build.props", "."]
 COPY ["Directory.Build.targets", "."]
-COPY ["src/TacticalHeroes.Admin.Api/TacticalHeroes.Admin.Api.csproj", "src/TacticalHeroes.Admin.Api/"]
 COPY ["src/TacticalHeroes.Admin.Client/TacticalHeroes.Admin.Client.csproj", "src/TacticalHeroes.Admin.Client/"]
 COPY ["src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj", "src/TacticalHeroes.Admin/"]
 

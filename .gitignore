@@ -3,9 +3,6 @@
 [Oo]bj/
 [Aa]rtifacts/
 
-# Generated code
-src/TacticalHeroes.Admin.Api/Generated/
-
 # IDE
 .vs/
 .idea/
