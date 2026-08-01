@@ -21,7 +21,7 @@ public partial class FactionEditPage
         : "Редактирование фракции";
 
     private string HeaderSubtitle => IsNew
-        ? "Добавьте фракцию в Compendium"
+        ? "Добавьте новую игровую фракцию"
         : "Измените название и описание фракции";
 
     private void NavigateToList()

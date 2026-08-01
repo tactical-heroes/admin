@@ -15,7 +15,7 @@ public static class IdentityAdminModule
     public static IReadOnlyList<AdminNavigationGroup> NavigationGroups { get; } =
     [
         new(
-            "Identity",
+            "Управление доступом",
             [
                 new(
                     "Роли",

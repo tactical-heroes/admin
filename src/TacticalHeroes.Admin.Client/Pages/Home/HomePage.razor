@@ -3,55 +3,20 @@
 
 <PageTitle>Главная · Tactical Heroes</PageTitle>
 
-<PageHeader Title="Панель управления"
-            Subtitle="Единая точка администрирования Tactical Heroes" />
+<PageHeader Title="Главная"
+            Subtitle="Панель администрирования онлайн-игры Tactical Heroes" />
 
-<MudGrid Spacing="3">
-    <MudItem xs="12" md="6">
-        <MudCard Class="entity-card" Elevation="0">
-            <MudCardContent>
-                <div class="entity-card-icon roles">
-                    <MudIcon Icon="@Icons.Material.Filled.Security"
-                             Size="Size.Large" />
-                </div>
-                <MudText Typo="Typo.h6" Class="entity-card-title">
-                    Роли
-                </MudText>
-                <MudText Typo="Typo.body2" Color="Color.Secondary">
-                    Управление ролями и назначенными claims.
-                </MudText>
-            </MudCardContent>
-            <MudCardActions>
-                <MudButton Href="@IdentityRoutes.Roles"
-                           Variant="Variant.Text"
-                           EndIcon="@Icons.Material.Filled.ArrowForward">
-                    Открыть роли
-                </MudButton>
-            </MudCardActions>
-        </MudCard>
-    </MudItem>
-
-    <MudItem xs="12" md="6">
-        <MudCard Class="entity-card" Elevation="0">
-            <MudCardContent>
-                <div class="entity-card-icon users">
-                    <MudIcon Icon="@Icons.Material.Filled.Group"
-                             Size="Size.Large" />
-                </div>
-                <MudText Typo="Typo.h6" Class="entity-card-title">
-                    Пользователи
-                </MudText>
-                <MudText Typo="Typo.body2" Color="Color.Secondary">
-                    Просмотр аккаунтов, статусов и пользовательских claims.
-                </MudText>
-            </MudCardContent>
-            <MudCardActions>
-                <MudButton Href="@IdentityRoutes.Users"
-                           Variant="Variant.Text"
-                           EndIcon="@Icons.Material.Filled.ArrowForward">
-                    Открыть пользователей
-                </MudButton>
-            </MudCardActions>
-        </MudCard>
-    </MudItem>
-</MudGrid>
+<section class="welcome-panel" aria-labelledby="welcome-title">
+    <div class="welcome-icon" aria-hidden="true">
+        <MudIcon Icon="@Icons.Material.Filled.SportsEsports"
+                 Size="Size.Large" />
+    </div>
+    <div>
+        <MudText Typo="Typo.h5" Class="welcome-title" id="welcome-title">
+            Добро пожаловать
+        </MudText>
+        <MudText Typo="Typo.body1" Color="Color.Secondary">
+            Здесь собраны инструменты для управления игрой и её развитием.
+        </MudText>
+    </div>
+</section>

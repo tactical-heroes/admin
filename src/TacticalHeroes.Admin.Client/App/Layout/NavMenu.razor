@@ -1,9 +1,5 @@
 <nav class="nav-shell" aria-label="Основная навигация">
 <MudNavMenu>
-    <MudText Typo="Typo.overline"
-             Class="nav-section-title">
-        Обзор
-    </MudText>
     <MudNavLink Href="@AdminRoutes.Home"
                 Match="NavLinkMatch.All"
                 Icon="@Icons.Material.Filled.SpaceDashboard">
@@ -12,18 +8,22 @@
 
     @foreach (var group in AdminModules.NavigationGroups)
     {
-        <MudText Typo="Typo.overline"
-                 Class="nav-section-title nav-section-spaced">
-            @group.Title
-        </MudText>
-        @foreach (var item in group.Items)
-        {
-            <MudNavLink Href="@item.Href"
-                        Match="NavLinkMatch.Prefix"
-                        Icon="@item.Icon">
-                @item.Label
-            </MudNavLink>
-        }
+        <details class="nav-module" open="@IsCurrentGroup(group)">
+            <summary class="nav-module-header">
+                <span>@group.Title</span>
+                <span class="nav-module-chevron" aria-hidden="true"></span>
+            </summary>
+            <div class="nav-module-items">
+                @foreach (var item in group.Items)
+                {
+                    <MudNavLink Href="@item.Href"
+                                Match="NavLinkMatch.Prefix"
+                                Icon="@item.Icon">
+                        @item.Label
+                    </MudNavLink>
+                }
+            </div>
+        </details>
     }
 </MudNavMenu>
 </nav>
