@@ -33,14 +33,15 @@ async function retry() {
             // We have been able to reach the server, but the circuit is no longer available.
             // We'll reload the page so the user can continue using the app as quickly as possible.
             const resumeSuccessful = await Blazor.resumeCircuit();
-            if (!resumeSuccessful) {
-                location.reload();
-            } else {
+            if (resumeSuccessful) {
                 reconnectModal.close();
+            } else {
+                location.reload();
             }
         }
-    } catch (err) {
+    } catch (error) {
         // We got an exception, server is currently unavailable
+        console.warn("Blazor reconnection failed because the server is unavailable.", error);
         document.addEventListener("visibilitychange", retryWhenDocumentBecomesVisible);
     }
 }
