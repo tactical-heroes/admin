@@ -10,7 +10,7 @@ public sealed record PageResult<T>(
     public static PageResult<T> Empty(int pageNumber, int pageSize)
     {
         return new PageResult<T>(
-            Array.Empty<T>(),
+            [],
             pageNumber,
             pageSize,
             TotalCount: 0,
