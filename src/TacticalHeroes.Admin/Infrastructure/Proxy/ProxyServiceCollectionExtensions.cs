@@ -1,89 +1,39 @@
+using System.Net.Http.Headers;
+
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
-using TacticalHeroes.Admin.Client.App.Options;
 using TacticalHeroes.Admin.Infrastructure.Authentication;
+using TacticalHeroes.Admin.Infrastructure.Proxy.Configuration;
 
-using Yarp.ReverseProxy.Configuration;
 using Yarp.ReverseProxy.Transforms;
 
 namespace TacticalHeroes.Admin.Infrastructure.Proxy;
 
 internal static class ProxyServiceCollectionExtensions
 {
-    private const string ApiClusterId = "tactical-heroes-api";
-    private const string ProtectedApiRouteId = "tactical-heroes-protected-api";
-    private const string OpenIdConnectRouteId = "tactical-heroes-openid-connect";
+    private const string ReverseProxySectionName = "ReverseProxy";
+    private const string AttachSessionAccessTokenMetadata = "AttachSessionAccessToken";
+    private const string BearerAuthenticationScheme = "Bearer";
 
     public static IServiceCollection AddTacticalHeroesProxy(
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var apiOptions = configuration
-            .GetSection(TacticalHeroesApiClientOptions.SectionName)
-            .Get<TacticalHeroesApiClientOptions>() ?? new TacticalHeroesApiClientOptions();
-        string[] anonymousAuthPaths =
-        [
-            "/api/v1/auth/login",
-            "/api/v1/auth/register",
-            "/api/v1/auth/confirm-email",
-            "/api/v1/auth/resend-confirmation-email",
-            "/api/v1/auth/forgot-password",
-            "/api/v1/auth/reset-password",
-        ];
-        var routes = anonymousAuthPaths
-            .Select((path, index) => new RouteConfig
-            {
-                RouteId = $"tactical-heroes-anonymous-auth-{index}",
-                ClusterId = ApiClusterId,
-                Match = new RouteMatch { Path = path },
-            })
-            .ToList();
-        routes.Add(
-            new RouteConfig
-            {
-                RouteId = ProtectedApiRouteId,
-                ClusterId = ApiClusterId,
-                AuthorizationPolicy = AuthenticationConstants.ApiAuthorizationPolicy,
-                Match = new RouteMatch
-                {
-                    Path = "/api/{**catch-all}",
-                },
-            });
-        routes.Add(
-            new RouteConfig
-            {
-                RouteId = OpenIdConnectRouteId,
-                ClusterId = ApiClusterId,
-                Match = new RouteMatch
-                {
-                    Path = "/connect/{**catch-all}",
-                },
-            });
-
-        var clusters = new[]
-        {
-            new ClusterConfig
-            {
-                ClusterId = ApiClusterId,
-                Destinations = new Dictionary<string, DestinationConfig>
-                {
-                    ["primary"] = new DestinationConfig
-                    {
-                        Address = $"{apiOptions.BaseUrl.TrimEnd('/')}/",
-                    },
-                },
-            },
-        };
-
         services
             .AddReverseProxy()
-            .LoadFromMemory(routes, clusters)
+            .LoadFromConfig(configuration.GetRequiredSection(ReverseProxySectionName))
+            .AddConfigFilter<TacticalHeroesApiProxyConfigFilter>()
             .AddTransforms(context =>
             {
-                if (!string.Equals(
-                        context.Route.RouteId,
-                        ProtectedApiRouteId,
-                        StringComparison.Ordinal))
+                if (context.Route.Metadata is null ||
+                    !context.Route.Metadata.TryGetValue(
+                        AttachSessionAccessTokenMetadata,
+                        out string? attachSessionAccessToken) ||
+                    !string.Equals(
+                        attachSessionAccessToken,
+                        bool.TrueString,
+                        StringComparison.OrdinalIgnoreCase))
                 {
                     return;
                 }
@@ -92,13 +42,13 @@ internal static class ProxyServiceCollectionExtensions
                 {
                     var accessToken = await transformContext.HttpContext.GetTokenAsync(
                         AuthenticationConstants.SessionScheme,
-                        "access_token");
+                        OpenIdConnectParameterNames.AccessToken);
 
                     if (!string.IsNullOrWhiteSpace(accessToken))
                     {
                         transformContext.ProxyRequest.Headers.Authorization =
-                            new System.Net.Http.Headers.AuthenticationHeaderValue(
-                                "Bearer",
+                            new AuthenticationHeaderValue(
+                                BearerAuthenticationScheme,
                                 accessToken);
                     }
                 });
