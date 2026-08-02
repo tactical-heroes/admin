@@ -9,11 +9,13 @@ public static class ClientServiceCollectionExtensions
     public static IServiceCollection AddTacticalHeroesAdminClient(
         this IServiceCollection services,
         Func<IServiceProvider, Uri> baseAddressFactory,
+        TimeSpan requestTimeout,
         Func<IServiceProvider, IAuthenticationProvider>? authenticationProviderFactory = null)
     {
         services.AddMudServices();
         services.AddTacticalHeroesApiClient(
             baseAddressFactory,
+            requestTimeout,
             authenticationProviderFactory);
         services.AddAdminModules();
 

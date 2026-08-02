@@ -12,6 +12,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddTacticalHeroesApiClient(
         this IServiceCollection services,
         Func<IServiceProvider, Uri> baseAddressFactory,
+        TimeSpan requestTimeout,
         Func<IServiceProvider, IAuthenticationProvider>? authenticationProviderFactory = null)
     {
         ArgumentNullException.ThrowIfNull(baseAddressFactory);
@@ -31,7 +32,7 @@ public static class ServiceCollectionExtensions
                 httpClient.BaseAddress = new Uri(
                     $"{baseAddress.AbsoluteUri.TrimEnd('/')}/",
                     UriKind.Absolute);
-                httpClient.Timeout = TimeSpan.FromSeconds(30);
+                httpClient.Timeout = requestTimeout;
             });
 
         services.AddScoped(

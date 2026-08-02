@@ -9,14 +9,19 @@ using TacticalHeroes.Admin.Modules.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 var apiBaseUri = builder.Configuration.GetTacticalHeroesApiBaseUri();
+var apiClientOptions = builder.Configuration.GetTacticalHeroesApiClientOptions();
 
-builder.Services.AddAdminAuthentication(builder.Configuration, apiBaseUri);
+builder.Services.AddAdminAuthentication(
+    builder.Configuration,
+    apiBaseUri,
+    apiClientOptions.Timeout);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents()
     .AddAuthenticationStateSerialization();
 builder.Services.AddTacticalHeroesAdminClient(
     _ => apiBaseUri,
+    apiClientOptions.Timeout,
     services => services.GetRequiredService<ServerAccessTokenAuthenticationProvider>());
 builder.Services.AddTacticalHeroesProxy(apiBaseUri);
 builder.Services.AddHealthChecks();

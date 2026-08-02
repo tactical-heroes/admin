@@ -11,7 +11,8 @@ internal static class AuthenticationServiceCollectionExtensions
     internal static IServiceCollection AddAdminAuthentication(
         this IServiceCollection services,
         IConfiguration configuration,
-        Uri apiBaseUri)
+        Uri apiBaseUri,
+        TimeSpan requestTimeout)
     {
         var settings = configuration
             .GetRequiredSection(AdminOpenIdConnectOptions.SectionName)
@@ -100,7 +101,7 @@ internal static class AuthenticationServiceCollectionExtensions
                 httpClient.BaseAddress = new Uri(
                     $"{apiBaseUri.AbsoluteUri.TrimEnd('/')}/",
                     UriKind.Absolute);
-                httpClient.Timeout = TimeSpan.FromSeconds(30);
+                httpClient.Timeout = requestTimeout;
             })
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
