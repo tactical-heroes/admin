@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-using TacticalHeroes.Admin.Client.App.Options;
+using TacticalHeroes.Admin.Client.App.Options.TacticalHeroesApiClient;
 
 using Yarp.ReverseProxy.Configuration;
 

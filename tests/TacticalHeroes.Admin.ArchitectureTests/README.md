@@ -110,6 +110,21 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
 15. `ListWidgets_Should_NotExposeIdentifiers_When_AdminListsAreScanned` — в
     пользовательской разметке списков запрещены колонки с техническим ID.
 
-16. `ListPages_Should_ExposeHeaderAndCreateAction_When_AdminListsAreScanned` —
+16. `ListWidgets_Should_BindLoadErrors_When_AdminListsAreScanned` — списки
+    передают в общий компонент фактическое состояние ошибки загрузки, а не
+    строковый литерал.
+
+17. `ListPages_Should_ExposeHeaderAndCreateAction_When_AdminListsAreScanned` —
     каждая страница списка содержит общий заголовок с пояснением и действие
     создания сущности.
+
+## Конфигурационные options
+
+18. `ConfigurationOptions_Should_HaveValidators_When_OptionsAreScanned` — каждый
+    конфигурационный options-класс является `sealed`, находится в отдельной
+    подпапке `Options/<name>`, совпадает с именем файла и имеет рядом валидатор
+    `<OptionsType>Validator`, реализующий `IValidateOptions<T>`.
+
+19. `ConfigurationOptions_Should_ValidateOnStart_When_RegistrationsAreScanned` —
+    валидатор каждого options-класса зарегистрирован в DI, а сами настройки
+    проверяются через `ValidateOnStart`.

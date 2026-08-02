@@ -1,8 +1,12 @@
+using System.Net.Http.Headers;
+
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Abstractions.Authentication;
+using Microsoft.Net.Http.Headers;
 
-namespace TacticalHeroes.Admin.Infrastructure.Authentication;
+namespace TacticalHeroes.Admin.Infrastructure.Authentication.Tokens;
 
 internal sealed class ServerAccessTokenAuthenticationProvider(
     IHttpContextAccessor httpContextAccessor) : IAuthenticationProvider
@@ -22,11 +26,14 @@ internal sealed class ServerAccessTokenAuthenticationProvider(
 
         var accessToken = await httpContext.GetTokenAsync(
             AuthenticationConstants.SessionScheme,
-            "access_token");
+            OpenIdConnectParameterNames.AccessToken);
 
         if (!string.IsNullOrWhiteSpace(accessToken))
         {
-            request.Headers.TryAdd("Authorization", $"Bearer {accessToken}");
+            var authorization = new AuthenticationHeaderValue(
+                AuthenticationConstants.BearerScheme,
+                accessToken);
+            request.Headers.TryAdd(HeaderNames.Authorization, authorization.ToString());
         }
     }
 }

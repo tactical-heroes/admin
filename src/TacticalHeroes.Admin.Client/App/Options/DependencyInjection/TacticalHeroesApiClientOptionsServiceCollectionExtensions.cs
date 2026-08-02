@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Options;
 
+using TacticalHeroes.Admin.Client.App.Options.TacticalHeroesApiClient;
+
 namespace TacticalHeroes.Admin.Client.App.Options.DependencyInjection;
 
 internal static class TacticalHeroesApiClientOptionsServiceCollectionExtensions

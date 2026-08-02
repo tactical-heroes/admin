@@ -4,7 +4,7 @@ namespace TacticalHeroes.Admin.ArchitectureTests;
 
 public sealed class SourceDependencyTests
 {
-    private static readonly IReadOnlyDictionary<string, int> LayerRanks =
+    private static readonly Dictionary<string, int> LayerRanks =
         new Dictionary<string, int>(StringComparer.Ordinal)
         {
             ["Entities"] = 1,

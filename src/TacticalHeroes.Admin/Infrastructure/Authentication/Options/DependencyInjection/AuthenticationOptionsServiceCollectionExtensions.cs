@@ -1,0 +1,41 @@
+using Microsoft.Extensions.Options;
+
+using TacticalHeroes.Admin.Infrastructure.Authentication.Options.IdentityLogin;
+using TacticalHeroes.Admin.Infrastructure.Authentication.Options.OpenIdConnect;
+using TacticalHeroes.Admin.Infrastructure.Authentication.Options.Session;
+
+namespace TacticalHeroes.Admin.Infrastructure.Authentication.Options.DependencyInjection;
+
+internal static class AuthenticationOptionsServiceCollectionExtensions
+{
+    internal static IServiceCollection AddAdminAuthenticationOptions(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddSingleton<
+            IValidateOptions<AdminSessionOptions>,
+            AdminSessionOptionsValidator>();
+        services
+            .AddOptions<AdminSessionOptions>()
+            .Bind(configuration.GetRequiredSection(AdminSessionOptions.SectionName))
+            .ValidateOnStart();
+
+        services.AddSingleton<
+            IValidateOptions<AdminOpenIdConnectOptions>,
+            AdminOpenIdConnectOptionsValidator>();
+        services
+            .AddOptions<AdminOpenIdConnectOptions>()
+            .Bind(configuration.GetRequiredSection(AdminOpenIdConnectOptions.SectionName))
+            .ValidateOnStart();
+
+        services.AddSingleton<
+            IValidateOptions<IdentityLoginRouteOptions>,
+            IdentityLoginRouteOptionsValidator>();
+        services
+            .AddOptions<IdentityLoginRouteOptions>()
+            .Bind(configuration.GetRequiredSection(IdentityLoginRouteOptions.SectionName))
+            .ValidateOnStart();
+
+        return services;
+    }
+}
