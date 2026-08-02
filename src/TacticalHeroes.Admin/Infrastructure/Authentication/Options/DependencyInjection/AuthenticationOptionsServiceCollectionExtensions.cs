@@ -24,6 +24,14 @@ internal static class AuthenticationOptionsServiceCollectionExtensions
             .Bind(configuration.GetRequiredSection(AdminOpenIdConnectOptions.SectionName))
             .ValidateOnStart();
 
+        services.AddSingleton<
+            IValidateOptions<IdentityLoginRouteOptions>,
+            IdentityLoginRouteOptionsValidator>();
+        services
+            .AddOptions<IdentityLoginRouteOptions>()
+            .Bind(configuration.GetRequiredSection(IdentityLoginRouteOptions.SectionName))
+            .ValidateOnStart();
+
         return services;
     }
 }

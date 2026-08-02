@@ -1,9 +1,13 @@
+using Microsoft.Extensions.Options;
+
+using TacticalHeroes.Admin.Infrastructure.Authentication.Options;
+
 namespace TacticalHeroes.Admin.Infrastructure.Authentication.Login;
 
-internal sealed class IdentityLoginGateway(HttpClient httpClient)
+internal sealed class IdentityLoginGateway(
+    HttpClient httpClient,
+    IOptionsMonitor<IdentityLoginRouteOptions> routeOptions)
 {
-    private const string SignInPath = "/api/v1/auth/login";
-
     internal Task<HttpResponseMessage> SignInAsync(
         string email,
         string password,
@@ -11,7 +15,7 @@ internal sealed class IdentityLoginGateway(HttpClient httpClient)
         CancellationToken cancellationToken)
     {
         return httpClient.PostAsJsonAsync(
-            SignInPath,
+            routeOptions.CurrentValue.Path,
             new ApiLoginRequest(email, password, returnUrl),
             cancellationToken);
     }
