@@ -38,12 +38,11 @@ internal static class AuthenticationServiceCollectionExtensions
             IConfigureOptions<OpenIdConnectOptions>,
             AdminOpenIdConnectOptionsSetup>();
 
-        services.AddAuthorization(options =>
-        {
-            options.AddPolicy(
+        services
+            .AddAuthorizationBuilder()
+            .AddPolicy(
                 AuthenticationConstants.ApiAuthorizationPolicy,
                 policy => policy.RequireAuthenticatedUser());
-        });
         services.AddCascadingAuthenticationState();
         services.AddHttpContextAccessor();
         services.AddScoped<ServerAccessTokenAuthenticationProvider>();

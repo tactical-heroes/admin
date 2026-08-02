@@ -57,7 +57,7 @@ internal static class AuthenticationEndpointRouteBuilderExtensions
                     string[] setCookieHeaders = response.Headers.TryGetValues(
                         HeaderNames.SetCookie,
                         out var values)
-                        ? values.ToArray()
+                        ? [.. values]
                         : [];
                     if (setCookieHeaders.Length == 0)
                     {

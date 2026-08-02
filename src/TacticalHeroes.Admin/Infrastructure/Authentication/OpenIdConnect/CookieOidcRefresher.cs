@@ -31,7 +31,12 @@ internal sealed class CookieOidcRefresher(
         string oidcScheme)
     {
         var expiresAtText = context.Properties.GetTokenValue(ExpiresAtTokenName);
-        if (!DateTimeOffset.TryParse(expiresAtText, out var expiresAt))
+        if (!DateTimeOffset.TryParseExact(
+                expiresAtText,
+                RoundtripDateTimeFormat,
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out var expiresAt))
         {
             return;
         }
