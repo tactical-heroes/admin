@@ -1,4 +1,7 @@
+using System.Net;
+
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 
@@ -38,20 +41,32 @@ internal static class AuthenticationEndpointRouteBuilderExtensions
                         return RedirectToLogin(error: LoginError.InvalidRequest, returnUrl: null);
                     }
 
-                    var result = await gateway.SignInAsync(
+                    using var response = await gateway.SignInAsync(
                         form.Email,
                         form.Password,
                         returnUrl,
                         cancellationToken);
 
-                    if (result.Status != IdentityLoginStatus.Succeeded)
+                    if (response.StatusCode != HttpStatusCode.Redirect)
                     {
                         return RedirectToLogin(
-                            error: GetErrorCode(result.Status),
+                            error: GetErrorCode(response.StatusCode),
                             returnUrl: returnUrl);
                     }
 
-                    foreach (var setCookieHeader in result.SetCookieHeaders)
+                    string[] setCookieHeaders = response.Headers.TryGetValues(
+                        HeaderNames.SetCookie,
+                        out var values)
+                        ? values.ToArray()
+                        : [];
+                    if (setCookieHeaders.Length == 0)
+                    {
+                        return RedirectToLogin(
+                            error: LoginError.Unavailable,
+                            returnUrl: returnUrl);
+                    }
+
+                    foreach (var setCookieHeader in setCookieHeaders)
                     {
                         httpContext.Response.Headers.Append(HeaderNames.SetCookie, setCookieHeader);
                     }
@@ -72,18 +87,18 @@ internal static class AuthenticationEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    private static IResult RedirectToLogin(LoginError error, string? returnUrl)
+    private static RedirectHttpResult RedirectToLogin(LoginError error, string? returnUrl)
     {
         return TypedResults.Redirect(IdentityRoutes.LoginPage(returnUrl, error: error));
     }
 
-    private static LoginError GetErrorCode(IdentityLoginStatus status)
+    private static LoginError GetErrorCode(HttpStatusCode statusCode)
     {
-        return status switch
+        return statusCode switch
         {
-            IdentityLoginStatus.InvalidCredentials => LoginError.InvalidCredentials,
-            IdentityLoginStatus.Forbidden => LoginError.Forbidden,
-            IdentityLoginStatus.InvalidRequest => LoginError.InvalidRequest,
+            HttpStatusCode.Unauthorized => LoginError.InvalidCredentials,
+            HttpStatusCode.Forbidden => LoginError.Forbidden,
+            HttpStatusCode.BadRequest => LoginError.InvalidRequest,
             _ => LoginError.Unavailable,
         };
     }
