@@ -1,4 +1,7 @@
+using System.Net.Http.Headers;
+
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 using TacticalHeroes.Admin.Infrastructure.Authentication;
 using TacticalHeroes.Admin.Infrastructure.Proxy.Configuration;
@@ -11,6 +14,7 @@ internal static class ProxyServiceCollectionExtensions
 {
     private const string ReverseProxySectionName = "ReverseProxy";
     private const string AttachSessionAccessTokenMetadata = "AttachSessionAccessToken";
+    private const string BearerAuthenticationScheme = "Bearer";
 
     public static IServiceCollection AddTacticalHeroesProxy(
         this IServiceCollection services,
@@ -38,13 +42,13 @@ internal static class ProxyServiceCollectionExtensions
                 {
                     var accessToken = await transformContext.HttpContext.GetTokenAsync(
                         AuthenticationConstants.SessionScheme,
-                        "access_token");
+                        OpenIdConnectParameterNames.AccessToken);
 
                     if (!string.IsNullOrWhiteSpace(accessToken))
                     {
                         transformContext.ProxyRequest.Headers.Authorization =
-                            new System.Net.Http.Headers.AuthenticationHeaderValue(
-                                "Bearer",
+                            new AuthenticationHeaderValue(
+                                BearerAuthenticationScheme,
                                 accessToken);
                     }
                 });
