@@ -2,10 +2,12 @@ using System.Net;
 
 using Microsoft.Net.Http.Headers;
 
-namespace TacticalHeroes.Admin.Infrastructure.Authentication;
+namespace TacticalHeroes.Admin.Infrastructure.Authentication.Login;
 
 internal sealed class IdentityLoginGateway(HttpClient httpClient)
 {
+    private const string SignInPath = "/api/v1/auth/login";
+
     internal async Task<IdentityLoginResult> SignInAsync(
         string email,
         string password,
@@ -13,7 +15,7 @@ internal sealed class IdentityLoginGateway(HttpClient httpClient)
         CancellationToken cancellationToken)
     {
         using var response = await httpClient.PostAsJsonAsync(
-            "/api/v1/auth/login",
+            SignInPath,
             new ApiLoginRequest(email, password, returnUrl),
             cancellationToken);
 

@@ -10,11 +10,17 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
-namespace TacticalHeroes.Admin.Infrastructure.Authentication;
+using TacticalHeroes.Admin.Infrastructure.Authentication.Options;
+
+namespace TacticalHeroes.Admin.Infrastructure.Authentication.OpenIdConnect;
 
 internal sealed class CookieOidcRefresher(
-    IOptionsMonitor<OpenIdConnectOptions> oidcOptionsMonitor)
+    IOptionsMonitor<OpenIdConnectOptions> oidcOptionsMonitor,
+    IOptions<AdminOpenIdConnectOptions> configuredOptions)
 {
+    private const string ExpiresAtTokenName = "expires_at";
+    private const string RoundtripDateTimeFormat = "O";
+
     private readonly OpenIdConnectProtocolValidator _tokenValidator = new()
     {
         RequireNonce = false,
@@ -24,7 +30,7 @@ internal sealed class CookieOidcRefresher(
         CookieValidatePrincipalContext context,
         string oidcScheme)
     {
-        var expiresAtText = context.Properties.GetTokenValue("expires_at");
+        var expiresAtText = context.Properties.GetTokenValue(ExpiresAtTokenName);
         if (!DateTimeOffset.TryParse(expiresAtText, out var expiresAt))
         {
             return;
@@ -32,7 +38,7 @@ internal sealed class CookieOidcRefresher(
 
         var options = oidcOptionsMonitor.Get(oidcScheme);
         var now = options.TimeProvider!.GetUtcNow();
-        if (now + TimeSpan.FromMinutes(5) < expiresAt)
+        if (now + configuredOptions.Value.RefreshBeforeExpiration < expiresAt)
         {
             return;
         }
@@ -41,7 +47,8 @@ internal sealed class CookieOidcRefresher(
             context.HttpContext.RequestAborted);
         var tokenEndpoint = configuration.TokenEndpoint ??
             throw new InvalidOperationException("The OIDC token endpoint is missing.");
-        var refreshToken = context.Properties.GetTokenValue("refresh_token");
+        var refreshToken = context.Properties.GetTokenValue(
+            OpenIdConnectParameterNames.RefreshToken);
 
         if (string.IsNullOrWhiteSpace(refreshToken))
         {
@@ -100,7 +107,8 @@ internal sealed class CookieOidcRefresher(
 
         var validatedIdToken = JwtSecurityTokenConverter.Convert(
             validationResult.SecurityToken as JsonWebToken);
-        validatedIdToken.Payload[System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Nonce] = null;
+        validatedIdToken.Payload[
+            System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Nonce] = null;
         _tokenValidator.ValidateTokenResponse(new OpenIdConnectProtocolValidationContext
         {
             ProtocolMessage = message,
@@ -118,14 +126,32 @@ internal sealed class CookieOidcRefresher(
         var refreshedExpiresAt = now + TimeSpan.FromSeconds(expiresIn);
         context.Properties.StoreTokens(
         [
-            new AuthenticationToken { Name = "access_token", Value = message.AccessToken },
-            new AuthenticationToken { Name = "id_token", Value = message.IdToken },
-            new AuthenticationToken { Name = "refresh_token", Value = message.RefreshToken },
-            new AuthenticationToken { Name = "token_type", Value = message.TokenType },
             new AuthenticationToken
             {
-                Name = "expires_at",
-                Value = refreshedExpiresAt.ToString("o", CultureInfo.InvariantCulture),
+                Name = OpenIdConnectParameterNames.AccessToken,
+                Value = message.AccessToken,
+            },
+            new AuthenticationToken
+            {
+                Name = OpenIdConnectParameterNames.IdToken,
+                Value = message.IdToken,
+            },
+            new AuthenticationToken
+            {
+                Name = OpenIdConnectParameterNames.RefreshToken,
+                Value = message.RefreshToken,
+            },
+            new AuthenticationToken
+            {
+                Name = OpenIdConnectParameterNames.TokenType,
+                Value = message.TokenType,
+            },
+            new AuthenticationToken
+            {
+                Name = ExpiresAtTokenName,
+                Value = refreshedExpiresAt.ToString(
+                    RoundtripDateTimeFormat,
+                    CultureInfo.InvariantCulture),
             },
         ]);
     }

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace TacticalHeroes.Admin.Infrastructure.Authentication.Options;
 
@@ -32,9 +33,69 @@ internal sealed class AdminOpenIdConnectOptionsValidator
             nameof(AdminOpenIdConnectOptions.SignedOutCallbackPath),
             failures);
 
+        if (options.RefreshBeforeExpiration <= TimeSpan.Zero)
+        {
+            failures.Add(
+                $"{AdminOpenIdConnectOptions.SectionName}:RefreshBeforeExpiration must be positive.");
+        }
+
+        ValidateRequiredValue(
+            options.NameClaimType,
+            nameof(AdminOpenIdConnectOptions.NameClaimType),
+            failures);
+        ValidateRequiredValue(
+            options.RoleClaimType,
+            nameof(AdminOpenIdConnectOptions.RoleClaimType),
+            failures);
+        ValidateScopes(options.Scopes, failures);
+
         return failures.Count == 0
             ? ValidateOptionsResult.Success
             : ValidateOptionsResult.Fail(failures: failures);
+    }
+
+    private static void ValidateRequiredValue(
+        string value,
+        string name,
+        ICollection<string> failures)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            failures.Add($"{AdminOpenIdConnectOptions.SectionName}:{name} is required.");
+        }
+    }
+
+    private static void ValidateScopes(
+        IReadOnlyCollection<string> scopes,
+        ICollection<string> failures)
+    {
+        if (scopes.Count == 0 || scopes.Any(string.IsNullOrWhiteSpace))
+        {
+            failures.Add(
+                $"{AdminOpenIdConnectOptions.SectionName}:Scopes must contain only non-empty values.");
+            return;
+        }
+
+        if (scopes.Distinct(StringComparer.Ordinal).Count() != scopes.Count)
+        {
+            failures.Add(
+                $"{AdminOpenIdConnectOptions.SectionName}:Scopes must not contain duplicates.");
+        }
+
+        ValidateRequiredScope(OpenIdConnectScope.OpenId, scopes, failures);
+        ValidateRequiredScope(OpenIdConnectScope.OfflineAccess, scopes, failures);
+    }
+
+    private static void ValidateRequiredScope(
+        string requiredScope,
+        IReadOnlyCollection<string> scopes,
+        ICollection<string> failures)
+    {
+        if (!scopes.Contains(requiredScope, StringComparer.Ordinal))
+        {
+            failures.Add(
+                $"{AdminOpenIdConnectOptions.SectionName}:Scopes must contain '{requiredScope}'.");
+        }
     }
 
     private static void ValidatePath(

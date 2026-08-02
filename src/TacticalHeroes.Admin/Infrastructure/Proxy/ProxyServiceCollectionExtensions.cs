@@ -14,7 +14,6 @@ internal static class ProxyServiceCollectionExtensions
 {
     private const string ReverseProxySectionName = "ReverseProxy";
     private const string AttachSessionAccessTokenMetadata = "AttachSessionAccessToken";
-    private const string BearerAuthenticationScheme = "Bearer";
 
     public static IServiceCollection AddTacticalHeroesProxy(
         this IServiceCollection services,
@@ -48,7 +47,7 @@ internal static class ProxyServiceCollectionExtensions
                     {
                         transformContext.ProxyRequest.Headers.Authorization =
                             new AuthenticationHeaderValue(
-                                BearerAuthenticationScheme,
+                                AuthenticationConstants.BearerScheme,
                                 accessToken);
                     }
                 });

@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 
 using TacticalHeroes.Admin.Client.App.Routing;
+using TacticalHeroes.Admin.Infrastructure.Authentication.Login;
+using TacticalHeroes.Admin.Infrastructure.Authentication.OpenIdConnect;
 using TacticalHeroes.Admin.Modules.Identity;
 
-namespace TacticalHeroes.Admin.Infrastructure.Authentication;
+namespace TacticalHeroes.Admin.Infrastructure.Authentication.Endpoints;
 
 internal static class AuthenticationEndpointRouteBuilderExtensions
 {
@@ -22,9 +24,15 @@ internal static class AuthenticationEndpointRouteBuilderExtensions
                     [FromForm] SignInForm form,
                     HttpContext httpContext,
                     IdentityLoginGateway gateway,
+                    OpenIdConnectEndpointResolver endpointResolver,
                     CancellationToken cancellationToken) =>
                 {
-                    var returnUrl = NormalizeAuthorizeReturnUrl(form.ReturnUrl, httpContext.Request);
+                    string authorizationPath = await endpointResolver
+                        .GetAuthorizationPathAsync(cancellationToken);
+                    var returnUrl = NormalizeAuthorizeReturnUrl(
+                        form.ReturnUrl,
+                        httpContext.Request,
+                        authorizationPath);
                     if (returnUrl is null)
                     {
                         return RedirectToLogin(error: LoginError.InvalidRequest, returnUrl: null);
@@ -80,7 +88,10 @@ internal static class AuthenticationEndpointRouteBuilderExtensions
         };
     }
 
-    private static string? NormalizeAuthorizeReturnUrl(string? returnUrl, HttpRequest request)
+    private static string? NormalizeAuthorizeReturnUrl(
+        string? returnUrl,
+        HttpRequest request,
+        string authorizationPath)
     {
         if (string.IsNullOrWhiteSpace(returnUrl))
         {
@@ -107,7 +118,7 @@ internal static class AuthenticationEndpointRouteBuilderExtensions
         var queryStart = pathAndQuery.IndexOf('?');
         var path = queryStart < 0 ? pathAndQuery : pathAndQuery[..queryStart];
 
-        return string.Equals(path, "/connect/authorize", StringComparison.Ordinal)
+        return string.Equals(path, authorizationPath, StringComparison.Ordinal)
             ? pathAndQuery
             : null;
     }
