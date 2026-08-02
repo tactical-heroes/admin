@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication;
+using TacticalHeroes.Admin.Client.App.Options;
 using TacticalHeroes.Admin.Infrastructure.Authentication;
 using Yarp.ReverseProxy.Configuration;
 using Yarp.ReverseProxy.Transforms;
@@ -13,8 +14,11 @@ internal static class ProxyServiceCollectionExtensions
 
     public static IServiceCollection AddTacticalHeroesProxy(
         this IServiceCollection services,
-        Uri apiBaseUri)
+        IConfiguration configuration)
     {
+        var apiOptions = configuration
+            .GetSection(TacticalHeroesApiClientOptions.SectionName)
+            .Get<TacticalHeroesApiClientOptions>() ?? new TacticalHeroesApiClientOptions();
         string[] anonymousAuthPaths =
         [
             "/api/v1/auth/login",
@@ -63,7 +67,7 @@ internal static class ProxyServiceCollectionExtensions
                 {
                     ["primary"] = new DestinationConfig
                     {
-                        Address = $"{apiBaseUri.AbsoluteUri.TrimEnd('/')}/",
+                        Address = $"{apiOptions.BaseUrl.TrimEnd('/')}/",
                     },
                 },
             },

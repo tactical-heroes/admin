@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using TacticalHeroes.Admin.Client.App.Routing;
+using TacticalHeroes.Admin.Client.App.Options;
+using TacticalHeroes.Admin.Infrastructure.Authentication.Options;
 using TacticalHeroes.Admin.Modules.Identity;
 
 namespace TacticalHeroes.Admin.Infrastructure.Authentication;
@@ -10,14 +13,19 @@ internal static class AuthenticationServiceCollectionExtensions
 {
     internal static IServiceCollection AddAdminAuthentication(
         this IServiceCollection services,
-        IConfiguration configuration,
-        Uri apiBaseUri,
-        TimeSpan requestTimeout)
+        IConfiguration configuration)
     {
-        var settings = configuration
-            .GetRequiredSection(AdminOpenIdConnectOptions.SectionName)
+        var configurationSection = configuration.GetSection(AdminOpenIdConnectOptions.SectionName);
+        var settings = configurationSection
             .Get<AdminOpenIdConnectOptions>() ?? new AdminOpenIdConnectOptions();
-        settings.Validate();
+
+        services.AddSingleton<
+            IValidateOptions<AdminOpenIdConnectOptions>,
+            AdminOpenIdConnectOptionsValidator>();
+        services
+            .AddOptions<AdminOpenIdConnectOptions>()
+            .Bind(configurationSection)
+            .ValidateOnStart();
 
         services
             .AddAuthentication(options =>
@@ -96,12 +104,15 @@ internal static class AuthenticationServiceCollectionExtensions
         services.AddCascadingAuthenticationState();
         services.AddHttpContextAccessor();
         services.AddScoped<ServerAccessTokenAuthenticationProvider>();
-        services.AddHttpClient<IdentityLoginGateway>(httpClient =>
+        services.AddHttpClient<IdentityLoginGateway>((serviceProvider, httpClient) =>
             {
+                var apiOptions = serviceProvider
+                    .GetRequiredService<IOptions<TacticalHeroesApiClientOptions>>()
+                    .Value;
                 httpClient.BaseAddress = new Uri(
-                    $"{apiBaseUri.AbsoluteUri.TrimEnd('/')}/",
+                    $"{apiOptions.BaseUrl.TrimEnd('/')}/",
                     UriKind.Absolute);
-                httpClient.Timeout = requestTimeout;
+                httpClient.Timeout = apiOptions.Timeout;
             })
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
