@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Mvc;
+
 using TacticalHeroes.Admin.Client.App.Composition;
 using TacticalHeroes.Admin.Client.App.Routing;
 using TacticalHeroes.Admin.Components;
@@ -40,7 +42,8 @@ app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapHealthChecks("/health");
-app.MapReverseProxy();
+app.MapReverseProxy()
+    .WithMetadata(new SkipStatusCodePagesAttribute());
 app.MapAdminAuthentication();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
