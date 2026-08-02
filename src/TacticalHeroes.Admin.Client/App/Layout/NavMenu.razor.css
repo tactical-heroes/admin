@@ -23,8 +23,8 @@
     list-style: none;
 }
 
-.nav-module-header::-webkit-details-marker {
-    display: none;
+.nav-module-header::marker {
+    content: "";
 }
 
 .nav-module-header:hover {
@@ -63,7 +63,7 @@
 
 .nav-shell ::deep .mud-nav-link.active {
     position: relative;
-    background: rgba(217, 79, 61, 0.16);
+    background: #312227;
     color: #ff8a78;
 }
 
