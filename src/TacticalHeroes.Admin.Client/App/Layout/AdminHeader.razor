@@ -1,0 +1,28 @@
+<MudAppBar Elevation="0"
+           Class="app-bar">
+    <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                   Color="Color.Inherit"
+                   Edge="Edge.Start"
+                   OnClick="OnMenuClick"
+                   aria-label="Открыть меню" />
+    <MudText Typo="Typo.subtitle1"
+             Class="app-bar-title">
+        Tactical Heroes
+    </MudText>
+    <MudSpacer />
+    <AuthorizeView>
+        <Authorized Context="authentication">
+            <MudText Typo="Typo.body2" Class="current-user">
+                @authentication.User.Identity?.Name
+            </MudText>
+            <form action="@IdentityRoutes.AuthenticationLogout" method="post" class="logout-form">
+                <AntiforgeryToken />
+                <input type="hidden" name="returnUrl" value="@AdminRoutes.Home" />
+                <MudIconButton Icon="@Icons.Material.Filled.Logout"
+                               ButtonType="ButtonType.Submit"
+                               Color="Color.Inherit"
+                               aria-label="Выйти" />
+            </form>
+        </Authorized>
+    </AuthorizeView>
+</MudAppBar>
