@@ -1,12 +1,13 @@
+@attribute [Route(IdentityRoutes.CreateUser)]
 @attribute [Route(IdentityRoutes.UserTemplate)]
 @attribute [Authorize]
 @attribute [StreamRendering]
 @using TacticalHeroes.Admin.Modules.Identity.Features.Users.EditUser
 
-<PageTitle>Редактирование пользователя · Tactical Heroes</PageTitle>
+<PageTitle>@PageTitleText</PageTitle>
 
-<PageHeader Title="Редактирование пользователя"
-            Subtitle="Измените профиль, статус и атрибуты доступа пользователя">
+<PageHeader Title="@HeaderTitle"
+            Subtitle="@HeaderSubtitle">
     <Actions>
         <MudButton Href="@IdentityRoutes.Users"
                    Variant="Variant.Text"
@@ -16,4 +17,4 @@
     </Actions>
 </PageHeader>
 
-<UserEditor Id="Id" Saved="NavigateToList" />
+<UserEditor Id="Id" Completed="NavigateToList" />

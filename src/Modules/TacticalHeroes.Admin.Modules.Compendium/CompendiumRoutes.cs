@@ -15,7 +15,7 @@ public static class CompendiumRoutes
         return $"{Factions}/{id:D}";
     }
 
-    public static string FactionsPage(int pageNumber = 1)
+    public static string FactionsPage(int pageNumber = 1, int pageSize = 10)
     {
         if (pageNumber < 1)
         {
@@ -25,8 +25,33 @@ public static class CompendiumRoutes
                 "Page number must be greater than zero.");
         }
 
-        return pageNumber == 1
+        ValidatePageSize(pageSize);
+
+        var query = new List<string>();
+
+        if (pageNumber != 1)
+        {
+            query.Add($"page={pageNumber.ToString(CultureInfo.InvariantCulture)}");
+        }
+
+        if (pageSize != 10)
+        {
+            query.Add($"pageSize={pageSize.ToString(CultureInfo.InvariantCulture)}");
+        }
+
+        return query.Count == 0
             ? Factions
-            : $"{Factions}?page={pageNumber.ToString(CultureInfo.InvariantCulture)}";
+            : $"{Factions}?{string.Join('&', query)}";
+    }
+
+    private static void ValidatePageSize(int pageSize)
+    {
+        if (pageSize is not (10 or 25 or 50 or 100))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(pageSize),
+                pageSize,
+                "Page size must be 10, 25, 50, or 100.");
+        }
     }
 }

@@ -10,7 +10,6 @@ public partial class FactionEditor
 {
     private bool _loading;
     private bool _saving;
-    private bool _deleting;
 
     [Inject]
     private FactionsApi FactionsApi { get; set; } = null!;
@@ -109,28 +108,4 @@ public partial class FactionEditor
         }
     }
 
-    private async Task DeleteAsync()
-    {
-        if (Faction?.Id is not Guid id)
-        {
-            return;
-        }
-
-        _deleting = true;
-
-        try
-        {
-            await FactionsApi.DeleteAsync(id);
-            Snackbar.Add("Фракция удалена", Severity.Success);
-            await Completed.InvokeAsync();
-        }
-        catch (Exception exception)
-        {
-            Snackbar.Add(ApiErrorMessage.FromException(exception), Severity.Error);
-        }
-        finally
-        {
-            _deleting = false;
-        }
-    }
 }

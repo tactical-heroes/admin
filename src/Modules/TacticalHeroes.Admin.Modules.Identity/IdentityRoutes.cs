@@ -12,9 +12,13 @@ public static class IdentityRoutes
 
     public const string Roles = "/roles";
 
+    public const string CreateRole = "/roles/new";
+
     public const string RoleTemplate = "/roles/{Id:guid}";
 
     public const string Users = "/users";
+
+    public const string CreateUser = "/users/new";
 
     public const string UserTemplate = "/users/{Id:guid}";
 
@@ -34,27 +38,38 @@ public static class IdentityRoutes
         return $"{Users}/{id:D}";
     }
 
-    public static string RolesPage(int pageNumber = 1)
+    public static string RolesPage(int pageNumber = 1, int pageSize = 10)
     {
         ValidatePageNumber(pageNumber);
+        ValidatePageSize(pageSize);
 
         return BuildUri(
             Roles,
             ("page", pageNumber == 1
                 ? null
-                : pageNumber.ToString(CultureInfo.InvariantCulture)));
+                : pageNumber.ToString(CultureInfo.InvariantCulture)),
+            ("pageSize", pageSize == 10
+                ? null
+                : pageSize.ToString(CultureInfo.InvariantCulture)));
     }
 
-    public static string UsersPage(string? email = null, int pageNumber = 1)
+    public static string UsersPage(
+        string? email = null,
+        int pageNumber = 1,
+        int pageSize = 10)
     {
         ValidatePageNumber(pageNumber);
+        ValidatePageSize(pageSize);
 
         return BuildUri(
             Users,
             ("email", string.IsNullOrWhiteSpace(email) ? null : email.Trim()),
             ("page", pageNumber == 1
                 ? null
-                : pageNumber.ToString(CultureInfo.InvariantCulture)));
+                : pageNumber.ToString(CultureInfo.InvariantCulture)),
+            ("pageSize", pageSize == 10
+                ? null
+                : pageSize.ToString(CultureInfo.InvariantCulture)));
     }
 
     public static string LoginPage(
@@ -142,6 +157,17 @@ public static class IdentityRoutes
                 nameof(pageNumber),
                 pageNumber,
                 "Page number must be greater than zero.");
+        }
+    }
+
+    private static void ValidatePageSize(int pageSize)
+    {
+        if (pageSize is not (10 or 25 or 50 or 100))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(pageSize),
+                pageSize,
+                "Page size must be 10, 25, 50, or 100.");
         }
     }
 }

@@ -31,6 +31,7 @@ public sealed class ProjectReferenceDependencyTests
                 "TacticalHeroes.Admin.Client",
                 "TacticalHeroes.Admin.Modules.Compendium",
                 "TacticalHeroes.Admin.Modules.Identity",
+                "TacticalHeroes.Admin.Shared",
             ],
         };
 

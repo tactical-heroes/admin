@@ -16,7 +16,10 @@ public partial class UserEditForm
     public IReadOnlyList<UserStatus> Statuses { get; set; } = [];
 
     [Parameter]
-    public bool Saving { get; set; }
+    public bool IsNew { get; set; }
+
+    [Parameter]
+    public bool Busy { get; set; }
 
     [Parameter]
     public EventCallback OnSave { get; set; }

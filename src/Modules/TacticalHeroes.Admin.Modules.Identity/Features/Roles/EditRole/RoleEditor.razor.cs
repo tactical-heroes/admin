@@ -18,10 +18,10 @@ public partial class RoleEditor
     private ISnackbar Snackbar { get; set; } = null!;
 
     [Parameter]
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
 
     [Parameter]
-    public EventCallback Saved { get; set; }
+    public EventCallback Completed { get; set; }
 
     [PersistentState]
     public RoleDetails? Role { get; set; }
@@ -29,9 +29,22 @@ public partial class RoleEditor
     [PersistentState]
     public string? LoadError { get; set; }
 
+    private bool IsNew => !Id.HasValue;
+
     protected override async Task OnParametersSetAsync()
     {
-        if (Role?.Id != Id && LoadError is null)
+        if (!Id.HasValue)
+        {
+            if (Role is null || Role.Id != Guid.Empty)
+            {
+                Role = new RoleDetails();
+            }
+
+            LoadError = null;
+            return;
+        }
+
+        if (Role?.Id != Id.Value)
         {
             await LoadAsync();
         }
@@ -39,12 +52,17 @@ public partial class RoleEditor
 
     private async Task LoadAsync()
     {
+        if (!Id.HasValue)
+        {
+            return;
+        }
+
         _loading = true;
         LoadError = null;
 
         try
         {
-            Role = await RolesApi.GetAsync(Id);
+            Role = await RolesApi.GetAsync(Id.Value);
         }
         catch (Exception exception)
         {
@@ -67,9 +85,18 @@ public partial class RoleEditor
 
         try
         {
-            await RolesApi.UpdateAsync(Role);
-            Snackbar.Add("Роль сохранена", Severity.Success);
-            await Saved.InvokeAsync();
+            if (Role.Id == Guid.Empty)
+            {
+                Role.Id = await RolesApi.CreateAsync(Role);
+                Snackbar.Add("Роль создана", Severity.Success);
+            }
+            else
+            {
+                await RolesApi.UpdateAsync(Role);
+                Snackbar.Add("Роль сохранена", Severity.Success);
+            }
+
+            await Completed.InvokeAsync();
         }
         catch (Exception exception)
         {

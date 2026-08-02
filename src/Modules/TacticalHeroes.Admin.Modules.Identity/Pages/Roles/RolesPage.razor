@@ -6,7 +6,18 @@
 <PageTitle>Роли · Tactical Heroes</PageTitle>
 
 <PageHeader Title="Роли"
-            Subtitle="Управление ролями и наборами разрешений" />
+            Subtitle="Управление ролями и наборами разрешений">
+    <Actions>
+        <MudButton Href="@IdentityRoutes.CreateRole"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add">
+            Добавить роль
+        </MudButton>
+    </Actions>
+</PageHeader>
 
 <RoleListWidget PageNumber="CurrentPageNumber"
-                PageNumberChanged="ChangePage" />
+                PageSize="CurrentPageSize"
+                PageNumberChanged="ChangePage"
+                PageSizeChanged="ChangePageSize" />

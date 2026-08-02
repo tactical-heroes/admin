@@ -2,10 +2,7 @@
 
 <MudForm @ref="_form"
          @bind-IsValid="_isValid">
-    <MudPaper Elevation="0" Class="edit-section">
-        <MudText Typo="Typo.h6" Class="section-title">
-            Основные данные
-        </MudText>
+    <EditSection Title="Основные данные">
         <MudStack Spacing="3">
             <MudTextField T="string"
                           @bind-Value="Model.Name"
@@ -23,27 +20,10 @@
                           MaxLength="2000"
                           Lines="8" />
         </MudStack>
-    </MudPaper>
+    </EditSection>
 
-    <div class="form-actions">
-        <MudButton Href="@CompendiumRoutes.Factions"
-                   Variant="Variant.Text"
-                   Disabled="Busy">
-            Отмена
-        </MudButton>
-        <MudButton Class="save-action"
-                   Variant="Variant.Filled"
-                   Color="Color.Primary"
-                   StartIcon="@(IsNew ? Icons.Material.Filled.Add : Icons.Material.Filled.Save)"
-                   Disabled="Busy"
-                   OnClick="SubmitAsync">
-            @if (Busy)
-            {
-                <MudProgressCircular Size="Size.Small"
-                                     Indeterminate="true"
-                                     Class="button-progress" />
-            }
-            @(IsNew ? "Создать" : "Сохранить")
-        </MudButton>
-    </div>
+    <EditFormActions CancelHref="@CompendiumRoutes.Factions"
+                     IsNew="IsNew"
+                     Busy="Busy"
+                     OnSubmit="SubmitAsync" />
 </MudForm>

@@ -10,6 +10,8 @@ public sealed class UserDetails
 
     public string UserName { get; set; } = string.Empty;
 
+    public string Password { get; set; } = string.Empty;
+
     public bool IsConfirmed { get; set; }
 
     public string Status { get; set; } = string.Empty;

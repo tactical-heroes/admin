@@ -25,7 +25,7 @@ public sealed class FactionEditFormTests : BunitContext
             .Add(form => form.Model, faction)
             .Add(form => form.OnSave, () => saved = true));
 
-        component.Find(".save-action").Click();
+        component.Find(".submit-action").Click();
 
         component.WaitForAssertion(() => saved.ShouldBeTrue());
     }

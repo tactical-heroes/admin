@@ -18,10 +18,10 @@ public partial class UserEditor
     private ISnackbar Snackbar { get; set; } = null!;
 
     [Parameter]
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
 
     [Parameter]
-    public EventCallback Saved { get; set; }
+    public EventCallback Completed { get; set; }
 
     [PersistentState]
     public UserDetails? User { get; set; }
@@ -32,9 +32,21 @@ public partial class UserEditor
     [PersistentState]
     public string? LoadError { get; set; }
 
+    private bool IsNew => !Id.HasValue;
+
     protected override async Task OnParametersSetAsync()
     {
-        if ((User?.Id != Id || Statuses is null) && LoadError is null)
+        if (!Id.HasValue)
+        {
+            if (User is null || User.Id != Guid.Empty || Statuses is null)
+            {
+                await LoadForCreateAsync();
+            }
+
+            return;
+        }
+
+        if (User?.Id != Id.Value || Statuses is null)
         {
             await LoadAsync();
         }
@@ -42,12 +54,17 @@ public partial class UserEditor
 
     private async Task LoadAsync()
     {
+        if (!Id.HasValue)
+        {
+            return;
+        }
+
         _loading = true;
         LoadError = null;
 
         try
         {
-            var userTask = UsersApi.GetAsync(Id);
+            var userTask = UsersApi.GetAsync(Id.Value);
             var statusesTask = UsersApi.GetStatusesAsync();
 
             await Task.WhenAll(userTask, statusesTask);
@@ -57,6 +74,30 @@ public partial class UserEditor
         }
         catch (Exception exception)
         {
+            LoadError = ApiErrorMessage.FromException(exception);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task LoadForCreateAsync()
+    {
+        _loading = true;
+        LoadError = null;
+
+        try
+        {
+            Statuses = (await UsersApi.GetStatusesAsync()).ToList();
+            User = new UserDetails
+            {
+                Status = Statuses.FirstOrDefault()?.Name ?? string.Empty,
+            };
+        }
+        catch (Exception exception)
+        {
+            User = null;
             LoadError = ApiErrorMessage.FromException(exception);
         }
         finally
@@ -76,9 +117,18 @@ public partial class UserEditor
 
         try
         {
-            await UsersApi.UpdateAsync(User);
-            Snackbar.Add("Пользователь сохранён", Severity.Success);
-            await Saved.InvokeAsync();
+            if (User.Id == Guid.Empty)
+            {
+                User.Id = await UsersApi.CreateAsync(User);
+                Snackbar.Add("Пользователь создан", Severity.Success);
+            }
+            else
+            {
+                await UsersApi.UpdateAsync(User);
+                Snackbar.Add("Пользователь сохранён", Severity.Success);
+            }
+
+            await Completed.InvokeAsync();
         }
         catch (Exception exception)
         {

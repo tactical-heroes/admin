@@ -64,10 +64,33 @@ public sealed class RolesApi(TacticalHeroesApiClient client)
         };
     }
 
+    public async Task<Guid> CreateAsync(
+        RoleDetails role,
+        CancellationToken cancellationToken = default)
+    {
+        var request = new CreateRoleRequest
+        {
+            Name = role.Name.Trim(),
+            Claims = role.Claims.Select(ToApiClaim).ToList(),
+        };
+        var response = await client.Api.V1.Roles.PostAsync(
+            request,
+            cancellationToken: cancellationToken)
+            ?? throw new InvalidOperationException("The roles API returned an empty response.");
+
+        return response.Id
+            ?? throw new InvalidOperationException("The roles API did not return the created identifier.");
+    }
+
     public Task UpdateAsync(
         RoleDetails role,
         CancellationToken cancellationToken = default)
     {
+        if (role.Id == Guid.Empty)
+        {
+            throw new InvalidOperationException("A role identifier is required for update.");
+        }
+
         var request = new UpdateRoleRequest
         {
             Name = role.Name.Trim(),
@@ -76,6 +99,14 @@ public sealed class RolesApi(TacticalHeroesApiClient client)
 
         return client.Api.V1.Roles[role.Id].PutAsync(
             request,
+            cancellationToken: cancellationToken);
+    }
+
+    public Task DeleteAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        return client.Api.V1.Roles[id].DeleteAsync(
             cancellationToken: cancellationToken);
     }
 
