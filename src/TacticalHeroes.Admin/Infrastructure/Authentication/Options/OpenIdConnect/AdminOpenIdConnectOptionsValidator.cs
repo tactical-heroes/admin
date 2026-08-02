@@ -57,7 +57,7 @@ internal sealed class AdminOpenIdConnectOptionsValidator
     private static void ValidateRequiredValue(
         string value,
         string name,
-        ICollection<string> failures)
+        List<string> failures)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
@@ -66,8 +66,8 @@ internal sealed class AdminOpenIdConnectOptionsValidator
     }
 
     private static void ValidateScopes(
-        IReadOnlyCollection<string> scopes,
-        ICollection<string> failures)
+        List<string> scopes,
+        List<string> failures)
     {
         if (scopes.Count == 0 || scopes.Any(string.IsNullOrWhiteSpace))
         {
@@ -88,8 +88,8 @@ internal sealed class AdminOpenIdConnectOptionsValidator
 
     private static void ValidateRequiredScope(
         string requiredScope,
-        IReadOnlyCollection<string> scopes,
-        ICollection<string> failures)
+        List<string> scopes,
+        List<string> failures)
     {
         if (!scopes.Contains(requiredScope, StringComparer.Ordinal))
         {
@@ -101,7 +101,7 @@ internal sealed class AdminOpenIdConnectOptionsValidator
     private static void ValidatePath(
         string value,
         string name,
-        ICollection<string> failures)
+        List<string> failures)
     {
         if (string.IsNullOrWhiteSpace(value) ||
             !value.StartsWith('/') ||
