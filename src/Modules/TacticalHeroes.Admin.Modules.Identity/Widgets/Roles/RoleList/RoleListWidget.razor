@@ -3,7 +3,7 @@
 <EntityList TItem="RoleSummary"
             Items="Page?.Items"
             Loading="_loading"
-            LoadError="LoadError"
+            LoadError="@LoadError"
             EmptyText="Роли не найдены"
             RefreshLabel="Обновить список ролей"
             OnRefresh="RetryAsync"

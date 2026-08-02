@@ -53,6 +53,20 @@ public sealed class ListPageConventionTests
         violations.ShouldBeEmpty();
     }
 
+    [Fact(DisplayName = "List widgets bind load errors instead of passing a literal")]
+    public void ListWidgets_Should_BindLoadErrors_When_AdminListsAreScanned()
+    {
+        string repositoryRoot = RepositoryPaths.FindRoot();
+        string[] listWidgetPaths = GetListWidgetPaths(repositoryRoot);
+        string[] violations = listWidgetPaths
+            .Where(relativePath => !ReadSource(repositoryRoot, relativePath)
+                .Contains("LoadError=\"@LoadError\"", StringComparison.Ordinal))
+            .ToArray();
+
+        listWidgetPaths.ShouldNotBeEmpty();
+        violations.ShouldBeEmpty();
+    }
+
     [Fact(DisplayName = "List pages expose a page header and create action")]
     public void ListPages_Should_ExposeHeaderAndCreateAction_When_AdminListsAreScanned()
     {

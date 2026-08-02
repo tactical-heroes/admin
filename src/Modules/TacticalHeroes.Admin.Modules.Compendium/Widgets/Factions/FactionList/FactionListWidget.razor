@@ -3,7 +3,7 @@
 <EntityList TItem="FactionSummary"
             Items="Page?.Items"
             Loading="_loading"
-            LoadError="LoadError"
+            LoadError="@LoadError"
             EmptyText="Фракции не найдены"
             RefreshLabel="Обновить список фракций"
             OnRefresh="RetryAsync"
