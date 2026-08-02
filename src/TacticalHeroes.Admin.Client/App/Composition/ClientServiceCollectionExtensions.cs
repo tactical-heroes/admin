@@ -1,5 +1,7 @@
 using Microsoft.Kiota.Abstractions.Authentication;
+
 using MudBlazor.Services;
+
 using TacticalHeroes.Admin.Api.DependencyInjection;
 using TacticalHeroes.Admin.Client.App.Options.DependencyInjection;
 

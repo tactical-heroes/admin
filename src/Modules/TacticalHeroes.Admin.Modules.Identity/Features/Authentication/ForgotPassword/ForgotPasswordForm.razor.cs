@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+
 using Microsoft.AspNetCore.Components;
+
 using TacticalHeroes.Admin.Api.Errors;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Api;
 

@@ -1,6 +1,7 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Http.HttpClientLibrary;
-using Microsoft.Extensions.DependencyInjection;
+
 using TacticalHeroes.Admin.Api.Generated;
 
 namespace TacticalHeroes.Admin.Api.DependencyInjection;

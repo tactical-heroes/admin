@@ -2,8 +2,9 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using TacticalHeroes.Admin.Client.App.Routing;
+
 using TacticalHeroes.Admin.Client.App.Options;
+using TacticalHeroes.Admin.Client.App.Routing;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Options;
 using TacticalHeroes.Admin.Modules.Identity;
 

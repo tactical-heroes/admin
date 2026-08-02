@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Options;
+
 using TacticalHeroes.Admin.Client.App.Composition;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);

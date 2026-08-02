@@ -1,6 +1,6 @@
-using TacticalHeroes.Admin.Components;
 using TacticalHeroes.Admin.Client.App.Composition;
 using TacticalHeroes.Admin.Client.App.Routing;
+using TacticalHeroes.Admin.Components;
 using TacticalHeroes.Admin.Infrastructure.Authentication;
 using TacticalHeroes.Admin.Infrastructure.Proxy;
 using TacticalHeroes.Admin.Modules.Compendium;
