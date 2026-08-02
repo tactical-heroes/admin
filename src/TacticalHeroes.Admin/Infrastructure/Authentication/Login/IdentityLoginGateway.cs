@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-using TacticalHeroes.Admin.Infrastructure.Authentication.Options;
+using TacticalHeroes.Admin.Infrastructure.Authentication.Options.IdentityLogin;
 
 namespace TacticalHeroes.Admin.Infrastructure.Authentication.Login;
 

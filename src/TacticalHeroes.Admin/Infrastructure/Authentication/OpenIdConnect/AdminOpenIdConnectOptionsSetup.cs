@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 using TacticalHeroes.Admin.Client.App.Routing;
-using TacticalHeroes.Admin.Infrastructure.Authentication.Options;
+using TacticalHeroes.Admin.Infrastructure.Authentication.Options.OpenIdConnect;
 using TacticalHeroes.Admin.Modules.Identity;
 
 namespace TacticalHeroes.Admin.Infrastructure.Authentication.OpenIdConnect;

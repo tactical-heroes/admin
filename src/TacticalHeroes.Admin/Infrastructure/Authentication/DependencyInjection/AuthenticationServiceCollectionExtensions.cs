@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Options;
 
-using TacticalHeroes.Admin.Client.App.Options;
+using TacticalHeroes.Admin.Client.App.Options.TacticalHeroesApiClient;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Login;
 using TacticalHeroes.Admin.Infrastructure.Authentication.OpenIdConnect;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Options.DependencyInjection;

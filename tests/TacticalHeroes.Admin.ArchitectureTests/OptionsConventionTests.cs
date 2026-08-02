@@ -8,7 +8,7 @@ public sealed class OptionsConventionTests
         @"\b(?:public|internal)\s+(?<modifier>sealed|static)?\s*class\s+(?<name>[A-Za-z_]\w*Options)\b",
         RegexOptions.CultureInvariant);
 
-    [Fact(DisplayName = "Configuration options are sealed and have adjacent validators")]
+    [Fact(DisplayName = "Configuration options use dedicated folders with adjacent validators")]
     public void ConfigurationOptions_Should_HaveValidators_When_OptionsAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
@@ -22,14 +22,34 @@ public sealed class OptionsConventionTests
                 violations.Add($"{optionsType.RelativePath}: options class must be sealed");
             }
 
-            string optionsDirectory = Path.GetDirectoryName(optionsType.SourcePath)!;
-            if (!Path.GetFileName(optionsDirectory).Equals("Options", StringComparison.Ordinal))
+            string optionDirectory = Path.GetDirectoryName(optionsType.SourcePath)!;
+            string? optionsDirectory = Path.GetDirectoryName(optionDirectory);
+            if (optionsDirectory is null ||
+                !Path.GetFileName(optionsDirectory).Equals("Options", StringComparison.Ordinal))
             {
-                violations.Add($"{optionsType.RelativePath}: options class must be in an Options folder");
+                violations.Add(
+                    $"{optionsType.RelativePath}: options class must be in a dedicated Options/<name> folder");
+            }
+
+            if (!Path.GetFileName(optionsType.SourcePath).Equals(
+                    $"{optionsType.Name}.cs",
+                    StringComparison.Ordinal))
+            {
+                violations.Add(
+                    $"{optionsType.RelativePath}: file name must match the options type");
+            }
+
+            if (optionsTypes.Count(candidate => string.Equals(
+                    Path.GetDirectoryName(candidate.SourcePath),
+                    optionDirectory,
+                    StringComparison.OrdinalIgnoreCase)) != 1)
+            {
+                violations.Add(
+                    $"{optionsType.RelativePath}: each options folder must contain exactly one options class");
             }
 
             string validatorPath = Path.Combine(
-                optionsDirectory,
+                optionDirectory,
                 $"{optionsType.Name}Validator.cs");
             if (!File.Exists(validatorPath))
             {

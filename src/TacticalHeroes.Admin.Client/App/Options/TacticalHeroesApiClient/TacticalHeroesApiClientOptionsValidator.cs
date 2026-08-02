@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace TacticalHeroes.Admin.Client.App.Options;
+namespace TacticalHeroes.Admin.Client.App.Options.TacticalHeroesApiClient;
 
 internal sealed class TacticalHeroesApiClientOptionsValidator
     : IValidateOptions<TacticalHeroesApiClientOptions>

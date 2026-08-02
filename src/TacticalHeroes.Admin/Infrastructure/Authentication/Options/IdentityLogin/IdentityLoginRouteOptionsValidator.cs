@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace TacticalHeroes.Admin.Infrastructure.Authentication.Options;
+namespace TacticalHeroes.Admin.Infrastructure.Authentication.Options.IdentityLogin;
 
 internal sealed class IdentityLoginRouteOptionsValidator
     : IValidateOptions<IdentityLoginRouteOptions>

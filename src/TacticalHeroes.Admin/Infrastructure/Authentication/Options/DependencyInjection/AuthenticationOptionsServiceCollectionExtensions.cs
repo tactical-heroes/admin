@@ -1,5 +1,9 @@
 using Microsoft.Extensions.Options;
 
+using TacticalHeroes.Admin.Infrastructure.Authentication.Options.IdentityLogin;
+using TacticalHeroes.Admin.Infrastructure.Authentication.Options.OpenIdConnect;
+using TacticalHeroes.Admin.Infrastructure.Authentication.Options.Session;
+
 namespace TacticalHeroes.Admin.Infrastructure.Authentication.Options.DependencyInjection;
 
 internal static class AuthenticationOptionsServiceCollectionExtensions

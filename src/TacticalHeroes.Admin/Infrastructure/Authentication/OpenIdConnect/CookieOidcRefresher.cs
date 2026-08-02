@@ -10,7 +10,7 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
-using TacticalHeroes.Admin.Infrastructure.Authentication.Options;
+using TacticalHeroes.Admin.Infrastructure.Authentication.Options.OpenIdConnect;
 
 namespace TacticalHeroes.Admin.Infrastructure.Authentication.OpenIdConnect;
 

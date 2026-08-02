@@ -1,4 +1,4 @@
-namespace TacticalHeroes.Admin.Infrastructure.Authentication.Options;
+namespace TacticalHeroes.Admin.Infrastructure.Authentication.Options.Session;
 
 internal sealed class AdminSessionOptions
 {

@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 
-namespace TacticalHeroes.Admin.Infrastructure.Authentication.Options;
+namespace TacticalHeroes.Admin.Infrastructure.Authentication.Options.Session;
 
 internal sealed class AdminSessionOptionsValidator
     : IValidateOptions<AdminSessionOptions>

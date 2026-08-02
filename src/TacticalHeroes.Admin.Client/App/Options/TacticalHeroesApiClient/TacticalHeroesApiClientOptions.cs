@@ -1,4 +1,4 @@
-namespace TacticalHeroes.Admin.Client.App.Options;
+namespace TacticalHeroes.Admin.Client.App.Options.TacticalHeroesApiClient;
 
 public sealed class TacticalHeroesApiClientOptions
 {

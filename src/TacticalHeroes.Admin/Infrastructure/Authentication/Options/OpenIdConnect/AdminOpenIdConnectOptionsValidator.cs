@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
-namespace TacticalHeroes.Admin.Infrastructure.Authentication.Options;
+namespace TacticalHeroes.Admin.Infrastructure.Authentication.Options.OpenIdConnect;
 
 internal sealed class AdminOpenIdConnectOptionsValidator
     : IValidateOptions<AdminOpenIdConnectOptions>

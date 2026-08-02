@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Options;
 
 using TacticalHeroes.Admin.Infrastructure.Authentication.OpenIdConnect;
-using TacticalHeroes.Admin.Infrastructure.Authentication.Options;
+using TacticalHeroes.Admin.Infrastructure.Authentication.Options.Session;
 using TacticalHeroes.Admin.Modules.Identity;
 
 namespace TacticalHeroes.Admin.Infrastructure.Authentication.Session;
