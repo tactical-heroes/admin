@@ -1,8 +1,5 @@
-using System.Globalization;
-
 using TacticalHeroes.Admin.Api.Generated;
 using TacticalHeroes.Admin.Api.Generated.Models;
-using TacticalHeroes.Admin.Api.Serialization;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Model;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Model;
 using TacticalHeroes.Admin.Shared.Model;
@@ -22,10 +19,8 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
         var response = await client.Api.V1.Users.GetAsync(
             request =>
             {
-                request.QueryParameters.PageNumber = pageNumber.ToString(
-                    CultureInfo.InvariantCulture);
-                request.QueryParameters.PageSize = pageSize.ToString(
-                    CultureInfo.InvariantCulture);
+                request.QueryParameters.PageNumber = pageNumber;
+                request.QueryParameters.PageSize = pageSize;
                 request.QueryParameters.Email = string.IsNullOrWhiteSpace(email)
                     ? null
                     : email.Trim();
@@ -50,10 +45,10 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
 
         return new PageResult<UserSummary>(
             items,
-            checked((int)Math.Max(response.PageNumber.ToInt64(), pageNumber)),
-            checked((int)Math.Max(response.PageSize.ToInt64(), pageSize)),
-            response.TotalCount.ToInt64(),
-            checked((int)response.TotalPages.ToInt64()));
+            Math.Max(response.PageNumber ?? 0, pageNumber),
+            Math.Max(response.PageSize ?? 0, pageSize),
+            response.TotalCount ?? 0,
+            checked((int)(response.TotalPages ?? 0)));
     }
 
     public async Task<UserDetails> GetAsync(
