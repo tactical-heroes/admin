@@ -1,24 +1,23 @@
 using TacticalHeroes.Admin.Components;
 using TacticalHeroes.Admin.Client.App.Composition;
 using TacticalHeroes.Admin.Client.App.Routing;
-using TacticalHeroes.Admin.Infrastructure.Api;
 using TacticalHeroes.Admin.Infrastructure.Authentication;
 using TacticalHeroes.Admin.Infrastructure.Proxy;
 using TacticalHeroes.Admin.Modules.Compendium;
 using TacticalHeroes.Admin.Modules.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
-var apiBaseUri = builder.Configuration.GetTacticalHeroesApiBaseUri();
 
-builder.Services.AddAdminAuthentication(builder.Configuration, apiBaseUri);
+builder.Services.AddTacticalHeroesAdminClient(
+    builder.Configuration,
+    authenticationProviderFactory: services =>
+        services.GetRequiredService<ServerAccessTokenAuthenticationProvider>());
+builder.Services.AddAdminAuthentication(builder.Configuration);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents()
     .AddAuthenticationStateSerialization();
-builder.Services.AddTacticalHeroesAdminClient(
-    _ => apiBaseUri,
-    services => services.GetRequiredService<ServerAccessTokenAuthenticationProvider>());
-builder.Services.AddTacticalHeroesProxy(apiBaseUri);
+builder.Services.AddTacticalHeroesProxy(builder.Configuration);
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
