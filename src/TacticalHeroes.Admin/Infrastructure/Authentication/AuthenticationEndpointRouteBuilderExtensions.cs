@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
+
 using TacticalHeroes.Admin.Client.App.Routing;
 using TacticalHeroes.Admin.Modules.Identity;
 

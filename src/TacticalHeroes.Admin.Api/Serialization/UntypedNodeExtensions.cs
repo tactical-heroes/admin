@@ -1,4 +1,5 @@
 using System.Globalization;
+
 using Microsoft.Kiota.Abstractions.Serialization;
 
 namespace TacticalHeroes.Admin.Api.Serialization;

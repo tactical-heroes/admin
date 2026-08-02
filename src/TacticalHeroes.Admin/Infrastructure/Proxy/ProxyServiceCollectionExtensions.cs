@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authentication;
+
 using TacticalHeroes.Admin.Client.App.Options;
 using TacticalHeroes.Admin.Infrastructure.Authentication;
+
 using Yarp.ReverseProxy.Configuration;
 using Yarp.ReverseProxy.Transforms;
 

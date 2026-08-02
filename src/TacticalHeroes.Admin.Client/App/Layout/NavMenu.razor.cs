@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+
 using TacticalHeroes.Admin.Shared.Navigation;
 
 namespace TacticalHeroes.Admin.Client.App.Layout;
