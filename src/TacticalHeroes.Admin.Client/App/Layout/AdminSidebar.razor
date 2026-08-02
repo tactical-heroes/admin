@@ -1,0 +1,22 @@
+<MudDrawer Open="@Open"
+           OpenChanged="@OpenChanged"
+           Variant="DrawerVariant.Responsive"
+           Breakpoint="Breakpoint.Md"
+           ClipMode="DrawerClipMode.Always"
+           Elevation="0"
+           Width="264px"
+           Class="app-drawer">
+    <div class="brand">
+        <img class="brand-mark"
+             src="logo.png"
+             alt="Tactical Heroes" />
+        <div>
+            <MudText Typo="Typo.subtitle1">Управление игрой</MudText>
+            <MudText Typo="Typo.caption"
+                     Class="brand-subtitle">
+                Панель администратора
+            </MudText>
+        </div>
+    </div>
+    <NavMenu />
+</MudDrawer>

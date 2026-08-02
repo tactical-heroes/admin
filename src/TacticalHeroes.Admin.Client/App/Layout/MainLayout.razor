@@ -6,56 +6,8 @@
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="0"
-               Class="app-bar">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu"
-                       Color="Color.Inherit"
-                       Edge="Edge.Start"
-                       OnClick="ToggleDrawer"
-                       aria-label="Открыть меню" />
-        <MudText Typo="Typo.subtitle1"
-                 Class="app-bar-title">
-            Tactical Heroes
-        </MudText>
-        <MudSpacer />
-        <AuthorizeView>
-            <Authorized Context="authentication">
-                <MudText Typo="Typo.body2" Class="current-user">
-                    @authentication.User.Identity?.Name
-                </MudText>
-                <form action="@IdentityRoutes.AuthenticationLogout" method="post" class="logout-form">
-                    <AntiforgeryToken />
-                    <input type="hidden" name="returnUrl" value="@AdminRoutes.Home" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Logout"
-                                   ButtonType="ButtonType.Submit"
-                                   Color="Color.Inherit"
-                                   aria-label="Выйти" />
-                </form>
-            </Authorized>
-        </AuthorizeView>
-    </MudAppBar>
-
-    <MudDrawer @bind-Open="_drawerOpen"
-               Variant="DrawerVariant.Responsive"
-               Breakpoint="Breakpoint.Md"
-               ClipMode="DrawerClipMode.Always"
-               Elevation="0"
-               Width="264px"
-               Class="app-drawer">
-        <div class="brand">
-            <img class="brand-mark"
-                 src="logo.png"
-                 alt="Tactical Heroes" />
-            <div>
-                <MudText Typo="Typo.subtitle1">Управление игрой</MudText>
-                <MudText Typo="Typo.caption"
-                         Class="brand-subtitle">
-                    Панель администратора
-                </MudText>
-            </div>
-        </div>
-        <NavMenu />
-    </MudDrawer>
+    <AdminHeader OnMenuClick="ToggleDrawer" />
+    <AdminSidebar @bind-Open="_drawerOpen" />
 
     <MudMainContent>
         <main class="page-content">
@@ -64,8 +16,4 @@
     </MudMainContent>
 </MudLayout>
 
-<div id="blazor-error-ui" data-nosnippet>
-    Произошла непредвиденная ошибка.
-    <a href="." class="reload">Перезагрузить</a>
-    <button type="button" class="dismiss">×</button>
-</div>
+<BlazorErrorUi />

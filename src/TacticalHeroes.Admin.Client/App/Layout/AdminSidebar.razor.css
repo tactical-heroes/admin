@@ -1,0 +1,30 @@
+.app-drawer {
+    border-right: 0 !important;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    min-height: 96px;
+    padding: 0 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.brand-mark {
+    display: block;
+    width: 48px;
+    height: 48px;
+    border-radius: 11px;
+    box-shadow: 0 8px 24px rgba(217, 79, 61, 0.28);
+    object-fit: cover;
+}
+
+.brand ::deep .mud-typography-subtitle1 {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.brand ::deep .brand-subtitle {
+    color: #8f9bad;
+}
