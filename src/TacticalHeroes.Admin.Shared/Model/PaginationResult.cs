@@ -1,15 +1,15 @@
 namespace TacticalHeroes.Admin.Shared.Model;
 
-public sealed record PageResult<T>(
+public sealed record PaginationResult<T>(
     IReadOnlyList<T> Items,
     int PageNumber,
     int PageSize,
     long TotalCount,
     int TotalPages)
 {
-    public static PageResult<T> Empty(int pageNumber, int pageSize)
+    public static PaginationResult<T> Empty(int pageNumber, int pageSize)
     {
-        return new PageResult<T>(
+        return new PaginationResult<T>(
             [],
             pageNumber,
             pageSize,

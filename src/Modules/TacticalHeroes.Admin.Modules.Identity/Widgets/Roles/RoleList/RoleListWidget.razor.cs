@@ -37,7 +37,7 @@ public partial class RoleListWidget
     public EventCallback<int> PageSizeChanged { get; set; }
 
     [PersistentState(AllowUpdates = true)]
-    public PageResult<RoleSummary>? Page { get; set; }
+    public PaginationResult<RoleSummary>? Page { get; set; }
 
     [PersistentState(AllowUpdates = true)]
     public string? LoadError { get; set; }
