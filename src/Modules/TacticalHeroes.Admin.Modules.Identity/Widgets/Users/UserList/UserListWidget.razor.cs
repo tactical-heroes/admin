@@ -44,7 +44,7 @@ public partial class UserListWidget
     public EventCallback<int> PageSizeChanged { get; set; }
 
     [PersistentState(AllowUpdates = true)]
-    public PageResult<UserSummary>? Page { get; set; }
+    public PaginationResult<UserSummary>? Page { get; set; }
 
     [PersistentState(AllowUpdates = true)]
     public string? LoadError { get; set; }

@@ -10,7 +10,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.Entities.Roles.Api;
 
 public sealed class RolesApi(TacticalHeroesApiClient client)
 {
-    public async Task<PageResult<RoleSummary>> GetPageAsync(
+    public async Task<PaginationResult<RoleSummary>> GetPageAsync(
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken = default)
@@ -25,7 +25,7 @@ public sealed class RolesApi(TacticalHeroesApiClient client)
 
         if (response is null)
         {
-            return PageResult<RoleSummary>.Empty(pageNumber, pageSize);
+            return PaginationResult<RoleSummary>.Empty(pageNumber, pageSize);
         }
 
         var items = response.Items?
@@ -35,7 +35,7 @@ public sealed class RolesApi(TacticalHeroesApiClient client)
                 role.Name ?? string.Empty))
             .ToArray() ?? [];
 
-        return new PageResult<RoleSummary>(
+        return new PaginationResult<RoleSummary>(
             items,
             Math.Max(response.PageNumber ?? 0, pageNumber),
             Math.Max(response.PageSize ?? 0, pageSize),

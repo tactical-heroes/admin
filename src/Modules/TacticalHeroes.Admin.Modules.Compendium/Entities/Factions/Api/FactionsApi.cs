@@ -7,7 +7,7 @@ namespace TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Api;
 
 public sealed class FactionsApi(TacticalHeroesApiClient client)
 {
-    public async Task<PageResult<FactionSummary>> GetPageAsync(
+    public async Task<PaginationResult<FactionSummary>> GetPageAsync(
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken = default)
@@ -22,7 +22,7 @@ public sealed class FactionsApi(TacticalHeroesApiClient client)
 
         if (response is null)
         {
-            return PageResult<FactionSummary>.Empty(pageNumber, pageSize);
+            return PaginationResult<FactionSummary>.Empty(pageNumber, pageSize);
         }
 
         var items = response.Items?
@@ -33,7 +33,7 @@ public sealed class FactionsApi(TacticalHeroesApiClient client)
                 faction.Description ?? string.Empty))
             .ToArray() ?? [];
 
-        return new PageResult<FactionSummary>(
+        return new PaginationResult<FactionSummary>(
             items,
             Math.Max(response.PageNumber ?? 0, pageNumber),
             Math.Max(response.PageSize ?? 0, pageSize),

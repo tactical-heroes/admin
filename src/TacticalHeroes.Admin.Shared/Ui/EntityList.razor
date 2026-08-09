@@ -19,36 +19,13 @@
                        aria-label="@RefreshLabel" />
     </div>
 
-    <MudCollapse Expanded="_filtersExpanded">
-        <div class="filters-panel">
-            @if (Filters is null)
-            {
-                <MudText Typo="Typo.body2" Color="Color.Secondary">
-                    Для этого списка дополнительные фильтры не предусмотрены.
-                </MudText>
-            }
-            else
-            {
-                <div class="filters-content">
-                    @Filters
-                </div>
-            }
-            <div class="filters-actions">
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           Disabled="@(Loading || !HasFilters)"
-                           OnClick="OnApplyFilters">
-                    Применить
-                </MudButton>
-                <MudButton Variant="Variant.Text"
-                           Color="Color.Default"
-                           Disabled="@(Loading || !HasFilters || !HasActiveFilters)"
-                           OnClick="OnResetFilters">
-                    Сбросить
-                </MudButton>
-            </div>
-        </div>
-    </MudCollapse>
+    <ListFilters Expanded="_filtersExpanded"
+                 Loading="Loading"
+                 HasFilters="HasFilters"
+                 HasActiveFilters="HasActiveFilters"
+                 OnApply="OnApplyFilters"
+                 OnReset="OnResetFilters"
+                 ChildContent="@Filters" />
 
     @if (Loading && Items is null)
     {

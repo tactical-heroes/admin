@@ -37,7 +37,7 @@ public partial class FactionListWidget
     public EventCallback<int> PageSizeChanged { get; set; }
 
     [PersistentState(AllowUpdates = true)]
-    public PageResult<FactionSummary>? Page { get; set; }
+    public PaginationResult<FactionSummary>? Page { get; set; }
 
     [PersistentState(AllowUpdates = true)]
     public string? LoadError { get; set; }

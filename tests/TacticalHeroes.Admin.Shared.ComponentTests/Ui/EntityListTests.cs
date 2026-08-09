@@ -1,4 +1,3 @@
-using MudBlazor;
 using MudBlazor.Services;
 
 using TacticalHeroes.Admin.Shared.Ui;
@@ -18,11 +17,11 @@ public sealed class EntityListTests : BunitContext
     {
         var component = RenderList(hasFilters: true);
 
-        component.FindComponent<MudCollapse>().Instance.Expanded.ShouldBeFalse();
+        component.FindComponent<ListFilters>().Instance.Expanded.ShouldBeFalse();
 
         FindButton(component, "Фильтры").Click();
 
-        component.FindComponent<MudCollapse>().Instance.Expanded.ShouldBeTrue();
+        component.FindComponent<ListFilters>().Instance.Expanded.ShouldBeTrue();
     }
 
     [Fact(DisplayName = "Invokes filter actions when filters are available")]
