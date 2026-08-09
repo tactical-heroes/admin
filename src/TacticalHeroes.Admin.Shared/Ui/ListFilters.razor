@@ -1,0 +1,30 @@
+<MudCollapse Expanded="Expanded">
+    <div class="filters-panel">
+        @if (ChildContent is null)
+        {
+            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                Для этого списка дополнительные фильтры не предусмотрены.
+            </MudText>
+        }
+        else
+        {
+            <div class="filters-content">
+                @ChildContent
+            </div>
+        }
+        <div class="filters-actions">
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Disabled="@(Loading || !HasFilters)"
+                       OnClick="OnApply">
+                Применить
+            </MudButton>
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Default"
+                       Disabled="@(Loading || !HasFilters || !HasActiveFilters)"
+                       OnClick="OnReset">
+                Сбросить
+            </MudButton>
+        </div>
+    </div>
+</MudCollapse>
