@@ -1,6 +1,6 @@
 namespace TacticalHeroes.Admin.Modules.Identity.Entities.Users.Model;
 
-public sealed record UserSummary(
+public sealed record UserListItem(
     Guid Id,
     string Email,
     string UserName,

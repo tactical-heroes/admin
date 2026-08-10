@@ -44,7 +44,7 @@ public partial class UserListWidget
     public EventCallback<int> PageSizeChanged { get; set; }
 
     [PersistentState(AllowUpdates = true)]
-    public PaginationResult<UserSummary>? Page { get; set; }
+    public PaginationResult<UserListItem>? Page { get; set; }
 
     [PersistentState(AllowUpdates = true)]
     public string? LoadError { get; set; }
@@ -114,7 +114,7 @@ public partial class UserListWidget
         return LoadPageAsync(PageNumber, PageSize, NormalizeEmail(Email));
     }
 
-    private async Task ConfirmDeleteAsync(UserSummary user)
+    private async Task ConfirmDeleteAsync(UserListItem user)
     {
         var parameters = new DialogParameters
         {
