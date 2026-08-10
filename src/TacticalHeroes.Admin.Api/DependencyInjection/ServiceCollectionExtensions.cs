@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Http.HttpClientLibrary;
 
@@ -19,22 +20,27 @@ public static class ServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(baseAddressFactory);
         ArgumentNullException.ThrowIfNull(requestTimeoutFactory);
 
-        services.AddHttpClient(
-            ApiHttpClientName,
-            (serviceProvider, httpClient) =>
-            {
-                Uri baseAddress = baseAddressFactory(serviceProvider);
-
-                if (!baseAddress.IsAbsoluteUri)
+        services
+            .AddHttpClient(
+                ApiHttpClientName,
+                (serviceProvider, httpClient) =>
                 {
-                    throw new InvalidOperationException(
-                        "The Tactical Heroes API base address must be absolute.");
-                }
+                    Uri baseAddress = baseAddressFactory(serviceProvider);
 
-                httpClient.BaseAddress = new Uri(
-                    $"{baseAddress.AbsoluteUri.TrimEnd('/')}/",
-                    UriKind.Absolute);
-                httpClient.Timeout = requestTimeoutFactory(serviceProvider);
+                    if (!baseAddress.IsAbsoluteUri)
+                    {
+                        throw new InvalidOperationException(
+                            "The Tactical Heroes API base address must be absolute.");
+                    }
+
+                    httpClient.BaseAddress = new Uri(
+                        $"{baseAddress.AbsoluteUri.TrimEnd('/')}/",
+                        UriKind.Absolute);
+                    httpClient.Timeout = requestTimeoutFactory(serviceProvider);
+                })
+            .AddStandardResilienceHandler(options =>
+            {
+                options.Retry.DisableForUnsafeHttpMethods();
             });
 
         services.AddScoped(
