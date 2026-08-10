@@ -23,6 +23,7 @@ else if (!string.IsNullOrWhiteSpace(LoadError))
 else if (User is not null && Statuses is not null)
 {
     <UserEditForm Model="User"
+                  Errors="_fieldErrors"
                   Statuses="Statuses"
                   IsNew="IsNew"
                   Busy="_saving"

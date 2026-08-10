@@ -2,6 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 using Microsoft.AspNetCore.Components;
 
+using PANiXiDA.Core.ResultPattern;
+
 using TacticalHeroes.Admin.Api.Errors;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Api;
 
@@ -35,22 +37,21 @@ public partial class ResetPasswordForm
         _submitting = true;
         _error = null;
 
-        try
+        Result result = await AuthenticationApi.ResetPasswordAsync(
+            UserId.Value,
+            PasswordResetToken,
+            _model.Password);
+
+        if (result.IsFailure)
         {
-            await AuthenticationApi.ResetPasswordAsync(
-                UserId.Value,
-                PasswordResetToken,
-                _model.Password);
+            _error = ApiErrorMessage.FromErrors(result.Errors);
+        }
+        else
+        {
             _completed = true;
         }
-        catch (Exception exception)
-        {
-            _error = ApiErrorMessage.FromException(exception);
-        }
-        finally
-        {
-            _submitting = false;
-        }
+
+        _submitting = false;
     }
 
     private void TogglePasswordVisibility()

@@ -12,6 +12,8 @@
                               Label="Email"
                               InputType="InputType.Email"
                               Variant="Variant.Outlined"
+                              Error="@HasError(nameof(UserDetails.Email))"
+                              ErrorText="@GetError(nameof(UserDetails.Email))"
                               Required="true"
                               RequiredError="Укажите email" />
             </MudItem>
@@ -20,6 +22,8 @@
                               @bind-Value="Model.UserName"
                               Label="Имя пользователя"
                               Variant="Variant.Outlined"
+                              Error="@HasError(nameof(UserDetails.UserName))"
+                              ErrorText="@GetError(nameof(UserDetails.UserName))"
                               Required="true"
                               RequiredError="Укажите имя пользователя" />
             </MudItem>
@@ -31,6 +35,8 @@
                                   Label="Пароль"
                                   InputType="InputType.Password"
                                   Variant="Variant.Outlined"
+                                  Error="@HasError(nameof(UserDetails.Password))"
+                                  ErrorText="@GetError(nameof(UserDetails.Password))"
                                   Required="true"
                                   RequiredError="Укажите пароль" />
                 </MudItem>
@@ -41,6 +47,8 @@
                            ToStringFunc="@GetStatusDisplayName"
                            Label="Статус"
                            Variant="Variant.Outlined"
+                           Error="@HasError(nameof(UserDetails.Status))"
+                           ErrorText="@GetError(nameof(UserDetails.Status))"
                            Required="true"
                            RequiredError="Выберите статус">
                     @foreach (var status in Statuses)

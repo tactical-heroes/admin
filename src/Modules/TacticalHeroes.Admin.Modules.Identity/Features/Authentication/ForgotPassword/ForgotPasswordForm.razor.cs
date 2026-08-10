@@ -2,6 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 using Microsoft.AspNetCore.Components;
 
+using PANiXiDA.Core.ResultPattern;
+
 using TacticalHeroes.Admin.Api.Errors;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Api;
 
@@ -27,19 +29,18 @@ public partial class ForgotPasswordForm
         _submitting = true;
         _error = null;
 
-        try
+        Result result = await AuthenticationApi.RequestPasswordResetAsync(_model.Email);
+
+        if (result.IsFailure)
         {
-            await AuthenticationApi.RequestPasswordResetAsync(_model.Email);
+            _error = ApiErrorMessage.FromErrors(result.Errors);
+        }
+        else
+        {
             _requested = true;
         }
-        catch (Exception exception)
-        {
-            _error = ApiErrorMessage.FromException(exception);
-        }
-        finally
-        {
-            _submitting = false;
-        }
+
+        _submitting = false;
     }
 
     private sealed class EmailModel

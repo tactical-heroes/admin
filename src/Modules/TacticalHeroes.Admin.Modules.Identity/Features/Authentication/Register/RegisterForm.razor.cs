@@ -2,6 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 using Microsoft.AspNetCore.Components;
 
+using PANiXiDA.Core.ResultPattern;
+
 using TacticalHeroes.Admin.Api.Errors;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Api;
 
@@ -33,22 +35,21 @@ public partial class RegisterForm
         _submitting = true;
         _error = null;
 
-        try
+        Result<Guid?> result = await AuthenticationApi.RegisterAsync(
+            _model.Email,
+            _model.UserName,
+            _model.Password);
+
+        if (result.IsFailure)
         {
-            await AuthenticationApi.RegisterAsync(
-                _model.Email,
-                _model.UserName,
-                _model.Password);
+            _error = ApiErrorMessage.FromErrors(result.Errors);
+        }
+        else
+        {
             _registered = true;
         }
-        catch (Exception exception)
-        {
-            _error = ApiErrorMessage.FromException(exception);
-        }
-        finally
-        {
-            _submitting = false;
-        }
+
+        _submitting = false;
     }
 
     private void TogglePasswordVisibility()

@@ -15,6 +15,10 @@ public partial class RoleEditForm
     public RoleDetails Model { get; set; } = new();
 
     [Parameter]
+    public IReadOnlyDictionary<string, string[]> Errors { get; set; } =
+        new Dictionary<string, string[]>();
+
+    [Parameter]
     public bool IsNew { get; set; }
 
     [Parameter]
@@ -22,6 +26,18 @@ public partial class RoleEditForm
 
     [Parameter]
     public EventCallback OnSave { get; set; }
+
+    private bool HasError(string field)
+    {
+        return Errors.ContainsKey(field);
+    }
+
+    private string? GetError(string field)
+    {
+        return Errors.TryGetValue(field, out string[]? messages)
+            ? string.Join(" ", messages)
+            : null;
+    }
 
     private async Task SubmitAsync()
     {

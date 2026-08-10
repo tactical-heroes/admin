@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Components;
 
 using MudBlazor;
 
+using PANiXiDA.Core.ResultPattern;
+
 using TacticalHeroes.Admin.Api.Errors;
 using TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Api;
 using TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Model;
@@ -12,6 +14,8 @@ public partial class FactionEditor
 {
     private bool _loading;
     private bool _saving;
+    private IReadOnlyDictionary<string, string[]> _fieldErrors =
+        new Dictionary<string, string[]>();
 
     [Inject]
     private FactionsApi FactionsApi { get; set; } = null!;
@@ -43,6 +47,7 @@ public partial class FactionEditor
             }
 
             LoadError = null;
+            _fieldErrors = new Dictionary<string, string[]>();
             return;
         }
 
@@ -61,19 +66,20 @@ public partial class FactionEditor
 
         _loading = true;
         LoadError = null;
+        _fieldErrors = new Dictionary<string, string[]>();
 
-        try
+        Result<FactionDetails> result = await FactionsApi.GetAsync(Id.Value);
+
+        if (result.IsFailure)
         {
-            Faction = await FactionsApi.GetAsync(Id.Value);
+            LoadError = ApiErrorMessage.FromErrors(result.Errors);
         }
-        catch (Exception exception)
+        else
         {
-            LoadError = ApiErrorMessage.FromException(exception);
+            Faction = result.Value;
         }
-        finally
-        {
-            _loading = false;
-        }
+
+        _loading = false;
     }
 
     private async Task SaveAsync()
@@ -84,30 +90,69 @@ public partial class FactionEditor
         }
 
         _saving = true;
+        _fieldErrors = new Dictionary<string, string[]>();
 
-        try
+        if (Faction.Id.HasValue)
         {
-            if (Faction.Id.HasValue)
+            Result result = await FactionsApi.UpdateAsync(Faction);
+
+            if (result.IsFailure)
             {
-                await FactionsApi.UpdateAsync(Faction);
-                Snackbar.Add("Фракция сохранена", Severity.Success);
-            }
-            else
-            {
-                Faction.Id = await FactionsApi.CreateAsync(Faction);
-                Snackbar.Add("Фракция создана", Severity.Success);
+                HandleErrors(result.Errors);
+                _saving = false;
+                return;
             }
 
-            await Completed.InvokeAsync();
+            Snackbar.Add("Фракция сохранена", Severity.Success);
         }
-        catch (Exception exception)
+        else
         {
-            Snackbar.Add(ApiErrorMessage.FromException(exception), Severity.Error);
+            Result<Guid> result = await FactionsApi.CreateAsync(Faction);
+
+            if (result.IsFailure)
+            {
+                HandleErrors(result.Errors);
+                _saving = false;
+                return;
+            }
+
+            Faction.Id = result.Value;
+            Snackbar.Add("Фракция создана", Severity.Success);
         }
-        finally
+
+        _saving = false;
+        await Completed.InvokeAsync();
+    }
+
+    private void HandleErrors(IReadOnlyList<Error> errors)
+    {
+        _fieldErrors = ApiErrorMessage.GetFieldErrors(errors, MapField);
+        IReadOnlyList<Error> unhandledErrors =
+            ApiErrorMessage.GetUnhandledErrors(errors, MapField);
+
+        if (unhandledErrors.Count > 0)
         {
-            _saving = false;
+            Snackbar.Add(ApiErrorMessage.FromErrors(unhandledErrors), Severity.Error);
         }
     }
 
+    private static string? MapField(string field)
+    {
+        if (string.Equals(field, nameof(FactionDetails.Name), StringComparison.OrdinalIgnoreCase)
+            || string.Equals(field, "FactionName", StringComparison.OrdinalIgnoreCase))
+        {
+            return nameof(FactionDetails.Name);
+        }
+
+        if (string.Equals(
+                field,
+                nameof(FactionDetails.Description),
+                StringComparison.OrdinalIgnoreCase)
+            || string.Equals(field, "FactionDescription", StringComparison.OrdinalIgnoreCase))
+        {
+            return nameof(FactionDetails.Description);
+        }
+
+        return null;
+    }
 }

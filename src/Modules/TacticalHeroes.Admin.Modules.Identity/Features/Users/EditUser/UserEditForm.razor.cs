@@ -14,6 +14,10 @@ public partial class UserEditForm
     [Parameter, EditorRequired]
     public UserDetails Model { get; set; } = new();
 
+    [Parameter]
+    public IReadOnlyDictionary<string, string[]> Errors { get; set; } =
+        new Dictionary<string, string[]>();
+
     [Parameter, EditorRequired]
     public IReadOnlyList<UserStatus> Statuses { get; set; } = [];
 
@@ -25,6 +29,18 @@ public partial class UserEditForm
 
     [Parameter]
     public EventCallback OnSave { get; set; }
+
+    private bool HasError(string field)
+    {
+        return Errors.ContainsKey(field);
+    }
+
+    private string? GetError(string field)
+    {
+        return Errors.TryGetValue(field, out string[]? messages)
+            ? string.Join(" ", messages)
+            : null;
+    }
 
     private string GetStatusDisplayName(string? statusName)
     {

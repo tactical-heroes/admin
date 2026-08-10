@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Components;
 
 using MudBlazor;
 
+using PANiXiDA.Core.ResultPattern;
+
 using TacticalHeroes.Admin.Api.Errors;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Roles.Api;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Roles.Model;
@@ -12,6 +14,8 @@ public partial class RoleEditor
 {
     private bool _loading;
     private bool _saving;
+    private IReadOnlyDictionary<string, string[]> _fieldErrors =
+        new Dictionary<string, string[]>();
 
     [Inject]
     private RolesApi RolesApi { get; set; } = null!;
@@ -43,6 +47,7 @@ public partial class RoleEditor
             }
 
             LoadError = null;
+            _fieldErrors = new Dictionary<string, string[]>();
             return;
         }
 
@@ -61,19 +66,20 @@ public partial class RoleEditor
 
         _loading = true;
         LoadError = null;
+        _fieldErrors = new Dictionary<string, string[]>();
 
-        try
+        Result<RoleDetails> result = await RolesApi.GetAsync(Id.Value);
+
+        if (result.IsFailure)
         {
-            Role = await RolesApi.GetAsync(Id.Value);
+            LoadError = ApiErrorMessage.FromErrors(result.Errors);
         }
-        catch (Exception exception)
+        else
         {
-            LoadError = ApiErrorMessage.FromException(exception);
+            Role = result.Value;
         }
-        finally
-        {
-            _loading = false;
-        }
+
+        _loading = false;
     }
 
     private async Task SaveAsync()
@@ -84,29 +90,57 @@ public partial class RoleEditor
         }
 
         _saving = true;
+        _fieldErrors = new Dictionary<string, string[]>();
 
-        try
+        if (Role.Id == Guid.Empty)
         {
-            if (Role.Id == Guid.Empty)
+            Result<Guid> result = await RolesApi.CreateAsync(Role);
+
+            if (result.IsFailure)
             {
-                Role.Id = await RolesApi.CreateAsync(Role);
-                Snackbar.Add("Роль создана", Severity.Success);
-            }
-            else
-            {
-                await RolesApi.UpdateAsync(Role);
-                Snackbar.Add("Роль сохранена", Severity.Success);
+                HandleErrors(result.Errors);
+                _saving = false;
+                return;
             }
 
-            await Completed.InvokeAsync();
+            Role.Id = result.Value;
+            Snackbar.Add("Роль создана", Severity.Success);
         }
-        catch (Exception exception)
+        else
         {
-            Snackbar.Add(ApiErrorMessage.FromException(exception), Severity.Error);
+            Result result = await RolesApi.UpdateAsync(Role);
+
+            if (result.IsFailure)
+            {
+                HandleErrors(result.Errors);
+                _saving = false;
+                return;
+            }
+
+            Snackbar.Add("Роль сохранена", Severity.Success);
         }
-        finally
+
+        _saving = false;
+        await Completed.InvokeAsync();
+    }
+
+    private void HandleErrors(IReadOnlyList<Error> errors)
+    {
+        _fieldErrors = ApiErrorMessage.GetFieldErrors(errors, MapField);
+        IReadOnlyList<Error> unhandledErrors =
+            ApiErrorMessage.GetUnhandledErrors(errors, MapField);
+
+        if (unhandledErrors.Count > 0)
         {
-            _saving = false;
+            Snackbar.Add(ApiErrorMessage.FromErrors(unhandledErrors), Severity.Error);
         }
+    }
+
+    private static string? MapField(string field)
+    {
+        return string.Equals(field, nameof(RoleDetails.Name), StringComparison.OrdinalIgnoreCase)
+            || string.Equals(field, "RoleName", StringComparison.OrdinalIgnoreCase)
+                ? nameof(RoleDetails.Name)
+                : null;
     }
 }

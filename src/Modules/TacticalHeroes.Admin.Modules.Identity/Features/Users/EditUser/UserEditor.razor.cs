@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Components;
 
 using MudBlazor;
 
+using PANiXiDA.Core.ResultPattern;
+
 using TacticalHeroes.Admin.Api.Errors;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Api;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Model;
@@ -12,6 +14,8 @@ public partial class UserEditor
 {
     private bool _loading;
     private bool _saving;
+    private IReadOnlyDictionary<string, string[]> _fieldErrors =
+        new Dictionary<string, string[]>();
 
     [Inject]
     private UsersApi UsersApi { get; set; } = null!;
@@ -63,49 +67,53 @@ public partial class UserEditor
 
         _loading = true;
         LoadError = null;
+        _fieldErrors = new Dictionary<string, string[]>();
 
-        try
-        {
-            var userTask = UsersApi.GetAsync(Id.Value);
-            var statusesTask = UsersApi.GetStatusesAsync();
+        Task<Result<UserDetails>> userTask = UsersApi.GetAsync(Id.Value);
+        Task<Result<IReadOnlyList<UserStatus>>> statusesTask = UsersApi.GetStatusesAsync();
 
-            await Task.WhenAll(userTask, statusesTask);
+        await Task.WhenAll(userTask, statusesTask);
 
-            User = await userTask;
-            Statuses = (await statusesTask).ToList();
-        }
-        catch (Exception exception)
+        Result<UserDetails> userResult = await userTask;
+        Result<IReadOnlyList<UserStatus>> statusesResult = await statusesTask;
+        Result result = Result.Combine(userResult, statusesResult);
+
+        if (result.IsFailure)
         {
-            LoadError = ApiErrorMessage.FromException(exception);
+            LoadError = ApiErrorMessage.FromErrors(result.Errors);
         }
-        finally
+        else
         {
-            _loading = false;
+            User = userResult.Value;
+            Statuses = statusesResult.Value.ToList();
         }
+
+        _loading = false;
     }
 
     private async Task LoadForCreateAsync()
     {
         _loading = true;
         LoadError = null;
+        _fieldErrors = new Dictionary<string, string[]>();
 
-        try
+        Result<IReadOnlyList<UserStatus>> result = await UsersApi.GetStatusesAsync();
+
+        if (result.IsFailure)
         {
-            Statuses = (await UsersApi.GetStatusesAsync()).ToList();
+            User = null;
+            LoadError = ApiErrorMessage.FromErrors(result.Errors);
+        }
+        else
+        {
+            Statuses = result.Value.ToList();
             User = new UserDetails
             {
                 Status = Statuses.FirstOrDefault()?.Name ?? string.Empty,
             };
         }
-        catch (Exception exception)
-        {
-            User = null;
-            LoadError = ApiErrorMessage.FromException(exception);
-        }
-        finally
-        {
-            _loading = false;
-        }
+
+        _loading = false;
     }
 
     private async Task SaveAsync()
@@ -116,29 +124,75 @@ public partial class UserEditor
         }
 
         _saving = true;
+        _fieldErrors = new Dictionary<string, string[]>();
 
-        try
+        if (User.Id == Guid.Empty)
         {
-            if (User.Id == Guid.Empty)
+            Result<Guid> result = await UsersApi.CreateAsync(User);
+
+            if (result.IsFailure)
             {
-                User.Id = await UsersApi.CreateAsync(User);
-                Snackbar.Add("Пользователь создан", Severity.Success);
-            }
-            else
-            {
-                await UsersApi.UpdateAsync(User);
-                Snackbar.Add("Пользователь сохранён", Severity.Success);
+                HandleErrors(result.Errors);
+                _saving = false;
+                return;
             }
 
-            await Completed.InvokeAsync();
+            User.Id = result.Value;
+            Snackbar.Add("Пользователь создан", Severity.Success);
         }
-        catch (Exception exception)
+        else
         {
-            Snackbar.Add(ApiErrorMessage.FromException(exception), Severity.Error);
+            Result result = await UsersApi.UpdateAsync(User);
+
+            if (result.IsFailure)
+            {
+                HandleErrors(result.Errors);
+                _saving = false;
+                return;
+            }
+
+            Snackbar.Add("Пользователь сохранён", Severity.Success);
         }
-        finally
+
+        _saving = false;
+        await Completed.InvokeAsync();
+    }
+
+    private void HandleErrors(IReadOnlyList<Error> errors)
+    {
+        _fieldErrors = ApiErrorMessage.GetFieldErrors(errors, MapField);
+        IReadOnlyList<Error> unhandledErrors =
+            ApiErrorMessage.GetUnhandledErrors(errors, MapField);
+
+        if (unhandledErrors.Count > 0)
         {
-            _saving = false;
+            Snackbar.Add(ApiErrorMessage.FromErrors(unhandledErrors), Severity.Error);
         }
+    }
+
+    private static string? MapField(string field)
+    {
+        if (string.Equals(field, nameof(UserDetails.Email), StringComparison.OrdinalIgnoreCase))
+        {
+            return nameof(UserDetails.Email);
+        }
+
+        if (string.Equals(field, nameof(UserDetails.UserName), StringComparison.OrdinalIgnoreCase))
+        {
+            return nameof(UserDetails.UserName);
+        }
+
+        if (string.Equals(field, nameof(UserDetails.Password), StringComparison.OrdinalIgnoreCase))
+        {
+            return nameof(UserDetails.Password);
+        }
+
+        if (string.Equals(field, nameof(UserDetails.Status), StringComparison.OrdinalIgnoreCase)
+            || string.Equals(field, "UserStatus", StringComparison.OrdinalIgnoreCase))
+        {
+            return nameof(UserDetails.Status);
+        }
+
+        return null;
     }
 }

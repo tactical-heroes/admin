@@ -8,6 +8,8 @@
                           @bind-Value="Model.Name"
                           Label="Название фракции"
                           Variant="Variant.Outlined"
+                          Error="@HasError(nameof(FactionDetails.Name))"
+                          ErrorText="@GetError(nameof(FactionDetails.Name))"
                           Required="true"
                           RequiredError="Укажите название фракции"
                           MaxLength="128" />
@@ -15,6 +17,8 @@
                           @bind-Value="Model.Description"
                           Label="Описание"
                           Variant="Variant.Outlined"
+                          Error="@HasError(nameof(FactionDetails.Description))"
+                          ErrorText="@GetError(nameof(FactionDetails.Description))"
                           Required="true"
                           RequiredError="Укажите описание фракции"
                           MaxLength="2000"

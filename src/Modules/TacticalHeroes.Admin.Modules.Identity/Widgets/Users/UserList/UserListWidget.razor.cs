@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Components;
 
 using MudBlazor;
 
+using PANiXiDA.Core.ResultPattern;
+
 using TacticalHeroes.Admin.Api.Errors;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Api;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Model;
@@ -145,28 +147,27 @@ public partial class UserListWidget
     {
         _deletingId = id;
 
-        try
-        {
-            await UsersApi.DeleteAsync(id);
-            Snackbar.Add("Пользователь удалён", Severity.Success);
+        Result result = await UsersApi.DeleteAsync(id);
 
-            if (Page?.Items.Count == 1 && PageNumber > 1)
-            {
-                await PageNumberChanged.InvokeAsync(PageNumber - 1);
-            }
-            else
-            {
-                await RetryAsync();
-            }
-        }
-        catch (Exception exception)
+        if (result.IsFailure)
         {
-            Snackbar.Add(ApiErrorMessage.FromException(exception), Severity.Error);
-        }
-        finally
-        {
+            Snackbar.Add(ApiErrorMessage.FromErrors(result.Errors), Severity.Error);
             _deletingId = null;
+            return;
         }
+
+        Snackbar.Add("Пользователь удалён", Severity.Success);
+
+        if (Page?.Items.Count == 1 && PageNumber > 1)
+        {
+            await PageNumberChanged.InvokeAsync(PageNumber - 1);
+        }
+        else
+        {
+            await RetryAsync();
+        }
+
+        _deletingId = null;
     }
 
     private async Task LoadPageAsync(int pageNumber, int pageSize, string? email)
@@ -177,19 +178,20 @@ public partial class UserListWidget
         LoadedPageSize = pageSize;
         LoadedEmail = email;
 
-        try
-        {
-            Page = await UsersApi.GetPageAsync(pageNumber, pageSize, email);
-        }
-        catch (Exception exception)
+        Result<PaginationResult<UserListItem>> result =
+            await UsersApi.GetPageAsync(pageNumber, pageSize, email);
+
+        if (result.IsFailure)
         {
             Page = null;
-            LoadError = ApiErrorMessage.FromException(exception);
+            LoadError = ApiErrorMessage.FromErrors(result.Errors);
         }
-        finally
+        else
         {
-            _loading = false;
+            Page = result.Value;
         }
+
+        _loading = false;
     }
 
     private static string? NormalizeEmail(string? email)

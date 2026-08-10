@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Components;
 
 using MudBlazor;
 
+using PANiXiDA.Core.ResultPattern;
+
 using TacticalHeroes.Admin.Api.Errors;
 using TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Api;
 using TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Model;
@@ -102,28 +104,27 @@ public partial class FactionListWidget
     {
         _deletingId = id;
 
-        try
-        {
-            await FactionsApi.DeleteAsync(id);
-            Snackbar.Add("Фракция удалена", Severity.Success);
+        Result result = await FactionsApi.DeleteAsync(id);
 
-            if (Page?.Items.Count == 1 && PageNumber > 1)
-            {
-                await PageNumberChanged.InvokeAsync(PageNumber - 1);
-            }
-            else
-            {
-                await RetryAsync();
-            }
-        }
-        catch (Exception exception)
+        if (result.IsFailure)
         {
-            Snackbar.Add(ApiErrorMessage.FromException(exception), Severity.Error);
-        }
-        finally
-        {
+            Snackbar.Add(ApiErrorMessage.FromErrors(result.Errors), Severity.Error);
             _deletingId = null;
+            return;
         }
+
+        Snackbar.Add("Фракция удалена", Severity.Success);
+
+        if (Page?.Items.Count == 1 && PageNumber > 1)
+        {
+            await PageNumberChanged.InvokeAsync(PageNumber - 1);
+        }
+        else
+        {
+            await RetryAsync();
+        }
+
+        _deletingId = null;
     }
 
     private async Task LoadPageAsync(int pageNumber, int pageSize)
@@ -133,18 +134,19 @@ public partial class FactionListWidget
         LoadedPageNumber = pageNumber;
         LoadedPageSize = pageSize;
 
-        try
-        {
-            Page = await FactionsApi.GetPageAsync(pageNumber, pageSize);
-        }
-        catch (Exception exception)
+        Result<PaginationResult<FactionListItem>> result =
+            await FactionsApi.GetPageAsync(pageNumber, pageSize);
+
+        if (result.IsFailure)
         {
             Page = null;
-            LoadError = ApiErrorMessage.FromException(exception);
+            LoadError = ApiErrorMessage.FromErrors(result.Errors);
         }
-        finally
+        else
         {
-            _loading = false;
+            Page = result.Value;
         }
+
+        _loading = false;
     }
 }

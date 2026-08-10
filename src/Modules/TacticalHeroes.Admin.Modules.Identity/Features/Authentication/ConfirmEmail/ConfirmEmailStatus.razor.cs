@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Components;
 
+using PANiXiDA.Core.ResultPattern;
+
 using TacticalHeroes.Admin.Api.Errors;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Api;
 
@@ -29,20 +31,16 @@ public partial class ConfirmEmailStatus
             return;
         }
 
-        try
+        Result result = await AuthenticationApi.ConfirmEmailAsync(
+            UserId!.Value,
+            EmailConfirmationToken!);
+
+        if (result.IsFailure)
         {
-            await AuthenticationApi.ConfirmEmailAsync(
-                UserId!.Value,
-                EmailConfirmationToken!);
+            _error = ApiErrorMessage.FromErrors(result.Errors);
         }
-        catch (Exception exception)
-        {
-            _error = ApiErrorMessage.FromException(exception);
-        }
-        finally
-        {
-            _processed = true;
-            StateHasChanged();
-        }
+
+        _processed = true;
+        StateHasChanged();
     }
 }

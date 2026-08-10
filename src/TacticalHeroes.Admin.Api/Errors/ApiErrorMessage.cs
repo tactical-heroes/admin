@@ -1,97 +1,56 @@
-using Microsoft.Kiota.Abstractions;
-using Microsoft.Kiota.Abstractions.Serialization;
-
-using TacticalHeroes.Admin.Api.Generated.Models;
+using PANiXiDA.Core.ResultPattern;
 
 namespace TacticalHeroes.Admin.Api.Errors;
 
 public static class ApiErrorMessage
 {
-    public static string FromException(Exception exception)
+    public static string FromErrors(IReadOnlyList<Error> errors)
     {
-        return exception switch
-        {
-            ApiException { ResponseStatusCode: >= 500 } =>
-                "API временно недоступен. Попробуйте повторить запрос позже.",
-            HttpValidationProblemDetails validationProblem
-                when GetValidationMessage(validationProblem) is { } message =>
-                message,
-            ProblemDetails problem
-                when GetServerMessage(problem.Detail) is { } message =>
-                message,
-            ApiException { ResponseStatusCode: 401 } =>
-                "API требует авторизацию. Интерфейс готов, но доступ к данным будет закрыт до подключения входа.",
-            ApiException { ResponseStatusCode: 403 } =>
-                "У текущего пользователя недостаточно прав для этого действия.",
-            ApiException { ResponseStatusCode: 400 } =>
-                "Проверьте заполненные поля: API отклонил переданные данные.",
-            ApiException { ResponseStatusCode: 404 } =>
-                "Запрошенная сущность не найдена.",
-            ApiException { ResponseStatusCode: 409 } =>
-                "Изменения конфликтуют с текущим состоянием данных.",
-            HttpRequestException =>
-                "Не удалось подключиться к Tactical Heroes API.",
-            TaskCanceledException =>
-                "Tactical Heroes API не ответил вовремя.",
-            _ =>
-                "Не удалось выполнить запрос. Повторите попытку.",
-        };
-    }
-
-    private static string? GetValidationMessage(
-        HttpValidationProblemDetails problem)
-    {
-        var messages = problem.Errors?.AdditionalData.Values
-            .SelectMany(GetMessages)
-            .Select(message => message.Trim())
+        string[] messages = errors
+            .Select(error => error.Message.Trim())
             .Where(message => !string.IsNullOrWhiteSpace(message))
             .Distinct(StringComparer.Ordinal)
-            .ToArray() ?? [];
+            .ToArray();
 
         return messages.Length > 0
             ? string.Join(" ", messages)
-            : GetServerMessage(problem.Detail);
+            : "Не удалось выполнить запрос. Повторите попытку.";
     }
 
-    private static IEnumerable<string> GetMessages(object? value)
+    public static IReadOnlyDictionary<string, string[]> GetFieldErrors(
+        IReadOnlyList<Error> errors,
+        Func<string, string?>? mapField = null)
     {
-        switch (value)
-        {
-            case string message:
-                yield return message;
-                break;
-            case UntypedString message:
-                var text = message.GetValue();
-                if (text is not null)
-                {
-                    yield return text;
-                }
-
-                break;
-            case UntypedArray messages:
-                foreach (var item in messages.GetValue())
-                {
-                    foreach (var message in GetMessages(item))
-                    {
-                        yield return message;
-                    }
-                }
-
-                break;
-            case IEnumerable<string> messages:
-                foreach (var message in messages)
-                {
-                    yield return message;
-                }
-
-                break;
-        }
+        return errors
+            .Select(error => (Error: error, Field: GetField(error)))
+            .Where(item => item.Field is not null)
+            .Select(item => (
+                item.Error,
+                Field: mapField is null ? item.Field : mapField(item.Field!)))
+            .Where(item => !string.IsNullOrWhiteSpace(item.Field))
+            .GroupBy(item => item.Field!, StringComparer.Ordinal)
+            .ToDictionary(
+                group => group.Key,
+                group => group
+                    .Select(item => item.Error.Message)
+                    .Distinct(StringComparer.Ordinal)
+                    .ToArray(),
+                StringComparer.Ordinal);
     }
 
-    private static string? GetServerMessage(string? message)
+    public static IReadOnlyList<Error> GetUnhandledErrors(
+        IReadOnlyList<Error> errors,
+        Func<string, string?> mapField)
     {
-        return string.IsNullOrWhiteSpace(message)
-            ? null
-            : message.Trim();
+        return errors
+            .Where(error => GetField(error) is not { } field || mapField(field) is null)
+            .ToArray();
+    }
+
+    private static string? GetField(Error error)
+    {
+        return error.Metadata.TryGetValue(Error.FieldMetadataKey, out object? field)
+            ? field as string
+            : null;
     }
 }

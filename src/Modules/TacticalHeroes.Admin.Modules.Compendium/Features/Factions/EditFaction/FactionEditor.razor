@@ -23,6 +23,7 @@ else if (!string.IsNullOrWhiteSpace(LoadError))
 else if (Faction is not null)
 {
     <FactionEditForm Model="Faction"
+                     Errors="_fieldErrors"
                      IsNew="@IsNew"
                      Busy="_saving"
                      OnSave="SaveAsync" />
