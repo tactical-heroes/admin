@@ -37,7 +37,7 @@ public partial class RoleListWidget
     public EventCallback<int> PageSizeChanged { get; set; }
 
     [PersistentState(AllowUpdates = true)]
-    public PaginationResult<RoleSummary>? Page { get; set; }
+    public PaginationResult<RoleListItem>? Page { get; set; }
 
     [PersistentState(AllowUpdates = true)]
     public string? LoadError { get; set; }
@@ -71,7 +71,7 @@ public partial class RoleListWidget
         return LoadPageAsync(PageNumber, PageSize);
     }
 
-    private async Task ConfirmDeleteAsync(RoleSummary role)
+    private async Task ConfirmDeleteAsync(RoleListItem role)
     {
         var parameters = new DialogParameters
         {

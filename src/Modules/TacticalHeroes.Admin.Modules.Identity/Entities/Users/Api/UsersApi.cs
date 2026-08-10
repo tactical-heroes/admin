@@ -10,7 +10,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.Entities.Users.Api;
 
 public sealed class UsersApi(TacticalHeroesApiClient client)
 {
-    public async Task<PaginationResult<UserSummary>> GetPageAsync(
+    public async Task<PaginationResult<UserListItem>> GetPageAsync(
         int pageNumber,
         int pageSize,
         string? email,
@@ -29,12 +29,12 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
 
         if (response is null)
         {
-            return PaginationResult<UserSummary>.Empty(pageNumber, pageSize);
+            return PaginationResult<UserListItem>.Empty(pageNumber, pageSize);
         }
 
         var items = response.Items?
             .Where(user => user.Id.HasValue)
-            .Select(user => new UserSummary(
+            .Select(user => new UserListItem(
                 user.Id!.Value,
                 user.Email ?? string.Empty,
                 user.UserName ?? string.Empty,
@@ -43,7 +43,7 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
                 user.StatusDisplayName ?? user.Status ?? string.Empty))
             .ToArray() ?? [];
 
-        return new PaginationResult<UserSummary>(
+        return new PaginationResult<UserListItem>(
             items,
             Math.Max(response.PageNumber ?? 0, pageNumber),
             Math.Max(response.PageSize ?? 0, pageSize),

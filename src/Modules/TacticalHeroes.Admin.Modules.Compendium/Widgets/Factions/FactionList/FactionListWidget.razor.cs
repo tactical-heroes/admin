@@ -37,7 +37,7 @@ public partial class FactionListWidget
     public EventCallback<int> PageSizeChanged { get; set; }
 
     [PersistentState(AllowUpdates = true)]
-    public PaginationResult<FactionSummary>? Page { get; set; }
+    public PaginationResult<FactionListItem>? Page { get; set; }
 
     [PersistentState(AllowUpdates = true)]
     public string? LoadError { get; set; }
@@ -71,7 +71,7 @@ public partial class FactionListWidget
         return LoadPageAsync(PageNumber, PageSize);
     }
 
-    private async Task ConfirmDeleteAsync(FactionSummary faction)
+    private async Task ConfirmDeleteAsync(FactionListItem faction)
     {
         var parameters = new DialogParameters
         {
