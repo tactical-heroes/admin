@@ -33,11 +33,6 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
 
         return result.Map(response =>
         {
-            if (response is null)
-            {
-                return PaginationResult<UserListItem>.Empty(pageNumber, pageSize);
-            }
-
             var items = response.Items?
                 .Select(apiUser => new UserListItem(
                     apiUser.Id!.Value,
@@ -67,7 +62,7 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
 
         return result.Map(response => new UserDetails
         {
-            Id = response!.Id!.Value,
+            Id = response.Id!.Value,
             Email = response.Email!,
             UserName = response.UserName!,
             IsConfirmed = response.IsConfirmed!.Value,
@@ -87,7 +82,7 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
             .ToApiResultAsync(cancellationToken);
 
         return result.Map(response =>
-            (IReadOnlyList<UserStatus>)response!
+            (IReadOnlyList<UserStatus>)response
                 .Select(apiStatus => new UserStatus(
                     apiStatus.Name!,
                     apiStatus.DisplayName!))
@@ -112,7 +107,7 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
                 cancellationToken: cancellationToken)
             .ToApiResultAsync(cancellationToken);
 
-        return result.Map(response => response!.Id!.Value);
+        return result.Map(response => response.Id!.Value);
     }
 
     public async Task<Result> UpdateAsync(

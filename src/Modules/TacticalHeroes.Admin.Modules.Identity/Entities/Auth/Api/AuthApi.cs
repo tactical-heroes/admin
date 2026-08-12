@@ -24,7 +24,7 @@ public sealed class AuthApi(TacticalHeroesApiClient client)
                 cancellationToken: cancellationToken)
             .ToApiResultAsync(cancellationToken);
 
-        return result.Map(response => response!.Id!.Value);
+        return result.Map(response => response.Id!.Value);
     }
 
     public Task<Result> ResendConfirmationEmailAsync(

@@ -29,11 +29,6 @@ public sealed class RolesApi(TacticalHeroesApiClient client)
 
         return result.Map(response =>
         {
-            if (response is null)
-            {
-                return PaginationResult<RoleListItem>.Empty(pageNumber, pageSize);
-            }
-
             var items = response.Items?
                 .Select(apiRole => new RoleListItem(
                     apiRole.Id!.Value,
@@ -59,7 +54,7 @@ public sealed class RolesApi(TacticalHeroesApiClient client)
 
         return result.Map(response => new RoleDetails
         {
-            Id = response!.Id!.Value,
+            Id = response.Id!.Value,
             Name = response.Name!,
             Claims = response.Claims!
                 .Select(ToClaimValue)
@@ -81,7 +76,7 @@ public sealed class RolesApi(TacticalHeroesApiClient client)
                 cancellationToken: cancellationToken)
             .ToApiResultAsync(cancellationToken);
 
-        return result.Map(response => response!.Id!.Value);
+        return result.Map(response => response.Id!.Value);
     }
 
     public async Task<Result> UpdateAsync(

@@ -12,12 +12,18 @@ namespace TacticalHeroes.Admin.Api.Errors;
 public static class ApiResultExtensions
 {
     public static async Task<Result<T>> ToApiResultAsync<T>(
-        this Task<T> task,
+        this Task<T?> task,
         CancellationToken cancellationToken)
+        where T : class
     {
         try
         {
-            return Result.Success(await task);
+            T? response = await task;
+
+            return response is null
+                ? Result.Failure<T>(
+                    Error.Unexpected("Tactical Heroes API вернул пустой ответ."))
+                : Result.Success(response);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {

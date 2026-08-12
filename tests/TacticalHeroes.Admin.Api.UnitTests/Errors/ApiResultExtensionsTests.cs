@@ -14,11 +14,22 @@ public sealed class ApiResultExtensionsTests
     [Fact(DisplayName = "Returns a successful result with a value")]
     public async Task ToApiResultAsync_Should_ReturnSuccess_When_OperationSucceeds()
     {
-        Result<int> result = await Task.FromResult(42).ToApiResultAsync(
+        Result<string> result = await Task.FromResult<string?>("response").ToApiResultAsync(
             TestContext.Current.CancellationToken);
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldBe(42);
+        result.Value.ShouldBe("response");
+    }
+
+    [Fact(DisplayName = "Returns a failure when API response is empty")]
+    public async Task ToApiResultAsync_Should_ReturnFailure_When_ResponseIsNull()
+    {
+        Result<string> result = await Task.FromResult<string?>(null).ToApiResultAsync(
+            TestContext.Current.CancellationToken);
+
+        result.IsFailure.ShouldBeTrue();
+        result.FirstError.Type.ShouldBe(ErrorType.Unexpected);
+        result.FirstError.Message.ShouldBe("Tactical Heroes API вернул пустой ответ.");
     }
 
     [Fact(DisplayName = "Maps validation messages and their fields")]

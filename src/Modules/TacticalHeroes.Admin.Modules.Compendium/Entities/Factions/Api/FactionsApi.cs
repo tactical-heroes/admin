@@ -26,11 +26,6 @@ public sealed class FactionsApi(TacticalHeroesApiClient client)
 
         return result.Map(response =>
         {
-            if (response is null)
-            {
-                return PaginationResult<FactionListItem>.Empty(pageNumber, pageSize);
-            }
-
             var items = response.Items?
                 .Select(apiFaction => new FactionListItem(
                     apiFaction.Id!.Value,
@@ -57,7 +52,7 @@ public sealed class FactionsApi(TacticalHeroesApiClient client)
 
         return result.Map(response => new FactionDetails
         {
-            Id = response!.Id!.Value,
+            Id = response.Id!.Value,
             Name = response.Name!,
             Description = response.Description!,
         });
@@ -77,7 +72,7 @@ public sealed class FactionsApi(TacticalHeroesApiClient client)
                 cancellationToken: cancellationToken)
             .ToApiResultAsync(cancellationToken);
 
-        return result.Map(response => response!.Id!.Value);
+        return result.Map(response => response.Id!.Value);
     }
 
     public async Task<Result> UpdateAsync(
