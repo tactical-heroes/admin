@@ -104,7 +104,7 @@ public partial class FactionListWidget
     {
         _deletingId = id;
 
-        Result result = await FactionsApi.DeleteAsync(id);
+        Result result = await FactionsApi.DeleteAsync(id, CancellationToken.None);
 
         if (result.IsFailure)
         {
@@ -135,7 +135,7 @@ public partial class FactionListWidget
         LoadedPageSize = pageSize;
 
         Result<PaginationResult<FactionListItem>> result =
-            await FactionsApi.GetPageAsync(pageNumber, pageSize);
+            await FactionsApi.GetPageAsync(pageNumber, pageSize, CancellationToken.None);
 
         if (result.IsFailure)
         {

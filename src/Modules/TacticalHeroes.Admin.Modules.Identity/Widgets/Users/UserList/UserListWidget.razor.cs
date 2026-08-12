@@ -147,7 +147,7 @@ public partial class UserListWidget
     {
         _deletingId = id;
 
-        Result result = await UsersApi.DeleteAsync(id);
+        Result result = await UsersApi.DeleteAsync(id, CancellationToken.None);
 
         if (result.IsFailure)
         {
@@ -179,7 +179,11 @@ public partial class UserListWidget
         LoadedEmail = email;
 
         Result<PaginationResult<UserListItem>> result =
-            await UsersApi.GetPageAsync(pageNumber, pageSize, email);
+            await UsersApi.GetPageAsync(
+                pageNumber,
+                pageSize,
+                email,
+                CancellationToken.None);
 
         if (result.IsFailure)
         {

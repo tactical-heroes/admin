@@ -68,7 +68,9 @@ public partial class RoleEditor
         LoadError = null;
         _fieldErrors = new Dictionary<string, string[]>();
 
-        Result<RoleDetails> result = await RolesApi.GetAsync(Id.Value);
+        Result<RoleDetails> result = await RolesApi.GetAsync(
+            Id.Value,
+            CancellationToken.None);
 
         if (result.IsFailure)
         {
@@ -94,7 +96,7 @@ public partial class RoleEditor
 
         if (Role.Id == Guid.Empty)
         {
-            Result<Guid> result = await RolesApi.CreateAsync(Role);
+            Result<Guid> result = await RolesApi.CreateAsync(Role, CancellationToken.None);
 
             if (result.IsFailure)
             {
@@ -108,7 +110,7 @@ public partial class RoleEditor
         }
         else
         {
-            Result result = await RolesApi.UpdateAsync(Role);
+            Result result = await RolesApi.UpdateAsync(Role, CancellationToken.None);
 
             if (result.IsFailure)
             {

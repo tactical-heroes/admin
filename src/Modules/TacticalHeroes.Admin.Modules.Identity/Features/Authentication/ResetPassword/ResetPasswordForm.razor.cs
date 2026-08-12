@@ -40,7 +40,8 @@ public partial class ResetPasswordForm
         Result result = await AuthApi.ResetPasswordAsync(
             UserId.Value,
             PasswordResetToken,
-            _model.Password);
+            _model.Password,
+            CancellationToken.None);
 
         if (result.IsFailure)
         {

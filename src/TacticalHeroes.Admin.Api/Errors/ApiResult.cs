@@ -11,7 +11,7 @@ public static class ApiResult
 {
     public static async Task<Result<T>> ExecuteAsync<T>(
         Func<Task<T>> operation,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -29,7 +29,7 @@ public static class ApiResult
 
     public static async Task<Result> ExecuteAsync(
         Func<Task> operation,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         Result<bool> result = await ExecuteAsync(
             async () =>

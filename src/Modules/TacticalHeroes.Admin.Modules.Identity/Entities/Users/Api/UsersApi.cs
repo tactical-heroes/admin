@@ -17,7 +17,7 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
         int pageNumber,
         int pageSize,
         string? email,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync(
             async () =>
@@ -60,7 +60,7 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
 
     public Task<Result<UserDetails>> GetAsync(
         Guid id,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync(
             async () =>
@@ -85,7 +85,7 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
     }
 
     public Task<Result<IReadOnlyList<UserStatus>>> GetStatusesAsync(
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync<IReadOnlyList<UserStatus>>(
             async () =>
@@ -104,7 +104,7 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
 
     public Task<Result<Guid>> CreateAsync(
         UserDetails user,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync(
             async () =>
@@ -129,7 +129,7 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
 
     public Task<Result> UpdateAsync(
         UserDetails user,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync(
             async () =>
@@ -158,7 +158,7 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
 
     public Task<Result> DeleteAsync(
         Guid id,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync(
             () => client.Api.V1.Users[id].DeleteAsync(

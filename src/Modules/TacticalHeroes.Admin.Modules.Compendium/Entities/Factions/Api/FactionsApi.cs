@@ -13,7 +13,7 @@ public sealed class FactionsApi(TacticalHeroesApiClient client)
     public Task<Result<PaginationResult<FactionListItem>>> GetPageAsync(
         int pageNumber,
         int pageSize,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync(
             async () =>
@@ -50,7 +50,7 @@ public sealed class FactionsApi(TacticalHeroesApiClient client)
 
     public Task<Result<FactionDetails>> GetAsync(
         Guid id,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync(
             async () =>
@@ -70,7 +70,7 @@ public sealed class FactionsApi(TacticalHeroesApiClient client)
 
     public Task<Result<Guid>> CreateAsync(
         FactionDetails faction,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync(
             async () =>
@@ -91,7 +91,7 @@ public sealed class FactionsApi(TacticalHeroesApiClient client)
 
     public Task<Result> UpdateAsync(
         FactionDetails faction,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync(
             async () =>
@@ -117,7 +117,7 @@ public sealed class FactionsApi(TacticalHeroesApiClient client)
 
     public Task<Result> DeleteAsync(
         Guid id,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync(
             () => client.Api.V1.Factions[id].DeleteAsync(

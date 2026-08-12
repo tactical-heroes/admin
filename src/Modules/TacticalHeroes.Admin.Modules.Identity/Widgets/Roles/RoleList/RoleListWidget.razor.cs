@@ -104,7 +104,7 @@ public partial class RoleListWidget
     {
         _deletingId = id;
 
-        Result result = await RolesApi.DeleteAsync(id);
+        Result result = await RolesApi.DeleteAsync(id, CancellationToken.None);
 
         if (result.IsFailure)
         {
@@ -135,7 +135,7 @@ public partial class RoleListWidget
         LoadedPageSize = pageSize;
 
         Result<PaginationResult<RoleListItem>> result =
-            await RolesApi.GetPageAsync(pageNumber, pageSize);
+            await RolesApi.GetPageAsync(pageNumber, pageSize, CancellationToken.None);
 
         if (result.IsFailure)
         {

@@ -16,7 +16,7 @@ public sealed class RolesApi(TacticalHeroesApiClient client)
     public Task<Result<PaginationResult<RoleListItem>>> GetPageAsync(
         int pageNumber,
         int pageSize,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync(
             async () =>
@@ -52,7 +52,7 @@ public sealed class RolesApi(TacticalHeroesApiClient client)
 
     public Task<Result<RoleDetails>> GetAsync(
         Guid id,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync(
             async () =>
@@ -74,7 +74,7 @@ public sealed class RolesApi(TacticalHeroesApiClient client)
 
     public Task<Result<Guid>> CreateAsync(
         RoleDetails role,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync(
             async () =>
@@ -95,7 +95,7 @@ public sealed class RolesApi(TacticalHeroesApiClient client)
 
     public Task<Result> UpdateAsync(
         RoleDetails role,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync(
             async () =>
@@ -121,7 +121,7 @@ public sealed class RolesApi(TacticalHeroesApiClient client)
 
     public Task<Result> DeleteAsync(
         Guid id,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync(
             () => client.Api.V1.Roles[id].DeleteAsync(

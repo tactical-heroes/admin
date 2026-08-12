@@ -38,7 +38,8 @@ public partial class RegisterForm
         Result<Guid> result = await AuthApi.RegisterAsync(
             _model.Email,
             _model.UserName,
-            _model.Password);
+            _model.Password,
+            CancellationToken.None);
 
         if (result.IsFailure)
         {

@@ -12,7 +12,7 @@ public sealed class AuthApi(TacticalHeroesApiClient client)
         string email,
         string userName,
         string password,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync(
             async () =>
@@ -33,7 +33,7 @@ public sealed class AuthApi(TacticalHeroesApiClient client)
 
     public Task<Result> ResendConfirmationEmailAsync(
         string email,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync(
             () => client.Api.V1.Auth.ResendConfirmationEmail.PostAsync(
@@ -45,7 +45,7 @@ public sealed class AuthApi(TacticalHeroesApiClient client)
     public Task<Result> ConfirmEmailAsync(
         Guid userId,
         string emailConfirmationToken,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync(
             () => client.Api.V1.Auth.ConfirmEmail.PostAsync(
@@ -60,7 +60,7 @@ public sealed class AuthApi(TacticalHeroesApiClient client)
 
     public Task<Result> RequestPasswordResetAsync(
         string email,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync(
             () => client.Api.V1.Auth.ForgotPassword.PostAsync(
@@ -73,7 +73,7 @@ public sealed class AuthApi(TacticalHeroesApiClient client)
         Guid userId,
         string passwordResetToken,
         string newPassword,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         return ApiResult.ExecuteAsync(
             () => client.Api.V1.Auth.ResetPassword.PostAsync(

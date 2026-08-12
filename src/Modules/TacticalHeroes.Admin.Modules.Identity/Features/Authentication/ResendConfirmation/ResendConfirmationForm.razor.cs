@@ -29,7 +29,9 @@ public partial class ResendConfirmationForm
         _submitting = true;
         _error = null;
 
-        Result result = await AuthApi.ResendConfirmationEmailAsync(_model.Email);
+        Result result = await AuthApi.ResendConfirmationEmailAsync(
+            _model.Email,
+            CancellationToken.None);
 
         if (result.IsFailure)
         {

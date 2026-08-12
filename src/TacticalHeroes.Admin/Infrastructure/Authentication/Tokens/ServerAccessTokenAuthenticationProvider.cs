@@ -13,8 +13,8 @@ internal sealed class ServerAccessTokenAuthenticationProvider(
 {
     public async Task AuthenticateRequestAsync(
         RequestInformation request,
-        Dictionary<string, object>? additionalAuthenticationContext = null,
-        CancellationToken cancellationToken = default)
+        Dictionary<string, object>? additionalAuthenticationContext,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 

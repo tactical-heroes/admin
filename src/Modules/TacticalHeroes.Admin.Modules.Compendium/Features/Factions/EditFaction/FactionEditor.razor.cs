@@ -68,7 +68,9 @@ public partial class FactionEditor
         LoadError = null;
         _fieldErrors = new Dictionary<string, string[]>();
 
-        Result<FactionDetails> result = await FactionsApi.GetAsync(Id.Value);
+        Result<FactionDetails> result = await FactionsApi.GetAsync(
+            Id.Value,
+            CancellationToken.None);
 
         if (result.IsFailure)
         {
@@ -94,7 +96,7 @@ public partial class FactionEditor
 
         if (Faction.Id.HasValue)
         {
-            Result result = await FactionsApi.UpdateAsync(Faction);
+            Result result = await FactionsApi.UpdateAsync(Faction, CancellationToken.None);
 
             if (result.IsFailure)
             {
@@ -107,7 +109,7 @@ public partial class FactionEditor
         }
         else
         {
-            Result<Guid> result = await FactionsApi.CreateAsync(Faction);
+            Result<Guid> result = await FactionsApi.CreateAsync(Faction, CancellationToken.None);
 
             if (result.IsFailure)
             {

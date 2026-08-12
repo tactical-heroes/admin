@@ -33,7 +33,8 @@ public partial class ConfirmEmailStatus
 
         Result result = await AuthApi.ConfirmEmailAsync(
             UserId!.Value,
-            EmailConfirmationToken!);
+            EmailConfirmationToken!,
+            CancellationToken.None);
 
         if (result.IsFailure)
         {

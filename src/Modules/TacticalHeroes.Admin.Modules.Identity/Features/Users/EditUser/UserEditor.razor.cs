@@ -69,8 +69,11 @@ public partial class UserEditor
         LoadError = null;
         _fieldErrors = new Dictionary<string, string[]>();
 
-        Task<Result<UserDetails>> userTask = UsersApi.GetAsync(Id.Value);
-        Task<Result<IReadOnlyList<UserStatus>>> statusesTask = UsersApi.GetStatusesAsync();
+        Task<Result<UserDetails>> userTask = UsersApi.GetAsync(
+            Id.Value,
+            CancellationToken.None);
+        Task<Result<IReadOnlyList<UserStatus>>> statusesTask =
+            UsersApi.GetStatusesAsync(CancellationToken.None);
 
         await Task.WhenAll(userTask, statusesTask);
 
@@ -97,7 +100,8 @@ public partial class UserEditor
         LoadError = null;
         _fieldErrors = new Dictionary<string, string[]>();
 
-        Result<IReadOnlyList<UserStatus>> result = await UsersApi.GetStatusesAsync();
+        Result<IReadOnlyList<UserStatus>> result =
+            await UsersApi.GetStatusesAsync(CancellationToken.None);
 
         if (result.IsFailure)
         {
@@ -128,7 +132,7 @@ public partial class UserEditor
 
         if (User.Id == Guid.Empty)
         {
-            Result<Guid> result = await UsersApi.CreateAsync(User);
+            Result<Guid> result = await UsersApi.CreateAsync(User, CancellationToken.None);
 
             if (result.IsFailure)
             {
@@ -142,7 +146,7 @@ public partial class UserEditor
         }
         else
         {
-            Result result = await UsersApi.UpdateAsync(User);
+            Result result = await UsersApi.UpdateAsync(User, CancellationToken.None);
 
             if (result.IsFailure)
             {
