@@ -8,38 +8,33 @@ namespace TacticalHeroes.Admin.Modules.Identity.Entities.Auth.Api;
 
 public sealed class AuthApi(TacticalHeroesApiClient client)
 {
-    public Task<Result<Guid>> RegisterAsync(
+    public async Task<Result<Guid>> RegisterAsync(
         string email,
         string userName,
         string password,
         CancellationToken cancellationToken)
     {
-        return ApiResult.ExecuteAsync(
-            async () =>
-            {
-                var response = await client.Api.V1.Auth.Register.PostAsync(
-                    new RegisterUserRequest
-                    {
-                        Email = email.Trim(),
-                        UserName = userName.Trim(),
-                        Password = password,
-                    },
-                    cancellationToken: cancellationToken);
+        var result = await client.Api.V1.Auth.Register.PostAsync(
+                new RegisterUserRequest
+                {
+                    Email = email.Trim(),
+                    UserName = userName.Trim(),
+                    Password = password,
+                },
+                cancellationToken: cancellationToken)
+            .ToApiResultAsync(cancellationToken);
 
-                return response!.Id!.Value;
-            },
-            cancellationToken);
+        return result.Map(response => response!.Id!.Value);
     }
 
     public Task<Result> ResendConfirmationEmailAsync(
         string email,
         CancellationToken cancellationToken)
     {
-        return ApiResult.ExecuteAsync(
-            () => client.Api.V1.Auth.ResendConfirmationEmail.PostAsync(
+        return client.Api.V1.Auth.ResendConfirmationEmail.PostAsync(
                 new ResendConfirmationEmailRequest { Email = email.Trim() },
-                cancellationToken: cancellationToken),
-            cancellationToken);
+                cancellationToken: cancellationToken)
+            .ToApiResultAsync(cancellationToken);
     }
 
     public Task<Result> ConfirmEmailAsync(
@@ -47,26 +42,24 @@ public sealed class AuthApi(TacticalHeroesApiClient client)
         string emailConfirmationToken,
         CancellationToken cancellationToken)
     {
-        return ApiResult.ExecuteAsync(
-            () => client.Api.V1.Auth.ConfirmEmail.PostAsync(
+        return client.Api.V1.Auth.ConfirmEmail.PostAsync(
                 new ConfirmEmailRequest
                 {
                     UserId = userId,
                     EmailConfirmationToken = emailConfirmationToken,
                 },
-                cancellationToken: cancellationToken),
-            cancellationToken);
+                cancellationToken: cancellationToken)
+            .ToApiResultAsync(cancellationToken);
     }
 
     public Task<Result> RequestPasswordResetAsync(
         string email,
         CancellationToken cancellationToken)
     {
-        return ApiResult.ExecuteAsync(
-            () => client.Api.V1.Auth.ForgotPassword.PostAsync(
+        return client.Api.V1.Auth.ForgotPassword.PostAsync(
                 new ForgotPasswordRequest { Email = email.Trim() },
-                cancellationToken: cancellationToken),
-            cancellationToken);
+                cancellationToken: cancellationToken)
+            .ToApiResultAsync(cancellationToken);
     }
 
     public Task<Result> ResetPasswordAsync(
@@ -75,15 +68,14 @@ public sealed class AuthApi(TacticalHeroesApiClient client)
         string newPassword,
         CancellationToken cancellationToken)
     {
-        return ApiResult.ExecuteAsync(
-            () => client.Api.V1.Auth.ResetPassword.PostAsync(
+        return client.Api.V1.Auth.ResetPassword.PostAsync(
                 new ResetPasswordRequest
                 {
                     UserId = userId,
                     PasswordResetToken = passwordResetToken,
                     NewPassword = newPassword,
                 },
-                cancellationToken: cancellationToken),
-            cancellationToken);
+                cancellationToken: cancellationToken)
+            .ToApiResultAsync(cancellationToken);
     }
 }

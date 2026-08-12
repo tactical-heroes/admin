@@ -10,118 +10,104 @@ namespace TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Api;
 
 public sealed class FactionsApi(TacticalHeroesApiClient client)
 {
-    public Task<Result<PaginationResult<FactionListItem>>> GetPageAsync(
+    public async Task<Result<PaginationResult<FactionListItem>>> GetPageAsync(
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken)
     {
-        return ApiResult.ExecuteAsync(
-            async () =>
-            {
-                var response = await client.Api.V1.Factions.GetAsync(
-                    request =>
-                    {
-                        request.QueryParameters.PageNumber = pageNumber;
-                        request.QueryParameters.PageSize = pageSize;
-                    },
-                    cancellationToken);
-
-                if (response is null)
+        var result = await client.Api.V1.Factions.GetAsync(
+                request =>
                 {
-                    return PaginationResult<FactionListItem>.Empty(pageNumber, pageSize);
-                }
+                    request.QueryParameters.PageNumber = pageNumber;
+                    request.QueryParameters.PageSize = pageSize;
+                },
+                cancellationToken)
+            .ToApiResultAsync(cancellationToken);
 
-                var items = response.Items?
-                    .Select(apiFaction => new FactionListItem(
-                        apiFaction.Id!.Value,
-                        apiFaction.Name!,
-                        apiFaction.Description!))
-                    .ToArray() ?? [];
+        return result.Map(response =>
+        {
+            if (response is null)
+            {
+                return PaginationResult<FactionListItem>.Empty(pageNumber, pageSize);
+            }
 
-                return new PaginationResult<FactionListItem>(
-                    items,
-                    Math.Max(response.PageNumber ?? 0, pageNumber),
-                    Math.Max(response.PageSize ?? 0, pageSize),
-                    response.TotalCount ?? 0,
-                    checked((int)(response.TotalPages ?? 0)));
-            },
-            cancellationToken);
+            var items = response.Items?
+                .Select(apiFaction => new FactionListItem(
+                    apiFaction.Id!.Value,
+                    apiFaction.Name!,
+                    apiFaction.Description!))
+                .ToArray() ?? [];
+
+            return new PaginationResult<FactionListItem>(
+                items,
+                Math.Max(response.PageNumber ?? 0, pageNumber),
+                Math.Max(response.PageSize ?? 0, pageSize),
+                response.TotalCount ?? 0,
+                checked((int)(response.TotalPages ?? 0)));
+        });
     }
 
-    public Task<Result<FactionDetails>> GetAsync(
+    public async Task<Result<FactionDetails>> GetAsync(
         Guid id,
         CancellationToken cancellationToken)
     {
-        return ApiResult.ExecuteAsync(
-            async () =>
-            {
-                var response = await client.Api.V1.Factions[id].GetAsync(
-                    cancellationToken: cancellationToken);
+        var result = await client.Api.V1.Factions[id].GetAsync(
+                cancellationToken: cancellationToken)
+            .ToApiResultAsync(cancellationToken);
 
-                return new FactionDetails
-                {
-                    Id = response!.Id!.Value,
-                    Name = response.Name!,
-                    Description = response.Description!,
-                };
-            },
-            cancellationToken);
+        return result.Map(response => new FactionDetails
+        {
+            Id = response!.Id!.Value,
+            Name = response.Name!,
+            Description = response.Description!,
+        });
     }
 
-    public Task<Result<Guid>> CreateAsync(
+    public async Task<Result<Guid>> CreateAsync(
         FactionDetails faction,
         CancellationToken cancellationToken)
     {
-        return ApiResult.ExecuteAsync(
-            async () =>
-            {
-                var request = new CreateFactionRequest
-                {
-                    Name = faction.Name.Trim(),
-                    Description = faction.Description.Trim(),
-                };
-                var response = await client.Api.V1.Factions.PostAsync(
-                    request,
-                    cancellationToken: cancellationToken);
+        var request = new CreateFactionRequest
+        {
+            Name = faction.Name.Trim(),
+            Description = faction.Description.Trim(),
+        };
+        var result = await client.Api.V1.Factions.PostAsync(
+                request,
+                cancellationToken: cancellationToken)
+            .ToApiResultAsync(cancellationToken);
 
-                return response!.Id!.Value;
-            },
-            cancellationToken);
+        return result.Map(response => response!.Id!.Value);
     }
 
-    public Task<Result> UpdateAsync(
+    public async Task<Result> UpdateAsync(
         FactionDetails faction,
         CancellationToken cancellationToken)
     {
-        return ApiResult.ExecuteAsync(
-            async () =>
-            {
-                if (!faction.Id.HasValue)
-                {
-                    throw new InvalidOperationException(
-                        "A faction identifier is required for update.");
-                }
+        if (!faction.Id.HasValue)
+        {
+            throw new InvalidOperationException(
+                "A faction identifier is required for update.");
+        }
 
-                var request = new UpdateFactionRequest
-                {
-                    Name = faction.Name.Trim(),
-                    Description = faction.Description.Trim(),
-                };
+        var request = new UpdateFactionRequest
+        {
+            Name = faction.Name.Trim(),
+            Description = faction.Description.Trim(),
+        };
 
-                await client.Api.V1.Factions[faction.Id.Value].PutAsync(
-                    request,
-                    cancellationToken: cancellationToken);
-            },
-            cancellationToken);
+        return await client.Api.V1.Factions[faction.Id.Value].PutAsync(
+                request,
+                cancellationToken: cancellationToken)
+            .ToApiResultAsync(cancellationToken);
     }
 
     public Task<Result> DeleteAsync(
         Guid id,
         CancellationToken cancellationToken)
     {
-        return ApiResult.ExecuteAsync(
-            () => client.Api.V1.Factions[id].DeleteAsync(
-                cancellationToken: cancellationToken),
-            cancellationToken);
+        return client.Api.V1.Factions[id].DeleteAsync(
+                cancellationToken: cancellationToken)
+            .ToApiResultAsync(cancellationToken);
     }
 }

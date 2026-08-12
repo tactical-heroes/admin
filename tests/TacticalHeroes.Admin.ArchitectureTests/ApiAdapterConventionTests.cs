@@ -8,6 +8,7 @@ public sealed class ApiAdapterConventionTests
     private static readonly Regex TransportVariableRegex = new(
         @"\b(?<variable>[a-z][A-Za-z0-9_]*)\s*=\s*await\s+client\." +
         @"|\.Select\(\s*(?<variable>[a-z][A-Za-z0-9_]*)\s*=>" +
+        @"|\.Map\(\s*(?<variable>[a-z][A-Za-z0-9_]*)\s*=>" +
         @"|\(\s*Api[A-Za-z0-9_<>?]*\s+(?<variable>[a-z][A-Za-z0-9_]*)\s*\)",
         RegexOptions.CultureInvariant);
 

@@ -13,157 +13,140 @@ namespace TacticalHeroes.Admin.Modules.Identity.Entities.Users.Api;
 
 public sealed class UsersApi(TacticalHeroesApiClient client)
 {
-    public Task<Result<PaginationResult<UserListItem>>> GetPageAsync(
+    public async Task<Result<PaginationResult<UserListItem>>> GetPageAsync(
         int pageNumber,
         int pageSize,
         string? email,
         CancellationToken cancellationToken)
     {
-        return ApiResult.ExecuteAsync(
-            async () =>
-            {
-                var response = await client.Api.V1.Users.GetAsync(
-                    request =>
-                    {
-                        request.QueryParameters.PageNumber = pageNumber;
-                        request.QueryParameters.PageSize = pageSize;
-                        request.QueryParameters.Email = string.IsNullOrWhiteSpace(email)
-                            ? null
-                            : email.Trim();
-                    },
-                    cancellationToken);
-
-                if (response is null)
+        var result = await client.Api.V1.Users.GetAsync(
+                request =>
                 {
-                    return PaginationResult<UserListItem>.Empty(pageNumber, pageSize);
-                }
+                    request.QueryParameters.PageNumber = pageNumber;
+                    request.QueryParameters.PageSize = pageSize;
+                    request.QueryParameters.Email = string.IsNullOrWhiteSpace(email)
+                        ? null
+                        : email.Trim();
+                },
+                cancellationToken)
+            .ToApiResultAsync(cancellationToken);
 
-                var items = response.Items?
-                    .Select(apiUser => new UserListItem(
-                        apiUser.Id!.Value,
-                        apiUser.Email!,
-                        apiUser.UserName!,
-                        apiUser.IsConfirmed!.Value,
-                        apiUser.Status!,
-                        apiUser.StatusDisplayName!))
-                    .ToArray() ?? [];
+        return result.Map(response =>
+        {
+            if (response is null)
+            {
+                return PaginationResult<UserListItem>.Empty(pageNumber, pageSize);
+            }
 
-                return new PaginationResult<UserListItem>(
-                    items,
-                    Math.Max(response.PageNumber ?? 0, pageNumber),
-                    Math.Max(response.PageSize ?? 0, pageSize),
-                    response.TotalCount ?? 0,
-                    checked((int)(response.TotalPages ?? 0)));
-            },
-            cancellationToken);
+            var items = response.Items?
+                .Select(apiUser => new UserListItem(
+                    apiUser.Id!.Value,
+                    apiUser.Email!,
+                    apiUser.UserName!,
+                    apiUser.IsConfirmed!.Value,
+                    apiUser.Status!,
+                    apiUser.StatusDisplayName!))
+                .ToArray() ?? [];
+
+            return new PaginationResult<UserListItem>(
+                items,
+                Math.Max(response.PageNumber ?? 0, pageNumber),
+                Math.Max(response.PageSize ?? 0, pageSize),
+                response.TotalCount ?? 0,
+                checked((int)(response.TotalPages ?? 0)));
+        });
     }
 
-    public Task<Result<UserDetails>> GetAsync(
+    public async Task<Result<UserDetails>> GetAsync(
         Guid id,
         CancellationToken cancellationToken)
     {
-        return ApiResult.ExecuteAsync(
-            async () =>
-            {
-                var response = await client.Api.V1.Users[id].GetAsync(
-                    cancellationToken: cancellationToken);
+        var result = await client.Api.V1.Users[id].GetAsync(
+                cancellationToken: cancellationToken)
+            .ToApiResultAsync(cancellationToken);
 
-                return new UserDetails
-                {
-                    Id = response!.Id!.Value,
-                    Email = response.Email!,
-                    UserName = response.UserName!,
-                    IsConfirmed = response.IsConfirmed!.Value,
-                    Status = response.Status!,
-                    StatusDisplayName = response.StatusDisplayName!,
-                    Claims = response.Claims!
-                        .Select(ToClaimValue)
-                        .ToList(),
-                };
-            },
-            cancellationToken);
+        return result.Map(response => new UserDetails
+        {
+            Id = response!.Id!.Value,
+            Email = response.Email!,
+            UserName = response.UserName!,
+            IsConfirmed = response.IsConfirmed!.Value,
+            Status = response.Status!,
+            StatusDisplayName = response.StatusDisplayName!,
+            Claims = response.Claims!
+                .Select(ToClaimValue)
+                .ToList(),
+        });
     }
 
-    public Task<Result<IReadOnlyList<UserStatus>>> GetStatusesAsync(
+    public async Task<Result<IReadOnlyList<UserStatus>>> GetStatusesAsync(
         CancellationToken cancellationToken)
     {
-        return ApiResult.ExecuteAsync<IReadOnlyList<UserStatus>>(
-            async () =>
-            {
-                var response = await client.Api.V1.Users.Statuses.GetAsync(
-                    cancellationToken: cancellationToken);
+        var result = await client.Api.V1.Users.Statuses.GetAsync(
+                cancellationToken: cancellationToken)
+            .ToApiResultAsync(cancellationToken);
 
-                return response!
-                    .Select(apiStatus => new UserStatus(
-                        apiStatus.Name!,
-                        apiStatus.DisplayName!))
-                    .ToArray();
-            },
-            cancellationToken);
+        return result.Map(response =>
+            (IReadOnlyList<UserStatus>)response!
+                .Select(apiStatus => new UserStatus(
+                    apiStatus.Name!,
+                    apiStatus.DisplayName!))
+                .ToArray());
     }
 
-    public Task<Result<Guid>> CreateAsync(
+    public async Task<Result<Guid>> CreateAsync(
         UserDetails user,
         CancellationToken cancellationToken)
     {
-        return ApiResult.ExecuteAsync(
-            async () =>
-            {
-                var request = new CreateUserRequest
-                {
-                    Email = user.Email.Trim(),
-                    UserName = user.UserName.Trim(),
-                    Password = user.Password,
-                    IsConfirmed = user.IsConfirmed,
-                    Status = user.Status,
-                    Claims = user.Claims.Select(ToApiClaim).ToList(),
-                };
-                var response = await client.Api.V1.Users.PostAsync(
-                    request,
-                    cancellationToken: cancellationToken);
+        var request = new CreateUserRequest
+        {
+            Email = user.Email.Trim(),
+            UserName = user.UserName.Trim(),
+            Password = user.Password,
+            IsConfirmed = user.IsConfirmed,
+            Status = user.Status,
+            Claims = user.Claims.Select(ToApiClaim).ToList(),
+        };
+        var result = await client.Api.V1.Users.PostAsync(
+                request,
+                cancellationToken: cancellationToken)
+            .ToApiResultAsync(cancellationToken);
 
-                return response!.Id!.Value;
-            },
-            cancellationToken);
+        return result.Map(response => response!.Id!.Value);
     }
 
-    public Task<Result> UpdateAsync(
+    public async Task<Result> UpdateAsync(
         UserDetails user,
         CancellationToken cancellationToken)
     {
-        return ApiResult.ExecuteAsync(
-            async () =>
-            {
-                if (user.Id == Guid.Empty)
-                {
-                    throw new InvalidOperationException(
-                        "A user identifier is required for update.");
-                }
+        if (user.Id == Guid.Empty)
+        {
+            throw new InvalidOperationException(
+                "A user identifier is required for update.");
+        }
 
-                var request = new UpdateUserRequest
-                {
-                    Email = user.Email.Trim(),
-                    UserName = user.UserName.Trim(),
-                    IsConfirmed = user.IsConfirmed,
-                    Status = user.Status,
-                    Claims = user.Claims.Select(ToApiClaim).ToList(),
-                };
+        var request = new UpdateUserRequest
+        {
+            Email = user.Email.Trim(),
+            UserName = user.UserName.Trim(),
+            IsConfirmed = user.IsConfirmed,
+            Status = user.Status,
+            Claims = user.Claims.Select(ToApiClaim).ToList(),
+        };
 
-                await client.Api.V1.Users[user.Id].PutAsync(
-                    request,
-                    cancellationToken: cancellationToken);
-            },
-            cancellationToken);
+        return await client.Api.V1.Users[user.Id].PutAsync(
+                request,
+                cancellationToken: cancellationToken)
+            .ToApiResultAsync(cancellationToken);
     }
 
     public Task<Result> DeleteAsync(
         Guid id,
         CancellationToken cancellationToken)
     {
-        return ApiResult.ExecuteAsync(
-            () => client.Api.V1.Users[id].DeleteAsync(
-                cancellationToken: cancellationToken),
-            cancellationToken);
+        return client.Api.V1.Users[id].DeleteAsync(
+                cancellationToken: cancellationToken)
+            .ToApiResultAsync(cancellationToken);
     }
 
     private static ClaimValue ToClaimValue(ApiClaim apiClaim)

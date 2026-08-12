@@ -3,45 +3,59 @@ using Microsoft.Kiota.Abstractions.Serialization;
 
 using PANiXiDA.Core.ResultPattern;
 
+using Polly.Timeout;
+
 using TacticalHeroes.Admin.Api.Generated.Models;
 
 namespace TacticalHeroes.Admin.Api.Errors;
 
-public static class ApiResult
+public static class ApiResultExtensions
 {
-    public static async Task<Result<T>> ExecuteAsync<T>(
-        Func<Task<T>> operation,
+    public static async Task<Result<T>> ToApiResultAsync<T>(
+        this Task<T> task,
         CancellationToken cancellationToken)
     {
         try
         {
-            return Result.Success(await operation());
+            return Result.Success(await task);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             throw;
         }
-        catch (Exception exception)
+        catch (Exception exception) when (exception is
+            ApiException or
+            HttpRequestException or
+            TimeoutException or
+            TimeoutRejectedException or
+            TaskCanceledException)
         {
             return Result.Failure<T>(MapErrors(exception));
         }
     }
 
-    public static async Task<Result> ExecuteAsync(
-        Func<Task> operation,
+    public static async Task<Result> ToApiResultAsync(
+        this Task task,
         CancellationToken cancellationToken)
     {
-        Result<bool> result = await ExecuteAsync(
-            async () =>
-            {
-                await operation();
-                return true;
-            },
-            cancellationToken);
-
-        return result.IsSuccess
-            ? Result.Success()
-            : Result.Failure(result.Errors);
+        try
+        {
+            await task;
+            return Result.Success();
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception) when (exception is
+            ApiException or
+            HttpRequestException or
+            TimeoutException or
+            TimeoutRejectedException or
+            TaskCanceledException)
+        {
+            return Result.Failure(MapErrors(exception));
+        }
     }
 
     private static IReadOnlyList<Error> MapErrors(Exception exception)
@@ -63,7 +77,8 @@ public static class ApiResult
                 ApiException { ResponseStatusCode: 404 } => Error.NotFound(message),
                 ApiException { ResponseStatusCode: 409 } => Error.Conflict(message),
                 ApiException { ResponseStatusCode: >= 500 } => Error.Unexpected(message),
-                HttpRequestException or TimeoutException or TaskCanceledException =>
+                HttpRequestException or TimeoutException or TimeoutRejectedException or
+                    TaskCanceledException =>
                     Error.Unexpected(message),
                 _ => Error.Unexpected(message),
             },
@@ -128,7 +143,7 @@ public static class ApiResult
                 "Изменения конфликтуют с текущим состоянием данных.",
             HttpRequestException =>
                 "Не удалось подключиться к Tactical Heroes API.",
-            TimeoutException or TaskCanceledException =>
+            TimeoutException or TimeoutRejectedException or TaskCanceledException =>
                 "Tactical Heroes API не ответил вовремя.",
             _ =>
                 "Не удалось выполнить запрос. Повторите попытку.",
