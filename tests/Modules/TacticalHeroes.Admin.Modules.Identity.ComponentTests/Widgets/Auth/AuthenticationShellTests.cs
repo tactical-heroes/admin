@@ -1,6 +1,6 @@
-using TacticalHeroes.Admin.Modules.Identity.Widgets.Authentication;
+using TacticalHeroes.Admin.Modules.Identity.Widgets.Auth;
 
-namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Widgets.Authentication;
+namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Widgets.Auth;
 
 public sealed class AuthenticationShellTests : BunitContext
 {

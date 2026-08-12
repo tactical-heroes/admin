@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Components;
 using PANiXiDA.Core.ResultPattern;
 
 using TacticalHeroes.Admin.Api.Errors;
-using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Api;
+using TacticalHeroes.Admin.Modules.Identity.Entities.Auth.Api;
 
-namespace TacticalHeroes.Admin.Modules.Identity.Features.Authentication.ConfirmEmail;
+namespace TacticalHeroes.Admin.Modules.Identity.Features.Auth.ConfirmEmail;
 
 public partial class ConfirmEmailStatus
 {

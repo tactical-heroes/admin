@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-namespace TacticalHeroes.Admin.Modules.Identity.Pages.Authentication;
+namespace TacticalHeroes.Admin.Modules.Identity.Pages.Auth;
 
 public partial class ResetPasswordPage
 {

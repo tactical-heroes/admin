@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-namespace TacticalHeroes.Admin.Modules.Identity.Features.Authentication.Login;
+namespace TacticalHeroes.Admin.Modules.Identity.Features.Auth.Login;
 
 public partial class LoginForm
 {

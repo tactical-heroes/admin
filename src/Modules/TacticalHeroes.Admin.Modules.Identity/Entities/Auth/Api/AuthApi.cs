@@ -4,7 +4,7 @@ using TacticalHeroes.Admin.Api.Errors;
 using TacticalHeroes.Admin.Api.Generated;
 using TacticalHeroes.Admin.Api.Generated.Models;
 
-namespace TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Api;
+namespace TacticalHeroes.Admin.Modules.Identity.Entities.Auth.Api;
 
 public sealed class AuthApi(TacticalHeroesApiClient client)
 {

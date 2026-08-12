@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using MudBlazor;
 
-using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Api;
+using TacticalHeroes.Admin.Modules.Identity.Entities.Auth.Api;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Roles.Api;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Api;
 using TacticalHeroes.Admin.Shared.Navigation;

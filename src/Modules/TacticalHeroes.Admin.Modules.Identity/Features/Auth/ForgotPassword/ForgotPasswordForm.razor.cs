@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Components;
 using PANiXiDA.Core.ResultPattern;
 
 using TacticalHeroes.Admin.Api.Errors;
-using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Api;
+using TacticalHeroes.Admin.Modules.Identity.Entities.Auth.Api;
 
-namespace TacticalHeroes.Admin.Modules.Identity.Features.Authentication.ForgotPassword;
+namespace TacticalHeroes.Admin.Modules.Identity.Features.Auth.ForgotPassword;
 
 public partial class ForgotPasswordForm
 {
