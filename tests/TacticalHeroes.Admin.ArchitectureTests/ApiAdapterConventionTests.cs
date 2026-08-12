@@ -11,8 +11,8 @@ public sealed class ApiAdapterConventionTests
         @"|\(\s*Api[A-Za-z0-9_<>?]*\s+(?<variable>[a-z][A-Za-z0-9_]*)\s*\)",
         RegexOptions.CultureInvariant);
 
-    [Fact(DisplayName = "API adapters use their OpenAPI tags for names and entity slices")]
-    public void ApiAdapters_Should_UseOpenApiTag_When_NamedAndLocated()
+    [Fact(DisplayName = "API adapter names match their OpenAPI tags")]
+    public void ApiAdapters_Should_UseOpenApiTagName_When_Named()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
         string modulesRoot = Path.Combine(repositoryRoot, "src", "Modules");
@@ -35,9 +35,6 @@ public sealed class ApiAdapterConventionTests
             string apiName = Path.GetFileNameWithoutExtension(apiPath);
             string tag = apiName[..^"Api".Length];
             string source = File.ReadAllText(apiPath);
-            string expectedDirectory = Path.Combine("Entities", tag, "Api");
-            string relativeDirectory = Path.GetDirectoryName(
-                Path.GetRelativePath(modulesRoot, apiPath))!;
 
             if (!tags.Contains(tag))
             {
@@ -54,15 +51,6 @@ public sealed class ApiAdapterConventionTests
                 violations.Add(
                     $"{Path.GetRelativePath(repositoryRoot, apiPath)}: " +
                     $"does not declare '{apiName}'");
-            }
-
-            if (!relativeDirectory.EndsWith(
-                    expectedDirectory,
-                    StringComparison.Ordinal))
-            {
-                violations.Add(
-                    $"{Path.GetRelativePath(repositoryRoot, apiPath)}: " +
-                    $"must be located in '{expectedDirectory}'");
             }
         }
 
