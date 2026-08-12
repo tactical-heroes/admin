@@ -35,10 +35,9 @@ public sealed class RolesApi(TacticalHeroesApiClient client)
                 }
 
                 var items = response.Items?
-                    .Where(role => role.Id.HasValue)
-                    .Select(role => new RoleListItem(
-                        role.Id!.Value,
-                        role.Name ?? string.Empty))
+                    .Select(apiRole => new RoleListItem(
+                        apiRole.Id!.Value,
+                        apiRole.Name!))
                     .ToArray() ?? [];
 
                 return new PaginationResult<RoleListItem>(
@@ -59,17 +58,15 @@ public sealed class RolesApi(TacticalHeroesApiClient client)
             async () =>
             {
                 var response = await client.Api.V1.Roles[id].GetAsync(
-                    cancellationToken: cancellationToken)
-                    ?? throw new InvalidOperationException(
-                        "The roles API returned an empty response.");
+                    cancellationToken: cancellationToken);
 
                 return new RoleDetails
                 {
-                    Id = response.Id ?? id,
-                    Name = response.Name ?? string.Empty,
-                    Claims = response.Claims?
+                    Id = response!.Id!.Value,
+                    Name = response.Name!,
+                    Claims = response.Claims!
                         .Select(ToClaimValue)
-                        .ToList() ?? [],
+                        .ToList(),
                 };
             },
             cancellationToken);
@@ -89,13 +86,9 @@ public sealed class RolesApi(TacticalHeroesApiClient client)
                 };
                 var response = await client.Api.V1.Roles.PostAsync(
                     request,
-                    cancellationToken: cancellationToken)
-                    ?? throw new InvalidOperationException(
-                        "The roles API returned an empty response.");
+                    cancellationToken: cancellationToken);
 
-                return response.Id
-                    ?? throw new InvalidOperationException(
-                        "The roles API did not return the created identifier.");
+                return response!.Id!.Value;
             },
             cancellationToken);
     }
@@ -136,12 +129,12 @@ public sealed class RolesApi(TacticalHeroesApiClient client)
             cancellationToken);
     }
 
-    private static ClaimValue ToClaimValue(ApiClaim claim)
+    private static ClaimValue ToClaimValue(ApiClaim apiClaim)
     {
         return new ClaimValue
         {
-            Type = claim.Type ?? string.Empty,
-            Value = claim.Value ?? string.Empty,
+            Type = apiClaim.Type!,
+            Value = apiClaim.Value!,
         };
     }
 

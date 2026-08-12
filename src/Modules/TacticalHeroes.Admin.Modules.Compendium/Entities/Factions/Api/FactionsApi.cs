@@ -32,11 +32,10 @@ public sealed class FactionsApi(TacticalHeroesApiClient client)
                 }
 
                 var items = response.Items?
-                    .Where(faction => faction.Id.HasValue)
-                    .Select(faction => new FactionListItem(
-                        faction.Id!.Value,
-                        faction.Name ?? string.Empty,
-                        faction.Description ?? string.Empty))
+                    .Select(apiFaction => new FactionListItem(
+                        apiFaction.Id!.Value,
+                        apiFaction.Name!,
+                        apiFaction.Description!))
                     .ToArray() ?? [];
 
                 return new PaginationResult<FactionListItem>(
@@ -57,15 +56,13 @@ public sealed class FactionsApi(TacticalHeroesApiClient client)
             async () =>
             {
                 var response = await client.Api.V1.Factions[id].GetAsync(
-                    cancellationToken: cancellationToken)
-                    ?? throw new InvalidOperationException(
-                        "The factions API returned an empty response.");
+                    cancellationToken: cancellationToken);
 
                 return new FactionDetails
                 {
-                    Id = response.Id ?? id,
-                    Name = response.Name ?? string.Empty,
-                    Description = response.Description ?? string.Empty,
+                    Id = response!.Id!.Value,
+                    Name = response.Name!,
+                    Description = response.Description!,
                 };
             },
             cancellationToken);
@@ -85,13 +82,9 @@ public sealed class FactionsApi(TacticalHeroesApiClient client)
                 };
                 var response = await client.Api.V1.Factions.PostAsync(
                     request,
-                    cancellationToken: cancellationToken)
-                    ?? throw new InvalidOperationException(
-                        "The factions API returned an empty response.");
+                    cancellationToken: cancellationToken);
 
-                return response.Id
-                    ?? throw new InvalidOperationException(
-                        "The factions API did not return the created identifier.");
+                return response!.Id!.Value;
             },
             cancellationToken);
     }

@@ -6,9 +6,9 @@ using TacticalHeroes.Admin.Api.Generated.Models;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Api;
 
-public sealed class AuthenticationApi(TacticalHeroesApiClient client)
+public sealed class AuthApi(TacticalHeroesApiClient client)
 {
-    public Task<Result<Guid?>> RegisterAsync(
+    public Task<Result<Guid>> RegisterAsync(
         string email,
         string userName,
         string password,
@@ -26,7 +26,7 @@ public sealed class AuthenticationApi(TacticalHeroesApiClient client)
                     },
                     cancellationToken: cancellationToken);
 
-                return response?.Id;
+                return response!.Id!.Value;
             },
             cancellationToken);
     }

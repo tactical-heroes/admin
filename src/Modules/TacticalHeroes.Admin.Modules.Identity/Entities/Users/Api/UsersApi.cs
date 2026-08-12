@@ -39,14 +39,13 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
                 }
 
                 var items = response.Items?
-                    .Where(user => user.Id.HasValue)
-                    .Select(user => new UserListItem(
-                        user.Id!.Value,
-                        user.Email ?? string.Empty,
-                        user.UserName ?? string.Empty,
-                        user.IsConfirmed ?? false,
-                        user.Status ?? string.Empty,
-                        user.StatusDisplayName ?? user.Status ?? string.Empty))
+                    .Select(apiUser => new UserListItem(
+                        apiUser.Id!.Value,
+                        apiUser.Email!,
+                        apiUser.UserName!,
+                        apiUser.IsConfirmed!.Value,
+                        apiUser.Status!,
+                        apiUser.StatusDisplayName!))
                     .ToArray() ?? [];
 
                 return new PaginationResult<UserListItem>(
@@ -67,21 +66,19 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
             async () =>
             {
                 var response = await client.Api.V1.Users[id].GetAsync(
-                    cancellationToken: cancellationToken)
-                    ?? throw new InvalidOperationException(
-                        "The users API returned an empty response.");
+                    cancellationToken: cancellationToken);
 
                 return new UserDetails
                 {
-                    Id = response.Id ?? id,
-                    Email = response.Email ?? string.Empty,
-                    UserName = response.UserName ?? string.Empty,
-                    IsConfirmed = response.IsConfirmed ?? false,
-                    Status = response.Status ?? string.Empty,
-                    StatusDisplayName = response.StatusDisplayName ?? response.Status ?? string.Empty,
-                    Claims = response.Claims?
+                    Id = response!.Id!.Value,
+                    Email = response.Email!,
+                    UserName = response.UserName!,
+                    IsConfirmed = response.IsConfirmed!.Value,
+                    Status = response.Status!,
+                    StatusDisplayName = response.StatusDisplayName!,
+                    Claims = response.Claims!
                         .Select(ToClaimValue)
-                        .ToList() ?? [],
+                        .ToList(),
                 };
             },
             cancellationToken);
@@ -96,12 +93,11 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
                 var response = await client.Api.V1.Users.Statuses.GetAsync(
                     cancellationToken: cancellationToken);
 
-                return response?
-                    .Where(status => !string.IsNullOrWhiteSpace(status.Name))
-                    .Select(status => new UserStatus(
-                        status.Name!,
-                        status.DisplayName ?? status.Name!))
-                    .ToArray() ?? [];
+                return response!
+                    .Select(apiStatus => new UserStatus(
+                        apiStatus.Name!,
+                        apiStatus.DisplayName!))
+                    .ToArray();
             },
             cancellationToken);
     }
@@ -124,13 +120,9 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
                 };
                 var response = await client.Api.V1.Users.PostAsync(
                     request,
-                    cancellationToken: cancellationToken)
-                    ?? throw new InvalidOperationException(
-                        "The users API returned an empty response.");
+                    cancellationToken: cancellationToken);
 
-                return response.Id
-                    ?? throw new InvalidOperationException(
-                        "The users API did not return the created identifier.");
+                return response!.Id!.Value;
             },
             cancellationToken);
     }
@@ -174,12 +166,12 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
             cancellationToken);
     }
 
-    private static ClaimValue ToClaimValue(ApiClaim claim)
+    private static ClaimValue ToClaimValue(ApiClaim apiClaim)
     {
         return new ClaimValue
         {
-            Type = claim.Type ?? string.Empty,
-            Value = claim.Value ?? string.Empty,
+            Type = apiClaim.Type!,
+            Value = apiClaim.Value!,
         };
     }
 

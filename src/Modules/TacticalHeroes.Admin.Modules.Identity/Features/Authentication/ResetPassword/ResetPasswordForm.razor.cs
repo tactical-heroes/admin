@@ -19,7 +19,7 @@ public partial class ResetPasswordForm
     private string? _error;
 
     [Inject]
-    private AuthenticationApi AuthenticationApi { get; set; } = null!;
+    private AuthApi AuthApi { get; set; } = null!;
 
     [Parameter]
     public Guid? UserId { get; set; }
@@ -37,7 +37,7 @@ public partial class ResetPasswordForm
         _submitting = true;
         _error = null;
 
-        Result result = await AuthenticationApi.ResetPasswordAsync(
+        Result result = await AuthApi.ResetPasswordAsync(
             UserId.Value,
             PasswordResetToken,
             _model.Password);

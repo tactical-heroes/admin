@@ -36,7 +36,7 @@ public static class IdentityAdminModule
     {
         services.AddScoped<RolesApi>();
         services.AddScoped<UsersApi>();
-        services.AddScoped<AuthenticationApi>();
+        services.AddScoped<AuthApi>();
 
         return services;
     }

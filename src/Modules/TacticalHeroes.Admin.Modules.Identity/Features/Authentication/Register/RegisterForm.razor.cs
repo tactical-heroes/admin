@@ -19,7 +19,7 @@ public partial class RegisterForm
     private string? _error;
 
     [Inject]
-    private AuthenticationApi AuthenticationApi { get; set; } = null!;
+    private AuthApi AuthApi { get; set; } = null!;
 
     [Parameter]
     public string? ReturnUrl { get; set; }
@@ -35,7 +35,7 @@ public partial class RegisterForm
         _submitting = true;
         _error = null;
 
-        Result<Guid?> result = await AuthenticationApi.RegisterAsync(
+        Result<Guid> result = await AuthApi.RegisterAsync(
             _model.Email,
             _model.UserName,
             _model.Password);
