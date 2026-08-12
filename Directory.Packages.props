@@ -19,6 +19,7 @@
         <PackageVersion Include="MudBlazor" Version="9.7.0" />
         <PackageVersion Include="PANiXiDA.Core.ResultPattern" Version="1.0.2" />
         <PackageVersion Include="Polly.Core" Version="8.4.2" />
+        <PackageVersion Include="Riok.Mapperly" Version="4.3.1" />
         <PackageVersion Include="Shouldly" Version="4.3.0" />
         <PackageVersion Include="Yarp.ReverseProxy" Version="2.3.0" />
         <PackageVersion Include="xunit.v3.mtp-v2" Version="3.2.2" />

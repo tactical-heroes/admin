@@ -2,7 +2,6 @@ using PANiXiDA.Core.ResultPattern;
 
 using TacticalHeroes.Admin.Api.Errors;
 using TacticalHeroes.Admin.Api.Generated;
-using TacticalHeroes.Admin.Api.Generated.Models;
 using TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Model;
 using TacticalHeroes.Admin.Shared.Model;
 
@@ -24,22 +23,7 @@ public sealed class FactionsApi(TacticalHeroesApiClient client)
                 cancellationToken)
             .ToApiResultAsync(cancellationToken);
 
-        return result.Map(response =>
-        {
-            var items = response.Items?
-                .Select(apiFaction => new FactionListItem(
-                    apiFaction.Id!.Value,
-                    apiFaction.Name!,
-                    apiFaction.Description!))
-                .ToArray() ?? [];
-
-            return new PaginationResult<FactionListItem>(
-                items,
-                Math.Max(response.PageNumber ?? 0, pageNumber),
-                Math.Max(response.PageSize ?? 0, pageSize),
-                response.TotalCount ?? 0,
-                checked((int)(response.TotalPages ?? 0)));
-        });
+        return result.Map(response => FactionsMapper.ToPage(response, pageNumber, pageSize));
     }
 
     public async Task<Result<FactionDetails>> GetAsync(
@@ -50,29 +34,20 @@ public sealed class FactionsApi(TacticalHeroesApiClient client)
                 cancellationToken: cancellationToken)
             .ToApiResultAsync(cancellationToken);
 
-        return result.Map(response => new FactionDetails
-        {
-            Id = response.Id!.Value,
-            Name = response.Name!,
-            Description = response.Description!,
-        });
+        return result.Map(FactionsMapper.ToDetails);
     }
 
     public async Task<Result<Guid>> CreateAsync(
         FactionDetails faction,
         CancellationToken cancellationToken)
     {
-        var request = new CreateFactionRequest
-        {
-            Name = faction.Name.Trim(),
-            Description = faction.Description.Trim(),
-        };
+        var request = FactionsMapper.ToCreateRequest(faction);
         var result = await client.Api.V1.Factions.PostAsync(
                 request,
                 cancellationToken: cancellationToken)
             .ToApiResultAsync(cancellationToken);
 
-        return result.Map(response => response.Id!.Value);
+        return result.Map(FactionsMapper.ToId);
     }
 
     public async Task<Result> UpdateAsync(
@@ -85,11 +60,7 @@ public sealed class FactionsApi(TacticalHeroesApiClient client)
                 "A faction identifier is required for update.");
         }
 
-        var request = new UpdateFactionRequest
-        {
-            Name = faction.Name.Trim(),
-            Description = faction.Description.Trim(),
-        };
+        var request = FactionsMapper.ToUpdateRequest(faction);
 
         return await client.Api.V1.Factions[faction.Id.Value].PutAsync(
                 request,

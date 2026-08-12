@@ -2,12 +2,8 @@ using PANiXiDA.Core.ResultPattern;
 
 using TacticalHeroes.Admin.Api.Errors;
 using TacticalHeroes.Admin.Api.Generated;
-using TacticalHeroes.Admin.Api.Generated.Models;
-using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Model;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Model;
 using TacticalHeroes.Admin.Shared.Model;
-
-using ApiClaim = TacticalHeroes.Admin.Api.Generated.Models.Claim;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Entities.Users.Api;
 
@@ -31,25 +27,7 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
                 cancellationToken)
             .ToApiResultAsync(cancellationToken);
 
-        return result.Map(response =>
-        {
-            var items = response.Items?
-                .Select(apiUser => new UserListItem(
-                    apiUser.Id!.Value,
-                    apiUser.Email!,
-                    apiUser.UserName!,
-                    apiUser.IsConfirmed!.Value,
-                    apiUser.Status!,
-                    apiUser.StatusDisplayName!))
-                .ToArray() ?? [];
-
-            return new PaginationResult<UserListItem>(
-                items,
-                Math.Max(response.PageNumber ?? 0, pageNumber),
-                Math.Max(response.PageSize ?? 0, pageSize),
-                response.TotalCount ?? 0,
-                checked((int)(response.TotalPages ?? 0)));
-        });
+        return result.Map(response => UsersMapper.ToPage(response, pageNumber, pageSize));
     }
 
     public async Task<Result<UserDetails>> GetAsync(
@@ -60,18 +38,7 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
                 cancellationToken: cancellationToken)
             .ToApiResultAsync(cancellationToken);
 
-        return result.Map(response => new UserDetails
-        {
-            Id = response.Id!.Value,
-            Email = response.Email!,
-            UserName = response.UserName!,
-            IsConfirmed = response.IsConfirmed!.Value,
-            Status = response.Status!,
-            StatusDisplayName = response.StatusDisplayName!,
-            Claims = response.Claims!
-                .Select(ToClaimValue)
-                .ToList(),
-        });
+        return result.Map(UsersMapper.ToDetails);
     }
 
     public async Task<Result<IReadOnlyList<UserStatus>>> GetStatusesAsync(
@@ -81,33 +48,20 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
                 cancellationToken: cancellationToken)
             .ToApiResultAsync(cancellationToken);
 
-        return result.Map(response =>
-            (IReadOnlyList<UserStatus>)response
-                .Select(apiStatus => new UserStatus(
-                    apiStatus.Name!,
-                    apiStatus.DisplayName!))
-                .ToArray());
+        return result.Map(UsersMapper.ToStatuses);
     }
 
     public async Task<Result<Guid>> CreateAsync(
         UserDetails user,
         CancellationToken cancellationToken)
     {
-        var request = new CreateUserRequest
-        {
-            Email = user.Email.Trim(),
-            UserName = user.UserName.Trim(),
-            Password = user.Password,
-            IsConfirmed = user.IsConfirmed,
-            Status = user.Status,
-            Claims = user.Claims.Select(ToApiClaim).ToList(),
-        };
+        var request = UsersMapper.ToCreateRequest(user);
         var result = await client.Api.V1.Users.PostAsync(
                 request,
                 cancellationToken: cancellationToken)
             .ToApiResultAsync(cancellationToken);
 
-        return result.Map(response => response.Id!.Value);
+        return result.Map(UsersMapper.ToId);
     }
 
     public async Task<Result> UpdateAsync(
@@ -120,14 +74,7 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
                 "A user identifier is required for update.");
         }
 
-        var request = new UpdateUserRequest
-        {
-            Email = user.Email.Trim(),
-            UserName = user.UserName.Trim(),
-            IsConfirmed = user.IsConfirmed,
-            Status = user.Status,
-            Claims = user.Claims.Select(ToApiClaim).ToList(),
-        };
+        var request = UsersMapper.ToUpdateRequest(user);
 
         return await client.Api.V1.Users[user.Id].PutAsync(
                 request,
@@ -142,23 +89,5 @@ public sealed class UsersApi(TacticalHeroesApiClient client)
         return client.Api.V1.Users[id].DeleteAsync(
                 cancellationToken: cancellationToken)
             .ToApiResultAsync(cancellationToken);
-    }
-
-    private static ClaimValue ToClaimValue(ApiClaim apiClaim)
-    {
-        return new ClaimValue
-        {
-            Type = apiClaim.Type!,
-            Value = apiClaim.Value!,
-        };
-    }
-
-    private static ApiClaim ToApiClaim(ClaimValue claim)
-    {
-        return new ApiClaim
-        {
-            Type = claim.Type.Trim(),
-            Value = claim.Value.Trim(),
-        };
     }
 }

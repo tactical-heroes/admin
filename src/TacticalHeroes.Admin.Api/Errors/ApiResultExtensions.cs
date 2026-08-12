@@ -22,7 +22,7 @@ public static class ApiResultExtensions
 
             return response is null
                 ? Result.Failure<T>(
-                    Error.Unexpected("Tactical Heroes API вернул пустой ответ."))
+                    Error.Unexpected("API вернул пустой ответ."))
                 : Result.Success(response);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)

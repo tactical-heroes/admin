@@ -29,7 +29,7 @@ public sealed class ApiResultExtensionsTests
 
         result.IsFailure.ShouldBeTrue();
         result.FirstError.Type.ShouldBe(ErrorType.Unexpected);
-        result.FirstError.Message.ShouldBe("Tactical Heroes API вернул пустой ответ.");
+        result.FirstError.Message.ShouldBe("API вернул пустой ответ.");
     }
 
     [Fact(DisplayName = "Maps validation messages and their fields")]

@@ -8,6 +8,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" />
     <PackageReference Include="MudBlazor" />
     <PackageReference Include="PANiXiDA.Core.ResultPattern" />
+    <PackageReference Include="Riok.Mapperly" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
