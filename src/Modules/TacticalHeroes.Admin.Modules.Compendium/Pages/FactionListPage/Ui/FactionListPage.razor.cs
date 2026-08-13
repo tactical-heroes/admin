@@ -76,7 +76,7 @@ public partial class FactionListPage
         Result result = await ListState.DeleteAsync(
             id,
             cancellationToken => FactionsApi.DeleteAsync(id, cancellationToken),
-            CancellationToken.None);
+            LifetimeToken);
 
         if (result.IsFailure)
         {
@@ -105,6 +105,6 @@ public partial class FactionListPage
                 CurrentPageNumber,
                 CurrentPageSize,
                 cancellationToken),
-            CancellationToken.None);
+            LifetimeToken);
     }
 }

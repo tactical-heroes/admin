@@ -71,7 +71,7 @@ public partial class RoleListPage
         Result result = await ListState.DeleteAsync(
             role.Id,
             cancellationToken => RolesApi.DeleteAsync(role.Id, cancellationToken),
-            CancellationToken.None);
+            LifetimeToken);
 
         if (result.IsFailure)
         {
@@ -100,6 +100,6 @@ public partial class RoleListPage
                 CurrentPageNumber,
                 CurrentPageSize,
                 cancellationToken),
-            cancellationToken: CancellationToken.None);
+            cancellationToken: LifetimeToken);
     }
 }

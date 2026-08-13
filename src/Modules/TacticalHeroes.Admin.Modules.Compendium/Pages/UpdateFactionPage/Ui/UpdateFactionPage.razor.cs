@@ -57,7 +57,7 @@ public partial class UpdateFactionPage
 
         Result<UpdateFactionFormModel> result = await FactionsApi.GetAsync(
             Id,
-            CancellationToken.None);
+            LifetimeToken);
 
         if (result.IsFailure)
         {
@@ -84,7 +84,7 @@ public partial class UpdateFactionPage
         Result result = await FactionsApi.UpdateAsync(
             Id,
             Faction,
-            CancellationToken.None);
+            LifetimeToken);
 
         if (result.IsFailure)
         {

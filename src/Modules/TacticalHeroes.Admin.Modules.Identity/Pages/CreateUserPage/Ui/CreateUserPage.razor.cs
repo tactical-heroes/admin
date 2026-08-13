@@ -54,7 +54,7 @@ public partial class CreateUserPage
         _errors.Clear();
 
         Result<IReadOnlyList<UserStatus>> result =
-            await UsersApi.GetStatusesAsync(CancellationToken.None);
+            await UsersApi.GetStatusesAsync(LifetimeToken);
 
         if (result.IsFailure)
         {
@@ -75,7 +75,7 @@ public partial class CreateUserPage
         _saving = true;
         _errors.Clear();
 
-        Result<Guid> result = await UsersApi.CreateAsync(User, CancellationToken.None);
+        Result<Guid> result = await UsersApi.CreateAsync(User, LifetimeToken);
 
         if (result.IsFailure)
         {

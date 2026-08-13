@@ -41,7 +41,7 @@ public partial class ResetPasswordPage
             UserId.Value,
             PasswordResetToken,
             _model.Password,
-            CancellationToken.None);
+            LifetimeToken);
 
         if (result.IsFailure)
         {

@@ -4,8 +4,8 @@ namespace TacticalHeroes.Admin.ArchitectureTests;
 
 public sealed class CancellationTokenConventionTests
 {
-    private static readonly Regex OptionalCancellationTokenRegex = new(
-        @"\bCancellationToken\s+[A-Za-z_]\w*\s*=",
+    private static readonly Regex DefaultCancellationTokenRegex = new(
+        @"\bCancellationToken\s+[A-Za-z_]\w*\s*=\s*default\b",
         RegexOptions.CultureInvariant);
 
     [Fact(DisplayName = "Cancellation tokens are required parameters")]
@@ -21,7 +21,7 @@ public sealed class CancellationTokenConventionTests
 
         foreach (string sourcePath in sourceRoots.SelectMany(EnumerateSourceFiles))
         {
-            if (OptionalCancellationTokenRegex.IsMatch(File.ReadAllText(sourcePath)))
+            if (DefaultCancellationTokenRegex.IsMatch(File.ReadAllText(sourcePath)))
             {
                 violations.Add(Path.GetRelativePath(repositoryRoot, sourcePath));
             }

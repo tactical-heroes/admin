@@ -62,9 +62,9 @@ public partial class UpdateUserPage
 
         Task<Result<UpdateUserFormModel>> userTask = UsersApi.GetAsync(
             Id,
-            CancellationToken.None);
+            LifetimeToken);
         Task<Result<IReadOnlyList<UserStatus>>> statusesTask =
-            UsersApi.GetStatusesAsync(CancellationToken.None);
+            UsersApi.GetStatusesAsync(LifetimeToken);
 
         await Task.WhenAll(userTask, statusesTask);
 
@@ -95,7 +95,7 @@ public partial class UpdateUserPage
         _saving = true;
         _errors.Clear();
 
-        Result result = await UsersApi.UpdateAsync(Id, User, CancellationToken.None);
+        Result result = await UsersApi.UpdateAsync(Id, User, LifetimeToken);
 
         if (result.IsFailure)
         {

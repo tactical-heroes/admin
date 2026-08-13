@@ -34,7 +34,7 @@ public partial class CreateFactionPage
 
         Result<Guid> result = await FactionsApi.CreateAsync(
             Faction,
-            CancellationToken.None);
+            LifetimeToken);
 
         if (result.IsFailure)
         {

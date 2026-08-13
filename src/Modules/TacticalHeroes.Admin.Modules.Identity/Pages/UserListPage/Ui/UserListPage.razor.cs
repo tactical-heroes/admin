@@ -117,7 +117,7 @@ public partial class UserListPage
         Result result = await ListState.DeleteAsync(
             user.Id,
             cancellationToken => UsersApi.DeleteAsync(user.Id, cancellationToken),
-            CancellationToken.None);
+            LifetimeToken);
 
         if (result.IsFailure)
         {
@@ -149,7 +149,7 @@ public partial class UserListPage
                 CurrentPageSize,
                 normalizedEmail,
                 cancellationToken),
-            CancellationToken.None,
+            LifetimeToken,
             normalizedEmail);
     }
 

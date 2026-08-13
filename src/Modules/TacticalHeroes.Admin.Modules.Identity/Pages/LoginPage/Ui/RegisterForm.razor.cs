@@ -39,7 +39,7 @@ public partial class RegisterForm
             _model.Email,
             _model.UserName,
             _model.Password,
-            CancellationToken.None);
+            LifetimeToken);
 
         if (result.IsFailure)
         {

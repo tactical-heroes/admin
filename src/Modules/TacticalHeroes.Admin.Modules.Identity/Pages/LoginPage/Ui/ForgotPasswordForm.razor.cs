@@ -31,7 +31,7 @@ public partial class ForgotPasswordForm
 
         Result result = await AuthApi.RequestPasswordResetAsync(
             _model.Email,
-            CancellationToken.None);
+            LifetimeToken);
 
         if (result.IsFailure)
         {

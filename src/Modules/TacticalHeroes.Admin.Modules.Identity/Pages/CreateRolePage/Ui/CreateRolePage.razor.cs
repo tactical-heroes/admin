@@ -32,7 +32,7 @@ public partial class CreateRolePage
         _saving = true;
         _errors.Clear();
 
-        Result<Guid> result = await RolesApi.CreateAsync(Role, CancellationToken.None);
+        Result<Guid> result = await RolesApi.CreateAsync(Role, LifetimeToken);
 
         if (result.IsFailure)
         {

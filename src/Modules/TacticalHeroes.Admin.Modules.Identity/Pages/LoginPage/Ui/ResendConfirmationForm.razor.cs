@@ -31,7 +31,7 @@ public partial class ResendConfirmationForm
 
         Result result = await AuthApi.ResendConfirmationEmailAsync(
             _model.Email,
-            CancellationToken.None);
+            LifetimeToken);
 
         if (result.IsFailure)
         {

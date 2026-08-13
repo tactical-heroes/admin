@@ -34,7 +34,7 @@ public partial class ConfirmEmailPage
         Result result = await AuthApi.ConfirmEmailAsync(
             UserId!.Value,
             EmailConfirmationToken!,
-            CancellationToken.None);
+            LifetimeToken);
 
         if (result.IsFailure)
         {

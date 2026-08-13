@@ -57,7 +57,7 @@ public partial class UpdateRolePage
 
         Result<UpdateRoleFormModel> result = await RolesApi.GetAsync(
             Id,
-            CancellationToken.None);
+            LifetimeToken);
 
         if (result.IsFailure)
         {
@@ -81,7 +81,7 @@ public partial class UpdateRolePage
         _saving = true;
         _errors.Clear();
 
-        Result result = await RolesApi.UpdateAsync(Id, Role, CancellationToken.None);
+        Result result = await RolesApi.UpdateAsync(Id, Role, LifetimeToken);
 
         if (result.IsFailure)
         {
