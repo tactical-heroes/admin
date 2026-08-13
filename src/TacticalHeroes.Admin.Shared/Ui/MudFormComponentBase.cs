@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Components;
 
 using MudBlazor;
 
+using PANiXiDA.Core.ResultPattern;
+
 using TacticalHeroes.Admin.Shared.Errors;
 using TacticalHeroes.Admin.Shared.Validation;
 
@@ -24,6 +26,9 @@ public abstract class MudFormComponentBase<TModel, TValidator> : CancelableCompo
 
     protected TValidator Validator { get; } = new();
 
+    [Inject]
+    protected ISnackbar Snackbar { get; set; } = null!;
+
     protected MudForm? Form { get; set; }
 
     protected bool IsValid { get; set; }
@@ -45,7 +50,7 @@ public abstract class MudFormComponentBase<TModel, TValidator> : CancelableCompo
 
             if (IsValid)
             {
-                await SaveAsync();
+                await ExecuteSaveAsync();
             }
         }
         finally
@@ -54,5 +59,39 @@ public abstract class MudFormComponentBase<TModel, TValidator> : CancelableCompo
         }
     }
 
-    protected abstract Task SaveAsync();
+    protected async Task SaveAsync(
+        Func<Task<Result>> saveAsync,
+        Action onSuccess)
+    {
+        Errors.Clear();
+
+        Result result = await saveAsync();
+
+        if (result.IsFailure)
+        {
+            Errors.Handle(result.Errors, Snackbar);
+            return;
+        }
+
+        onSuccess();
+    }
+
+    protected async Task SaveAsync<T>(
+        Func<Task<Result<T>>> saveAsync,
+        Action<T> onSuccess)
+    {
+        Errors.Clear();
+
+        Result<T> result = await saveAsync();
+
+        if (result.IsFailure)
+        {
+            Errors.Handle(result.Errors, Snackbar);
+            return;
+        }
+
+        onSuccess(result.Value);
+    }
+
+    protected abstract Task ExecuteSaveAsync();
 }

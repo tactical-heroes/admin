@@ -62,7 +62,7 @@ public sealed class MudFormComponentBaseTests
             return base.SubmitAsync();
         }
 
-        protected override Task SaveAsync()
+        protected override Task ExecuteSaveAsync()
         {
             SaveCount++;
             SaveStarted.TrySetResult();

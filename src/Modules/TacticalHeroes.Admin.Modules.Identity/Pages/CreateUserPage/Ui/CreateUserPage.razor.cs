@@ -20,9 +20,6 @@ public partial class CreateUserPage
     [Inject]
     private NavigationManager Navigation { get; set; } = null!;
 
-    [Inject]
-    private ISnackbar Snackbar { get; set; } = null!;
-
     [PersistentState(AllowUpdates = true)]
     public List<UserStatus>? Statuses { get; set; }
 
@@ -60,20 +57,15 @@ public partial class CreateUserPage
         _loading = false;
     }
 
-    protected override async Task SaveAsync()
+    protected override Task ExecuteSaveAsync()
     {
-        Errors.Clear();
-
-        Result<Guid> result = await CreateUserApi.CreateAsync(Model, LifetimeToken);
-
-        if (result.IsFailure)
-        {
-            Errors.Handle(result.Errors, Snackbar);
-            return;
-        }
-
-        Snackbar.Add("Пользователь создан", Severity.Success);
-        Navigation.NavigateTo(IdentityRoutes.User(result.Value));
+        return SaveAsync(
+            () => CreateUserApi.CreateAsync(Model, LifetimeToken),
+            id =>
+            {
+                Snackbar.Add("Пользователь создан", Severity.Success);
+                Navigation.NavigateTo(IdentityRoutes.User(id));
+            });
     }
 
     private string GetStatusDisplayName(string? statusName)

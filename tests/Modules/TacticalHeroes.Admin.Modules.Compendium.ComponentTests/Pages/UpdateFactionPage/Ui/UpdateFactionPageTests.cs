@@ -65,9 +65,24 @@ public sealed class UpdateFactionPageTests : BunitContext
         });
     }
 
+    [Fact(DisplayName = "Displays a server validation error on its field")]
+    public void Submit_Should_DisplayFieldError_When_ServerRejectsFactionName()
+    {
+        _handler.RejectName = true;
+        var component = Render<UpdateFactionPageComponent>(parameters => parameters
+            .Add(page => page.Id, _factionId));
+
+        component.WaitForElement(".submit-action").Click();
+
+        component.WaitForAssertion(() => component.Markup.ShouldContain(
+            "A faction with this name already exists."));
+    }
+
     private sealed class UpdateFactionHandler(Guid factionId) : HttpMessageHandler
     {
         public int PutCount { get; private set; }
+
+        public bool RejectName { get; set; }
 
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
@@ -93,7 +108,26 @@ public sealed class UpdateFactionPageTests : BunitContext
             request.Method.ShouldBe(HttpMethod.Put);
             PutCount++;
 
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NoContent));
+            var response = RejectName
+                ? new HttpResponseMessage(HttpStatusCode.BadRequest)
+                {
+                    Content = new StringContent(
+                        """
+                        {
+                          "status": 400,
+                          "errors": {
+                            "Name": [
+                              "A faction with this name already exists."
+                            ]
+                          }
+                        }
+                        """,
+                        Encoding.UTF8,
+                        "application/json"),
+                }
+                : new HttpResponseMessage(HttpStatusCode.NoContent);
+
+            return Task.FromResult(response);
         }
     }
 }
