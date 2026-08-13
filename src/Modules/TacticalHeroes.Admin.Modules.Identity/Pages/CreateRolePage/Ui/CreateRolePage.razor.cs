@@ -14,6 +14,7 @@ public partial class CreateRolePage
 {
     private readonly CreateRoleFormModel Role = new();
     private readonly FormErrorState<CreateRoleFormModel> _errors = new();
+    private readonly CreateRoleFormModelValidator _validator = new();
     private MudForm? _form;
     private bool _isValid;
     private bool _saving;

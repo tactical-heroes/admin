@@ -13,6 +13,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.Pages.UpdateRolePage.Ui;
 public partial class UpdateRolePage
 {
     private readonly FormErrorState<UpdateRoleFormModel> _errors = new();
+    private readonly UpdateRoleFormModelValidator _validator = new();
     private MudForm? _form;
     private bool _isValid;
     private bool _loading;

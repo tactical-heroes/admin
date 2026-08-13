@@ -14,6 +14,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.Pages.UpdateUserPage.Ui;
 public partial class UpdateUserPage
 {
     private readonly FormErrorState<UpdateUserFormModel> _errors = new();
+    private readonly UpdateUserFormModelValidator _validator = new();
     private MudForm? _form;
     private bool _isValid;
     private bool _loading;

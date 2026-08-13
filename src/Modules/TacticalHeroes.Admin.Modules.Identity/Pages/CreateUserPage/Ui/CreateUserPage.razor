@@ -44,51 +44,51 @@ else if (Statuses is not null)
 {
     <div class="user-edit-form">
         <MudForm @ref="_form"
+                 Model="User"
+                 Validation="@_validator.ValidateValue"
                  @bind-IsValid="_isValid">
             <EditSection Title="Аккаунт">
                 <MudGrid Spacing="2">
                     <MudItem xs="12" md="6">
                         <MudTextField T="string"
                                       @bind-Value="User.Email"
+                                      For="@(() => User.Email)"
                                       Label="Email"
                                       InputType="InputType.Email"
                                       Variant="Variant.Outlined"
                                       Error="@_errors.HasError(nameof(CreateUserFormModel.Email))"
                                       ErrorText="@_errors.GetError(nameof(CreateUserFormModel.Email))"
-                                      Required="true"
-                                      RequiredError="Укажите email" />
+                                      MaxLength="320" />
                     </MudItem>
                     <MudItem xs="12" md="6">
                         <MudTextField T="string"
                                       @bind-Value="User.UserName"
+                                      For="@(() => User.UserName)"
                                       Label="Имя пользователя"
                                       Variant="Variant.Outlined"
                                       Error="@_errors.HasError(nameof(CreateUserFormModel.UserName))"
                                       ErrorText="@_errors.GetError(nameof(CreateUserFormModel.UserName))"
-                                      Required="true"
-                                      RequiredError="Укажите имя пользователя" />
+                                      MaxLength="256" />
                     </MudItem>
                     <MudItem xs="12" md="6">
                         <MudTextField T="string"
                                       @bind-Value="User.Password"
+                                      For="@(() => User.Password)"
                                       Label="Пароль"
                                       InputType="InputType.Password"
                                       Variant="Variant.Outlined"
                                       Error="@_errors.HasError(nameof(CreateUserFormModel.Password))"
-                                      ErrorText="@_errors.GetError(nameof(CreateUserFormModel.Password))"
-                                      Required="true"
-                                      RequiredError="Укажите пароль" />
+                                      ErrorText="@_errors.GetError(nameof(CreateUserFormModel.Password))" />
                     </MudItem>
                     <MudItem xs="12" md="6">
                         <MudSelect T="string"
                                    @bind-Value="User.Status"
+                                   For="@(() => User.Status)"
                                    ToStringFunc="@GetStatusDisplayName"
                                    Label="Статус"
                                    Variant="Variant.Outlined"
                                    Error="@_errors.HasError(nameof(CreateUserFormModel.Status))"
-                                   ErrorText="@_errors.GetError(nameof(CreateUserFormModel.Status))"
-                                   Required="true"
-                                   RequiredError="Выберите статус">
+                                   ErrorText="@_errors.GetError(nameof(CreateUserFormModel.Status))">
                             @foreach (var status in Statuses)
                             {
                                 <MudSelectItem T="string" Value="@status.Name">

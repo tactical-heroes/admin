@@ -49,6 +49,22 @@ public sealed class UpdateRolePageTests : BunitContext
         });
     }
 
+    [Fact(DisplayName = "Does not update a role when its name is empty")]
+    public void Submit_Should_DisplayValidationError_When_RoleNameIsEmpty()
+    {
+        var component = Render<UpdateRolePageComponent>(parameters => parameters
+            .Add(page => page.Id, _roleId));
+        component.WaitForElement("input").Change(string.Empty);
+
+        component.Find(".submit-action").Click();
+
+        component.WaitForAssertion(() =>
+        {
+            _handler.PutCount.ShouldBe(0);
+            component.Markup.ShouldContain("Укажите название роли");
+        });
+    }
+
     private sealed class UpdateRoleHandler(Guid roleId) : HttpMessageHandler
     {
         public int PutCount { get; private set; }

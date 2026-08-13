@@ -14,6 +14,7 @@ public partial class CreateFactionPage
 {
     private readonly CreateFactionFormModel Faction = new();
     private readonly FormErrorState<CreateFactionFormModel> _errors = new();
+    private readonly CreateFactionFormModelValidator _validator = new();
     private MudForm? _form;
     private bool _isValid;
     private bool _saving;

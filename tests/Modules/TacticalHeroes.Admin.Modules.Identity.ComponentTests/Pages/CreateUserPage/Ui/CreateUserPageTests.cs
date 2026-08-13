@@ -53,6 +53,21 @@ public sealed class CreateUserPageTests : BunitContext
         });
     }
 
+    [Fact(DisplayName = "Does not create a user when account fields are empty")]
+    public void Submit_Should_DisplayValidationErrors_When_AccountFieldsAreEmpty()
+    {
+        var component = Render<CreateUserPageComponent>();
+        component.WaitForElement(".submit-action").Click();
+
+        component.WaitForAssertion(() =>
+        {
+            _handler.PostCount.ShouldBe(0);
+            component.Markup.ShouldContain("Укажите email");
+            component.Markup.ShouldContain("Укажите имя пользователя");
+            component.Markup.ShouldContain("Укажите пароль");
+        });
+    }
+
     private sealed class CreateUserHandler(Guid createdId) : HttpMessageHandler
     {
         public int PostCount { get; private set; }

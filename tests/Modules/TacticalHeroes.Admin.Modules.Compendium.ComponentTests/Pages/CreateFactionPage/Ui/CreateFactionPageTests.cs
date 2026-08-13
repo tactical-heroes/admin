@@ -51,6 +51,21 @@ public sealed class CreateFactionPageTests : BunitContext
         });
     }
 
+    [Fact(DisplayName = "Does not create a faction when required fields are empty")]
+    public void Submit_Should_DisplayValidationErrors_When_RequiredFieldsAreEmpty()
+    {
+        var component = Render<CreateFactionPageComponent>();
+
+        component.Find(".submit-action").Click();
+
+        component.WaitForAssertion(() =>
+        {
+            _handler.PostCount.ShouldBe(0);
+            component.Markup.ShouldContain("Укажите название фракции");
+            component.Markup.ShouldContain("Укажите описание фракции");
+        });
+    }
+
     [Fact(DisplayName = "Displays a server validation error on its field")]
     public void Submit_Should_DisplayFieldError_When_ServerRejectsFactionName()
     {

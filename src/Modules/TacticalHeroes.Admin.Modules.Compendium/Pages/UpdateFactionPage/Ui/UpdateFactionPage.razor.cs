@@ -13,6 +13,7 @@ namespace TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateFactionPage.Ui;
 public partial class UpdateFactionPage
 {
     private readonly FormErrorState<UpdateFactionFormModel> _errors = new();
+    private readonly UpdateFactionFormModelValidator _validator = new();
     private MudForm? _form;
     private bool _isValid;
     private bool _loading;

@@ -19,17 +19,18 @@
 </PageHeader>
 
 <MudForm @ref="_form"
+         Model="Role"
+         Validation="@_validator.ValidateValue"
          @bind-IsValid="_isValid">
     <EditSection Title="Основные данные">
         <MudTextField T="string"
                       @bind-Value="Role.Name"
+                      For="@(() => Role.Name)"
                       Label="Название роли"
                       Variant="Variant.Outlined"
                       Error="@_errors.HasError(nameof(CreateRoleFormModel.Name))"
                       ErrorText="@_errors.GetError(nameof(CreateRoleFormModel.Name))"
-                      Required="true"
-                      RequiredError="Укажите название роли"
-                      MaxLength="100" />
+                      MaxLength="128" />
     </EditSection>
 
     <EditSection Title="Доступ">

@@ -18,26 +18,26 @@
 </PageHeader>
 
 <MudForm @ref="_form"
+         Model="Faction"
+         Validation="@_validator.ValidateValue"
          @bind-IsValid="_isValid">
     <EditSection Title="Основные данные">
         <MudStack Spacing="3">
             <MudTextField T="string"
                           @bind-Value="Faction.Name"
+                          For="@(() => Faction.Name)"
                           Label="Название фракции"
                           Variant="Variant.Outlined"
                           Error="@_errors.HasError(nameof(CreateFactionFormModel.Name))"
                           ErrorText="@_errors.GetError(nameof(CreateFactionFormModel.Name))"
-                          Required="true"
-                          RequiredError="Укажите название фракции"
                           MaxLength="128" />
             <MudTextField T="string"
                           @bind-Value="Faction.Description"
+                          For="@(() => Faction.Description)"
                           Label="Описание"
                           Variant="Variant.Outlined"
                           Error="@_errors.HasError(nameof(CreateFactionFormModel.Description))"
                           ErrorText="@_errors.GetError(nameof(CreateFactionFormModel.Description))"
-                          Required="true"
-                          RequiredError="Укажите описание фракции"
                           MaxLength="2000"
                           Lines="8" />
         </MudStack>

@@ -14,6 +14,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.Pages.CreateUserPage.Ui;
 public partial class CreateUserPage
 {
     private readonly FormErrorState<CreateUserFormModel> _errors = new();
+    private readonly CreateUserFormModelValidator _validator = new();
     private MudForm? _form;
     private bool _isValid;
     private bool _loading;

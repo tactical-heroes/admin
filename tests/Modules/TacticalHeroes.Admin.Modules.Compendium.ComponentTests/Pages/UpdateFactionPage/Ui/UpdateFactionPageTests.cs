@@ -49,6 +49,22 @@ public sealed class UpdateFactionPageTests : BunitContext
         });
     }
 
+    [Fact(DisplayName = "Does not update a faction when its name is empty")]
+    public void Submit_Should_DisplayValidationError_When_FactionNameIsEmpty()
+    {
+        var component = Render<UpdateFactionPageComponent>(parameters => parameters
+            .Add(page => page.Id, _factionId));
+        component.WaitForElement("input").Change(string.Empty);
+
+        component.Find(".submit-action").Click();
+
+        component.WaitForAssertion(() =>
+        {
+            _handler.PutCount.ShouldBe(0);
+            component.Markup.ShouldContain("Укажите название фракции");
+        });
+    }
+
     private sealed class UpdateFactionHandler(Guid factionId) : HttpMessageHandler
     {
         public int PutCount { get; private set; }

@@ -44,40 +44,41 @@ else if (User is not null && Statuses is not null)
 {
     <div class="user-edit-form">
         <MudForm @ref="_form"
+                 Model="User"
+                 Validation="@_validator.ValidateValue"
                  @bind-IsValid="_isValid">
             <EditSection Title="Аккаунт">
                 <MudGrid Spacing="2">
                     <MudItem xs="12" md="6">
                         <MudTextField T="string"
                                       @bind-Value="User.Email"
+                                      For="@(() => User.Email)"
                                       Label="Email"
                                       InputType="InputType.Email"
                                       Variant="Variant.Outlined"
                                       Error="@_errors.HasError(nameof(UpdateUserFormModel.Email))"
                                       ErrorText="@_errors.GetError(nameof(UpdateUserFormModel.Email))"
-                                      Required="true"
-                                      RequiredError="Укажите email" />
+                                      MaxLength="320" />
                     </MudItem>
                     <MudItem xs="12" md="6">
                         <MudTextField T="string"
                                       @bind-Value="User.UserName"
+                                      For="@(() => User.UserName)"
                                       Label="Имя пользователя"
                                       Variant="Variant.Outlined"
                                       Error="@_errors.HasError(nameof(UpdateUserFormModel.UserName))"
                                       ErrorText="@_errors.GetError(nameof(UpdateUserFormModel.UserName))"
-                                      Required="true"
-                                      RequiredError="Укажите имя пользователя" />
+                                      MaxLength="256" />
                     </MudItem>
                     <MudItem xs="12" md="6">
                         <MudSelect T="string"
                                    @bind-Value="User.Status"
+                                   For="@(() => User.Status)"
                                    ToStringFunc="@GetStatusDisplayName"
                                    Label="Статус"
                                    Variant="Variant.Outlined"
                                    Error="@_errors.HasError(nameof(UpdateUserFormModel.Status))"
-                                   ErrorText="@_errors.GetError(nameof(UpdateUserFormModel.Status))"
-                                   Required="true"
-                                   RequiredError="Выберите статус">
+                                   ErrorText="@_errors.GetError(nameof(UpdateUserFormModel.Status))">
                             @foreach (var status in Statuses)
                             {
                                 <MudSelectItem T="string" Value="@status.Name">

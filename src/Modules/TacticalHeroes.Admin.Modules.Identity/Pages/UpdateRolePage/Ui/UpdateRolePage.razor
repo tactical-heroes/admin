@@ -43,17 +43,18 @@ else if (!string.IsNullOrWhiteSpace(LoadError))
 else if (Role is not null)
 {
     <MudForm @ref="_form"
+             Model="Role"
+             Validation="@_validator.ValidateValue"
              @bind-IsValid="_isValid">
         <EditSection Title="Основные данные">
             <MudTextField T="string"
                           @bind-Value="Role.Name"
+                          For="@(() => Role.Name)"
                           Label="Название роли"
                           Variant="Variant.Outlined"
                           Error="@_errors.HasError(nameof(UpdateRoleFormModel.Name))"
                           ErrorText="@_errors.GetError(nameof(UpdateRoleFormModel.Name))"
-                          Required="true"
-                          RequiredError="Укажите название роли"
-                          MaxLength="100" />
+                          MaxLength="128" />
         </EditSection>
 
         <EditSection Title="Доступ">

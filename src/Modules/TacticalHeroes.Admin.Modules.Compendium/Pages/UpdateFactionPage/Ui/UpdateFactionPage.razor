@@ -42,26 +42,26 @@ else if (!string.IsNullOrWhiteSpace(LoadError))
 else if (Faction is not null)
 {
     <MudForm @ref="_form"
+             Model="Faction"
+             Validation="@_validator.ValidateValue"
              @bind-IsValid="_isValid">
         <EditSection Title="Основные данные">
             <MudStack Spacing="3">
                 <MudTextField T="string"
                               @bind-Value="Faction.Name"
+                              For="@(() => Faction.Name)"
                               Label="Название фракции"
                               Variant="Variant.Outlined"
                               Error="@_errors.HasError(nameof(UpdateFactionFormModel.Name))"
                               ErrorText="@_errors.GetError(nameof(UpdateFactionFormModel.Name))"
-                              Required="true"
-                              RequiredError="Укажите название фракции"
                               MaxLength="128" />
                 <MudTextField T="string"
                               @bind-Value="Faction.Description"
+                              For="@(() => Faction.Description)"
                               Label="Описание"
                               Variant="Variant.Outlined"
                               Error="@_errors.HasError(nameof(UpdateFactionFormModel.Description))"
                               ErrorText="@_errors.GetError(nameof(UpdateFactionFormModel.Description))"
-                              Required="true"
-                              RequiredError="Укажите описание фракции"
                               MaxLength="2000"
                               Lines="8" />
             </MudStack>

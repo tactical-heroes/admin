@@ -49,6 +49,22 @@ public sealed class UpdateUserPageTests : BunitContext
         });
     }
 
+    [Fact(DisplayName = "Does not update a user when email is empty")]
+    public void Submit_Should_DisplayValidationError_When_EmailIsEmpty()
+    {
+        var component = Render<UpdateUserPageComponent>(parameters => parameters
+            .Add(page => page.Id, _userId));
+        component.WaitForElement("input").Change(string.Empty);
+
+        component.Find(".submit-action").Click();
+
+        component.WaitForAssertion(() =>
+        {
+            _handler.PutCount.ShouldBe(0);
+            component.Markup.ShouldContain("Укажите email");
+        });
+    }
+
     private sealed class UpdateUserHandler(Guid userId) : HttpMessageHandler
     {
         public int PutCount { get; private set; }
