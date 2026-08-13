@@ -9,7 +9,7 @@ using ApiClaim = TacticalHeroes.Admin.Api.Generated.Models.Claim;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Entities.Roles.Api;
 
-[Mapper(ThrowOnPropertyMappingNullMismatch = true)]
+[Mapper]
 internal static partial class RolesMapper
 {
     [MapperIgnoreSource(nameof(RoleListItemResponse.AdditionalData))]

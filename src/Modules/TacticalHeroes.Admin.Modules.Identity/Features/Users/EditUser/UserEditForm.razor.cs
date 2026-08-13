@@ -30,18 +30,6 @@ public partial class UserEditForm
     [Parameter]
     public EventCallback OnSave { get; set; }
 
-    private bool HasError(string field)
-    {
-        return Errors.ContainsKey(field);
-    }
-
-    private string? GetError(string field)
-    {
-        return Errors.TryGetValue(field, out string[]? messages)
-            ? string.Join(" ", messages)
-            : null;
-    }
-
     private string GetStatusDisplayName(string? statusName)
     {
         return Statuses.FirstOrDefault(status => status.Name == statusName)?.DisplayName

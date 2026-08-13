@@ -67,6 +67,22 @@ public sealed class ApiResultExtensionsTests
             .ShouldBe(result.Errors);
     }
 
+    [Fact(DisplayName = "Maps errors only to writable form model fields")]
+    public void GetFieldErrors_Should_MapOnlyWritableModelFields()
+    {
+        Error[] errors =
+        [
+            Error.Validation("Name is required.").WithField("name"),
+            Error.Validation("Identifier is invalid.").WithField("Id"),
+        ];
+
+        IReadOnlyDictionary<string, string[]> fieldErrors =
+            ApiErrorMessage.GetFieldErrors<TestFormModel>(errors);
+
+        fieldErrors.Keys.ShouldBe([nameof(TestFormModel.Name)]);
+        ApiErrorMessage.GetUnhandledErrors<TestFormModel>(errors).ShouldBe([errors[1]]);
+    }
+
     [Fact(DisplayName = "Maps problem detail and status to a typed error")]
     public async Task ToApiResultAsync_Should_MapTypedError_When_ServerReturnsProblem()
     {
@@ -133,5 +149,12 @@ public sealed class ApiResultExtensionsTests
 
         result.IsFailure.ShouldBeTrue();
         result.FirstError.Type.ShouldBe(ErrorType.Unexpected);
+    }
+
+    private sealed class TestFormModel
+    {
+        public string Name { get; set; } = string.Empty;
+
+        public Guid Id { get; }
     }
 }

@@ -27,18 +27,6 @@ public partial class RoleEditForm
     [Parameter]
     public EventCallback OnSave { get; set; }
 
-    private bool HasError(string field)
-    {
-        return Errors.ContainsKey(field);
-    }
-
-    private string? GetError(string field)
-    {
-        return Errors.TryGetValue(field, out string[]? messages)
-            ? string.Join(" ", messages)
-            : null;
-    }
-
     private async Task SubmitAsync()
     {
         if (_form is null)

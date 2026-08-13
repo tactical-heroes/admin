@@ -8,8 +8,8 @@
                       @bind-Value="Model.Name"
                       Label="Название роли"
                       Variant="Variant.Outlined"
-                      Error="@HasError(nameof(RoleDetails.Name))"
-                      ErrorText="@GetError(nameof(RoleDetails.Name))"
+                      Error="@Errors.HasError(nameof(RoleDetails.Name))"
+                      ErrorText="@Errors.GetError(nameof(RoleDetails.Name))"
                       Required="true"
                       RequiredError="Укажите название роли"
                       MaxLength="100" />

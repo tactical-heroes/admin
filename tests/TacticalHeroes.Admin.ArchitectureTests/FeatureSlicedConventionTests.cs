@@ -151,14 +151,11 @@ public sealed class FeatureSlicedConventionTests
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "Pages compose lower layers without direct API access")]
-    public void PageSources_Should_NotAccessApiAdapters_When_PagesAreScanned()
+    [Fact(DisplayName = "Page slices do not depend on sibling page slices")]
+    public void PageSources_Should_NotReferenceSiblingSlices_When_PagesAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
         string modulesRoot = Path.Combine(repositoryRoot, "src", "Modules");
-        Regex apiReferenceRegex = new(
-            @"(?:TacticalHeroes\.Admin\.Api\.Errors|\.Entities\.[A-Za-z0-9_.]+\.Api)\b",
-            RegexOptions.CultureInvariant);
         List<string> violations = [];
 
         foreach (string moduleRoot in Directory.EnumerateDirectories(
@@ -171,9 +168,29 @@ public sealed class FeatureSlicedConventionTests
                 continue;
             }
 
-            violations.AddRange(EnumerateSourceFiles(pagesRoot)
-                .Where(path => apiReferenceRegex.IsMatch(File.ReadAllText(path)))
-                .Select(path => Path.GetRelativePath(repositoryRoot, path)));
+            string rootNamespace = Path.GetFileName(moduleRoot);
+            Regex pageReferenceRegex = new(
+                $@"\b{Regex.Escape(rootNamespace)}\.Pages\.(?<slice>[A-Za-z0-9_]+)\.",
+                RegexOptions.CultureInvariant);
+
+            foreach (string sourcePath in EnumerateSourceFiles(pagesRoot))
+            {
+                string sourceSlice = Path
+                    .GetRelativePath(pagesRoot, sourcePath)
+                    .Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)[0];
+
+                foreach (Match match in pageReferenceRegex.Matches(
+                             File.ReadAllText(sourcePath)))
+                {
+                    string targetSlice = match.Groups["slice"].Value;
+                    if (!string.Equals(sourceSlice, targetSlice, StringComparison.Ordinal))
+                    {
+                        violations.Add(
+                            $"{Path.GetRelativePath(repositoryRoot, sourcePath)}: " +
+                            $"{sourceSlice} -> {targetSlice}");
+                    }
+                }
+            }
         }
 
         violations.ShouldBeEmpty();

@@ -1,0 +1,57 @@
+@attribute [Route(CompendiumRoutes.Factions)]
+@attribute [Authorize]
+@attribute [StreamRendering]
+@using TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Model
+
+<PageTitle>Фракции · Tactical Heroes</PageTitle>
+
+<PageHeader Title="Фракции"
+            Subtitle="Управление игровыми фракциями">
+    <Actions>
+        <MudButton Href="@CompendiumRoutes.CreateFaction"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add">
+            Добавить фракцию
+        </MudButton>
+    </Actions>
+</PageHeader>
+
+<EntityList TItem="FactionListItem"
+            Items="Page?.Items"
+            Loading="_loading"
+            LoadError="@LoadError"
+            EmptyText="Фракции не найдены"
+            RefreshLabel="Обновить список фракций"
+            OnRefresh="RetryAsync"
+            PageNumber="CurrentPageNumber"
+            PageSize="CurrentPageSize"
+            TotalPages="@(Page?.TotalPages ?? 0)"
+            TotalCount="@(Page?.TotalCount ?? 0)"
+            OnPageNumberChanged="ChangePage"
+            OnPageSizeChanged="ChangePageSize">
+    <HeaderContent>
+        <MudTh>Название</MudTh>
+        <MudTh>Описание</MudTh>
+        <MudTh Class="actions-column">Действия</MudTh>
+    </HeaderContent>
+    <RowTemplate Context="faction">
+        <MudTd DataLabel="Название">
+            <MudText Typo="Typo.body2" Class="entity-name">
+                @faction.Name
+            </MudText>
+        </MudTd>
+        <MudTd DataLabel="Описание">
+            <MudText Typo="Typo.body2" Class="entity-description">
+                @faction.Description
+            </MudText>
+        </MudTd>
+        <MudTd DataLabel="Действия" Class="actions-column">
+            <EntityRowActions EditHref="@CompendiumRoutes.Faction(faction.Id)"
+                              EditLabel="Редактировать фракцию"
+                              DeleteLabel="Удалить фракцию"
+                              Disabled="@(_loading || _deletingId.HasValue)"
+                              OnDelete="@(() => ConfirmDeleteAsync(faction))" />
+        </MudTd>
+    </RowTemplate>
+</EntityList>

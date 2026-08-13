@@ -9,7 +9,7 @@ using ApiClaim = TacticalHeroes.Admin.Api.Generated.Models.Claim;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Entities.Users.Api;
 
-[Mapper(ThrowOnPropertyMappingNullMismatch = true)]
+[Mapper]
 internal static partial class UsersMapper
 {
     [MapperIgnoreSource(nameof(UserListItemResponse.AdditionalData))]

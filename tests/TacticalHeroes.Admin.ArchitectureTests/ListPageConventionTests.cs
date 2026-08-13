@@ -6,25 +6,29 @@ public sealed class ListPageConventionTests
 {
     private static readonly string[] ListPagePaths =
     [
-        "src/Modules/TacticalHeroes.Admin.Modules.Compendium/Pages/Factions/FactionsPage.razor",
+        "src/Modules/TacticalHeroes.Admin.Modules.Compendium/Pages/FactionListPage/Ui/FactionListPage.razor",
         "src/Modules/TacticalHeroes.Admin.Modules.Identity/Pages/Roles/RolesPage.razor",
         "src/Modules/TacticalHeroes.Admin.Modules.Identity/Pages/Users/UsersPage.razor",
+    ];
+
+    private static readonly string[] ListSurfacePaths =
+    [
+        "src/Modules/TacticalHeroes.Admin.Modules.Compendium/Pages/FactionListPage/Ui/FactionListPage.razor",
+        "src/Modules/TacticalHeroes.Admin.Modules.Identity/Widgets/Roles/RoleList/RoleListWidget.razor",
+        "src/Modules/TacticalHeroes.Admin.Modules.Identity/Widgets/Users/UserList/UserListWidget.razor",
     ];
 
     private static readonly Regex IdentifierColumnRegex = new(
         "<MudTh[^>]*>\\s*ID\\s*</MudTh>|DataLabel\\s*=\\s*\"ID\"",
         RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
-    [Fact(DisplayName = "List widgets use the shared list and row action components")]
-    public void ListWidgets_Should_UseSharedComponents_When_AdminListsAreScanned()
+    [Fact(DisplayName = "List surfaces use the shared list and row action components")]
+    public void ListSurfaces_Should_UseSharedComponents_When_AdminListsAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
-        string[] listWidgetPaths = GetListWidgetPaths(repositoryRoot);
         List<string> violations = [];
 
-        listWidgetPaths.ShouldNotBeEmpty();
-
-        foreach (string relativePath in listWidgetPaths)
+        foreach (string relativePath in ListSurfacePaths)
         {
             string source = ReadSource(repositoryRoot, relativePath);
 
@@ -39,31 +43,27 @@ public sealed class ListPageConventionTests
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "List widgets do not expose identifier columns")]
-    public void ListWidgets_Should_NotExposeIdentifiers_When_AdminListsAreScanned()
+    [Fact(DisplayName = "List surfaces do not expose identifier columns")]
+    public void ListSurfaces_Should_NotExposeIdentifiers_When_AdminListsAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
-        string[] listWidgetPaths = GetListWidgetPaths(repositoryRoot);
-        string[] violations = listWidgetPaths
+        string[] violations = ListSurfacePaths
             .Where(relativePath => IdentifierColumnRegex.IsMatch(
                 ReadSource(repositoryRoot, relativePath)))
             .ToArray();
 
-        listWidgetPaths.ShouldNotBeEmpty();
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "List widgets bind load errors instead of passing a literal")]
-    public void ListWidgets_Should_BindLoadErrors_When_AdminListsAreScanned()
+    [Fact(DisplayName = "List surfaces bind load errors instead of passing a literal")]
+    public void ListSurfaces_Should_BindLoadErrors_When_AdminListsAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
-        string[] listWidgetPaths = GetListWidgetPaths(repositoryRoot);
-        string[] violations = listWidgetPaths
+        string[] violations = ListSurfacePaths
             .Where(relativePath => !ReadSource(repositoryRoot, relativePath)
                 .Contains("LoadError=\"@LoadError\"", StringComparison.Ordinal))
             .ToArray();
 
-        listWidgetPaths.ShouldNotBeEmpty();
         violations.ShouldBeEmpty();
     }
 
@@ -93,20 +93,5 @@ public sealed class ListPageConventionTests
         return File.ReadAllText(Path.Combine(
             repositoryRoot,
             relativePath.Replace('/', Path.DirectorySeparatorChar)));
-    }
-
-    private static string[] GetListWidgetPaths(string repositoryRoot)
-    {
-        string modulesRoot = Path.Combine(repositoryRoot, "src", "Modules");
-
-        return Directory
-            .EnumerateFiles(
-                modulesRoot,
-                "*ListWidget.razor",
-                SearchOption.AllDirectories)
-            .Select(path => Path.GetRelativePath(repositoryRoot, path)
-                .Replace(Path.DirectorySeparatorChar, '/'))
-            .Order(StringComparer.Ordinal)
-            .ToArray();
     }
 }
