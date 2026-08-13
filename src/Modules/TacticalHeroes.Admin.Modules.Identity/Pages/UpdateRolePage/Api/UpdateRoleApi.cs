@@ -6,7 +6,7 @@ using TacticalHeroes.Admin.Modules.Identity.Pages.UpdateRolePage.Model;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.UpdateRolePage.Api;
 
-public sealed class RolesApi(TacticalHeroesApiClient client)
+public sealed class UpdateRoleApi(TacticalHeroesApiClient client)
 {
     public async Task<Result<UpdateRoleFormModel>> GetAsync(
         Guid id,

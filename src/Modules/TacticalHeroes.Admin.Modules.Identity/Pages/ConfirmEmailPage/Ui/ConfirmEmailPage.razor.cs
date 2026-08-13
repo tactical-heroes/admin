@@ -13,7 +13,7 @@ public partial class ConfirmEmailPage
     private string? _error;
 
     [Inject]
-    private AuthApi AuthApi { get; set; } = null!;
+    private ConfirmEmailApi ConfirmEmailApi { get; set; } = null!;
 
     [Parameter]
     public Guid? UserId { get; set; }
@@ -31,7 +31,7 @@ public partial class ConfirmEmailPage
             return;
         }
 
-        Result result = await AuthApi.ConfirmEmailAsync(
+        Result result = await ConfirmEmailApi.ConfirmEmailAsync(
             UserId!.Value,
             EmailConfirmationToken!,
             LifetimeToken);

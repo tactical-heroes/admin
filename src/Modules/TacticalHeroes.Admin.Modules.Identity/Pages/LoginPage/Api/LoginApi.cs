@@ -6,7 +6,7 @@ using TacticalHeroes.Admin.Api.Generated.Models;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Api;
 
-public sealed class AuthApi(TacticalHeroesApiClient client)
+public sealed class LoginApi(TacticalHeroesApiClient client)
 {
     public async Task<Result<Guid>> RegisterAsync(
         string email,
@@ -24,7 +24,7 @@ public sealed class AuthApi(TacticalHeroesApiClient client)
                 cancellationToken: cancellationToken)
             .ToApiResultAsync(cancellationToken);
 
-        return result.Map(AuthMapper.ToId);
+        return result.Map(LoginMapper.ToId);
     }
 
     public Task<Result> ResendConfirmationEmailAsync(

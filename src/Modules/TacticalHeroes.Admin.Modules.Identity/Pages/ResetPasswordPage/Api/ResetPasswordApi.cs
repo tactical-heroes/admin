@@ -6,7 +6,7 @@ using TacticalHeroes.Admin.Api.Generated.Models;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.ResetPasswordPage.Api;
 
-public sealed class AuthApi(TacticalHeroesApiClient client)
+public sealed class ResetPasswordApi(TacticalHeroesApiClient client)
 {
     public Task<Result> ResetPasswordAsync(
         Guid userId,

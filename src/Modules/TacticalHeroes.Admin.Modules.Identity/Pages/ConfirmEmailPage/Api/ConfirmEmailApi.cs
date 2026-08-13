@@ -6,7 +6,7 @@ using TacticalHeroes.Admin.Api.Generated.Models;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.ConfirmEmailPage.Api;
 
-public sealed class AuthApi(TacticalHeroesApiClient client)
+public sealed class ConfirmEmailApi(TacticalHeroesApiClient client)
 {
     public Task<Result> ConfirmEmailAsync(
         Guid userId,

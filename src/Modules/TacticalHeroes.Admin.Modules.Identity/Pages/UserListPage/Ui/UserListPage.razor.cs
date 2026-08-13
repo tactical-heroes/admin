@@ -17,7 +17,7 @@ public partial class UserListPage
     private string? _emailFilter;
 
     [Inject]
-    private UsersApi UsersApi { get; set; } = null!;
+    private UserListApi UserListApi { get; set; } = null!;
 
     [Inject]
     private IDialogService DialogService { get; set; } = null!;
@@ -116,7 +116,7 @@ public partial class UserListPage
 
         Result result = await ListState.DeleteAsync(
             user.Id,
-            cancellationToken => UsersApi.DeleteAsync(user.Id, cancellationToken),
+            cancellationToken => UserListApi.DeleteAsync(user.Id, cancellationToken),
             LifetimeToken);
 
         if (result.IsFailure)
@@ -144,7 +144,7 @@ public partial class UserListPage
         return ListState.LoadAsync(
             CurrentPageNumber,
             CurrentPageSize,
-            cancellationToken => UsersApi.GetPageAsync(
+            cancellationToken => UserListApi.GetPageAsync(
                 CurrentPageNumber,
                 CurrentPageSize,
                 normalizedEmail,

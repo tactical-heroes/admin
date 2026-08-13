@@ -20,7 +20,7 @@ public partial class CreateRolePage
     private bool _saving;
 
     [Inject]
-    private RolesApi RolesApi { get; set; } = null!;
+    private CreateRoleApi CreateRoleApi { get; set; } = null!;
 
     [Inject]
     private NavigationManager Navigation { get; set; } = null!;
@@ -33,7 +33,7 @@ public partial class CreateRolePage
         _saving = true;
         _errors.Clear();
 
-        Result<Guid> result = await RolesApi.CreateAsync(Role, LifetimeToken);
+        Result<Guid> result = await CreateRoleApi.CreateAsync(Role, LifetimeToken);
 
         if (result.IsFailure)
         {

@@ -7,7 +7,7 @@ using TacticalHeroes.Admin.Modules.Identity.Pages.UpdateUserPage.Model;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.UpdateUserPage.Api;
 
-public sealed class UsersApi(TacticalHeroesApiClient client)
+public sealed class UpdateUserApi(TacticalHeroesApiClient client)
 {
     public async Task<Result<UpdateUserFormModel>> GetAsync(
         Guid id,

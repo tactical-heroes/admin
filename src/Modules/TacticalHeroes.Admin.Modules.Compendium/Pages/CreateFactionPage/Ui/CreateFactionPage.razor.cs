@@ -20,7 +20,7 @@ public partial class CreateFactionPage
     private bool _saving;
 
     [Inject]
-    private FactionsApi FactionsApi { get; set; } = null!;
+    private CreateFactionApi CreateFactionApi { get; set; } = null!;
 
     [Inject]
     private NavigationManager Navigation { get; set; } = null!;
@@ -33,7 +33,7 @@ public partial class CreateFactionPage
         _saving = true;
         _errors.Clear();
 
-        Result<Guid> result = await FactionsApi.CreateAsync(
+        Result<Guid> result = await CreateFactionApi.CreateAsync(
             Faction,
             LifetimeToken);
 

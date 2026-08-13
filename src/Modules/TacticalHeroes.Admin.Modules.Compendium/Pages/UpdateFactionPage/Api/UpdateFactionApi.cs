@@ -6,7 +6,7 @@ using TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateFactionPage.Model;
 
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateFactionPage.Api;
 
-public sealed class FactionsApi(TacticalHeroesApiClient client)
+public sealed class UpdateFactionApi(TacticalHeroesApiClient client)
 {
     public async Task<Result<UpdateFactionFormModel>> GetAsync(
         Guid id,

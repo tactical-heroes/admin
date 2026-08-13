@@ -21,7 +21,7 @@ public partial class CreateUserPage
     private bool _saving;
 
     [Inject]
-    private UsersApi UsersApi { get; set; } = null!;
+    private CreateUserApi CreateUserApi { get; set; } = null!;
 
     [Inject]
     private NavigationManager Navigation { get; set; } = null!;
@@ -55,7 +55,7 @@ public partial class CreateUserPage
         _errors.Clear();
 
         Result<IReadOnlyList<UserStatus>> result =
-            await UsersApi.GetStatusesAsync(LifetimeToken);
+            await CreateUserApi.GetStatusesAsync(LifetimeToken);
 
         if (result.IsFailure)
         {
@@ -76,7 +76,7 @@ public partial class CreateUserPage
         _saving = true;
         _errors.Clear();
 
-        Result<Guid> result = await UsersApi.CreateAsync(User, LifetimeToken);
+        Result<Guid> result = await CreateUserApi.CreateAsync(User, LifetimeToken);
 
         if (result.IsFailure)
         {

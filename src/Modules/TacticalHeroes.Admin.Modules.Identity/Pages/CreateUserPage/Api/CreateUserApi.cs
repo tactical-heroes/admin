@@ -7,7 +7,7 @@ using TacticalHeroes.Admin.Modules.Identity.Pages.CreateUserPage.Model;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.CreateUserPage.Api;
 
-public sealed class UsersApi(TacticalHeroesApiClient client)
+public sealed class CreateUserApi(TacticalHeroesApiClient client)
 {
     public async Task<Result<IReadOnlyList<UserStatus>>> GetStatusesAsync(
         CancellationToken cancellationToken)

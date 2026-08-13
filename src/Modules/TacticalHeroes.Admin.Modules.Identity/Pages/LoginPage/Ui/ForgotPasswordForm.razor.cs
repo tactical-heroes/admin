@@ -17,7 +17,7 @@ public partial class ForgotPasswordForm
     private string? _error;
 
     [Inject]
-    private AuthApi AuthApi { get; set; } = null!;
+    private LoginApi LoginApi { get; set; } = null!;
 
     [Parameter]
     public string? ReturnUrl { get; set; }
@@ -29,7 +29,7 @@ public partial class ForgotPasswordForm
         _submitting = true;
         _error = null;
 
-        Result result = await AuthApi.RequestPasswordResetAsync(
+        Result result = await LoginApi.RequestPasswordResetAsync(
             _model.Email,
             LifetimeToken);
 

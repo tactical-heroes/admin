@@ -20,7 +20,7 @@ public partial class UpdateFactionPage
     private bool _saving;
 
     [Inject]
-    private FactionsApi FactionsApi { get; set; } = null!;
+    private UpdateFactionApi UpdateFactionApi { get; set; } = null!;
 
     [Inject]
     private NavigationManager Navigation { get; set; } = null!;
@@ -56,7 +56,7 @@ public partial class UpdateFactionPage
         LoadedId = Id;
         _errors.Clear();
 
-        Result<UpdateFactionFormModel> result = await FactionsApi.GetAsync(
+        Result<UpdateFactionFormModel> result = await UpdateFactionApi.GetAsync(
             Id,
             LifetimeToken);
 
@@ -82,7 +82,7 @@ public partial class UpdateFactionPage
         _saving = true;
         _errors.Clear();
 
-        Result result = await FactionsApi.UpdateAsync(
+        Result result = await UpdateFactionApi.UpdateAsync(
             Id,
             Faction,
             LifetimeToken);

@@ -17,7 +17,7 @@ public partial class ResendConfirmationForm
     private string? _error;
 
     [Inject]
-    private AuthApi AuthApi { get; set; } = null!;
+    private LoginApi LoginApi { get; set; } = null!;
 
     [Parameter]
     public string? ReturnUrl { get; set; }
@@ -29,7 +29,7 @@ public partial class ResendConfirmationForm
         _submitting = true;
         _error = null;
 
-        Result result = await AuthApi.ResendConfirmationEmailAsync(
+        Result result = await LoginApi.ResendConfirmationEmailAsync(
             _model.Email,
             LifetimeToken);
 

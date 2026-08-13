@@ -20,7 +20,7 @@ public partial class UpdateRolePage
     private bool _saving;
 
     [Inject]
-    private RolesApi RolesApi { get; set; } = null!;
+    private UpdateRoleApi UpdateRoleApi { get; set; } = null!;
 
     [Inject]
     private NavigationManager Navigation { get; set; } = null!;
@@ -56,7 +56,7 @@ public partial class UpdateRolePage
         LoadedId = Id;
         _errors.Clear();
 
-        Result<UpdateRoleFormModel> result = await RolesApi.GetAsync(
+        Result<UpdateRoleFormModel> result = await UpdateRoleApi.GetAsync(
             Id,
             LifetimeToken);
 
@@ -82,7 +82,7 @@ public partial class UpdateRolePage
         _saving = true;
         _errors.Clear();
 
-        Result result = await RolesApi.UpdateAsync(Id, Role, LifetimeToken);
+        Result result = await UpdateRoleApi.UpdateAsync(Id, Role, LifetimeToken);
 
         if (result.IsFailure)
         {

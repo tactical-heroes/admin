@@ -21,7 +21,7 @@ public partial class UpdateUserPage
     private bool _saving;
 
     [Inject]
-    private UsersApi UsersApi { get; set; } = null!;
+    private UpdateUserApi UpdateUserApi { get; set; } = null!;
 
     [Inject]
     private NavigationManager Navigation { get; set; } = null!;
@@ -61,11 +61,11 @@ public partial class UpdateUserPage
         LoadedId = Id;
         _errors.Clear();
 
-        Task<Result<UpdateUserFormModel>> userTask = UsersApi.GetAsync(
+        Task<Result<UpdateUserFormModel>> userTask = UpdateUserApi.GetAsync(
             Id,
             LifetimeToken);
         Task<Result<IReadOnlyList<UserStatus>>> statusesTask =
-            UsersApi.GetStatusesAsync(LifetimeToken);
+            UpdateUserApi.GetStatusesAsync(LifetimeToken);
 
         await Task.WhenAll(userTask, statusesTask);
 
@@ -96,7 +96,7 @@ public partial class UpdateUserPage
         _saving = true;
         _errors.Clear();
 
-        Result result = await UsersApi.UpdateAsync(Id, User, LifetimeToken);
+        Result result = await UpdateUserApi.UpdateAsync(Id, User, LifetimeToken);
 
         if (result.IsFailure)
         {

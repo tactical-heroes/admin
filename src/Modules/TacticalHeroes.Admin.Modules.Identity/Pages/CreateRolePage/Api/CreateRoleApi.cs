@@ -6,7 +6,7 @@ using TacticalHeroes.Admin.Modules.Identity.Pages.CreateRolePage.Model;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.CreateRolePage.Api;
 
-public sealed class RolesApi(TacticalHeroesApiClient client)
+public sealed class CreateRoleApi(TacticalHeroesApiClient client)
 {
     public async Task<Result<Guid>> CreateAsync(
         CreateRoleFormModel role,

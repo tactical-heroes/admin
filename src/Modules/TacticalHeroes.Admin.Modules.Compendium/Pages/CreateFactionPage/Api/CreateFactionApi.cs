@@ -6,7 +6,7 @@ using TacticalHeroes.Admin.Modules.Compendium.Pages.CreateFactionPage.Model;
 
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.CreateFactionPage.Api;
 
-public sealed class FactionsApi(TacticalHeroesApiClient client)
+public sealed class CreateFactionApi(TacticalHeroesApiClient client)
 {
     public async Task<Result<Guid>> CreateAsync(
         CreateFactionFormModel faction,

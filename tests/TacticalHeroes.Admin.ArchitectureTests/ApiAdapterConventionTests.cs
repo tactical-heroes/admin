@@ -1,4 +1,3 @@
-using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace TacticalHeroes.Admin.ArchitectureTests;
@@ -9,20 +8,11 @@ public sealed class ApiAdapterConventionTests
         @"\.Map\(\s*(?<variable>[a-z][A-Za-z0-9_]*)\s*=>",
         RegexOptions.CultureInvariant);
 
-    [Fact(DisplayName = "API adapter names match their OpenAPI tags")]
-    public void ApiAdapters_Should_UseOpenApiTagName_When_Named()
+    [Fact(DisplayName = "API adapter types match their filenames")]
+    public void ApiAdapters_Should_DeclareTypeMatchingFilename()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
         string modulesRoot = Path.Combine(repositoryRoot, "src", "Modules");
-        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(
-            Path.Combine(repositoryRoot, "openapi", "tactical-heroes.json")));
-        HashSet<string> tags = document.RootElement.GetProperty("paths")
-            .EnumerateObject()
-            .SelectMany(path => path.Value.EnumerateObject())
-            .Where(operation => operation.Value.TryGetProperty("tags", out _))
-            .SelectMany(operation => operation.Value.GetProperty("tags").EnumerateArray())
-            .Select(tag => tag.GetString()!)
-            .ToHashSet(StringComparer.Ordinal);
         List<string> violations = [];
 
         foreach (string apiPath in Directory.EnumerateFiles(
@@ -31,15 +21,7 @@ public sealed class ApiAdapterConventionTests
                      SearchOption.AllDirectories))
         {
             string apiName = Path.GetFileNameWithoutExtension(apiPath);
-            string tag = apiName[..^"Api".Length];
             string source = File.ReadAllText(apiPath);
-
-            if (!tags.Contains(tag))
-            {
-                violations.Add(
-                    $"{Path.GetRelativePath(repositoryRoot, apiPath)}: " +
-                    $"'{tag}' is not an OpenAPI tag");
-            }
 
             if (!Regex.IsMatch(
                     source,
