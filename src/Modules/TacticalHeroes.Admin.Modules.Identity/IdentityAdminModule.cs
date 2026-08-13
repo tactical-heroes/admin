@@ -4,10 +4,17 @@ using Microsoft.Extensions.DependencyInjection;
 
 using MudBlazor;
 
-using TacticalHeroes.Admin.Modules.Identity.Entities.Auth.Api;
-using TacticalHeroes.Admin.Modules.Identity.Entities.Roles.Api;
-using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Api;
 using TacticalHeroes.Admin.Shared.Navigation;
+
+using ConfirmEmailApi = TacticalHeroes.Admin.Modules.Identity.Pages.ConfirmEmailPage.Api.AuthApi;
+using CreateRoleApi = TacticalHeroes.Admin.Modules.Identity.Pages.CreateRolePage.Api.RolesApi;
+using CreateUserApi = TacticalHeroes.Admin.Modules.Identity.Pages.CreateUserPage.Api.UsersApi;
+using LoginApi = TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Api.AuthApi;
+using ResetPasswordApi = TacticalHeroes.Admin.Modules.Identity.Pages.ResetPasswordPage.Api.AuthApi;
+using RoleListApi = TacticalHeroes.Admin.Modules.Identity.Pages.RoleListPage.Api.RolesApi;
+using UpdateRoleApi = TacticalHeroes.Admin.Modules.Identity.Pages.UpdateRolePage.Api.RolesApi;
+using UpdateUserApi = TacticalHeroes.Admin.Modules.Identity.Pages.UpdateUserPage.Api.UsersApi;
+using UserListApi = TacticalHeroes.Admin.Modules.Identity.Pages.UserListPage.Api.UsersApi;
 
 namespace TacticalHeroes.Admin.Modules.Identity;
 
@@ -34,9 +41,15 @@ public static class IdentityAdminModule
     public static IServiceCollection AddIdentityAdminModule(
         this IServiceCollection services)
     {
-        services.AddScoped<RolesApi>();
-        services.AddScoped<UsersApi>();
-        services.AddScoped<AuthApi>();
+        services.AddScoped<RoleListApi>();
+        services.AddScoped<CreateRoleApi>();
+        services.AddScoped<UpdateRoleApi>();
+        services.AddScoped<UserListApi>();
+        services.AddScoped<CreateUserApi>();
+        services.AddScoped<UpdateUserApi>();
+        services.AddScoped<LoginApi>();
+        services.AddScoped<ConfirmEmailApi>();
+        services.AddScoped<ResetPasswordApi>();
 
         return services;
     }

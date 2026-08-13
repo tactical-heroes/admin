@@ -57,30 +57,9 @@ public sealed class ApiResultExtensionsTests
         result.IsFailure.ShouldBeTrue();
         result.Errors.Count.ShouldBe(2);
         result.Errors.ShouldAllBe(error => error.Type == ErrorType.Validation);
-        ApiErrorMessage.GetFieldErrors(result.Errors)["Name"].ShouldBe(
-        [
-            "Role name is required.",
-            "Role name must be unique.",
-        ]);
-        ApiErrorMessage.GetFieldErrors(result.Errors, static _ => null).ShouldBeEmpty();
-        ApiErrorMessage.GetUnhandledErrors(result.Errors, static _ => null)
-            .ShouldBe(result.Errors);
-    }
-
-    [Fact(DisplayName = "Maps errors only to writable form model fields")]
-    public void GetFieldErrors_Should_MapOnlyWritableModelFields()
-    {
-        Error[] errors =
-        [
-            Error.Validation("Name is required.").WithField("name"),
-            Error.Validation("Identifier is invalid.").WithField("Id"),
-        ];
-
-        IReadOnlyDictionary<string, string[]> fieldErrors =
-            ApiErrorMessage.GetFieldErrors<TestFormModel>(errors);
-
-        fieldErrors.Keys.ShouldBe([nameof(TestFormModel.Name)]);
-        ApiErrorMessage.GetUnhandledErrors<TestFormModel>(errors).ShouldBe([errors[1]]);
+        result.Errors
+            .Select(error => error.Metadata[Error.FieldMetadataKey])
+            .ShouldAllBe(field => string.Equals(field as string, "Name", StringComparison.Ordinal));
     }
 
     [Fact(DisplayName = "Maps problem detail and status to a typed error")]
@@ -149,12 +128,5 @@ public sealed class ApiResultExtensionsTests
 
         result.IsFailure.ShouldBeTrue();
         result.FirstError.Type.ShouldBe(ErrorType.Unexpected);
-    }
-
-    private sealed class TestFormModel
-    {
-        public string Name { get; set; } = string.Empty;
-
-        public Guid Id { get; }
     }
 }

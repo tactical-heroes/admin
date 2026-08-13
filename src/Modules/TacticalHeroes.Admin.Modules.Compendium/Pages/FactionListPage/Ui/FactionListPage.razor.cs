@@ -4,9 +4,9 @@ using MudBlazor;
 
 using PANiXiDA.Core.ResultPattern;
 
-using TacticalHeroes.Admin.Api.Errors;
 using TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Api;
 using TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Model;
+using TacticalHeroes.Admin.Shared.Errors;
 using TacticalHeroes.Admin.Shared.Model;
 using TacticalHeroes.Admin.Shared.Ui;
 
@@ -14,9 +14,6 @@ namespace TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Ui;
 
 public partial class FactionListPage
 {
-    private bool _loading;
-    private Guid? _deletingId;
-
     [Inject]
     private FactionsApi FactionsApi { get; set; } = null!;
 
@@ -36,16 +33,9 @@ public partial class FactionListPage
     public int? PageSize { get; set; }
 
     [PersistentState(AllowUpdates = true)]
-    public PaginationResult<FactionListItem>? Page { get; set; }
+    public PagedListState<FactionListItem>? PersistedListState { get; set; }
 
-    [PersistentState(AllowUpdates = true)]
-    public string? LoadError { get; set; }
-
-    [PersistentState(AllowUpdates = true)]
-    public int? LoadedPageNumber { get; set; }
-
-    [PersistentState(AllowUpdates = true)]
-    public int? LoadedPageSize { get; set; }
+    private PagedListState<FactionListItem> ListState => PersistedListState ??= new();
 
     private int CurrentPageNumber => PageNumber is > 0
         ? PageNumber.Value
@@ -55,7 +45,7 @@ public partial class FactionListPage
 
     protected override async Task OnParametersSetAsync()
     {
-        if (LoadedPageNumber != CurrentPageNumber || LoadedPageSize != CurrentPageSize)
+        if (!ListState.Matches(CurrentPageNumber, CurrentPageSize))
         {
             await LoadPageAsync(CurrentPageNumber, CurrentPageSize);
         }
@@ -78,24 +68,7 @@ public partial class FactionListPage
 
     private async Task ConfirmDeleteAsync(FactionListItem faction)
     {
-        var parameters = new DialogParameters
-        {
-            [nameof(DeleteConfirmationDialog.EntityType)] = "фракцию",
-            [nameof(DeleteConfirmationDialog.EntityName)] = faction.Name,
-        };
-        var options = new DialogOptions
-        {
-            CloseButton = true,
-            FullWidth = true,
-            MaxWidth = MaxWidth.ExtraSmall,
-        };
-        IDialogReference dialog = await DialogService.ShowAsync<DeleteConfirmationDialog>(
-            string.Empty,
-            parameters,
-            options);
-        DialogResult? result = await dialog.Result;
-
-        if (result is null || result.Canceled)
+        if (!await DialogService.ConfirmDeleteAsync("фракцию", faction.Name))
         {
             return;
         }
@@ -105,20 +78,20 @@ public partial class FactionListPage
 
     private async Task DeleteAsync(Guid id)
     {
-        _deletingId = id;
-
-        Result result = await FactionsApi.DeleteAsync(id, CancellationToken.None);
+        Result result = await ListState.DeleteAsync(
+            id,
+            cancellationToken => FactionsApi.DeleteAsync(id, cancellationToken),
+            CancellationToken.None);
 
         if (result.IsFailure)
         {
             Snackbar.Add(ApiErrorMessage.FromErrors(result.Errors), Severity.Error);
-            _deletingId = null;
             return;
         }
 
         Snackbar.Add("Фракция удалена", Severity.Success);
 
-        if (Page?.Items.Count == 1 && CurrentPageNumber > 1)
+        if (ListState.Page?.Items.Count == 1 && CurrentPageNumber > 1)
         {
             ChangePage(CurrentPageNumber - 1);
         }
@@ -126,30 +99,17 @@ public partial class FactionListPage
         {
             await RetryAsync();
         }
-
-        _deletingId = null;
     }
 
-    private async Task LoadPageAsync(int pageNumber, int pageSize)
+    private Task LoadPageAsync(int pageNumber, int pageSize)
     {
-        _loading = true;
-        LoadError = null;
-        LoadedPageNumber = pageNumber;
-        LoadedPageSize = pageSize;
-
-        Result<PaginationResult<FactionListItem>> result =
-            await FactionsApi.GetPageAsync(pageNumber, pageSize, CancellationToken.None);
-
-        if (result.IsFailure)
-        {
-            Page = null;
-            LoadError = ApiErrorMessage.FromErrors(result.Errors);
-        }
-        else
-        {
-            Page = result.Value;
-        }
-
-        _loading = false;
+        return ListState.LoadAsync(
+            pageNumber,
+            pageSize,
+            cancellationToken => FactionsApi.GetPageAsync(
+                pageNumber,
+                pageSize,
+                cancellationToken),
+            CancellationToken.None);
     }
 }

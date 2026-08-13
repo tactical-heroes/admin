@@ -11,9 +11,9 @@ public sealed class RouteStateConventionTests
             {
                 ["src/Modules/TacticalHeroes.Admin.Modules.Compendium/Pages/FactionListPage/Ui/FactionListPage.razor.cs"] =
                     ["page", "pageSize"],
-                ["src/Modules/TacticalHeroes.Admin.Modules.Identity/Pages/Roles/RolesPage.razor.cs"] =
+                ["src/Modules/TacticalHeroes.Admin.Modules.Identity/Pages/RoleListPage/Ui/RoleListPage.razor.cs"] =
                     ["page", "pageSize"],
-                ["src/Modules/TacticalHeroes.Admin.Modules.Identity/Pages/Users/UsersPage.razor.cs"] =
+                ["src/Modules/TacticalHeroes.Admin.Modules.Identity/Pages/UserListPage/Ui/UserListPage.razor.cs"] =
                     ["page", "email", "pageSize"],
             };
         List<string> violations = [];

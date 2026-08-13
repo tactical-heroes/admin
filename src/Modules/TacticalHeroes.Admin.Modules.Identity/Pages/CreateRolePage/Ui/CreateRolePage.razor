@@ -1,0 +1,42 @@
+@attribute [Route(IdentityRoutes.CreateRole)]
+@attribute [Authorize]
+@attribute [StreamRendering]
+@using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Ui
+@using TacticalHeroes.Admin.Modules.Identity.Pages.CreateRolePage.Model
+
+<PageTitle>Новая роль · Tactical Heroes</PageTitle>
+
+<PageHeader Title="Новая роль"
+            Subtitle="Создайте роль и назначьте ей атрибуты доступа">
+    <Actions>
+        <MudButton Href="@IdentityRoutes.Roles"
+                   Variant="Variant.Text"
+                   StartIcon="@Icons.Material.Filled.ArrowBack">
+            К списку
+        </MudButton>
+    </Actions>
+</PageHeader>
+
+<MudForm @ref="_form"
+         @bind-IsValid="_isValid">
+    <EditSection Title="Основные данные">
+        <MudTextField T="string"
+                      @bind-Value="Role.Name"
+                      Label="Название роли"
+                      Variant="Variant.Outlined"
+                      Error="@_errors.HasError(nameof(CreateRoleFormModel.Name))"
+                      ErrorText="@_errors.GetError(nameof(CreateRoleFormModel.Name))"
+                      Required="true"
+                      RequiredError="Укажите название роли"
+                      MaxLength="100" />
+    </EditSection>
+
+    <EditSection Title="Доступ">
+        <ClaimsEditor Claims="Role.Claims" />
+    </EditSection>
+
+    <EditFormActions CancelHref="@IdentityRoutes.Roles"
+                     IsNew="true"
+                     Busy="_saving"
+                     OnSubmit="SubmitAsync" />
+</MudForm>

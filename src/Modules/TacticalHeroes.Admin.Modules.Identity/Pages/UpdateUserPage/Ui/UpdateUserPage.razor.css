@@ -1,0 +1,5 @@
+.user-edit-form ::deep .confirmed-field {
+    display: flex;
+    align-items: center;
+    min-height: 56px;
+}

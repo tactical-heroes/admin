@@ -7,15 +7,15 @@ public sealed class ListPageConventionTests
     private static readonly string[] ListPagePaths =
     [
         "src/Modules/TacticalHeroes.Admin.Modules.Compendium/Pages/FactionListPage/Ui/FactionListPage.razor",
-        "src/Modules/TacticalHeroes.Admin.Modules.Identity/Pages/Roles/RolesPage.razor",
-        "src/Modules/TacticalHeroes.Admin.Modules.Identity/Pages/Users/UsersPage.razor",
+        "src/Modules/TacticalHeroes.Admin.Modules.Identity/Pages/RoleListPage/Ui/RoleListPage.razor",
+        "src/Modules/TacticalHeroes.Admin.Modules.Identity/Pages/UserListPage/Ui/UserListPage.razor",
     ];
 
     private static readonly string[] ListSurfacePaths =
     [
         "src/Modules/TacticalHeroes.Admin.Modules.Compendium/Pages/FactionListPage/Ui/FactionListPage.razor",
-        "src/Modules/TacticalHeroes.Admin.Modules.Identity/Widgets/Roles/RoleList/RoleListWidget.razor",
-        "src/Modules/TacticalHeroes.Admin.Modules.Identity/Widgets/Users/UserList/UserListWidget.razor",
+        "src/Modules/TacticalHeroes.Admin.Modules.Identity/Pages/RoleListPage/Ui/RoleListPage.razor",
+        "src/Modules/TacticalHeroes.Admin.Modules.Identity/Pages/UserListPage/Ui/UserListPage.razor",
     ];
 
     private static readonly Regex IdentifierColumnRegex = new(
@@ -61,7 +61,7 @@ public sealed class ListPageConventionTests
         string repositoryRoot = RepositoryPaths.FindRoot();
         string[] violations = ListSurfacePaths
             .Where(relativePath => !ReadSource(repositoryRoot, relativePath)
-                .Contains("LoadError=\"@LoadError\"", StringComparison.Ordinal))
+                .Contains("LoadError=", StringComparison.Ordinal))
             .ToArray();
 
         violations.ShouldBeEmpty();

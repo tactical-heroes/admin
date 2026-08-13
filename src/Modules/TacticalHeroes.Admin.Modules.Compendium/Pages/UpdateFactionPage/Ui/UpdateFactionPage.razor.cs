@@ -4,20 +4,19 @@ using MudBlazor;
 
 using PANiXiDA.Core.ResultPattern;
 
-using TacticalHeroes.Admin.Api.Errors;
 using TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateFactionPage.Api;
 using TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateFactionPage.Model;
+using TacticalHeroes.Admin.Shared.Errors;
 
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateFactionPage.Ui;
 
 public partial class UpdateFactionPage
 {
+    private readonly FormErrorState<UpdateFactionFormModel> _errors = new();
     private MudForm? _form;
     private bool _isValid;
     private bool _loading;
     private bool _saving;
-    private IReadOnlyDictionary<string, string[]> _fieldErrors =
-        new Dictionary<string, string[]>();
 
     [Inject]
     private FactionsApi FactionsApi { get; set; } = null!;
@@ -54,7 +53,7 @@ public partial class UpdateFactionPage
         Faction = null;
         LoadError = null;
         LoadedId = Id;
-        _fieldErrors = new Dictionary<string, string[]>();
+        _errors.Clear();
 
         Result<UpdateFactionFormModel> result = await FactionsApi.GetAsync(
             Id,
@@ -80,7 +79,7 @@ public partial class UpdateFactionPage
         }
 
         _saving = true;
-        _fieldErrors = new Dictionary<string, string[]>();
+        _errors.Clear();
 
         Result result = await FactionsApi.UpdateAsync(
             Id,
@@ -89,25 +88,13 @@ public partial class UpdateFactionPage
 
         if (result.IsFailure)
         {
-            HandleErrors(result.Errors);
+            _errors.Handle(result.Errors, Snackbar);
             _saving = false;
             return;
         }
 
         Snackbar.Add("Фракция сохранена", Severity.Success);
         Navigation.NavigateTo(CompendiumRoutes.Factions);
-    }
-
-    private void HandleErrors(IReadOnlyList<Error> errors)
-    {
-        _fieldErrors = ApiErrorMessage.GetFieldErrors<UpdateFactionFormModel>(errors);
-        IReadOnlyList<Error> unhandledErrors =
-            ApiErrorMessage.GetUnhandledErrors<UpdateFactionFormModel>(errors);
-
-        if (unhandledErrors.Count > 0)
-        {
-            Snackbar.Add(ApiErrorMessage.FromErrors(unhandledErrors), Severity.Error);
-        }
     }
 
     private async Task SubmitAsync()

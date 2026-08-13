@@ -1,0 +1,90 @@
+@attribute [Route(IdentityRoutes.Users)]
+@attribute [Authorize]
+@attribute [StreamRendering]
+@using TacticalHeroes.Admin.Modules.Identity.Pages.UserListPage.Model
+
+<PageTitle>Пользователи · Tactical Heroes</PageTitle>
+
+<PageHeader Title="Пользователи"
+            Subtitle="Управление аккаунтами Tactical Heroes">
+    <Actions>
+        <MudButton Href="@IdentityRoutes.CreateUser"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add">
+            Добавить пользователя
+        </MudButton>
+    </Actions>
+</PageHeader>
+
+<EntityList TItem="UserListItem"
+            Items="ListState.Page?.Items"
+            Loading="ListState.Loading"
+            LoadError="@ListState.LoadError"
+            EmptyText="Пользователи не найдены"
+            RefreshLabel="Обновить список пользователей"
+            HasFilters="true"
+            HasActiveFilters="@(!string.IsNullOrWhiteSpace(_emailFilter))"
+            OnApplyFilters="ApplyEmailFilter"
+            OnResetFilters="ResetFilters"
+            OnRefresh="RetryAsync"
+            PageNumber="CurrentPageNumber"
+            PageSize="CurrentPageSize"
+            TotalPages="@(ListState.Page?.TotalPages ?? 0)"
+            TotalCount="@(ListState.Page?.TotalCount ?? 0)"
+            OnPageNumberChanged="ChangePage"
+            OnPageSizeChanged="ChangePageSize">
+    <Filters>
+        <MudTextField T="string"
+                      @bind-Value="_emailFilter"
+                      Label="Поиск по Email"
+                      Placeholder="user@example.com"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Clearable="true"
+                      Immediate="true"
+                      DebounceInterval="400"
+                      OnDebounceIntervalElapsed="ApplyDynamicEmailFilter"
+                      HelperText="Автоматический запрос выполняется после ввода 3 символов"
+                      Disabled="ListState.Loading" />
+    </Filters>
+    <HeaderContent>
+        <MudTh>Пользователь</MudTh>
+        <MudTh>Email</MudTh>
+        <MudTh>Статус</MudTh>
+        <MudTh>Подтверждение</MudTh>
+        <MudTh Class="actions-column">Действия</MudTh>
+    </HeaderContent>
+    <RowTemplate Context="user">
+        <MudTd DataLabel="Пользователь">
+            <MudText Typo="Typo.body2" Class="entity-name">
+                @user.UserName
+            </MudText>
+        </MudTd>
+        <MudTd DataLabel="Email">@user.Email</MudTd>
+        <MudTd DataLabel="Статус">
+            <MudChip T="string"
+                     Size="Size.Small"
+                     Variant="Variant.Outlined"
+                     Color="@GetStatusColor(user.Status)">
+                @user.StatusDisplayName
+            </MudChip>
+        </MudTd>
+        <MudTd DataLabel="Подтверждение">
+            <MudIcon Icon="@(user.IsConfirmed
+                              ? Icons.Material.Filled.CheckCircle
+                              : Icons.Material.Outlined.Cancel)"
+                     Color="@(user.IsConfirmed ? Color.Success : Color.Secondary)"
+                     Size="Size.Small" />
+        </MudTd>
+        <MudTd DataLabel="Действия" Class="actions-column">
+            <EntityRowActions EditHref="@IdentityRoutes.User(user.Id)"
+                              EditLabel="Редактировать пользователя"
+                              DeleteLabel="Удалить пользователя"
+                              Disabled="@(ListState.Loading || ListState.DeletingId.HasValue)"
+                              OnDelete="@(() => ConfirmDeleteAsync(user))" />
+        </MudTd>
+    </RowTemplate>
+</EntityList>

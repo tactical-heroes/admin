@@ -1,0 +1,106 @@
+@attribute [Route(IdentityRoutes.UserTemplate)]
+@attribute [Authorize]
+@attribute [StreamRendering]
+@using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Ui
+@using TacticalHeroes.Admin.Modules.Identity.Pages.UpdateUserPage.Model
+
+<PageTitle>Редактирование пользователя · Tactical Heroes</PageTitle>
+
+<PageHeader Title="Редактирование пользователя"
+            Subtitle="Измените профиль, статус и атрибуты доступа пользователя">
+    <Actions>
+        <MudButton Href="@IdentityRoutes.Users"
+                   Variant="Variant.Text"
+                   StartIcon="@Icons.Material.Filled.ArrowBack">
+            К списку
+        </MudButton>
+    </Actions>
+</PageHeader>
+
+@if (_loading && (User is null || Statuses is null))
+{
+    <MudSkeleton SkeletonType="SkeletonType.Rectangle"
+                 Height="360px" />
+}
+else if (!string.IsNullOrWhiteSpace(LoadError))
+{
+    <MudAlert Severity="Severity.Warning"
+              Variant="Variant.Outlined">
+        <MudStack Row="true"
+                  AlignItems="AlignItems.Center"
+                  Justify="Justify.SpaceBetween">
+            <span>@LoadError</span>
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Warning"
+                       Disabled="_loading"
+                       OnClick="LoadAsync">
+                Повторить
+            </MudButton>
+        </MudStack>
+    </MudAlert>
+}
+else if (User is not null && Statuses is not null)
+{
+    <div class="user-edit-form">
+        <MudForm @ref="_form"
+                 @bind-IsValid="_isValid">
+            <EditSection Title="Аккаунт">
+                <MudGrid Spacing="2">
+                    <MudItem xs="12" md="6">
+                        <MudTextField T="string"
+                                      @bind-Value="User.Email"
+                                      Label="Email"
+                                      InputType="InputType.Email"
+                                      Variant="Variant.Outlined"
+                                      Error="@_errors.HasError(nameof(UpdateUserFormModel.Email))"
+                                      ErrorText="@_errors.GetError(nameof(UpdateUserFormModel.Email))"
+                                      Required="true"
+                                      RequiredError="Укажите email" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField T="string"
+                                      @bind-Value="User.UserName"
+                                      Label="Имя пользователя"
+                                      Variant="Variant.Outlined"
+                                      Error="@_errors.HasError(nameof(UpdateUserFormModel.UserName))"
+                                      ErrorText="@_errors.GetError(nameof(UpdateUserFormModel.UserName))"
+                                      Required="true"
+                                      RequiredError="Укажите имя пользователя" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudSelect T="string"
+                                   @bind-Value="User.Status"
+                                   ToStringFunc="@GetStatusDisplayName"
+                                   Label="Статус"
+                                   Variant="Variant.Outlined"
+                                   Error="@_errors.HasError(nameof(UpdateUserFormModel.Status))"
+                                   ErrorText="@_errors.GetError(nameof(UpdateUserFormModel.Status))"
+                                   Required="true"
+                                   RequiredError="Выберите статус">
+                            @foreach (var status in Statuses)
+                            {
+                                <MudSelectItem T="string" Value="@status.Name">
+                                    @status.DisplayName
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="6" Class="confirmed-field">
+                        <MudSwitch T="bool"
+                                   @bind-Value="User.IsConfirmed"
+                                   Color="Color.Success"
+                                   Label="Email подтверждён" />
+                    </MudItem>
+                </MudGrid>
+            </EditSection>
+
+            <EditSection Title="Доступ">
+                <ClaimsEditor Claims="User.Claims" />
+            </EditSection>
+
+            <EditFormActions CancelHref="@IdentityRoutes.Users"
+                             Busy="_saving"
+                             OnSubmit="SubmitAsync" />
+        </MudForm>
+    </div>
+}

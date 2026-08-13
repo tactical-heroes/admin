@@ -18,16 +18,16 @@
 </PageHeader>
 
 <EntityList TItem="FactionListItem"
-            Items="Page?.Items"
-            Loading="_loading"
-            LoadError="@LoadError"
+            Items="ListState.Page?.Items"
+            Loading="ListState.Loading"
+            LoadError="@ListState.LoadError"
             EmptyText="Фракции не найдены"
             RefreshLabel="Обновить список фракций"
             OnRefresh="RetryAsync"
             PageNumber="CurrentPageNumber"
             PageSize="CurrentPageSize"
-            TotalPages="@(Page?.TotalPages ?? 0)"
-            TotalCount="@(Page?.TotalCount ?? 0)"
+            TotalPages="@(ListState.Page?.TotalPages ?? 0)"
+            TotalCount="@(ListState.Page?.TotalCount ?? 0)"
             OnPageNumberChanged="ChangePage"
             OnPageSizeChanged="ChangePageSize">
     <HeaderContent>
@@ -50,7 +50,7 @@
             <EntityRowActions EditHref="@CompendiumRoutes.Faction(faction.Id)"
                               EditLabel="Редактировать фракцию"
                               DeleteLabel="Удалить фракцию"
-                              Disabled="@(_loading || _deletingId.HasValue)"
+                              Disabled="@(ListState.Loading || ListState.DeletingId.HasValue)"
                               OnDelete="@(() => ConfirmDeleteAsync(faction))" />
         </MudTd>
     </RowTemplate>
