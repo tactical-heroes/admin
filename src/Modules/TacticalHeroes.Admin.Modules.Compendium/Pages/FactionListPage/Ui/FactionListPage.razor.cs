@@ -47,7 +47,7 @@ public partial class FactionListPage
     {
         if (!ListState.Matches(CurrentPageNumber, CurrentPageSize))
         {
-            await LoadPageAsync(CurrentPageNumber, CurrentPageSize);
+            await LoadPageAsync();
         }
     }
 
@@ -59,11 +59,6 @@ public partial class FactionListPage
     private void ChangePageSize(int pageSize)
     {
         Navigation.NavigateTo(CompendiumRoutes.FactionsPage(pageSize: pageSize));
-    }
-
-    private Task RetryAsync()
-    {
-        return LoadPageAsync(CurrentPageNumber, CurrentPageSize);
     }
 
     private async Task ConfirmDeleteAsync(FactionListItem faction)
@@ -97,18 +92,18 @@ public partial class FactionListPage
         }
         else
         {
-            await RetryAsync();
+            await LoadPageAsync();
         }
     }
 
-    private Task LoadPageAsync(int pageNumber, int pageSize)
+    private Task LoadPageAsync()
     {
         return ListState.LoadAsync(
-            pageNumber,
-            pageSize,
+            CurrentPageNumber,
+            CurrentPageSize,
             cancellationToken => FactionsApi.GetPageAsync(
-                pageNumber,
-                pageSize,
+                CurrentPageNumber,
+                CurrentPageSize,
                 cancellationToken),
             CancellationToken.None);
     }

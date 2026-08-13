@@ -61,11 +61,6 @@ public partial class RoleListPage
         Navigation.NavigateTo(IdentityRoutes.RolesPage(pageSize: pageSize));
     }
 
-    private Task RetryAsync()
-    {
-        return LoadPageAsync();
-    }
-
     private async Task ConfirmDeleteAsync(RoleListItem role)
     {
         if (!await DialogService.ConfirmDeleteAsync("роль", role.Name))
@@ -92,7 +87,7 @@ public partial class RoleListPage
         }
         else
         {
-            await RetryAsync();
+            await LoadPageAsync();
         }
     }
 

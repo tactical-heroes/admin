@@ -23,7 +23,7 @@
             LoadError="@ListState.LoadError"
             EmptyText="Роли не найдены"
             RefreshLabel="Обновить список ролей"
-            OnRefresh="RetryAsync"
+            OnRefresh="LoadPageAsync"
             PageNumber="CurrentPageNumber"
             PageSize="CurrentPageSize"
             TotalPages="@(ListState.Page?.TotalPages ?? 0)"

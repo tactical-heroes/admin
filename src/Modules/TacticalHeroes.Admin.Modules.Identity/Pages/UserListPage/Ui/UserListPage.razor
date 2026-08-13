@@ -27,7 +27,7 @@
             HasActiveFilters="@(!string.IsNullOrWhiteSpace(_emailFilter))"
             OnApplyFilters="ApplyEmailFilter"
             OnResetFilters="ResetFilters"
-            OnRefresh="RetryAsync"
+            OnRefresh="LoadPageAsync"
             PageNumber="CurrentPageNumber"
             PageSize="CurrentPageSize"
             TotalPages="@(ListState.Page?.TotalPages ?? 0)"

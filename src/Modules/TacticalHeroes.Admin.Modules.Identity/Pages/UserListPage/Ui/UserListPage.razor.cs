@@ -107,11 +107,6 @@ public partial class UserListPage
             pageSize: pageSize));
     }
 
-    private Task RetryAsync()
-    {
-        return LoadPageAsync();
-    }
-
     private async Task ConfirmDeleteAsync(UserListItem user)
     {
         if (!await DialogService.ConfirmDeleteAsync("пользователя", user.UserName))
@@ -138,7 +133,7 @@ public partial class UserListPage
         }
         else
         {
-            await RetryAsync();
+            await LoadPageAsync();
         }
     }
 
