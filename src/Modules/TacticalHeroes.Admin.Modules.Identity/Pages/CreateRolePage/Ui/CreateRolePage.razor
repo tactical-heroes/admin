@@ -1,4 +1,4 @@
-@inherits MudFormComponentBase
+@inherits MudFormComponentBase<CreateRoleFormModel, CreateRoleFormModelValidator>
 @attribute [Route(IdentityRoutes.CreateRole)]
 @attribute [Authorize]
 @attribute [StreamRendering]
@@ -15,22 +15,22 @@
 </PageHeader>
 
 <MudForm @ref="Form"
-         Model="Role"
-         Validation="@_validator.ValidateValue"
+         Model="Model"
+         Validation="@Validator.ValidateValue"
          @bind-IsValid="IsValid">
     <EditSection Title="Основные данные">
         <MudTextField T="string"
-                      @bind-Value="Role.Name"
-                      For="@(() => Role.Name)"
+                      @bind-Value="Model.Name"
+                      For="@(() => Model.Name)"
                       Label="Название роли"
                       Variant="Variant.Outlined"
-                      Error="@_errors.HasError(nameof(CreateRoleFormModel.Name))"
-                      ErrorText="@_errors.GetError(nameof(CreateRoleFormModel.Name))"
+                      Error="@Errors.HasError(nameof(CreateRoleFormModel.Name))"
+                      ErrorText="@Errors.GetError(nameof(CreateRoleFormModel.Name))"
                       MaxLength="128" />
     </EditSection>
 
     <EditSection Title="Доступ">
-        <ClaimsEditor Claims="Role.Claims" />
+        <ClaimsEditor Claims="Model.Claims" />
     </EditSection>
 
     <EditFormActions CancelHref="@IdentityRoutes.Roles"

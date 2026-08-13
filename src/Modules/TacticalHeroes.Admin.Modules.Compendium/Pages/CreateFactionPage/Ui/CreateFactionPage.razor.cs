@@ -5,17 +5,11 @@ using MudBlazor;
 using PANiXiDA.Core.ResultPattern;
 
 using TacticalHeroes.Admin.Modules.Compendium.Pages.CreateFactionPage.Api;
-using TacticalHeroes.Admin.Modules.Compendium.Pages.CreateFactionPage.Model;
-using TacticalHeroes.Admin.Shared.Errors;
 
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.CreateFactionPage.Ui;
 
 public partial class CreateFactionPage
 {
-    private readonly CreateFactionFormModel Faction = new();
-    private readonly FormErrorState<CreateFactionFormModel> _errors = new();
-    private readonly CreateFactionFormModelValidator _validator = new();
-
     [Inject]
     private CreateFactionApi CreateFactionApi { get; set; } = null!;
 
@@ -27,15 +21,15 @@ public partial class CreateFactionPage
 
     protected override async Task SaveAsync()
     {
-        _errors.Clear();
+        Errors.Clear();
 
         Result<Guid> result = await CreateFactionApi.CreateAsync(
-            Faction,
+            Model,
             LifetimeToken);
 
         if (result.IsFailure)
         {
-            _errors.Handle(result.Errors, Snackbar);
+            Errors.Handle(result.Errors, Snackbar);
             return;
         }
 

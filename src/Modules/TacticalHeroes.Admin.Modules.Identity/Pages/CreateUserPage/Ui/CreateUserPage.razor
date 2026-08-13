@@ -1,4 +1,4 @@
-@inherits MudFormComponentBase
+@inherits MudFormComponentBase<CreateUserFormModel, CreateUserFormModelValidator>
 @attribute [Route(IdentityRoutes.CreateUser)]
 @attribute [Authorize]
 @attribute [StreamRendering]
@@ -40,51 +40,51 @@ else if (Statuses is not null)
 {
     <div class="user-edit-form">
         <MudForm @ref="Form"
-                 Model="User"
-                 Validation="@_validator.ValidateValue"
+                 Model="Model"
+                 Validation="@Validator.ValidateValue"
                  @bind-IsValid="IsValid">
             <EditSection Title="Аккаунт">
                 <MudGrid Spacing="2">
                     <MudItem xs="12" md="6">
                         <MudTextField T="string"
-                                      @bind-Value="User.Email"
-                                      For="@(() => User.Email)"
+                                      @bind-Value="Model.Email"
+                                      For="@(() => Model.Email)"
                                       Label="Email"
                                       InputType="InputType.Email"
                                       Variant="Variant.Outlined"
-                                      Error="@_errors.HasError(nameof(CreateUserFormModel.Email))"
-                                      ErrorText="@_errors.GetError(nameof(CreateUserFormModel.Email))"
+                                      Error="@Errors.HasError(nameof(CreateUserFormModel.Email))"
+                                      ErrorText="@Errors.GetError(nameof(CreateUserFormModel.Email))"
                                       MaxLength="320" />
                     </MudItem>
                     <MudItem xs="12" md="6">
                         <MudTextField T="string"
-                                      @bind-Value="User.UserName"
-                                      For="@(() => User.UserName)"
+                                      @bind-Value="Model.UserName"
+                                      For="@(() => Model.UserName)"
                                       Label="Имя пользователя"
                                       Variant="Variant.Outlined"
-                                      Error="@_errors.HasError(nameof(CreateUserFormModel.UserName))"
-                                      ErrorText="@_errors.GetError(nameof(CreateUserFormModel.UserName))"
+                                      Error="@Errors.HasError(nameof(CreateUserFormModel.UserName))"
+                                      ErrorText="@Errors.GetError(nameof(CreateUserFormModel.UserName))"
                                       MaxLength="256" />
                     </MudItem>
                     <MudItem xs="12" md="6">
                         <MudTextField T="string"
-                                      @bind-Value="User.Password"
-                                      For="@(() => User.Password)"
+                                      @bind-Value="Model.Password"
+                                      For="@(() => Model.Password)"
                                       Label="Пароль"
                                       InputType="InputType.Password"
                                       Variant="Variant.Outlined"
-                                      Error="@_errors.HasError(nameof(CreateUserFormModel.Password))"
-                                      ErrorText="@_errors.GetError(nameof(CreateUserFormModel.Password))" />
+                                      Error="@Errors.HasError(nameof(CreateUserFormModel.Password))"
+                                      ErrorText="@Errors.GetError(nameof(CreateUserFormModel.Password))" />
                     </MudItem>
                     <MudItem xs="12" md="6">
                         <MudSelect T="string"
-                                   @bind-Value="User.Status"
-                                   For="@(() => User.Status)"
+                                   @bind-Value="Model.Status"
+                                   For="@(() => Model.Status)"
                                    ToStringFunc="@GetStatusDisplayName"
                                    Label="Статус"
                                    Variant="Variant.Outlined"
-                                   Error="@_errors.HasError(nameof(CreateUserFormModel.Status))"
-                                   ErrorText="@_errors.GetError(nameof(CreateUserFormModel.Status))">
+                                   Error="@Errors.HasError(nameof(CreateUserFormModel.Status))"
+                                   ErrorText="@Errors.GetError(nameof(CreateUserFormModel.Status))">
                             @foreach (var status in Statuses)
                             {
                                 <MudSelectItem T="string" Value="@status.Name">
@@ -95,7 +95,7 @@ else if (Statuses is not null)
                     </MudItem>
                     <MudItem xs="12" md="6" Class="confirmed-field">
                         <MudSwitch T="bool"
-                                   @bind-Value="User.IsConfirmed"
+                                   @bind-Value="Model.IsConfirmed"
                                    Color="Color.Success"
                                    Label="Email подтверждён" />
                     </MudItem>
@@ -103,7 +103,7 @@ else if (Statuses is not null)
             </EditSection>
 
             <EditSection Title="Доступ">
-                <ClaimsEditor Claims="User.Claims" />
+                <ClaimsEditor Claims="Model.Claims" />
             </EditSection>
 
             <EditFormActions CancelHref="@IdentityRoutes.Users"

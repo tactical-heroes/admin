@@ -1,4 +1,4 @@
-@inherits MudFormComponentBase
+@inherits MudFormComponentBase<UpdateUserFormModel, UpdateUserFormModelValidator>
 @attribute [Route(IdentityRoutes.UserTemplate)]
 @attribute [Authorize]
 @attribute [StreamRendering]
@@ -14,7 +14,7 @@
     </Actions>
 </PageHeader>
 
-@if (_loading && (User is null || Statuses is null))
+@if (_loading && Statuses is null)
 {
     <MudSkeleton SkeletonType="SkeletonType.Rectangle"
                  Height="360px" />
@@ -36,45 +36,45 @@ else if (!string.IsNullOrWhiteSpace(LoadError))
         </MudStack>
     </MudAlert>
 }
-else if (User is not null && Statuses is not null)
+else if (Statuses is not null)
 {
     <div class="user-edit-form">
         <MudForm @ref="Form"
-                 Model="User"
-                 Validation="@_validator.ValidateValue"
+                 Model="Model"
+                 Validation="@Validator.ValidateValue"
                  @bind-IsValid="IsValid">
             <EditSection Title="Аккаунт">
                 <MudGrid Spacing="2">
                     <MudItem xs="12" md="6">
                         <MudTextField T="string"
-                                      @bind-Value="User.Email"
-                                      For="@(() => User.Email)"
+                                      @bind-Value="Model.Email"
+                                      For="@(() => Model.Email)"
                                       Label="Email"
                                       InputType="InputType.Email"
                                       Variant="Variant.Outlined"
-                                      Error="@_errors.HasError(nameof(UpdateUserFormModel.Email))"
-                                      ErrorText="@_errors.GetError(nameof(UpdateUserFormModel.Email))"
+                                      Error="@Errors.HasError(nameof(UpdateUserFormModel.Email))"
+                                      ErrorText="@Errors.GetError(nameof(UpdateUserFormModel.Email))"
                                       MaxLength="320" />
                     </MudItem>
                     <MudItem xs="12" md="6">
                         <MudTextField T="string"
-                                      @bind-Value="User.UserName"
-                                      For="@(() => User.UserName)"
+                                      @bind-Value="Model.UserName"
+                                      For="@(() => Model.UserName)"
                                       Label="Имя пользователя"
                                       Variant="Variant.Outlined"
-                                      Error="@_errors.HasError(nameof(UpdateUserFormModel.UserName))"
-                                      ErrorText="@_errors.GetError(nameof(UpdateUserFormModel.UserName))"
+                                      Error="@Errors.HasError(nameof(UpdateUserFormModel.UserName))"
+                                      ErrorText="@Errors.GetError(nameof(UpdateUserFormModel.UserName))"
                                       MaxLength="256" />
                     </MudItem>
                     <MudItem xs="12" md="6">
                         <MudSelect T="string"
-                                   @bind-Value="User.Status"
-                                   For="@(() => User.Status)"
+                                   @bind-Value="Model.Status"
+                                   For="@(() => Model.Status)"
                                    ToStringFunc="@GetStatusDisplayName"
                                    Label="Статус"
                                    Variant="Variant.Outlined"
-                                   Error="@_errors.HasError(nameof(UpdateUserFormModel.Status))"
-                                   ErrorText="@_errors.GetError(nameof(UpdateUserFormModel.Status))">
+                                   Error="@Errors.HasError(nameof(UpdateUserFormModel.Status))"
+                                   ErrorText="@Errors.GetError(nameof(UpdateUserFormModel.Status))">
                             @foreach (var status in Statuses)
                             {
                                 <MudSelectItem T="string" Value="@status.Name">
@@ -85,7 +85,7 @@ else if (User is not null && Statuses is not null)
                     </MudItem>
                     <MudItem xs="12" md="6" Class="confirmed-field">
                         <MudSwitch T="bool"
-                                   @bind-Value="User.IsConfirmed"
+                                   @bind-Value="Model.IsConfirmed"
                                    Color="Color.Success"
                                    Label="Email подтверждён" />
                     </MudItem>
@@ -93,7 +93,7 @@ else if (User is not null && Statuses is not null)
             </EditSection>
 
             <EditSection Title="Доступ">
-                <ClaimsEditor Claims="User.Claims" />
+                <ClaimsEditor Claims="Model.Claims" />
             </EditSection>
 
             <EditFormActions CancelHref="@IdentityRoutes.Users"

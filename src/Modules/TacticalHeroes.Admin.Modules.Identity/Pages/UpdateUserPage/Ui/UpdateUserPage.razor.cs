@@ -13,8 +13,6 @@ namespace TacticalHeroes.Admin.Modules.Identity.Pages.UpdateUserPage.Ui;
 
 public partial class UpdateUserPage
 {
-    private readonly FormErrorState<UpdateUserFormModel> _errors = new();
-    private readonly UpdateUserFormModelValidator _validator = new();
     private bool _loading;
 
     [Inject]
@@ -28,9 +26,6 @@ public partial class UpdateUserPage
 
     [Parameter]
     public Guid Id { get; set; }
-
-    [PersistentState(AllowUpdates = true)]
-    public UpdateUserFormModel? User { get; set; }
 
     [PersistentState(AllowUpdates = true)]
     public List<UserStatus>? Statuses { get; set; }
@@ -52,11 +47,10 @@ public partial class UpdateUserPage
     private async Task LoadAsync()
     {
         _loading = true;
-        User = null;
         Statuses = null;
         LoadError = null;
         LoadedId = Id;
-        _errors.Clear();
+        Errors.Clear();
 
         Task<Result<UpdateUserFormModel>> userTask = UpdateUserApi.GetAsync(
             Id,
@@ -76,7 +70,7 @@ public partial class UpdateUserPage
         }
         else
         {
-            User = userResult.Value;
+            Model = userResult.Value;
             Statuses = statusesResult.Value.ToList();
         }
 
@@ -85,18 +79,13 @@ public partial class UpdateUserPage
 
     protected override async Task SaveAsync()
     {
-        if (User is null)
-        {
-            return;
-        }
+        Errors.Clear();
 
-        _errors.Clear();
-
-        Result result = await UpdateUserApi.UpdateAsync(Id, User, LifetimeToken);
+        Result result = await UpdateUserApi.UpdateAsync(Id, Model, LifetimeToken);
 
         if (result.IsFailure)
         {
-            _errors.Handle(result.Errors, Snackbar);
+            Errors.Handle(result.Errors, Snackbar);
             return;
         }
 

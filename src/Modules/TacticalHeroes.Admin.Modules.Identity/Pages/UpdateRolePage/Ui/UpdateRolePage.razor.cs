@@ -12,8 +12,6 @@ namespace TacticalHeroes.Admin.Modules.Identity.Pages.UpdateRolePage.Ui;
 
 public partial class UpdateRolePage
 {
-    private readonly FormErrorState<UpdateRoleFormModel> _errors = new();
-    private readonly UpdateRoleFormModelValidator _validator = new();
     private bool _loading;
 
     [Inject]
@@ -27,9 +25,6 @@ public partial class UpdateRolePage
 
     [Parameter]
     public Guid Id { get; set; }
-
-    [PersistentState(AllowUpdates = true)]
-    public UpdateRoleFormModel? Role { get; set; }
 
     [PersistentState(AllowUpdates = true)]
     public string? LoadError { get; set; }
@@ -48,10 +43,9 @@ public partial class UpdateRolePage
     private async Task LoadAsync()
     {
         _loading = true;
-        Role = null;
         LoadError = null;
         LoadedId = Id;
-        _errors.Clear();
+        Errors.Clear();
 
         Result<UpdateRoleFormModel> result = await UpdateRoleApi.GetAsync(
             Id,
@@ -63,7 +57,7 @@ public partial class UpdateRolePage
         }
         else
         {
-            Role = result.Value;
+            Model = result.Value;
         }
 
         _loading = false;
@@ -71,18 +65,13 @@ public partial class UpdateRolePage
 
     protected override async Task SaveAsync()
     {
-        if (Role is null)
-        {
-            return;
-        }
+        Errors.Clear();
 
-        _errors.Clear();
-
-        Result result = await UpdateRoleApi.UpdateAsync(Id, Role, LifetimeToken);
+        Result result = await UpdateRoleApi.UpdateAsync(Id, Model, LifetimeToken);
 
         if (result.IsFailure)
         {
-            _errors.Handle(result.Errors, Snackbar);
+            Errors.Handle(result.Errors, Snackbar);
             return;
         }
 

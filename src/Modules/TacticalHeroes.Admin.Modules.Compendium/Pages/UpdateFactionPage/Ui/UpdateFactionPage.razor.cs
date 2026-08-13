@@ -12,8 +12,6 @@ namespace TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateFactionPage.Ui;
 
 public partial class UpdateFactionPage
 {
-    private readonly FormErrorState<UpdateFactionFormModel> _errors = new();
-    private readonly UpdateFactionFormModelValidator _validator = new();
     private bool _loading;
 
     [Inject]
@@ -27,9 +25,6 @@ public partial class UpdateFactionPage
 
     [Parameter]
     public Guid Id { get; set; }
-
-    [PersistentState(AllowUpdates = true)]
-    public UpdateFactionFormModel? Faction { get; set; }
 
     [PersistentState(AllowUpdates = true)]
     public string? LoadError { get; set; }
@@ -48,10 +43,9 @@ public partial class UpdateFactionPage
     private async Task LoadAsync()
     {
         _loading = true;
-        Faction = null;
         LoadError = null;
         LoadedId = Id;
-        _errors.Clear();
+        Errors.Clear();
 
         Result<UpdateFactionFormModel> result = await UpdateFactionApi.GetAsync(
             Id,
@@ -63,7 +57,7 @@ public partial class UpdateFactionPage
         }
         else
         {
-            Faction = result.Value;
+            Model = result.Value;
         }
 
         _loading = false;
@@ -71,21 +65,16 @@ public partial class UpdateFactionPage
 
     protected override async Task SaveAsync()
     {
-        if (Faction is null)
-        {
-            return;
-        }
-
-        _errors.Clear();
+        Errors.Clear();
 
         Result result = await UpdateFactionApi.UpdateAsync(
             Id,
-            Faction,
+            Model,
             LifetimeToken);
 
         if (result.IsFailure)
         {
-            _errors.Handle(result.Errors, Snackbar);
+            Errors.Handle(result.Errors, Snackbar);
             return;
         }
 

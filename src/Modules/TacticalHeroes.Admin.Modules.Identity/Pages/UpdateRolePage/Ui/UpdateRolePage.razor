@@ -1,4 +1,4 @@
-@inherits MudFormComponentBase
+@inherits MudFormComponentBase<UpdateRoleFormModel, UpdateRoleFormModelValidator>
 @attribute [Route(IdentityRoutes.RoleTemplate)]
 @attribute [Authorize]
 @attribute [StreamRendering]
@@ -14,7 +14,7 @@
     </Actions>
 </PageHeader>
 
-@if (_loading && Role is null)
+@if (_loading)
 {
     <MudSkeleton SkeletonType="SkeletonType.Rectangle"
                  Height="280px" />
@@ -36,25 +36,25 @@ else if (!string.IsNullOrWhiteSpace(LoadError))
         </MudStack>
     </MudAlert>
 }
-else if (Role is not null)
+else
 {
     <MudForm @ref="Form"
-             Model="Role"
-             Validation="@_validator.ValidateValue"
+             Model="Model"
+             Validation="@Validator.ValidateValue"
              @bind-IsValid="IsValid">
         <EditSection Title="Основные данные">
             <MudTextField T="string"
-                          @bind-Value="Role.Name"
-                          For="@(() => Role.Name)"
+                          @bind-Value="Model.Name"
+                          For="@(() => Model.Name)"
                           Label="Название роли"
                           Variant="Variant.Outlined"
-                          Error="@_errors.HasError(nameof(UpdateRoleFormModel.Name))"
-                          ErrorText="@_errors.GetError(nameof(UpdateRoleFormModel.Name))"
+                          Error="@Errors.HasError(nameof(UpdateRoleFormModel.Name))"
+                          ErrorText="@Errors.GetError(nameof(UpdateRoleFormModel.Name))"
                           MaxLength="128" />
         </EditSection>
 
         <EditSection Title="Доступ">
-            <ClaimsEditor Claims="Role.Claims" />
+            <ClaimsEditor Claims="Model.Claims" />
         </EditSection>
 
         <EditFormActions CancelHref="@IdentityRoutes.Roles"

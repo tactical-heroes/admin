@@ -1,6 +1,7 @@
 using MudBlazor;
 
 using TacticalHeroes.Admin.Shared.Ui;
+using TacticalHeroes.Admin.Shared.Validation;
 
 namespace TacticalHeroes.Admin.Shared.ComponentTests.Ui;
 
@@ -39,7 +40,7 @@ public sealed class MudFormComponentBaseTests
         component.Saving.ShouldBeFalse();
     }
 
-    private sealed class TestComponent : MudFormComponentBase
+    private sealed class TestComponent : MudFormComponentBase<TestModel, TestValidator>
     {
         public TestComponent(bool isValid)
         {
@@ -67,5 +68,13 @@ public sealed class MudFormComponentBaseTests
             SaveStarted.TrySetResult();
             return OnSave();
         }
+    }
+
+    private sealed class TestModel
+    {
+    }
+
+    private sealed class TestValidator : MudFormValidator<TestModel>
+    {
     }
 }
