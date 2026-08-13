@@ -8,6 +8,7 @@ using Microsoft.Extensions.Http;
 using MudBlazor.Services;
 
 using TacticalHeroes.Admin.Api.DependencyInjection;
+
 using CreateFactionPageComponent =
     TacticalHeroes.Admin.Modules.Compendium.Pages.CreateFactionPage.Ui.CreateFactionPage;
 
