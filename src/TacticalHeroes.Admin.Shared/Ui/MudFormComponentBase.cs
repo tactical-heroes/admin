@@ -9,9 +9,11 @@ using TacticalHeroes.Admin.Shared.Validation;
 
 namespace TacticalHeroes.Admin.Shared.Ui;
 
-public abstract class MudFormComponentBase<TModel, TValidator> : CancelableComponentBase
+public abstract class MudFormComponentBase<TModel, TValidator, TSaveResult>
+    : CancelableComponentBase
     where TModel : class, new()
     where TValidator : MudFormValidator<TModel>, new()
+    where TSaveResult : Result
 {
     private TModel? _model;
 
@@ -28,6 +30,9 @@ public abstract class MudFormComponentBase<TModel, TValidator> : CancelableCompo
 
     [Inject]
     protected ISnackbar Snackbar { get; set; } = null!;
+
+    [Inject]
+    protected NavigationManager Navigation { get; set; } = null!;
 
     protected MudForm? Form { get; set; }
 
@@ -50,7 +55,7 @@ public abstract class MudFormComponentBase<TModel, TValidator> : CancelableCompo
 
             if (IsValid)
             {
-                await ExecuteSaveAsync();
+                await SaveAsync();
             }
         }
         finally
@@ -59,13 +64,17 @@ public abstract class MudFormComponentBase<TModel, TValidator> : CancelableCompo
         }
     }
 
-    protected async Task SaveAsync(
-        Func<Task<Result>> saveAsync,
-        Action onSuccess)
+    protected abstract Task<TSaveResult> SaveCoreAsync();
+
+    protected virtual void OnSaveSucceeded(TSaveResult result)
+    {
+    }
+
+    private async Task SaveAsync()
     {
         Errors.Clear();
 
-        Result result = await saveAsync();
+        TSaveResult result = await SaveCoreAsync();
 
         if (result.IsFailure)
         {
@@ -73,25 +82,6 @@ public abstract class MudFormComponentBase<TModel, TValidator> : CancelableCompo
             return;
         }
 
-        onSuccess();
+        OnSaveSucceeded(result);
     }
-
-    protected async Task SaveAsync<T>(
-        Func<Task<Result<T>>> saveAsync,
-        Action<T> onSuccess)
-    {
-        Errors.Clear();
-
-        Result<T> result = await saveAsync();
-
-        if (result.IsFailure)
-        {
-            Errors.Handle(result.Errors, Snackbar);
-            return;
-        }
-
-        onSuccess(result.Value);
-    }
-
-    protected abstract Task ExecuteSaveAsync();
 }

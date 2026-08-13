@@ -18,9 +18,6 @@ public partial class UpdateUserPage
     [Inject]
     private UpdateUserApi UpdateUserApi { get; set; } = null!;
 
-    [Inject]
-    private NavigationManager Navigation { get; set; } = null!;
-
     [Parameter]
     public Guid Id { get; set; }
 
@@ -74,15 +71,15 @@ public partial class UpdateUserPage
         _loading = false;
     }
 
-    protected override Task ExecuteSaveAsync()
+    protected override Task<Result> SaveCoreAsync()
     {
-        return SaveAsync(
-            () => UpdateUserApi.UpdateAsync(Id, Model, LifetimeToken),
-            () =>
-            {
-                Snackbar.Add("Пользователь сохранён", Severity.Success);
-                Navigation.NavigateTo(IdentityRoutes.Users);
-            });
+        return UpdateUserApi.UpdateAsync(Id, Model, LifetimeToken);
+    }
+
+    protected override void OnSaveSucceeded(Result result)
+    {
+        Snackbar.Add("Пользователь сохранён", Severity.Success);
+        Navigation.NavigateTo(IdentityRoutes.Users);
     }
 
     private string GetStatusDisplayName(string? statusName)

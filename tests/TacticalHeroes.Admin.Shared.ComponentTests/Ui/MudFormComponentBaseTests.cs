@@ -1,5 +1,7 @@
 using MudBlazor;
 
+using PANiXiDA.Core.ResultPattern;
+
 using TacticalHeroes.Admin.Shared.Ui;
 using TacticalHeroes.Admin.Shared.Validation;
 
@@ -40,7 +42,8 @@ public sealed class MudFormComponentBaseTests
         component.Saving.ShouldBeFalse();
     }
 
-    private sealed class TestComponent : MudFormComponentBase<TestModel, TestValidator>
+    private sealed class TestComponent
+        : MudFormComponentBase<TestModel, TestValidator, Result>
     {
         public TestComponent(bool isValid)
         {
@@ -62,11 +65,12 @@ public sealed class MudFormComponentBaseTests
             return base.SubmitAsync();
         }
 
-        protected override Task ExecuteSaveAsync()
+        protected override async Task<Result> SaveCoreAsync()
         {
             SaveCount++;
             SaveStarted.TrySetResult();
-            return OnSave();
+            await OnSave();
+            return Result.Success();
         }
     }
 

@@ -17,9 +17,6 @@ public partial class UpdateFactionPage
     [Inject]
     private UpdateFactionApi UpdateFactionApi { get; set; } = null!;
 
-    [Inject]
-    private NavigationManager Navigation { get; set; } = null!;
-
     [Parameter]
     public Guid Id { get; set; }
 
@@ -60,14 +57,14 @@ public partial class UpdateFactionPage
         _loading = false;
     }
 
-    protected override Task ExecuteSaveAsync()
+    protected override Task<Result> SaveCoreAsync()
     {
-        return SaveAsync(
-            () => UpdateFactionApi.UpdateAsync(Id, Model, LifetimeToken),
-            () =>
-            {
-                Snackbar.Add("Фракция сохранена", Severity.Success);
-                Navigation.NavigateTo(CompendiumRoutes.Factions);
-            });
+        return UpdateFactionApi.UpdateAsync(Id, Model, LifetimeToken);
+    }
+
+    protected override void OnSaveSucceeded(Result result)
+    {
+        Snackbar.Add("Фракция сохранена", Severity.Success);
+        Navigation.NavigateTo(CompendiumRoutes.Factions);
     }
 }

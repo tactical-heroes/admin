@@ -17,9 +17,6 @@ public partial class UpdateRolePage
     [Inject]
     private UpdateRoleApi UpdateRoleApi { get; set; } = null!;
 
-    [Inject]
-    private NavigationManager Navigation { get; set; } = null!;
-
     [Parameter]
     public Guid Id { get; set; }
 
@@ -60,14 +57,14 @@ public partial class UpdateRolePage
         _loading = false;
     }
 
-    protected override Task ExecuteSaveAsync()
+    protected override Task<Result> SaveCoreAsync()
     {
-        return SaveAsync(
-            () => UpdateRoleApi.UpdateAsync(Id, Model, LifetimeToken),
-            () =>
-            {
-                Snackbar.Add("Роль сохранена", Severity.Success);
-                Navigation.NavigateTo(IdentityRoutes.Roles);
-            });
+        return UpdateRoleApi.UpdateAsync(Id, Model, LifetimeToken);
+    }
+
+    protected override void OnSaveSucceeded(Result result)
+    {
+        Snackbar.Add("Роль сохранена", Severity.Success);
+        Navigation.NavigateTo(IdentityRoutes.Roles);
     }
 }
