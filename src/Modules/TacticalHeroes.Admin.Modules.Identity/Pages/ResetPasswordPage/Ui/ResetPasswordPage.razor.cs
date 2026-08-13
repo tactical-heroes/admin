@@ -9,7 +9,7 @@ using TacticalHeroes.Admin.Shared.Errors;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.ResetPasswordPage.Ui;
 
-public partial class ResetPasswordPage
+public partial class ResetPasswordPage(ResetPasswordApi resetPasswordApi)
 {
     private readonly ResetModel _model = new();
     private bool _submitting;
@@ -17,9 +17,6 @@ public partial class ResetPasswordPage
     private bool _showPassword;
     private bool _showPasswordConfirmation;
     private string? _error;
-
-    [Inject]
-    private ResetPasswordApi ResetPasswordApi { get; set; } = null!;
 
     [Parameter]
     public Guid? UserId { get; set; }
@@ -37,7 +34,7 @@ public partial class ResetPasswordPage
         _submitting = true;
         _error = null;
 
-        Result result = await ResetPasswordApi.ResetPasswordAsync(
+        Result result = await resetPasswordApi.ResetPasswordAsync(
             UserId.Value,
             PasswordResetToken,
             _model.Password,

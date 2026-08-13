@@ -7,13 +7,10 @@ using TacticalHeroes.Admin.Shared.Errors;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.ConfirmEmailPage.Ui;
 
-public partial class ConfirmEmailPage
+public partial class ConfirmEmailPage(ConfirmEmailApi confirmEmailApi)
 {
     private bool _processed;
     private string? _error;
-
-    [Inject]
-    private ConfirmEmailApi ConfirmEmailApi { get; set; } = null!;
 
     [Parameter]
     public Guid? UserId { get; set; }
@@ -31,7 +28,7 @@ public partial class ConfirmEmailPage
             return;
         }
 
-        Result result = await ConfirmEmailApi.ConfirmEmailAsync(
+        Result result = await confirmEmailApi.ConfirmEmailAsync(
             UserId!.Value,
             EmailConfirmationToken!,
             LifetimeToken);

@@ -10,12 +10,9 @@ using TacticalHeroes.Admin.Shared.Errors;
 
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateFactionPage.Ui;
 
-public partial class UpdateFactionPage
+public partial class UpdateFactionPage(UpdateFactionApi updateFactionApi)
 {
     private bool _loading;
-
-    [Inject]
-    private UpdateFactionApi UpdateFactionApi { get; set; } = null!;
 
     [Parameter]
     public Guid Id { get; set; }
@@ -41,7 +38,7 @@ public partial class UpdateFactionPage
         LoadedId = Id;
         Errors.Clear();
 
-        Result<UpdateFactionFormModel> result = await UpdateFactionApi.GetAsync(
+        Result<UpdateFactionFormModel> result = await updateFactionApi.GetAsync(
             Id,
             LifetimeToken);
 
@@ -59,7 +56,7 @@ public partial class UpdateFactionPage
 
     protected override Task<Result> SaveCoreAsync()
     {
-        return UpdateFactionApi.UpdateAsync(Id, Model, LifetimeToken);
+        return updateFactionApi.UpdateAsync(Id, Model, LifetimeToken);
     }
 
     protected override void OnSaveSucceeded(Result result)

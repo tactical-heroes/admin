@@ -68,4 +68,54 @@ public sealed class ApiAdapterConventionTests
 
         violations.ShouldBeEmpty();
     }
+
+    [Fact(DisplayName = "Razor components constructor-inject API adapters")]
+    public void RazorComponents_Should_ConstructorInjectApiAdapters()
+    {
+        string repositoryRoot = RepositoryPaths.FindRoot();
+        string modulesRoot = Path.Combine(repositoryRoot, "src", "Modules");
+        string[] apiAdapterNames = Directory
+            .EnumerateFiles(modulesRoot, "*Api.cs", SearchOption.AllDirectories)
+            .Select(static path => Path.GetFileNameWithoutExtension(path)!)
+            .ToArray();
+        List<string> violations = [];
+
+        foreach (string componentPath in Directory.EnumerateFiles(
+                     modulesRoot,
+                     "*.razor.cs",
+                     SearchOption.AllDirectories))
+        {
+            string source = File.ReadAllText(componentPath);
+            string componentName = Path.GetFileNameWithoutExtension(
+                Path.GetFileNameWithoutExtension(componentPath));
+            Match classDeclaration = Regex.Match(
+                source,
+                $@"\bpartial\s+class\s+{Regex.Escape(componentName)}\s*" +
+                @"\((?<parameters>[^)]*)\)",
+                RegexOptions.CultureInvariant | RegexOptions.Singleline);
+            string parameters = classDeclaration.Success
+                ? classDeclaration.Groups["parameters"].Value
+                : string.Empty;
+
+            foreach (string apiAdapterName in apiAdapterNames.Where(
+                         apiAdapterName => Regex.IsMatch(
+                             source,
+                             $@"\b{Regex.Escape(apiAdapterName)}\b",
+                             RegexOptions.CultureInvariant)))
+            {
+                if (!Regex.IsMatch(
+                        parameters,
+                        $@"\b{Regex.Escape(apiAdapterName)}\s+" +
+                        @"[A-Za-z_][A-Za-z0-9_]*\b",
+                        RegexOptions.CultureInvariant))
+                {
+                    violations.Add(
+                        $"{Path.GetRelativePath(repositoryRoot, componentPath)}: " +
+                        $"does not constructor-inject '{apiAdapterName}'");
+                }
+            }
+        }
+
+        violations.ShouldBeEmpty();
+    }
 }

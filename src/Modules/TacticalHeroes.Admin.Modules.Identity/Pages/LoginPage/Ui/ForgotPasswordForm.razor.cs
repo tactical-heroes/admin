@@ -9,15 +9,12 @@ using TacticalHeroes.Admin.Shared.Errors;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui;
 
-public partial class ForgotPasswordForm
+public partial class ForgotPasswordForm(LoginApi loginApi)
 {
     private readonly EmailModel _model = new();
     private bool _submitting;
     private bool _requested;
     private string? _error;
-
-    [Inject]
-    private LoginApi LoginApi { get; set; } = null!;
 
     [Parameter]
     public string? ReturnUrl { get; set; }
@@ -29,7 +26,7 @@ public partial class ForgotPasswordForm
         _submitting = true;
         _error = null;
 
-        Result result = await LoginApi.RequestPasswordResetAsync(
+        Result result = await loginApi.RequestPasswordResetAsync(
             _model.Email,
             LifetimeToken);
 

@@ -12,12 +12,9 @@ using TacticalHeroes.Admin.Shared.Ui;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.UserListPage.Ui;
 
-public partial class UserListPage
+public partial class UserListPage(UserListApi userListApi)
 {
     private string? _emailFilter;
-
-    [Inject]
-    private UserListApi UserListApi { get; set; } = null!;
 
     [Inject]
     private IDialogService DialogService { get; set; } = null!;
@@ -116,7 +113,7 @@ public partial class UserListPage
 
         Result result = await ListState.DeleteAsync(
             user.Id,
-            cancellationToken => UserListApi.DeleteAsync(user.Id, cancellationToken),
+            cancellationToken => userListApi.DeleteAsync(user.Id, cancellationToken),
             LifetimeToken);
 
         if (result.IsFailure)
@@ -144,7 +141,7 @@ public partial class UserListPage
         return ListState.LoadAsync(
             CurrentPageNumber,
             CurrentPageSize,
-            cancellationToken => UserListApi.GetPageAsync(
+            cancellationToken => userListApi.GetPageAsync(
                 CurrentPageNumber,
                 CurrentPageSize,
                 normalizedEmail,

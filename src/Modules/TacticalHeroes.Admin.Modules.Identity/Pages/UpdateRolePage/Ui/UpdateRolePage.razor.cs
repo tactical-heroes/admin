@@ -10,12 +10,9 @@ using TacticalHeroes.Admin.Shared.Errors;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.UpdateRolePage.Ui;
 
-public partial class UpdateRolePage
+public partial class UpdateRolePage(UpdateRoleApi updateRoleApi)
 {
     private bool _loading;
-
-    [Inject]
-    private UpdateRoleApi UpdateRoleApi { get; set; } = null!;
 
     [Parameter]
     public Guid Id { get; set; }
@@ -41,7 +38,7 @@ public partial class UpdateRolePage
         LoadedId = Id;
         Errors.Clear();
 
-        Result<UpdateRoleFormModel> result = await UpdateRoleApi.GetAsync(
+        Result<UpdateRoleFormModel> result = await updateRoleApi.GetAsync(
             Id,
             LifetimeToken);
 
@@ -59,7 +56,7 @@ public partial class UpdateRolePage
 
     protected override Task<Result> SaveCoreAsync()
     {
-        return UpdateRoleApi.UpdateAsync(Id, Model, LifetimeToken);
+        return updateRoleApi.UpdateAsync(Id, Model, LifetimeToken);
     }
 
     protected override void OnSaveSucceeded(Result result)

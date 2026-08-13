@@ -12,11 +12,8 @@ using TacticalHeroes.Admin.Shared.Ui;
 
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Ui;
 
-public partial class FactionListPage
+public partial class FactionListPage(FactionListApi factionListApi)
 {
-    [Inject]
-    private FactionListApi FactionListApi { get; set; } = null!;
-
     [Inject]
     private IDialogService DialogService { get; set; } = null!;
 
@@ -75,7 +72,7 @@ public partial class FactionListPage
     {
         Result result = await ListState.DeleteAsync(
             id,
-            cancellationToken => FactionListApi.DeleteAsync(id, cancellationToken),
+            cancellationToken => factionListApi.DeleteAsync(id, cancellationToken),
             LifetimeToken);
 
         if (result.IsFailure)
@@ -101,7 +98,7 @@ public partial class FactionListPage
         return ListState.LoadAsync(
             CurrentPageNumber,
             CurrentPageSize,
-            cancellationToken => FactionListApi.GetPageAsync(
+            cancellationToken => factionListApi.GetPageAsync(
                 CurrentPageNumber,
                 CurrentPageSize,
                 cancellationToken),

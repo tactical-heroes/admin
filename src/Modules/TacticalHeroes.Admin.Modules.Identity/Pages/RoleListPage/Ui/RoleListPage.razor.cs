@@ -12,11 +12,8 @@ using TacticalHeroes.Admin.Shared.Ui;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.RoleListPage.Ui;
 
-public partial class RoleListPage
+public partial class RoleListPage(RoleListApi roleListApi)
 {
-    [Inject]
-    private RoleListApi RoleListApi { get; set; } = null!;
-
     [Inject]
     private IDialogService DialogService { get; set; } = null!;
 
@@ -70,7 +67,7 @@ public partial class RoleListPage
 
         Result result = await ListState.DeleteAsync(
             role.Id,
-            cancellationToken => RoleListApi.DeleteAsync(role.Id, cancellationToken),
+            cancellationToken => roleListApi.DeleteAsync(role.Id, cancellationToken),
             LifetimeToken);
 
         if (result.IsFailure)
@@ -96,7 +93,7 @@ public partial class RoleListPage
         return ListState.LoadAsync(
             CurrentPageNumber,
             CurrentPageSize,
-            cancellationToken => RoleListApi.GetPageAsync(
+            cancellationToken => roleListApi.GetPageAsync(
                 CurrentPageNumber,
                 CurrentPageSize,
                 cancellationToken),

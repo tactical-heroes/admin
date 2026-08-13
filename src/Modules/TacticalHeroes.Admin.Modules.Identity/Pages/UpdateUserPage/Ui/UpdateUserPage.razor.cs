@@ -11,12 +11,9 @@ using TacticalHeroes.Admin.Shared.Errors;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.UpdateUserPage.Ui;
 
-public partial class UpdateUserPage
+public partial class UpdateUserPage(UpdateUserApi updateUserApi)
 {
     private bool _loading;
-
-    [Inject]
-    private UpdateUserApi UpdateUserApi { get; set; } = null!;
 
     [Parameter]
     public Guid Id { get; set; }
@@ -46,11 +43,11 @@ public partial class UpdateUserPage
         LoadedId = Id;
         Errors.Clear();
 
-        Task<Result<UpdateUserFormModel>> userTask = UpdateUserApi.GetAsync(
+        Task<Result<UpdateUserFormModel>> userTask = updateUserApi.GetAsync(
             Id,
             LifetimeToken);
         Task<Result<IReadOnlyList<UserStatus>>> statusesTask =
-            UpdateUserApi.GetStatusesAsync(LifetimeToken);
+            updateUserApi.GetStatusesAsync(LifetimeToken);
 
         await Task.WhenAll(userTask, statusesTask);
 
@@ -73,7 +70,7 @@ public partial class UpdateUserPage
 
     protected override Task<Result> SaveCoreAsync()
     {
-        return UpdateUserApi.UpdateAsync(Id, Model, LifetimeToken);
+        return updateUserApi.UpdateAsync(Id, Model, LifetimeToken);
     }
 
     protected override void OnSaveSucceeded(Result result)

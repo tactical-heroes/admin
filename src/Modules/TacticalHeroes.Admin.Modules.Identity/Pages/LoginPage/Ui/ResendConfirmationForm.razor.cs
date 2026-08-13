@@ -9,15 +9,12 @@ using TacticalHeroes.Admin.Shared.Errors;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui;
 
-public partial class ResendConfirmationForm
+public partial class ResendConfirmationForm(LoginApi loginApi)
 {
     private readonly EmailModel _model = new();
     private bool _submitting;
     private bool _requested;
     private string? _error;
-
-    [Inject]
-    private LoginApi LoginApi { get; set; } = null!;
 
     [Parameter]
     public string? ReturnUrl { get; set; }
@@ -29,7 +26,7 @@ public partial class ResendConfirmationForm
         _submitting = true;
         _error = null;
 
-        Result result = await LoginApi.ResendConfirmationEmailAsync(
+        Result result = await loginApi.ResendConfirmationEmailAsync(
             _model.Email,
             LifetimeToken);
 

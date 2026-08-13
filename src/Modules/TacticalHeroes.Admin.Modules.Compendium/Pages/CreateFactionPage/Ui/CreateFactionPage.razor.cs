@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Components;
-
 using MudBlazor;
 
 using PANiXiDA.Core.ResultPattern;
@@ -8,14 +6,11 @@ using TacticalHeroes.Admin.Modules.Compendium.Pages.CreateFactionPage.Api;
 
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.CreateFactionPage.Ui;
 
-public partial class CreateFactionPage
+public partial class CreateFactionPage(CreateFactionApi createFactionApi)
 {
-    [Inject]
-    private CreateFactionApi CreateFactionApi { get; set; } = null!;
-
     protected override Task<Result<Guid>> SaveCoreAsync()
     {
-        return CreateFactionApi.CreateAsync(Model, LifetimeToken);
+        return createFactionApi.CreateAsync(Model, LifetimeToken);
     }
 
     protected override void OnSaveSucceeded(Result<Guid> result)

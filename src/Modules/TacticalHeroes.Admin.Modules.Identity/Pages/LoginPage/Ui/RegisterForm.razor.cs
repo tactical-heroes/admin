@@ -9,7 +9,7 @@ using TacticalHeroes.Admin.Shared.Errors;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui;
 
-public partial class RegisterForm
+public partial class RegisterForm(LoginApi loginApi)
 {
     private readonly RegisterModel _model = new();
     private bool _submitting;
@@ -17,9 +17,6 @@ public partial class RegisterForm
     private bool _showPassword;
     private bool _showPasswordConfirmation;
     private string? _error;
-
-    [Inject]
-    private LoginApi LoginApi { get; set; } = null!;
 
     [Parameter]
     public string? ReturnUrl { get; set; }
@@ -35,7 +32,7 @@ public partial class RegisterForm
         _submitting = true;
         _error = null;
 
-        Result<Guid> result = await LoginApi.RegisterAsync(
+        Result<Guid> result = await loginApi.RegisterAsync(
             _model.Email,
             _model.UserName,
             _model.Password,

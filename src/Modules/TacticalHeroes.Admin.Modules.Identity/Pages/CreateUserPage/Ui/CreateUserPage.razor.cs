@@ -10,12 +10,9 @@ using TacticalHeroes.Admin.Shared.Errors;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.CreateUserPage.Ui;
 
-public partial class CreateUserPage
+public partial class CreateUserPage(CreateUserApi createUserApi)
 {
     private bool _loading;
-
-    [Inject]
-    private CreateUserApi CreateUserApi { get; set; } = null!;
 
     [PersistentState(AllowUpdates = true)]
     public List<UserStatus>? Statuses { get; set; }
@@ -38,7 +35,7 @@ public partial class CreateUserPage
         Errors.Clear();
 
         Result<IReadOnlyList<UserStatus>> result =
-            await CreateUserApi.GetStatusesAsync(LifetimeToken);
+            await createUserApi.GetStatusesAsync(LifetimeToken);
 
         if (result.IsFailure)
         {
@@ -56,7 +53,7 @@ public partial class CreateUserPage
 
     protected override Task<Result<Guid>> SaveCoreAsync()
     {
-        return CreateUserApi.CreateAsync(Model, LifetimeToken);
+        return createUserApi.CreateAsync(Model, LifetimeToken);
     }
 
     protected override void OnSaveSucceeded(Result<Guid> result)
