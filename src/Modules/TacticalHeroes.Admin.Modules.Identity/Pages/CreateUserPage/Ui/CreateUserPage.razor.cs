@@ -15,10 +15,7 @@ public partial class CreateUserPage
 {
     private readonly FormErrorState<CreateUserFormModel> _errors = new();
     private readonly CreateUserFormModelValidator _validator = new();
-    private MudForm? _form;
-    private bool _isValid;
     private bool _loading;
-    private bool _saving;
 
     [Inject]
     private CreateUserApi CreateUserApi { get; set; } = null!;
@@ -71,9 +68,8 @@ public partial class CreateUserPage
         _loading = false;
     }
 
-    private async Task SaveAsync()
+    protected override async Task SaveAsync()
     {
-        _saving = true;
         _errors.Clear();
 
         Result<Guid> result = await CreateUserApi.CreateAsync(User, LifetimeToken);
@@ -81,7 +77,6 @@ public partial class CreateUserPage
         if (result.IsFailure)
         {
             _errors.Handle(result.Errors, Snackbar);
-            _saving = false;
             return;
         }
 
@@ -96,18 +91,4 @@ public partial class CreateUserPage
             ?? string.Empty;
     }
 
-    private async Task SubmitAsync()
-    {
-        if (_form is null)
-        {
-            return;
-        }
-
-        await _form.ValidateAsync();
-
-        if (_isValid)
-        {
-            await SaveAsync();
-        }
-    }
 }

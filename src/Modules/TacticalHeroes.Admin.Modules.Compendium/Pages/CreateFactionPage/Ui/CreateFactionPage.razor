@@ -1,4 +1,4 @@
-@inherits CancelableComponentBase
+@inherits MudFormComponentBase
 @attribute [Route(CompendiumRoutes.CreateFaction)]
 @attribute [Authorize]
 @attribute [StreamRendering]
@@ -13,10 +13,10 @@
     </Actions>
 </PageHeader>
 
-<MudForm @ref="_form"
+<MudForm @ref="Form"
          Model="Faction"
          Validation="@_validator.ValidateValue"
-         @bind-IsValid="_isValid">
+         @bind-IsValid="IsValid">
     <EditSection Title="Основные данные">
         <MudStack Spacing="3">
             <MudTextField T="string"
@@ -41,6 +41,6 @@
 
     <EditFormActions CancelHref="@CompendiumRoutes.Factions"
                      IsNew="true"
-                     Busy="_saving"
+                     Busy="IsSaving"
                      OnSubmit="SubmitAsync" />
 </MudForm>

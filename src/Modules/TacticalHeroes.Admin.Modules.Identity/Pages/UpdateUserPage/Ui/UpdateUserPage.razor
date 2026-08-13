@@ -1,4 +1,4 @@
-@inherits CancelableComponentBase
+@inherits MudFormComponentBase
 @attribute [Route(IdentityRoutes.UserTemplate)]
 @attribute [Authorize]
 @attribute [StreamRendering]
@@ -39,10 +39,10 @@ else if (!string.IsNullOrWhiteSpace(LoadError))
 else if (User is not null && Statuses is not null)
 {
     <div class="user-edit-form">
-        <MudForm @ref="_form"
+        <MudForm @ref="Form"
                  Model="User"
                  Validation="@_validator.ValidateValue"
-                 @bind-IsValid="_isValid">
+                 @bind-IsValid="IsValid">
             <EditSection Title="Аккаунт">
                 <MudGrid Spacing="2">
                     <MudItem xs="12" md="6">
@@ -97,7 +97,7 @@ else if (User is not null && Statuses is not null)
             </EditSection>
 
             <EditFormActions CancelHref="@IdentityRoutes.Users"
-                             Busy="_saving"
+                             Busy="IsSaving"
                              OnSubmit="SubmitAsync" />
         </MudForm>
     </div>

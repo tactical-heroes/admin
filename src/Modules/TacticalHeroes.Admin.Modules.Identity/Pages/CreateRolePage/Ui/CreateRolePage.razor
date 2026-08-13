@@ -1,4 +1,4 @@
-@inherits CancelableComponentBase
+@inherits MudFormComponentBase
 @attribute [Route(IdentityRoutes.CreateRole)]
 @attribute [Authorize]
 @attribute [StreamRendering]
@@ -14,10 +14,10 @@
     </Actions>
 </PageHeader>
 
-<MudForm @ref="_form"
+<MudForm @ref="Form"
          Model="Role"
          Validation="@_validator.ValidateValue"
-         @bind-IsValid="_isValid">
+         @bind-IsValid="IsValid">
     <EditSection Title="Основные данные">
         <MudTextField T="string"
                       @bind-Value="Role.Name"
@@ -35,6 +35,6 @@
 
     <EditFormActions CancelHref="@IdentityRoutes.Roles"
                      IsNew="true"
-                     Busy="_saving"
+                     Busy="IsSaving"
                      OnSubmit="SubmitAsync" />
 </MudForm>

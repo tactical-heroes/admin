@@ -15,9 +15,6 @@ public partial class CreateFactionPage
     private readonly CreateFactionFormModel Faction = new();
     private readonly FormErrorState<CreateFactionFormModel> _errors = new();
     private readonly CreateFactionFormModelValidator _validator = new();
-    private MudForm? _form;
-    private bool _isValid;
-    private bool _saving;
 
     [Inject]
     private CreateFactionApi CreateFactionApi { get; set; } = null!;
@@ -28,9 +25,8 @@ public partial class CreateFactionPage
     [Inject]
     private ISnackbar Snackbar { get; set; } = null!;
 
-    private async Task SaveAsync()
+    protected override async Task SaveAsync()
     {
-        _saving = true;
         _errors.Clear();
 
         Result<Guid> result = await CreateFactionApi.CreateAsync(
@@ -40,26 +36,10 @@ public partial class CreateFactionPage
         if (result.IsFailure)
         {
             _errors.Handle(result.Errors, Snackbar);
-            _saving = false;
             return;
         }
 
         Snackbar.Add("Фракция создана", Severity.Success);
         Navigation.NavigateTo(CompendiumRoutes.Faction(result.Value));
-    }
-
-    private async Task SubmitAsync()
-    {
-        if (_form is null)
-        {
-            return;
-        }
-
-        await _form.ValidateAsync();
-
-        if (_isValid)
-        {
-            await SaveAsync();
-        }
     }
 }

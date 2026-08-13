@@ -15,10 +15,7 @@ public partial class UpdateUserPage
 {
     private readonly FormErrorState<UpdateUserFormModel> _errors = new();
     private readonly UpdateUserFormModelValidator _validator = new();
-    private MudForm? _form;
-    private bool _isValid;
     private bool _loading;
-    private bool _saving;
 
     [Inject]
     private UpdateUserApi UpdateUserApi { get; set; } = null!;
@@ -86,14 +83,13 @@ public partial class UpdateUserPage
         _loading = false;
     }
 
-    private async Task SaveAsync()
+    protected override async Task SaveAsync()
     {
         if (User is null)
         {
             return;
         }
 
-        _saving = true;
         _errors.Clear();
 
         Result result = await UpdateUserApi.UpdateAsync(Id, User, LifetimeToken);
@@ -101,7 +97,6 @@ public partial class UpdateUserPage
         if (result.IsFailure)
         {
             _errors.Handle(result.Errors, Snackbar);
-            _saving = false;
             return;
         }
 
@@ -116,18 +111,4 @@ public partial class UpdateUserPage
             ?? string.Empty;
     }
 
-    private async Task SubmitAsync()
-    {
-        if (_form is null)
-        {
-            return;
-        }
-
-        await _form.ValidateAsync();
-
-        if (_isValid)
-        {
-            await SaveAsync();
-        }
-    }
 }

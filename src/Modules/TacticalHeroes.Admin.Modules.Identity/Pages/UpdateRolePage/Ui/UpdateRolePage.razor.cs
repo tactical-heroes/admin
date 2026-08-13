@@ -14,10 +14,7 @@ public partial class UpdateRolePage
 {
     private readonly FormErrorState<UpdateRoleFormModel> _errors = new();
     private readonly UpdateRoleFormModelValidator _validator = new();
-    private MudForm? _form;
-    private bool _isValid;
     private bool _loading;
-    private bool _saving;
 
     [Inject]
     private UpdateRoleApi UpdateRoleApi { get; set; } = null!;
@@ -72,14 +69,13 @@ public partial class UpdateRolePage
         _loading = false;
     }
 
-    private async Task SaveAsync()
+    protected override async Task SaveAsync()
     {
         if (Role is null)
         {
             return;
         }
 
-        _saving = true;
         _errors.Clear();
 
         Result result = await UpdateRoleApi.UpdateAsync(Id, Role, LifetimeToken);
@@ -87,26 +83,10 @@ public partial class UpdateRolePage
         if (result.IsFailure)
         {
             _errors.Handle(result.Errors, Snackbar);
-            _saving = false;
             return;
         }
 
         Snackbar.Add("Роль сохранена", Severity.Success);
         Navigation.NavigateTo(IdentityRoutes.Roles);
-    }
-
-    private async Task SubmitAsync()
-    {
-        if (_form is null)
-        {
-            return;
-        }
-
-        await _form.ValidateAsync();
-
-        if (_isValid)
-        {
-            await SaveAsync();
-        }
     }
 }

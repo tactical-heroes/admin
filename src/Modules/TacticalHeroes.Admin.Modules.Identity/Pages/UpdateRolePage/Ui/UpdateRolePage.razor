@@ -1,4 +1,4 @@
-@inherits CancelableComponentBase
+@inherits MudFormComponentBase
 @attribute [Route(IdentityRoutes.RoleTemplate)]
 @attribute [Authorize]
 @attribute [StreamRendering]
@@ -38,10 +38,10 @@ else if (!string.IsNullOrWhiteSpace(LoadError))
 }
 else if (Role is not null)
 {
-    <MudForm @ref="_form"
+    <MudForm @ref="Form"
              Model="Role"
              Validation="@_validator.ValidateValue"
-             @bind-IsValid="_isValid">
+             @bind-IsValid="IsValid">
         <EditSection Title="Основные данные">
             <MudTextField T="string"
                           @bind-Value="Role.Name"
@@ -58,7 +58,7 @@ else if (Role is not null)
         </EditSection>
 
         <EditFormActions CancelHref="@IdentityRoutes.Roles"
-                         Busy="_saving"
+                         Busy="IsSaving"
                          OnSubmit="SubmitAsync" />
     </MudForm>
 }

@@ -1,4 +1,4 @@
-@inherits CancelableComponentBase
+@inherits MudFormComponentBase
 @attribute [Route(CompendiumRoutes.FactionTemplate)]
 @attribute [Authorize]
 @attribute [StreamRendering]
@@ -37,10 +37,10 @@ else if (!string.IsNullOrWhiteSpace(LoadError))
 }
 else if (Faction is not null)
 {
-    <MudForm @ref="_form"
+    <MudForm @ref="Form"
              Model="Faction"
              Validation="@_validator.ValidateValue"
-             @bind-IsValid="_isValid">
+             @bind-IsValid="IsValid">
         <EditSection Title="Основные данные">
             <MudStack Spacing="3">
                 <MudTextField T="string"
@@ -64,7 +64,7 @@ else if (Faction is not null)
         </EditSection>
 
         <EditFormActions CancelHref="@CompendiumRoutes.Factions"
-                         Busy="_saving"
+                         Busy="IsSaving"
                          OnSubmit="SubmitAsync" />
     </MudForm>
 }

@@ -14,10 +14,7 @@ public partial class UpdateFactionPage
 {
     private readonly FormErrorState<UpdateFactionFormModel> _errors = new();
     private readonly UpdateFactionFormModelValidator _validator = new();
-    private MudForm? _form;
-    private bool _isValid;
     private bool _loading;
-    private bool _saving;
 
     [Inject]
     private UpdateFactionApi UpdateFactionApi { get; set; } = null!;
@@ -72,14 +69,13 @@ public partial class UpdateFactionPage
         _loading = false;
     }
 
-    private async Task SaveAsync()
+    protected override async Task SaveAsync()
     {
         if (Faction is null)
         {
             return;
         }
 
-        _saving = true;
         _errors.Clear();
 
         Result result = await UpdateFactionApi.UpdateAsync(
@@ -90,26 +86,10 @@ public partial class UpdateFactionPage
         if (result.IsFailure)
         {
             _errors.Handle(result.Errors, Snackbar);
-            _saving = false;
             return;
         }
 
         Snackbar.Add("Фракция сохранена", Severity.Success);
         Navigation.NavigateTo(CompendiumRoutes.Factions);
-    }
-
-    private async Task SubmitAsync()
-    {
-        if (_form is null)
-        {
-            return;
-        }
-
-        await _form.ValidateAsync();
-
-        if (_isValid)
-        {
-            await SaveAsync();
-        }
     }
 }
