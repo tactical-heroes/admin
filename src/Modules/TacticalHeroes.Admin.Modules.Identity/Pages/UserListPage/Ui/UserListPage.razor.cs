@@ -12,18 +12,13 @@ using TacticalHeroes.Admin.Shared.Ui;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.UserListPage.Ui;
 
-public partial class UserListPage(UserListApi userListApi)
+public partial class UserListPage(
+    UserListApi userListApi,
+    IDialogService dialogService,
+    ISnackbar snackbar,
+    NavigationManager navigation)
 {
     private string? _emailFilter;
-
-    [Inject]
-    private IDialogService DialogService { get; set; } = null!;
-
-    [Inject]
-    private ISnackbar Snackbar { get; set; } = null!;
-
-    [Inject]
-    private NavigationManager Navigation { get; set; } = null!;
 
     [SupplyParameterFromQuery(Name = "page")]
     public int? PageNumber { get; set; }
@@ -58,7 +53,7 @@ public partial class UserListPage(UserListApi userListApi)
 
     private void ApplyEmailFilter()
     {
-        Navigation.NavigateTo(IdentityRoutes.UsersPage(
+        navigation.NavigateTo(IdentityRoutes.UsersPage(
             NormalizeEmail(_emailFilter),
             pageSize: CurrentPageSize));
     }
@@ -77,7 +72,7 @@ public partial class UserListPage(UserListApi userListApi)
                 NormalizeEmail(Email),
                 StringComparison.OrdinalIgnoreCase))
         {
-            Navigation.NavigateTo(IdentityRoutes.UsersPage(
+            navigation.NavigateTo(IdentityRoutes.UsersPage(
                 normalizedEmail,
                 pageSize: CurrentPageSize));
         }
@@ -86,12 +81,12 @@ public partial class UserListPage(UserListApi userListApi)
     private void ResetFilters()
     {
         _emailFilter = null;
-        Navigation.NavigateTo(IdentityRoutes.UsersPage(pageSize: CurrentPageSize));
+        navigation.NavigateTo(IdentityRoutes.UsersPage(pageSize: CurrentPageSize));
     }
 
     private void ChangePage(int pageNumber)
     {
-        Navigation.NavigateTo(IdentityRoutes.UsersPage(
+        navigation.NavigateTo(IdentityRoutes.UsersPage(
             NormalizeEmail(Email),
             pageNumber,
             CurrentPageSize));
@@ -99,14 +94,14 @@ public partial class UserListPage(UserListApi userListApi)
 
     private void ChangePageSize(int pageSize)
     {
-        Navigation.NavigateTo(IdentityRoutes.UsersPage(
+        navigation.NavigateTo(IdentityRoutes.UsersPage(
             NormalizeEmail(Email),
             pageSize: pageSize));
     }
 
     private async Task ConfirmDeleteAsync(UserListItem user)
     {
-        if (!await DialogService.ConfirmDeleteAsync("пользователя", user.UserName))
+        if (!await dialogService.ConfirmDeleteAsync("пользователя", user.UserName))
         {
             return;
         }
@@ -118,11 +113,11 @@ public partial class UserListPage(UserListApi userListApi)
 
         if (result.IsFailure)
         {
-            Snackbar.Add(ApiErrorMessage.FromErrors(result.Errors), Severity.Error);
+            snackbar.Add(ApiErrorMessage.FromErrors(result.Errors), Severity.Error);
             return;
         }
 
-        Snackbar.Add("Пользователь удалён", Severity.Success);
+        snackbar.Add("Пользователь удалён", Severity.Success);
 
         if (ListState.Page?.Items.Count == 1 && CurrentPageNumber > 1)
         {

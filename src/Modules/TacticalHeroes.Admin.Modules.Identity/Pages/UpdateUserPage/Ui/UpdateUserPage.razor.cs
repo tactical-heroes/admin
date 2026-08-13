@@ -8,10 +8,17 @@ using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Model;
 using TacticalHeroes.Admin.Modules.Identity.Pages.UpdateUserPage.Api;
 using TacticalHeroes.Admin.Modules.Identity.Pages.UpdateUserPage.Model;
 using TacticalHeroes.Admin.Shared.Errors;
+using TacticalHeroes.Admin.Shared.Ui;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.UpdateUserPage.Ui;
 
-public partial class UpdateUserPage(UpdateUserApi updateUserApi)
+public partial class UpdateUserPage(
+    UpdateUserApi updateUserApi,
+    ISnackbar snackbar,
+    NavigationManager navigation)
+    : MudFormComponentBase<UpdateUserFormModel, UpdateUserFormModelValidator>(
+        snackbar,
+        navigation)
 {
     private bool _loading;
 
@@ -68,12 +75,12 @@ public partial class UpdateUserPage(UpdateUserApi updateUserApi)
         _loading = false;
     }
 
-    protected override Task<Result> SaveCoreAsync()
+    protected override Task<Result<Guid>> SaveCoreAsync()
     {
         return updateUserApi.UpdateAsync(Id, Model, LifetimeToken);
     }
 
-    protected override void OnSaveSucceeded(Result result)
+    protected override void OnSaveSucceeded(Guid _)
     {
         Snackbar.Add("Пользователь сохранён", Severity.Success);
         Navigation.NavigateTo(IdentityRoutes.Users);

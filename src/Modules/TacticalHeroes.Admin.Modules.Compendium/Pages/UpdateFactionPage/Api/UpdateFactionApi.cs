@@ -19,16 +19,18 @@ public sealed class UpdateFactionApi(TacticalHeroesApiClient client)
         return result.Map(UpdateFactionMapper.ToForm);
     }
 
-    public async Task<Result> UpdateAsync(
+    public async Task<Result<Guid>> UpdateAsync(
         Guid id,
         UpdateFactionFormModel faction,
         CancellationToken cancellationToken)
     {
         var request = UpdateFactionMapper.ToRequest(faction);
 
-        return await client.Api.V1.Factions[id].PutAsync(
+        Result result = await client.Api.V1.Factions[id].PutAsync(
                 request,
                 cancellationToken: cancellationToken)
             .ToApiResultAsync(cancellationToken);
+
+        return result.Map(() => id);
     }
 }

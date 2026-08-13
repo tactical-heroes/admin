@@ -7,10 +7,17 @@ using PANiXiDA.Core.ResultPattern;
 using TacticalHeroes.Admin.Modules.Identity.Pages.UpdateRolePage.Api;
 using TacticalHeroes.Admin.Modules.Identity.Pages.UpdateRolePage.Model;
 using TacticalHeroes.Admin.Shared.Errors;
+using TacticalHeroes.Admin.Shared.Ui;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.UpdateRolePage.Ui;
 
-public partial class UpdateRolePage(UpdateRoleApi updateRoleApi)
+public partial class UpdateRolePage(
+    UpdateRoleApi updateRoleApi,
+    ISnackbar snackbar,
+    NavigationManager navigation)
+    : MudFormComponentBase<UpdateRoleFormModel, UpdateRoleFormModelValidator>(
+        snackbar,
+        navigation)
 {
     private bool _loading;
 
@@ -54,12 +61,12 @@ public partial class UpdateRolePage(UpdateRoleApi updateRoleApi)
         _loading = false;
     }
 
-    protected override Task<Result> SaveCoreAsync()
+    protected override Task<Result<Guid>> SaveCoreAsync()
     {
         return updateRoleApi.UpdateAsync(Id, Model, LifetimeToken);
     }
 
-    protected override void OnSaveSucceeded(Result result)
+    protected override void OnSaveSucceeded(Guid _)
     {
         Snackbar.Add("Роль сохранена", Severity.Success);
         Navigation.NavigateTo(IdentityRoutes.Roles);

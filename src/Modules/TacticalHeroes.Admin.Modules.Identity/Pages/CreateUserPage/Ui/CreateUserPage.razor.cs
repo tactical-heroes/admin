@@ -6,11 +6,19 @@ using PANiXiDA.Core.ResultPattern;
 
 using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Model;
 using TacticalHeroes.Admin.Modules.Identity.Pages.CreateUserPage.Api;
+using TacticalHeroes.Admin.Modules.Identity.Pages.CreateUserPage.Model;
 using TacticalHeroes.Admin.Shared.Errors;
+using TacticalHeroes.Admin.Shared.Ui;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.CreateUserPage.Ui;
 
-public partial class CreateUserPage(CreateUserApi createUserApi)
+public partial class CreateUserPage(
+    CreateUserApi createUserApi,
+    ISnackbar snackbar,
+    NavigationManager navigation)
+    : MudFormComponentBase<CreateUserFormModel, CreateUserFormModelValidator>(
+        snackbar,
+        navigation)
 {
     private bool _loading;
 
@@ -56,10 +64,10 @@ public partial class CreateUserPage(CreateUserApi createUserApi)
         return createUserApi.CreateAsync(Model, LifetimeToken);
     }
 
-    protected override void OnSaveSucceeded(Result<Guid> result)
+    protected override void OnSaveSucceeded(Guid id)
     {
         Snackbar.Add("Пользователь создан", Severity.Success);
-        Navigation.NavigateTo(IdentityRoutes.User(result.Value));
+        Navigation.NavigateTo(IdentityRoutes.User(id));
     }
 
     private string GetStatusDisplayName(string? statusName)

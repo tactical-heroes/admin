@@ -19,16 +19,18 @@ public sealed class UpdateRoleApi(TacticalHeroesApiClient client)
         return result.Map(UpdateRoleMapper.ToForm);
     }
 
-    public Task<Result> UpdateAsync(
+    public async Task<Result<Guid>> UpdateAsync(
         Guid id,
         UpdateRoleFormModel role,
         CancellationToken cancellationToken)
     {
         var request = UpdateRoleMapper.ToRequest(role);
 
-        return client.Api.V1.Roles[id].PutAsync(
+        Result result = await client.Api.V1.Roles[id].PutAsync(
                 request,
                 cancellationToken: cancellationToken)
             .ToApiResultAsync(cancellationToken);
+
+        return result.Map(() => id);
     }
 }

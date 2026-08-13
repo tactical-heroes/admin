@@ -43,9 +43,10 @@ public sealed class MudFormComponentBaseTests
     }
 
     private sealed class TestComponent
-        : MudFormComponentBase<TestModel, TestValidator, Result>
+        : MudFormComponentBase<TestModel, TestValidator>
     {
         public TestComponent(bool isValid)
+            : base(null!, null!)
         {
             Form = new MudForm();
             IsValid = isValid;
@@ -65,12 +66,12 @@ public sealed class MudFormComponentBaseTests
             return base.SubmitAsync();
         }
 
-        protected override async Task<Result> SaveCoreAsync()
+        protected override async Task<Result<Guid>> SaveCoreAsync()
         {
             SaveCount++;
             SaveStarted.TrySetResult();
             await OnSave();
-            return Result.Success();
+            return Result.Success(Guid.Empty);
         }
     }
 

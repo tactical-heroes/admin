@@ -9,11 +9,12 @@ using TacticalHeroes.Admin.Shared.Validation;
 
 namespace TacticalHeroes.Admin.Shared.Ui;
 
-public abstract class MudFormComponentBase<TModel, TValidator, TSaveResult>
+public abstract class MudFormComponentBase<TModel, TValidator>(
+    ISnackbar snackbar,
+    NavigationManager navigation)
     : CancelableComponentBase
     where TModel : class, new()
     where TValidator : MudFormValidator<TModel>, new()
-    where TSaveResult : Result
 {
     private TModel? _model;
 
@@ -28,11 +29,9 @@ public abstract class MudFormComponentBase<TModel, TValidator, TSaveResult>
 
     protected TValidator Validator { get; } = new();
 
-    [Inject]
-    protected ISnackbar Snackbar { get; set; } = null!;
+    protected ISnackbar Snackbar { get; } = snackbar;
 
-    [Inject]
-    protected NavigationManager Navigation { get; set; } = null!;
+    protected NavigationManager Navigation { get; } = navigation;
 
     protected MudForm? Form { get; set; }
 
@@ -64,9 +63,9 @@ public abstract class MudFormComponentBase<TModel, TValidator, TSaveResult>
         }
     }
 
-    protected abstract Task<TSaveResult> SaveCoreAsync();
+    protected abstract Task<Result<Guid>> SaveCoreAsync();
 
-    protected virtual void OnSaveSucceeded(TSaveResult result)
+    protected virtual void OnSaveSucceeded(Guid id)
     {
     }
 
@@ -74,7 +73,7 @@ public abstract class MudFormComponentBase<TModel, TValidator, TSaveResult>
     {
         Errors.Clear();
 
-        TSaveResult result = await SaveCoreAsync();
+        Result<Guid> result = await SaveCoreAsync();
 
         if (result.IsFailure)
         {
@@ -82,6 +81,6 @@ public abstract class MudFormComponentBase<TModel, TValidator, TSaveResult>
             return;
         }
 
-        OnSaveSucceeded(result);
+        OnSaveSucceeded(result.Value);
     }
 }

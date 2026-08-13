@@ -7,10 +7,17 @@ using PANiXiDA.Core.ResultPattern;
 using TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateFactionPage.Api;
 using TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateFactionPage.Model;
 using TacticalHeroes.Admin.Shared.Errors;
+using TacticalHeroes.Admin.Shared.Ui;
 
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateFactionPage.Ui;
 
-public partial class UpdateFactionPage(UpdateFactionApi updateFactionApi)
+public partial class UpdateFactionPage(
+    UpdateFactionApi updateFactionApi,
+    ISnackbar snackbar,
+    NavigationManager navigation)
+    : MudFormComponentBase<UpdateFactionFormModel, UpdateFactionFormModelValidator>(
+        snackbar,
+        navigation)
 {
     private bool _loading;
 
@@ -54,12 +61,12 @@ public partial class UpdateFactionPage(UpdateFactionApi updateFactionApi)
         _loading = false;
     }
 
-    protected override Task<Result> SaveCoreAsync()
+    protected override Task<Result<Guid>> SaveCoreAsync()
     {
         return updateFactionApi.UpdateAsync(Id, Model, LifetimeToken);
     }
 
-    protected override void OnSaveSucceeded(Result result)
+    protected override void OnSaveSucceeded(Guid _)
     {
         Snackbar.Add("Фракция сохранена", Severity.Success);
         Navigation.NavigateTo(CompendiumRoutes.Factions);

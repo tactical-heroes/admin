@@ -4,15 +4,12 @@ using TacticalHeroes.Admin.Modules.Identity;
 
 namespace TacticalHeroes.Admin.Client.App.Routing;
 
-public partial class RedirectToLogin
+public partial class RedirectToLogin(NavigationManager navigation)
 {
-    [Inject]
-    private NavigationManager Navigation { get; set; } = null!;
-
     protected override void OnInitialized()
     {
-        Navigation.NavigateTo(
-            IdentityRoutes.Challenge(Navigation.Uri),
+        navigation.NavigateTo(
+            IdentityRoutes.Challenge(navigation.Uri),
             forceLoad: true);
     }
 }

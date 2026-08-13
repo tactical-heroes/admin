@@ -12,17 +12,12 @@ using TacticalHeroes.Admin.Shared.Ui;
 
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Ui;
 
-public partial class FactionListPage(FactionListApi factionListApi)
+public partial class FactionListPage(
+    FactionListApi factionListApi,
+    IDialogService dialogService,
+    ISnackbar snackbar,
+    NavigationManager navigation)
 {
-    [Inject]
-    private IDialogService DialogService { get; set; } = null!;
-
-    [Inject]
-    private ISnackbar Snackbar { get; set; } = null!;
-
-    [Inject]
-    private NavigationManager Navigation { get; set; } = null!;
-
     [SupplyParameterFromQuery(Name = "page")]
     public int? PageNumber { get; set; }
 
@@ -50,17 +45,17 @@ public partial class FactionListPage(FactionListApi factionListApi)
 
     private void ChangePage(int pageNumber)
     {
-        Navigation.NavigateTo(CompendiumRoutes.FactionsPage(pageNumber, CurrentPageSize));
+        navigation.NavigateTo(CompendiumRoutes.FactionsPage(pageNumber, CurrentPageSize));
     }
 
     private void ChangePageSize(int pageSize)
     {
-        Navigation.NavigateTo(CompendiumRoutes.FactionsPage(pageSize: pageSize));
+        navigation.NavigateTo(CompendiumRoutes.FactionsPage(pageSize: pageSize));
     }
 
     private async Task ConfirmDeleteAsync(FactionListItem faction)
     {
-        if (!await DialogService.ConfirmDeleteAsync("фракцию", faction.Name))
+        if (!await dialogService.ConfirmDeleteAsync("фракцию", faction.Name))
         {
             return;
         }
@@ -77,11 +72,11 @@ public partial class FactionListPage(FactionListApi factionListApi)
 
         if (result.IsFailure)
         {
-            Snackbar.Add(ApiErrorMessage.FromErrors(result.Errors), Severity.Error);
+            snackbar.Add(ApiErrorMessage.FromErrors(result.Errors), Severity.Error);
             return;
         }
 
-        Snackbar.Add("Фракция удалена", Severity.Success);
+        snackbar.Add("Фракция удалена", Severity.Success);
 
         if (ListState.Page?.Items.Count == 1 && CurrentPageNumber > 1)
         {

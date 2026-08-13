@@ -12,17 +12,12 @@ using TacticalHeroes.Admin.Shared.Ui;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.RoleListPage.Ui;
 
-public partial class RoleListPage(RoleListApi roleListApi)
+public partial class RoleListPage(
+    RoleListApi roleListApi,
+    IDialogService dialogService,
+    ISnackbar snackbar,
+    NavigationManager navigation)
 {
-    [Inject]
-    private IDialogService DialogService { get; set; } = null!;
-
-    [Inject]
-    private ISnackbar Snackbar { get; set; } = null!;
-
-    [Inject]
-    private NavigationManager Navigation { get; set; } = null!;
-
     [SupplyParameterFromQuery(Name = "page")]
     public int? PageNumber { get; set; }
 
@@ -50,17 +45,17 @@ public partial class RoleListPage(RoleListApi roleListApi)
 
     private void ChangePage(int pageNumber)
     {
-        Navigation.NavigateTo(IdentityRoutes.RolesPage(pageNumber, CurrentPageSize));
+        navigation.NavigateTo(IdentityRoutes.RolesPage(pageNumber, CurrentPageSize));
     }
 
     private void ChangePageSize(int pageSize)
     {
-        Navigation.NavigateTo(IdentityRoutes.RolesPage(pageSize: pageSize));
+        navigation.NavigateTo(IdentityRoutes.RolesPage(pageSize: pageSize));
     }
 
     private async Task ConfirmDeleteAsync(RoleListItem role)
     {
-        if (!await DialogService.ConfirmDeleteAsync("роль", role.Name))
+        if (!await dialogService.ConfirmDeleteAsync("роль", role.Name))
         {
             return;
         }
@@ -72,11 +67,11 @@ public partial class RoleListPage(RoleListApi roleListApi)
 
         if (result.IsFailure)
         {
-            Snackbar.Add(ApiErrorMessage.FromErrors(result.Errors), Severity.Error);
+            snackbar.Add(ApiErrorMessage.FromErrors(result.Errors), Severity.Error);
             return;
         }
 
-        Snackbar.Add("Роль удалена", Severity.Success);
+        snackbar.Add("Роль удалена", Severity.Success);
 
         if (ListState.Page?.Items.Count == 1 && CurrentPageNumber > 1)
         {
