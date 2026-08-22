@@ -1,4 +1,4 @@
-@inherits MudFormComponentBase<UpdateUserFormModel, UpdateUserFormModelValidator>
+@inherits MudUpdateFormComponentBase<UpdateUserFormModel, UpdateUserFormModelValidator, UpdateUserLoadState>
 @attribute [Route(IdentityRoutes.UserTemplate)]
 @attribute [Authorize]
 @attribute [StreamRendering]
@@ -14,91 +14,79 @@
     </Actions>
 </PageHeader>
 
-@if (_loading && Statuses is null)
-{
-    <MudSkeleton SkeletonType="SkeletonType.Rectangle"
-                 Height="360px" />
-}
-else if (!string.IsNullOrWhiteSpace(LoadError))
-{
-    <MudAlert Severity="Severity.Warning"
-              Variant="Variant.Outlined">
-        <MudStack Row="true"
-                  AlignItems="AlignItems.Center"
-                  Justify="Justify.SpaceBetween">
-            <span>@LoadError</span>
-            <MudButton Variant="Variant.Text"
-                       Color="Color.Warning"
-                       Disabled="_loading"
-                       OnClick="LoadAsync">
-                Повторить
-            </MudButton>
-        </MudStack>
-    </MudAlert>
-}
-else if (Statuses is not null)
-{
-    <div class="user-edit-form">
-        <MudForm @ref="Form"
-                 Model="Model"
-                 Validation="@Validator.ValidateValue"
-                 @bind-IsValid="IsValid">
-            <EditSection Title="Аккаунт">
-                <MudGrid Spacing="2">
-                    <MudItem xs="12" md="6">
-                        <MudTextField T="string"
-                                      @bind-Value="Model.Email"
-                                      For="@(() => Model.Email)"
-                                      Label="Email"
-                                      InputType="InputType.Email"
-                                      Variant="Variant.Outlined"
-                                      Error="@Errors.HasError(nameof(UpdateUserFormModel.Email))"
-                                      ErrorText="@Errors.GetError(nameof(UpdateUserFormModel.Email))"
-                                      MaxLength="320" />
-                    </MudItem>
-                    <MudItem xs="12" md="6">
-                        <MudTextField T="string"
-                                      @bind-Value="Model.UserName"
-                                      For="@(() => Model.UserName)"
-                                      Label="Имя пользователя"
-                                      Variant="Variant.Outlined"
-                                      Error="@Errors.HasError(nameof(UpdateUserFormModel.UserName))"
-                                      ErrorText="@Errors.GetError(nameof(UpdateUserFormModel.UserName))"
-                                      MaxLength="256" />
-                    </MudItem>
-                    <MudItem xs="12" md="6">
-                        <MudSelect T="string"
-                                   @bind-Value="Model.Status"
-                                   For="@(() => Model.Status)"
-                                   ToStringFunc="@GetStatusDisplayName"
-                                   Label="Статус"
-                                   Variant="Variant.Outlined"
-                                   Error="@Errors.HasError(nameof(UpdateUserFormModel.Status))"
-                                   ErrorText="@Errors.GetError(nameof(UpdateUserFormModel.Status))">
-                            @foreach (var status in Statuses)
-                            {
-                                <MudSelectItem T="string" Value="@status.Name">
-                                    @status.DisplayName
-                                </MudSelectItem>
-                            }
-                        </MudSelect>
-                    </MudItem>
-                    <MudItem xs="12" md="6" Class="confirmed-field">
-                        <MudSwitch T="bool"
-                                   @bind-Value="Model.IsConfirmed"
-                                   Color="Color.Success"
-                                   Label="Email подтверждён" />
-                    </MudItem>
-                </MudGrid>
-            </EditSection>
+<LoadableContent Loading="IsLoading"
+                 LoadError="@LoadError"
+                 OnRetry="ReloadAsync">
+    <LoadingContent>
+        <MudSkeleton SkeletonType="SkeletonType.Rectangle"
+                     Height="360px" />
+    </LoadingContent>
+    <ChildContent>
+        @if (Statuses is not null)
+        {
+            <div class="user-edit-form">
+                <MudForm @ref="Form"
+                         Model="Model"
+                         Validation="@Validator.ValidateValue"
+                         @bind-IsValid="IsValid">
+                    <EditSection Title="Аккаунт">
+                        <MudGrid Spacing="2">
+                            <MudItem xs="12" md="6">
+                                <MudTextField T="string"
+                                              @bind-Value="Model.Email"
+                                              For="@(() => Model.Email)"
+                                              Label="Email"
+                                              InputType="InputType.Email"
+                                              Variant="Variant.Outlined"
+                                              Error="@Errors.HasError(nameof(UpdateUserFormModel.Email))"
+                                              ErrorText="@Errors.GetError(nameof(UpdateUserFormModel.Email))"
+                                              MaxLength="320" />
+                            </MudItem>
+                            <MudItem xs="12" md="6">
+                                <MudTextField T="string"
+                                              @bind-Value="Model.UserName"
+                                              For="@(() => Model.UserName)"
+                                              Label="Имя пользователя"
+                                              Variant="Variant.Outlined"
+                                              Error="@Errors.HasError(nameof(UpdateUserFormModel.UserName))"
+                                              ErrorText="@Errors.GetError(nameof(UpdateUserFormModel.UserName))"
+                                              MaxLength="256" />
+                            </MudItem>
+                            <MudItem xs="12" md="6">
+                                <MudSelect T="string"
+                                           @bind-Value="Model.Status"
+                                           For="@(() => Model.Status)"
+                                           ToStringFunc="@GetStatusDisplayName"
+                                           Label="Статус"
+                                           Variant="Variant.Outlined"
+                                           Error="@Errors.HasError(nameof(UpdateUserFormModel.Status))"
+                                           ErrorText="@Errors.GetError(nameof(UpdateUserFormModel.Status))">
+                                    @foreach (var status in Statuses)
+                                    {
+                                        <MudSelectItem T="string" Value="@status.Name">
+                                            @status.DisplayName
+                                        </MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12" md="6" Class="confirmed-field">
+                                <MudSwitch T="bool"
+                                           @bind-Value="Model.IsConfirmed"
+                                           Color="Color.Success"
+                                           Label="Email подтверждён" />
+                            </MudItem>
+                        </MudGrid>
+                    </EditSection>
 
-            <EditSection Title="Доступ">
-                <ClaimsEditor Claims="Model.Claims" />
-            </EditSection>
+                    <EditSection Title="Доступ">
+                        <ClaimsEditor Claims="Model.Claims" />
+                    </EditSection>
 
-            <EditFormActions CancelHref="@IdentityRoutes.Users"
-                             Busy="IsSaving"
-                             OnSubmit="SubmitAsync" />
-        </MudForm>
-    </div>
-}
+                    <EditFormActions CancelHref="@IdentityRoutes.Users"
+                                     Busy="IsSaving"
+                                     OnSubmit="SubmitAsync" />
+                </MudForm>
+            </div>
+        }
+    </ChildContent>
+</LoadableContent>

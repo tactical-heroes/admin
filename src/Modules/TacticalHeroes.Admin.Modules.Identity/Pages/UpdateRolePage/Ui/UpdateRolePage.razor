@@ -1,4 +1,4 @@
-@inherits MudFormComponentBase<UpdateRoleFormModel, UpdateRoleFormModelValidator>
+@inherits MudUpdateFormComponentBase<UpdateRoleFormModel, UpdateRoleFormModelValidator>
 @attribute [Route(IdentityRoutes.RoleTemplate)]
 @attribute [Authorize]
 @attribute [StreamRendering]
@@ -14,51 +14,36 @@
     </Actions>
 </PageHeader>
 
-@if (_loading)
-{
-    <MudSkeleton SkeletonType="SkeletonType.Rectangle"
-                 Height="280px" />
-}
-else if (!string.IsNullOrWhiteSpace(LoadError))
-{
-    <MudAlert Severity="Severity.Warning"
-              Variant="Variant.Outlined">
-        <MudStack Row="true"
-                  AlignItems="AlignItems.Center"
-                  Justify="Justify.SpaceBetween">
-            <span>@LoadError</span>
-            <MudButton Variant="Variant.Text"
-                       Color="Color.Warning"
-                       Disabled="_loading"
-                       OnClick="LoadAsync">
-                Повторить
-            </MudButton>
-        </MudStack>
-    </MudAlert>
-}
-else
-{
-    <MudForm @ref="Form"
-             Model="Model"
-             Validation="@Validator.ValidateValue"
-             @bind-IsValid="IsValid">
-        <EditSection Title="Основные данные">
-            <MudTextField T="string"
-                          @bind-Value="Model.Name"
-                          For="@(() => Model.Name)"
-                          Label="Название роли"
-                          Variant="Variant.Outlined"
-                          Error="@Errors.HasError(nameof(UpdateRoleFormModel.Name))"
-                          ErrorText="@Errors.GetError(nameof(UpdateRoleFormModel.Name))"
-                          MaxLength="128" />
-        </EditSection>
+<LoadableContent Loading="IsLoading"
+                 LoadError="@LoadError"
+                 OnRetry="ReloadAsync">
+    <LoadingContent>
+        <MudSkeleton SkeletonType="SkeletonType.Rectangle"
+                     Height="280px" />
+    </LoadingContent>
+    <ChildContent>
+        <MudForm @ref="Form"
+                 Model="Model"
+                 Validation="@Validator.ValidateValue"
+                 @bind-IsValid="IsValid">
+            <EditSection Title="Основные данные">
+                <MudTextField T="string"
+                              @bind-Value="Model.Name"
+                              For="@(() => Model.Name)"
+                              Label="Название роли"
+                              Variant="Variant.Outlined"
+                              Error="@Errors.HasError(nameof(UpdateRoleFormModel.Name))"
+                              ErrorText="@Errors.GetError(nameof(UpdateRoleFormModel.Name))"
+                              MaxLength="128" />
+            </EditSection>
 
-        <EditSection Title="Доступ">
-            <ClaimsEditor Claims="Model.Claims" />
-        </EditSection>
+            <EditSection Title="Доступ">
+                <ClaimsEditor Claims="Model.Claims" />
+            </EditSection>
 
-        <EditFormActions CancelHref="@IdentityRoutes.Roles"
-                         Busy="IsSaving"
-                         OnSubmit="SubmitAsync" />
-    </MudForm>
-}
+            <EditFormActions CancelHref="@IdentityRoutes.Roles"
+                             Busy="IsSaving"
+                             OnSubmit="SubmitAsync" />
+        </MudForm>
+    </ChildContent>
+</LoadableContent>

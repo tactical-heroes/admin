@@ -7,7 +7,6 @@ using PANiXiDA.Core.ResultPattern;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Model;
 using TacticalHeroes.Admin.Modules.Identity.Pages.UpdateUserPage.Api;
 using TacticalHeroes.Admin.Modules.Identity.Pages.UpdateUserPage.Model;
-using TacticalHeroes.Admin.Shared.Errors;
 using TacticalHeroes.Admin.Shared.Ui;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.UpdateUserPage.Ui;
@@ -16,63 +15,44 @@ public partial class UpdateUserPage(
     UpdateUserApi updateUserApi,
     ISnackbar snackbar,
     NavigationManager navigation)
-    : MudFormComponentBase<UpdateUserFormModel, UpdateUserFormModelValidator>(
+    : MudUpdateFormComponentBase<
+        UpdateUserFormModel,
+        UpdateUserFormModelValidator,
+        UpdateUserLoadState>(
         snackbar,
         navigation)
 {
-    private bool _loading;
-
-    [Parameter]
-    public Guid Id { get; set; }
-
     [PersistentState(AllowUpdates = true)]
     public List<UserStatus>? Statuses { get; set; }
 
-    [PersistentState(AllowUpdates = true)]
-    public string? LoadError { get; set; }
-
-    [PersistentState(AllowUpdates = true)]
-    public Guid? LoadedId { get; set; }
-
-    protected override async Task OnParametersSetAsync()
+    protected override async Task<Result<UpdateUserLoadState>> LoadCoreAsync(
+        Guid id,
+        CancellationToken cancellationToken)
     {
-        if (LoadedId != Id)
-        {
-            await LoadAsync();
-        }
-    }
-
-    private async Task LoadAsync()
-    {
-        _loading = true;
-        Statuses = null;
-        LoadError = null;
-        LoadedId = Id;
-        Errors.Clear();
-
         Task<Result<UpdateUserFormModel>> userTask = updateUserApi.GetAsync(
-            Id,
-            LifetimeToken);
+            id,
+            cancellationToken);
         Task<Result<IReadOnlyList<UserStatus>>> statusesTask =
-            updateUserApi.GetStatusesAsync(LifetimeToken);
+            updateUserApi.GetStatusesAsync(cancellationToken);
 
         await Task.WhenAll(userTask, statusesTask);
 
         Result<UpdateUserFormModel> userResult = await userTask;
         Result<IReadOnlyList<UserStatus>> statusesResult = await statusesTask;
-        Result result = Result.Combine(userResult, statusesResult);
 
-        if (result.IsFailure)
-        {
-            LoadError = ApiErrorMessage.FromErrors(result.Errors);
-        }
-        else
-        {
-            Model = userResult.Value;
-            Statuses = statusesResult.Value.ToList();
-        }
+        return ResultCombiner.Combine(userResult, statusesResult)
+            .Map(static state => new UpdateUserLoadState(state.Item1, state.Item2));
+    }
 
-        _loading = false;
+    protected override void ApplyLoadedState(UpdateUserLoadState state)
+    {
+        Model = state.User;
+        Statuses = state.Statuses.ToList();
+    }
+
+    protected override void OnLoadStarted()
+    {
+        Statuses = null;
     }
 
     protected override Task<Result<Guid>> SaveCoreAsync()

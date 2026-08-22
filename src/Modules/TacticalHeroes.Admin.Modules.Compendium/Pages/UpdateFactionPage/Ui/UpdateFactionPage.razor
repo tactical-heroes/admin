@@ -1,4 +1,4 @@
-@inherits MudFormComponentBase<UpdateFactionFormModel, UpdateFactionFormModelValidator>
+@inherits MudUpdateFormComponentBase<UpdateFactionFormModel, UpdateFactionFormModelValidator>
 @attribute [Route(CompendiumRoutes.FactionTemplate)]
 @attribute [Authorize]
 @attribute [StreamRendering]
@@ -13,58 +13,43 @@
     </Actions>
 </PageHeader>
 
-@if (_loading)
-{
-    <MudSkeleton SkeletonType="SkeletonType.Rectangle"
-                 Height="360px" />
-}
-else if (!string.IsNullOrWhiteSpace(LoadError))
-{
-    <MudAlert Severity="Severity.Warning"
-              Variant="Variant.Outlined">
-        <MudStack Row="true"
-                  AlignItems="AlignItems.Center"
-                  Justify="Justify.SpaceBetween">
-            <span>@LoadError</span>
-            <MudButton Variant="Variant.Text"
-                       Color="Color.Warning"
-                       Disabled="_loading"
-                       OnClick="LoadAsync">
-                Повторить
-            </MudButton>
-        </MudStack>
-    </MudAlert>
-}
-else
-{
-    <MudForm @ref="Form"
-             Model="Model"
-             Validation="@Validator.ValidateValue"
-             @bind-IsValid="IsValid">
-        <EditSection Title="Основные данные">
-            <MudStack Spacing="3">
-                <MudTextField T="string"
-                              @bind-Value="Model.Name"
-                              For="@(() => Model.Name)"
-                              Label="Название фракции"
-                              Variant="Variant.Outlined"
-                              Error="@Errors.HasError(nameof(UpdateFactionFormModel.Name))"
-                              ErrorText="@Errors.GetError(nameof(UpdateFactionFormModel.Name))"
-                              MaxLength="128" />
-                <MudTextField T="string"
-                              @bind-Value="Model.Description"
-                              For="@(() => Model.Description)"
-                              Label="Описание"
-                              Variant="Variant.Outlined"
-                              Error="@Errors.HasError(nameof(UpdateFactionFormModel.Description))"
-                              ErrorText="@Errors.GetError(nameof(UpdateFactionFormModel.Description))"
-                              MaxLength="2000"
-                              Lines="8" />
-            </MudStack>
-        </EditSection>
+<LoadableContent Loading="IsLoading"
+                 LoadError="@LoadError"
+                 OnRetry="ReloadAsync">
+    <LoadingContent>
+        <MudSkeleton SkeletonType="SkeletonType.Rectangle"
+                     Height="360px" />
+    </LoadingContent>
+    <ChildContent>
+        <MudForm @ref="Form"
+                 Model="Model"
+                 Validation="@Validator.ValidateValue"
+                 @bind-IsValid="IsValid">
+            <EditSection Title="Основные данные">
+                <MudStack Spacing="3">
+                    <MudTextField T="string"
+                                  @bind-Value="Model.Name"
+                                  For="@(() => Model.Name)"
+                                  Label="Название фракции"
+                                  Variant="Variant.Outlined"
+                                  Error="@Errors.HasError(nameof(UpdateFactionFormModel.Name))"
+                                  ErrorText="@Errors.GetError(nameof(UpdateFactionFormModel.Name))"
+                                  MaxLength="128" />
+                    <MudTextField T="string"
+                                  @bind-Value="Model.Description"
+                                  For="@(() => Model.Description)"
+                                  Label="Описание"
+                                  Variant="Variant.Outlined"
+                                  Error="@Errors.HasError(nameof(UpdateFactionFormModel.Description))"
+                                  ErrorText="@Errors.GetError(nameof(UpdateFactionFormModel.Description))"
+                                  MaxLength="2000"
+                                  Lines="8" />
+                </MudStack>
+            </EditSection>
 
-        <EditFormActions CancelHref="@CompendiumRoutes.Factions"
-                         Busy="IsSaving"
-                         OnSubmit="SubmitAsync" />
-    </MudForm>
-}
+            <EditFormActions CancelHref="@CompendiumRoutes.Factions"
+                             Busy="IsSaving"
+                             OnSubmit="SubmitAsync" />
+        </MudForm>
+    </ChildContent>
+</LoadableContent>

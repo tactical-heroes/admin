@@ -6,7 +6,6 @@ using PANiXiDA.Core.ResultPattern;
 
 using TacticalHeroes.Admin.Modules.Identity.Pages.UpdateRolePage.Api;
 using TacticalHeroes.Admin.Modules.Identity.Pages.UpdateRolePage.Model;
-using TacticalHeroes.Admin.Shared.Errors;
 using TacticalHeroes.Admin.Shared.Ui;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.UpdateRolePage.Ui;
@@ -15,50 +14,15 @@ public partial class UpdateRolePage(
     UpdateRoleApi updateRoleApi,
     ISnackbar snackbar,
     NavigationManager navigation)
-    : MudFormComponentBase<UpdateRoleFormModel, UpdateRoleFormModelValidator>(
+    : MudUpdateFormComponentBase<UpdateRoleFormModel, UpdateRoleFormModelValidator>(
         snackbar,
         navigation)
 {
-    private bool _loading;
-
-    [Parameter]
-    public Guid Id { get; set; }
-
-    [PersistentState(AllowUpdates = true)]
-    public string? LoadError { get; set; }
-
-    [PersistentState(AllowUpdates = true)]
-    public Guid? LoadedId { get; set; }
-
-    protected override async Task OnParametersSetAsync()
+    protected override Task<Result<UpdateRoleFormModel>> LoadCoreAsync(
+        Guid id,
+        CancellationToken cancellationToken)
     {
-        if (LoadedId != Id)
-        {
-            await LoadAsync();
-        }
-    }
-
-    private async Task LoadAsync()
-    {
-        _loading = true;
-        LoadError = null;
-        LoadedId = Id;
-        Errors.Clear();
-
-        Result<UpdateRoleFormModel> result = await updateRoleApi.GetAsync(
-            Id,
-            LifetimeToken);
-
-        if (result.IsFailure)
-        {
-            LoadError = ApiErrorMessage.FromErrors(result.Errors);
-        }
-        else
-        {
-            Model = result.Value;
-        }
-
-        _loading = false;
+        return updateRoleApi.GetAsync(id, cancellationToken);
     }
 
     protected override Task<Result<Guid>> SaveCoreAsync()
