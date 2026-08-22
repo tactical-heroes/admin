@@ -19,13 +19,27 @@ public sealed class LoadableContentTests : BunitContext
             .Add(content => content.Loading, true)
             .Add(content => content.LoadError, "Load failed.")
             .Add(content => content.OnRetry, () => { })
-            .Add(content => content.LoadingContent, builder =>
-                builder.AddMarkupContent(0, "<p class=\"loading\">Loading</p>"))
             .AddChildContent("<p class=\"content\">Content</p>"));
 
-        component.Find(".loading").TextContent.ShouldBe("Loading");
+        component.Find(".mud-skeleton")
+            .GetAttribute("style")!
+            .ShouldContain("height:360px");
         component.FindAll(".content").ShouldBeEmpty();
         component.Markup.ShouldNotContain("Load failed.");
+    }
+
+    [Fact(DisplayName = "Uses the configured loading height")]
+    public void Render_Should_UseLoadingHeight_When_Provided()
+    {
+        var component = Render<LoadableContent>(parameters => parameters
+            .Add(content => content.Loading, true)
+            .Add(content => content.LoadingHeight, "280px")
+            .Add(content => content.OnRetry, () => { })
+            .AddChildContent("<p>Content</p>"));
+
+        component.Find(".mud-skeleton")
+            .GetAttribute("style")!
+            .ShouldContain("height:280px");
     }
 
     [Fact(DisplayName = "Shows an error and retries loading")]
@@ -35,8 +49,6 @@ public sealed class LoadableContentTests : BunitContext
         var component = Render<LoadableContent>(parameters => parameters
             .Add(content => content.LoadError, "Load failed.")
             .Add(content => content.OnRetry, () => retryCount++)
-            .Add(content => content.LoadingContent, builder =>
-                builder.AddMarkupContent(0, "<p>Loading</p>"))
             .AddChildContent("<p class=\"content\">Content</p>"));
 
         component.Find("button").Click();
@@ -51,8 +63,6 @@ public sealed class LoadableContentTests : BunitContext
     {
         var component = Render<LoadableContent>(parameters => parameters
             .Add(content => content.OnRetry, () => { })
-            .Add(content => content.LoadingContent, builder =>
-                builder.AddMarkupContent(0, "<p>Loading</p>"))
             .AddChildContent("<p class=\"content\">Content</p>"));
 
         component.Find(".content").TextContent.ShouldBe("Content");

@@ -13,8 +13,8 @@ public partial class LoadableContent
     [Parameter, EditorRequired]
     public EventCallback OnRetry { get; set; }
 
-    [Parameter, EditorRequired]
-    public RenderFragment LoadingContent { get; set; } = null!;
+    [Parameter]
+    public string LoadingHeight { get; set; } = "360px";
 
     [Parameter, EditorRequired]
     public RenderFragment ChildContent { get; set; } = null!;

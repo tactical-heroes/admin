@@ -30,7 +30,7 @@ public partial class UpdateFactionPage(
         return updateFactionApi.UpdateAsync(Id, Model, LifetimeToken);
     }
 
-    protected override void OnSaveSucceeded(Guid _)
+    protected override void OnSaveSucceeded(Guid id)
     {
         Snackbar.Add("Фракция сохранена", Severity.Success);
         Navigation.NavigateTo(CompendiumRoutes.Factions);

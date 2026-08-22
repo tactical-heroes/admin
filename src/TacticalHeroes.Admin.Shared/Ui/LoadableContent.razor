@@ -1,6 +1,7 @@
 @if (Loading)
 {
-    @LoadingContent
+    <MudSkeleton SkeletonType="SkeletonType.Rectangle"
+                 Height="@LoadingHeight" />
 }
 else if (!string.IsNullOrWhiteSpace(LoadError))
 {

@@ -16,10 +16,6 @@
 <LoadableContent Loading="IsLoading"
                  LoadError="@LoadError"
                  OnRetry="ReloadAsync">
-    <LoadingContent>
-        <MudSkeleton SkeletonType="SkeletonType.Rectangle"
-                     Height="360px" />
-    </LoadingContent>
     <ChildContent>
         <MudForm @ref="Form"
                  Model="Model"

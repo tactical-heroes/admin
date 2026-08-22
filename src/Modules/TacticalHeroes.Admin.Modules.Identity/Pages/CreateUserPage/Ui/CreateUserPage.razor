@@ -17,10 +17,6 @@
 <LoadableContent Loading="_loading"
                  LoadError="@LoadError"
                  OnRetry="LoadAsync">
-    <LoadingContent>
-        <MudSkeleton SkeletonType="SkeletonType.Rectangle"
-                     Height="360px" />
-    </LoadingContent>
     <ChildContent>
         @if (Statuses is not null)
         {
