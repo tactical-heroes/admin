@@ -23,7 +23,7 @@ public sealed class RoleListApi(TacticalHeroesApiClient client)
                 cancellationToken)
             .ToApiResultAsync(cancellationToken);
 
-        return result.Map(response => RoleListMapper.ToPage(response, pageNumber, pageSize));
+        return result.Map(RoleListMapper.ToPage);
     }
 
     public Task<Result> DeleteAsync(

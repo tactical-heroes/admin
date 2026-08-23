@@ -87,15 +87,32 @@ public sealed class MudUpdateFormComponentBaseTests
     private sealed class TestComponent
         : MudUpdateFormComponentBase<TestModel, TestValidator>
     {
+        private readonly TestOperations _operations;
+
         public TestComponent()
-            : base(null!, null!)
+            : this(new TestOperations())
         {
         }
 
-        public Func<Guid, CancellationToken, Task<Result<TestModel>>> OnLoad { get; set; } =
-            static (id, _) => Task.FromResult(Result.Success(new TestModel { Id = id }));
+        private TestComponent(TestOperations operations)
+            : base(
+                operations.LoadAsync,
+                TestOperations.UpdateAsync,
+                "Saved",
+                "/items",
+                null!,
+                null!)
+        {
+            _operations = operations;
+        }
 
-        public List<Guid> LoadedIds { get; } = [];
+        public Func<Guid, CancellationToken, Task<Result<TestModel>>> OnLoad
+        {
+            get => _operations.OnLoad;
+            set => _operations.OnLoad = value;
+        }
+
+        public List<Guid> LoadedIds => _operations.LoadedIds;
 
         public string? Error => LoadError;
 
@@ -112,7 +129,16 @@ public sealed class MudUpdateFormComponentBaseTests
             return ReloadAsync();
         }
 
-        protected override Task<Result<TestModel>> LoadCoreAsync(
+    }
+
+    private sealed class TestOperations
+    {
+        public Func<Guid, CancellationToken, Task<Result<TestModel>>> OnLoad { get; set; } =
+            static (id, _) => Task.FromResult(Result.Success(new TestModel { Id = id }));
+
+        public List<Guid> LoadedIds { get; } = [];
+
+        public Task<Result<TestModel>> LoadAsync(
             Guid id,
             CancellationToken cancellationToken)
         {
@@ -120,9 +146,12 @@ public sealed class MudUpdateFormComponentBaseTests
             return OnLoad(id, cancellationToken);
         }
 
-        protected override Task<Result<Guid>> SaveCoreAsync()
+        public static Task<Result<Guid>> UpdateAsync(
+            Guid id,
+            TestModel model,
+            CancellationToken cancellationToken)
         {
-            return Task.FromResult(Result.Success(Guid.Empty));
+            return Task.FromResult(Result.Success(id));
         }
     }
 

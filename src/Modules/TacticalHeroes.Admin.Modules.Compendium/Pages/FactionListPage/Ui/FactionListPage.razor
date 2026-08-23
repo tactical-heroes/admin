@@ -1,4 +1,4 @@
-@inherits CancelableComponentBase
+@inherits MudPagedListComponentBase<FactionListItem>
 @attribute [Route(CompendiumRoutes.Factions)]
 @attribute [Authorize]
 @attribute [StreamRendering]
@@ -19,16 +19,16 @@
 </PageHeader>
 
 <EntityList TItem="FactionListItem"
-            Items="ListState.Page?.Items"
-            Loading="ListState.Loading"
-            LoadError="@ListState.LoadError"
+            Items="Page?.Items"
+            Loading="IsLoading"
+            LoadError="@LoadError"
             EmptyText="Фракции не найдены"
             RefreshLabel="Обновить список фракций"
             OnRefresh="LoadPageAsync"
             PageNumber="CurrentPageNumber"
             PageSize="CurrentPageSize"
-            TotalPages="@(ListState.Page?.TotalPages ?? 0)"
-            TotalCount="@(ListState.Page?.TotalCount ?? 0)"
+            TotalPages="TotalPages"
+            TotalCount="TotalCount"
             OnPageNumberChanged="ChangePage"
             OnPageSizeChanged="ChangePageSize">
     <HeaderContent>
@@ -48,11 +48,23 @@
             </MudText>
         </MudTd>
         <MudTd DataLabel="Действия" Class="actions-column">
-            <EntityRowActions EditHref="@CompendiumRoutes.Faction(faction.Id)"
-                              EditLabel="Редактировать фракцию"
-                              DeleteLabel="Удалить фракцию"
-                              Disabled="@(ListState.Loading || ListState.DeletingId.HasValue)"
-                              OnDelete="@(() => ConfirmDeleteAsync(faction))" />
+            <EntityRowActions>
+                <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                               Href="@CompendiumRoutes.Faction(faction.Id)"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               Disabled="IsLoading"
+                               aria-label="Редактировать фракцию" />
+                <EntityDeleteButton TKey="Guid"
+                                    EntityId="faction.Id"
+                                    EntityType="фракцию"
+                                    EntityName="@faction.Name"
+                                    DeleteLabel="Удалить фракцию"
+                                    SuccessMessage="Фракция удалена"
+                                    DeleteAsync="DeleteFactionAsync"
+                                    OnDeleted="OnItemRemovedAsync"
+                                    Disabled="IsLoading" />
+            </EntityRowActions>
         </MudTd>
     </RowTemplate>
 </EntityList>

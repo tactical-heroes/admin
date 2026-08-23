@@ -1,4 +1,4 @@
-@inherits CancelableComponentBase
+@inherits MudPagedListComponentBase<UserListItem, UserListFilter>
 @attribute [Route(IdentityRoutes.Users)]
 @attribute [Authorize]
 @attribute [StreamRendering]
@@ -19,37 +19,30 @@
 </PageHeader>
 
 <EntityList TItem="UserListItem"
-            Items="ListState.Page?.Items"
-            Loading="ListState.Loading"
-            LoadError="@ListState.LoadError"
+            Items="Page?.Items"
+            Loading="IsLoading"
+            LoadError="@LoadError"
             EmptyText="Пользователи не найдены"
             RefreshLabel="Обновить список пользователей"
             HasFilters="true"
-            HasActiveFilters="@(!string.IsNullOrWhiteSpace(_emailFilter))"
-            OnApplyFilters="ApplyEmailFilter"
-            OnResetFilters="ResetFilters"
+            HasActiveFilters="HasActiveFilter"
+            OnApplyFilters="ApplyFilter"
+            OnResetFilters="ResetFilter"
             OnRefresh="LoadPageAsync"
             PageNumber="CurrentPageNumber"
             PageSize="CurrentPageSize"
-            TotalPages="@(ListState.Page?.TotalPages ?? 0)"
-            TotalCount="@(ListState.Page?.TotalCount ?? 0)"
+            TotalPages="TotalPages"
+            TotalCount="TotalCount"
             OnPageNumberChanged="ChangePage"
             OnPageSizeChanged="ChangePageSize">
     <Filters>
-        <MudTextField T="string"
-                      @bind-Value="_emailFilter"
-                      Label="Поиск по Email"
-                      Placeholder="user@example.com"
-                      Variant="Variant.Outlined"
-                      Margin="Margin.Dense"
-                      Adornment="Adornment.Start"
-                      AdornmentIcon="@Icons.Material.Filled.Search"
-                      Clearable="true"
-                      Immediate="true"
-                      DebounceInterval="400"
-                      OnDebounceIntervalElapsed="ApplyDynamicEmailFilter"
-                      HelperText="Автоматический запрос выполняется после ввода 3 символов"
-                      Disabled="ListState.Loading" />
+        <DebouncedTextFilter @bind-Value="FilterDraft.Email"
+                             Label="Поиск по Email"
+                             Placeholder="user@example.com"
+                             MinimumLength="3"
+                             OnFilterChanged="ApplyFilter"
+                             HelperText="Автоматический запрос выполняется после ввода 3 символов"
+                             Disabled="IsLoading" />
     </Filters>
     <HeaderContent>
         <MudTh>Пользователь</MudTh>
@@ -81,11 +74,23 @@
                      Size="Size.Small" />
         </MudTd>
         <MudTd DataLabel="Действия" Class="actions-column">
-            <EntityRowActions EditHref="@IdentityRoutes.User(user.Id)"
-                              EditLabel="Редактировать пользователя"
-                              DeleteLabel="Удалить пользователя"
-                              Disabled="@(ListState.Loading || ListState.DeletingId.HasValue)"
-                              OnDelete="@(() => ConfirmDeleteAsync(user))" />
+            <EntityRowActions>
+                <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                               Href="@IdentityRoutes.User(user.Id)"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               Disabled="IsLoading"
+                               aria-label="Редактировать пользователя" />
+                <EntityDeleteButton TKey="Guid"
+                                    EntityId="user.Id"
+                                    EntityType="пользователя"
+                                    EntityName="@user.UserName"
+                                    DeleteLabel="Удалить пользователя"
+                                    SuccessMessage="Пользователь удалён"
+                                    DeleteAsync="DeleteUserAsync"
+                                    OnDeleted="OnItemRemovedAsync"
+                                    Disabled="IsLoading" />
+            </EntityRowActions>
         </MudTd>
     </RowTemplate>
 </EntityList>

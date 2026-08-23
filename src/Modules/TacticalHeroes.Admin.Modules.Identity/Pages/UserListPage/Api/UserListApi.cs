@@ -12,7 +12,7 @@ public sealed class UserListApi(TacticalHeroesApiClient client)
     public async Task<Result<PaginationResult<UserListItem>>> GetPageAsync(
         int pageNumber,
         int pageSize,
-        string? email,
+        UserListFilter filter,
         CancellationToken cancellationToken)
     {
         var result = await client.Api.V1.Users.GetAsync(
@@ -20,12 +20,12 @@ public sealed class UserListApi(TacticalHeroesApiClient client)
                 {
                     request.QueryParameters.PageNumber = pageNumber;
                     request.QueryParameters.PageSize = pageSize;
-                    request.QueryParameters.Email = email;
+                    request.QueryParameters.Email = filter.Email;
                 },
                 cancellationToken)
             .ToApiResultAsync(cancellationToken);
 
-        return result.Map(response => UserListMapper.ToPage(response, pageNumber, pageSize));
+        return result.Map(UserListMapper.ToPage);
     }
 
     public Task<Result> DeleteAsync(

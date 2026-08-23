@@ -10,9 +10,19 @@ using TacticalHeroes.Admin.Shared.Validation;
 namespace TacticalHeroes.Admin.Shared.Ui;
 
 public abstract class MudUpdateFormComponentBase<TModel, TValidator>(
+    Func<Guid, CancellationToken, Task<Result<TModel>>> loadAsync,
+    Func<Guid, TModel, CancellationToken, Task<Result<Guid>>> updateAsync,
+    string successMessage,
+    string successRoute,
     ISnackbar snackbar,
     NavigationManager navigation)
-    : MudUpdateFormComponentBase<TModel, TValidator, TModel>(snackbar, navigation)
+    : MudUpdateFormComponentBase<TModel, TValidator, TModel>(
+        loadAsync,
+        updateAsync,
+        successMessage,
+        successRoute,
+        snackbar,
+        navigation)
     where TModel : class, new()
     where TValidator : MudFormValidator<TModel>, new()
 {
@@ -23,9 +33,17 @@ public abstract class MudUpdateFormComponentBase<TModel, TValidator>(
 }
 
 public abstract class MudUpdateFormComponentBase<TModel, TValidator, TLoadedState>(
+    Func<Guid, CancellationToken, Task<Result<TLoadedState>>> loadAsync,
+    Func<Guid, TModel, CancellationToken, Task<Result<Guid>>> updateAsync,
+    string successMessage,
+    string successRoute,
     ISnackbar snackbar,
     NavigationManager navigation)
-    : MudFormComponentBase<TModel, TValidator>(snackbar, navigation)
+    : MudFormComponentBase<TModel, TValidator>(
+        snackbar,
+        navigation,
+        successMessage,
+        _ => successRoute)
     where TModel : class, new()
     where TValidator : MudFormValidator<TModel>, new()
 {
@@ -66,7 +84,7 @@ public abstract class MudUpdateFormComponentBase<TModel, TValidator, TLoadedStat
         {
             OnLoadStarted();
 
-            Result<TLoadedState> result = await LoadCoreAsync(id, LifetimeToken);
+            Result<TLoadedState> result = await loadAsync(id, LifetimeToken);
 
             if (loadVersion != _loadVersion || id != Id)
             {
@@ -94,9 +112,11 @@ public abstract class MudUpdateFormComponentBase<TModel, TValidator, TLoadedStat
     {
     }
 
-    protected abstract Task<Result<TLoadedState>> LoadCoreAsync(
-        Guid id,
-        CancellationToken cancellationToken);
-
     protected abstract void ApplyLoadedState(TLoadedState state);
+
+    protected Task SubmitAsync()
+    {
+        return base.SubmitAsync(
+            cancellationToken => updateAsync(Id, Model, cancellationToken));
+    }
 }

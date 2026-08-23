@@ -23,7 +23,7 @@ public sealed class FactionListApi(TacticalHeroesApiClient client)
                 cancellationToken)
             .ToApiResultAsync(cancellationToken);
 
-        return result.Map(response => FactionListMapper.ToPage(response, pageNumber, pageSize));
+        return result.Map(FactionListMapper.ToPage);
     }
 
     public Task<Result> DeleteAsync(

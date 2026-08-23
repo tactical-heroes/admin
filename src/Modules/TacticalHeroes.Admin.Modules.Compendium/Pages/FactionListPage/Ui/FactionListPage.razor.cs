@@ -1,102 +1,25 @@
 using Microsoft.AspNetCore.Components;
 
-using MudBlazor;
-
 using PANiXiDA.Core.ResultPattern;
 
 using TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Api;
 using TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Model;
-using TacticalHeroes.Admin.Shared.Errors;
-using TacticalHeroes.Admin.Shared.Model;
 using TacticalHeroes.Admin.Shared.Ui;
 
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Ui;
 
 public partial class FactionListPage(
     FactionListApi factionListApi,
-    IDialogService dialogService,
-    ISnackbar snackbar,
     NavigationManager navigation)
+    : MudPagedListComponentBase<FactionListItem>(
+        factionListApi.GetPageAsync,
+        CompendiumRoutes.FactionsPage,
+        navigation)
 {
-    [SupplyParameterFromQuery(Name = "page")]
-    public int? PageNumber { get; set; }
-
-    [SupplyParameterFromQuery(Name = "pageSize")]
-    public int? PageSize { get; set; }
-
-    [PersistentState(AllowUpdates = true)]
-    public PagedListState<FactionListItem>? PersistedListState { get; set; }
-
-    private PagedListState<FactionListItem> ListState => PersistedListState ??= new();
-
-    private int CurrentPageNumber => PageNumber is > 0
-        ? PageNumber.Value
-        : 1;
-
-    private int CurrentPageSize => PaginationOptions.NormalizePageSize(PageSize);
-
-    protected override async Task OnParametersSetAsync()
+    private Task<Result> DeleteFactionAsync(
+        Guid id,
+        CancellationToken cancellationToken)
     {
-        if (!ListState.Matches(CurrentPageNumber, CurrentPageSize))
-        {
-            await LoadPageAsync();
-        }
-    }
-
-    private void ChangePage(int pageNumber)
-    {
-        navigation.NavigateTo(CompendiumRoutes.FactionsPage(pageNumber, CurrentPageSize));
-    }
-
-    private void ChangePageSize(int pageSize)
-    {
-        navigation.NavigateTo(CompendiumRoutes.FactionsPage(pageSize: pageSize));
-    }
-
-    private async Task ConfirmDeleteAsync(FactionListItem faction)
-    {
-        if (!await dialogService.ConfirmDeleteAsync("фракцию", faction.Name))
-        {
-            return;
-        }
-
-        await DeleteAsync(faction.Id);
-    }
-
-    private async Task DeleteAsync(Guid id)
-    {
-        Result result = await ListState.DeleteAsync(
-            id,
-            cancellationToken => factionListApi.DeleteAsync(id, cancellationToken),
-            LifetimeToken);
-
-        if (result.IsFailure)
-        {
-            snackbar.Add(ApiErrorMessage.FromErrors(result.Errors), Severity.Error);
-            return;
-        }
-
-        snackbar.Add("Фракция удалена", Severity.Success);
-
-        if (ListState.Page?.Items.Count == 1 && CurrentPageNumber > 1)
-        {
-            ChangePage(CurrentPageNumber - 1);
-        }
-        else
-        {
-            await LoadPageAsync();
-        }
-    }
-
-    private Task LoadPageAsync()
-    {
-        return ListState.LoadAsync(
-            CurrentPageNumber,
-            CurrentPageSize,
-            cancellationToken => factionListApi.GetPageAsync(
-                CurrentPageNumber,
-                CurrentPageSize,
-                cancellationToken),
-            LifetimeToken);
+        return factionListApi.DeleteAsync(id, cancellationToken);
     }
 }

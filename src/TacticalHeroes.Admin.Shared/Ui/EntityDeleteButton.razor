@@ -1,0 +1,9 @@
+@inherits CancelableComponentBase
+@typeparam TKey
+
+<MudIconButton Icon="@Icons.Material.Outlined.Delete"
+               Color="Color.Error"
+               Size="Size.Small"
+               Disabled="@(Disabled || IsDeleting)"
+               OnClick="ConfirmDeleteAsync"
+               aria-label="@DeleteLabel" />

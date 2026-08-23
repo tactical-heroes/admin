@@ -11,7 +11,9 @@ namespace TacticalHeroes.Admin.Shared.Ui;
 
 public abstract class MudFormComponentBase<TModel, TValidator>(
     ISnackbar snackbar,
-    NavigationManager navigation)
+    NavigationManager navigation,
+    string successMessage,
+    Func<Guid, string> successRoute)
     : CancelableComponentBase
     where TModel : class, new()
     where TValidator : MudFormValidator<TModel>, new()
@@ -29,17 +31,14 @@ public abstract class MudFormComponentBase<TModel, TValidator>(
 
     protected TValidator Validator { get; } = new();
 
-    protected ISnackbar Snackbar { get; } = snackbar;
-
-    protected NavigationManager Navigation { get; } = navigation;
-
     protected MudForm? Form { get; set; }
 
     protected bool IsValid { get; set; }
 
     protected bool IsSaving { get; private set; }
 
-    protected async Task SubmitAsync()
+    protected async Task SubmitAsync(
+        Func<CancellationToken, Task<Result<Guid>>> saveAsync)
     {
         if (Form is null || IsSaving)
         {
@@ -54,7 +53,7 @@ public abstract class MudFormComponentBase<TModel, TValidator>(
 
             if (IsValid)
             {
-                await SaveAsync();
+                await SaveAsync(saveAsync);
             }
         }
         finally
@@ -63,24 +62,20 @@ public abstract class MudFormComponentBase<TModel, TValidator>(
         }
     }
 
-    protected abstract Task<Result<Guid>> SaveCoreAsync();
-
-    protected virtual void OnSaveSucceeded(Guid id)
-    {
-    }
-
-    private async Task SaveAsync()
+    private async Task SaveAsync(
+        Func<CancellationToken, Task<Result<Guid>>> saveAsync)
     {
         Errors.Clear();
 
-        Result<Guid> result = await SaveCoreAsync();
+        Result<Guid> result = await saveAsync(LifetimeToken);
 
         if (result.IsFailure)
         {
-            Errors.Handle(result.Errors, Snackbar);
+            Errors.Handle(result.Errors, snackbar);
             return;
         }
 
-        OnSaveSucceeded(result.Value);
+        snackbar.Add(successMessage, Severity.Success);
+        navigation.NavigateTo(successRoute(result.Value));
     }
 }

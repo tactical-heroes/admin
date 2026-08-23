@@ -1,4 +1,4 @@
-@inherits CancelableComponentBase
+@inherits MudPagedListComponentBase<RoleListItem>
 @attribute [Route(IdentityRoutes.Roles)]
 @attribute [Authorize]
 @attribute [StreamRendering]
@@ -19,16 +19,16 @@
 </PageHeader>
 
 <EntityList TItem="RoleListItem"
-            Items="ListState.Page?.Items"
-            Loading="ListState.Loading"
-            LoadError="@ListState.LoadError"
+            Items="Page?.Items"
+            Loading="IsLoading"
+            LoadError="@LoadError"
             EmptyText="Роли не найдены"
             RefreshLabel="Обновить список ролей"
             OnRefresh="LoadPageAsync"
             PageNumber="CurrentPageNumber"
             PageSize="CurrentPageSize"
-            TotalPages="@(ListState.Page?.TotalPages ?? 0)"
-            TotalCount="@(ListState.Page?.TotalCount ?? 0)"
+            TotalPages="TotalPages"
+            TotalCount="TotalCount"
             OnPageNumberChanged="ChangePage"
             OnPageSizeChanged="ChangePageSize">
     <HeaderContent>
@@ -42,11 +42,23 @@
             </MudText>
         </MudTd>
         <MudTd DataLabel="Действия" Class="actions-column">
-            <EntityRowActions EditHref="@IdentityRoutes.Role(role.Id)"
-                              EditLabel="Редактировать роль"
-                              DeleteLabel="Удалить роль"
-                              Disabled="@(ListState.Loading || ListState.DeletingId.HasValue)"
-                              OnDelete="@(() => ConfirmDeleteAsync(role))" />
+            <EntityRowActions>
+                <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                               Href="@IdentityRoutes.Role(role.Id)"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               Disabled="IsLoading"
+                               aria-label="Редактировать роль" />
+                <EntityDeleteButton TKey="Guid"
+                                    EntityId="role.Id"
+                                    EntityType="роль"
+                                    EntityName="@role.Name"
+                                    DeleteLabel="Удалить роль"
+                                    SuccessMessage="Роль удалена"
+                                    DeleteAsync="DeleteRoleAsync"
+                                    OnDeleted="OnItemRemovedAsync"
+                                    Disabled="IsLoading" />
+            </EntityRowActions>
         </MudTd>
     </RowTemplate>
 </EntityList>

@@ -1,6 +1,7 @@
 using Riok.Mapperly.Abstractions;
 
 using TacticalHeroes.Admin.Api.Generated.Models;
+using TacticalHeroes.Admin.Api.Mapping;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Model;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Model;
 using TacticalHeroes.Admin.Modules.Identity.Pages.CreateUserPage.Model;
@@ -10,6 +11,7 @@ using ApiClaim = TacticalHeroes.Admin.Api.Generated.Models.Claim;
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.CreateUserPage.Api;
 
 [Mapper]
+[UseStaticMapper(typeof(RequiredValueMapper))]
 internal static partial class CreateUserMapper
 {
     [MapperIgnoreTarget(nameof(CreateUserRequest.AdditionalData))]

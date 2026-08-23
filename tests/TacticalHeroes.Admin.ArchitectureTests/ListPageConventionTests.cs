@@ -22,7 +22,7 @@ public sealed class ListPageConventionTests
         "<MudTh[^>]*>\\s*ID\\s*</MudTh>|DataLabel\\s*=\\s*\"ID\"",
         RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
-    [Fact(DisplayName = "List surfaces use the shared list and row action components")]
+    [Fact(DisplayName = "List surfaces use the shared list and row action container")]
     public void ListSurfaces_Should_UseSharedComponents_When_AdminListsAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();

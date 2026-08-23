@@ -42,7 +42,7 @@ public sealed class IdentityRoutesTests
     public void UsersPage_Should_EncodeState_When_FilterAndPageAreProvided()
     {
         string route = IdentityRoutes.UsersPage(
-            " hero@example.com ",
+            "hero@example.com",
             pageNumber: 3,
             pageSize: 25);
 

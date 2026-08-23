@@ -16,7 +16,10 @@ public partial class CreateUserPage(
     CreateUserApi createUserApi,
     ISnackbar snackbar,
     NavigationManager navigation)
-    : MudFormComponentBase<CreateUserFormModel, CreateUserFormModelValidator>(
+    : MudCreateFormComponentBase<CreateUserFormModel, CreateUserFormModelValidator>(
+        createUserApi.CreateAsync,
+        "Пользователь создан",
+        IdentityRoutes.User,
         snackbar,
         navigation)
 {
@@ -57,17 +60,6 @@ public partial class CreateUserPage(
         }
 
         _loading = false;
-    }
-
-    protected override Task<Result<Guid>> SaveCoreAsync()
-    {
-        return createUserApi.CreateAsync(Model, LifetimeToken);
-    }
-
-    protected override void OnSaveSucceeded(Guid id)
-    {
-        Snackbar.Add("Пользователь создан", Severity.Success);
-        Navigation.NavigateTo(IdentityRoutes.User(id));
     }
 
     private string GetStatusDisplayName(string? statusName)

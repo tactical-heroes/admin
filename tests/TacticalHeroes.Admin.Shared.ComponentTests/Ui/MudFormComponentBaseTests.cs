@@ -1,4 +1,8 @@
+using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
+
 using MudBlazor;
+using MudBlazor.Services;
 
 using PANiXiDA.Core.ResultPattern;
 
@@ -7,12 +11,18 @@ using TacticalHeroes.Admin.Shared.Validation;
 
 namespace TacticalHeroes.Admin.Shared.ComponentTests.Ui;
 
-public sealed class MudFormComponentBaseTests
+public sealed class MudFormComponentBaseTests : BunitContext
 {
+    public MudFormComponentBaseTests()
+    {
+        Services.AddMudServices();
+        JSInterop.Mode = JSRuntimeMode.Loose;
+    }
+
     [Fact(DisplayName = "Saves a valid form once while submission is in progress")]
     public async Task SubmitAsync_Should_SaveOnce_When_FormIsValidAndAlreadySubmitting()
     {
-        var component = new TestComponent(isValid: true);
+        var component = CreateComponent(isValid: true);
         var saveCompletion = new TaskCompletionSource(
             TaskCreationOptions.RunContinuationsAsynchronously);
         component.OnSave = () => saveCompletion.Task;
@@ -34,7 +44,7 @@ public sealed class MudFormComponentBaseTests
     [Fact(DisplayName = "Does not save an invalid form")]
     public async Task SubmitAsync_Should_NotSave_When_FormIsInvalid()
     {
-        var component = new TestComponent(isValid: false);
+        var component = CreateComponent(isValid: false);
 
         await component.SubmitAsync();
 
@@ -42,22 +52,53 @@ public sealed class MudFormComponentBaseTests
         component.Saving.ShouldBeFalse();
     }
 
-    private sealed class TestComponent
-        : MudFormComponentBase<TestModel, TestValidator>
+    private TestComponent CreateComponent(bool isValid)
     {
-        public TestComponent(bool isValid)
-            : base(null!, null!)
+        return new TestComponent(
+            isValid,
+            Services.GetRequiredService<ISnackbar>(),
+            Services.GetRequiredService<NavigationManager>());
+    }
+
+    private sealed class TestComponent
+        : MudCreateFormComponentBase<TestModel, TestValidator>
+    {
+        private readonly TestSaveOperation _saveOperation;
+
+        public TestComponent(
+            bool isValid,
+            ISnackbar snackbar,
+            NavigationManager navigation)
+            : this(new TestSaveOperation(), isValid, snackbar, navigation)
         {
+        }
+
+        private TestComponent(
+            TestSaveOperation saveOperation,
+            bool isValid,
+            ISnackbar snackbar,
+            NavigationManager navigation)
+            : base(
+                saveOperation.SaveAsync,
+                "Saved",
+                static _ => "/saved",
+                snackbar,
+                navigation)
+        {
+            _saveOperation = saveOperation;
             Form = new MudForm();
             IsValid = isValid;
         }
 
-        public Func<Task> OnSave { get; set; } = () => Task.CompletedTask;
+        public Func<Task> OnSave
+        {
+            get => _saveOperation.OnSave;
+            set => _saveOperation.OnSave = value;
+        }
 
-        public TaskCompletionSource SaveStarted { get; } = new(
-            TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource SaveStarted => _saveOperation.SaveStarted;
 
-        public int SaveCount { get; private set; }
+        public int SaveCount => _saveOperation.SaveCount;
 
         public bool Saving => IsSaving;
 
@@ -66,7 +107,20 @@ public sealed class MudFormComponentBaseTests
             return base.SubmitAsync();
         }
 
-        protected override async Task<Result<Guid>> SaveCoreAsync()
+    }
+
+    private sealed class TestSaveOperation
+    {
+        public Func<Task> OnSave { get; set; } = () => Task.CompletedTask;
+
+        public TaskCompletionSource SaveStarted { get; } = new(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public int SaveCount { get; private set; }
+
+        public async Task<Result<Guid>> SaveAsync(
+            TestModel model,
+            CancellationToken cancellationToken)
         {
             SaveCount++;
             SaveStarted.TrySetResult();

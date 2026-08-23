@@ -1,5 +1,7 @@
 using System.Globalization;
 
+using TacticalHeroes.Admin.Shared.Navigation;
+
 namespace TacticalHeroes.Admin.Modules.Identity;
 
 public static class IdentityRoutes
@@ -40,10 +42,7 @@ public static class IdentityRoutes
 
     public static string RolesPage(int pageNumber = 1, int pageSize = 10)
     {
-        ValidatePageNumber(pageNumber);
-        ValidatePageSize(pageSize);
-
-        return BuildUri(
+        return RouteUriBuilder.Build(
             Roles,
             ("page", pageNumber == 1
                 ? null
@@ -58,12 +57,9 @@ public static class IdentityRoutes
         int pageNumber = 1,
         int pageSize = 10)
     {
-        ValidatePageNumber(pageNumber);
-        ValidatePageSize(pageSize);
-
-        return BuildUri(
+        return RouteUriBuilder.Build(
             Users,
-            ("email", string.IsNullOrWhiteSpace(email) ? null : email.Trim()),
+            ("email", email),
             ("page", pageNumber == 1
                 ? null
                 : pageNumber.ToString(CultureInfo.InvariantCulture)),
@@ -77,7 +73,7 @@ public static class IdentityRoutes
         LoginMode? mode = null,
         LoginError? error = null)
     {
-        return BuildUri(
+        return RouteUriBuilder.Build(
             Login,
             ("mode", mode is null ? null : GetValue(mode.Value)),
             ("returnUrl", returnUrl),
@@ -86,14 +82,14 @@ public static class IdentityRoutes
 
     public static string Challenge(string returnUrl = "/")
     {
-        return BuildUri(AuthenticationChallenge, ("returnUrl", returnUrl));
+        return RouteUriBuilder.Build(AuthenticationChallenge, ("returnUrl", returnUrl));
     }
 
     public static string ConfirmEmailPage(Guid userId, string emailConfirmationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(emailConfirmationToken);
 
-        return BuildUri(
+        return RouteUriBuilder.Build(
             ConfirmEmail,
             ("userId", userId.ToString("D")),
             ("emailConfirmationToken", emailConfirmationToken));
@@ -103,26 +99,10 @@ public static class IdentityRoutes
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(passwordResetToken);
 
-        return BuildUri(
+        return RouteUriBuilder.Build(
             ResetPassword,
             ("userId", userId.ToString("D")),
             ("passwordResetToken", passwordResetToken));
-    }
-
-    private static string BuildUri(
-        string path,
-        params (string Name, string? Value)[] parameters)
-    {
-        string[] query = parameters
-            .Where(static parameter => !string.IsNullOrWhiteSpace(parameter.Value))
-            .Select(static parameter =>
-                $"{Uri.EscapeDataString(parameter.Name)}=" +
-                Uri.EscapeDataString(parameter.Value!))
-            .ToArray();
-
-        return query.Length == 0
-            ? path
-            : $"{path}?{string.Join('&', query)}";
     }
 
     private static string GetValue(LoginMode mode)
@@ -147,28 +127,6 @@ public static class IdentityRoutes
             LoginError.OAuth => "oauth",
             _ => throw new ArgumentOutOfRangeException(nameof(error), error, null),
         };
-    }
-
-    private static void ValidatePageNumber(int pageNumber)
-    {
-        if (pageNumber < 1)
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(pageNumber),
-                pageNumber,
-                "Page number must be greater than zero.");
-        }
-    }
-
-    private static void ValidatePageSize(int pageSize)
-    {
-        if (pageSize is not (10 or 25 or 50 or 100))
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(pageSize),
-                pageSize,
-                "Page size must be 10, 25, 50, or 100.");
-        }
     }
 }
 
