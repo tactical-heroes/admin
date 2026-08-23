@@ -49,21 +49,12 @@
                                               MaxLength="256" />
                             </MudItem>
                             <MudItem xs="12" md="6">
-                                <MudSelect T="string"
-                                           @bind-Value="Model.Status"
-                                           For="@(() => Model.Status)"
-                                           ToStringFunc="@GetStatusDisplayName"
-                                           Label="Статус"
-                                           Variant="Variant.Outlined"
-                                           Error="@Errors.HasError(nameof(UpdateUserFormModel.Status))"
-                                           ErrorText="@Errors.GetError(nameof(UpdateUserFormModel.Status))">
-                                    @foreach (var status in Statuses)
-                                    {
-                                        <MudSelectItem T="string" Value="@status.Name">
-                                            @status.DisplayName
-                                        </MudSelectItem>
-                                    }
-                                </MudSelect>
+                                <EnumerationSelect Items="Statuses"
+                                                   @bind-Value="Model.Status"
+                                                   For="@(() => Model.Status)"
+                                                   Label="Статус"
+                                                   Error="@Errors.HasError(nameof(UpdateUserFormModel.Status))"
+                                                   ErrorText="@Errors.GetError(nameof(UpdateUserFormModel.Status))" />
                             </MudItem>
                             <MudItem xs="12" md="6" Class="confirmed-field">
                                 <MudSwitch T="bool"

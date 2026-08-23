@@ -37,12 +37,4 @@ public partial class UpdateUserPage(
     {
         Statuses = null;
     }
-
-    private string GetStatusDisplayName(string? statusName)
-    {
-        return Statuses?.FirstOrDefault(status => status.Name == statusName)?.DisplayName
-            ?? statusName
-            ?? string.Empty;
-    }
-
 }

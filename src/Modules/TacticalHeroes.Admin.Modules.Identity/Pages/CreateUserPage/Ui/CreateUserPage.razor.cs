@@ -61,12 +61,4 @@ public partial class CreateUserPage(
 
         _loading = false;
     }
-
-    private string GetStatusDisplayName(string? statusName)
-    {
-        return Statuses?.FirstOrDefault(status => status.Name == statusName)?.DisplayName
-            ?? statusName
-            ?? string.Empty;
-    }
-
 }

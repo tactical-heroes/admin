@@ -1,3 +1,5 @@
+using TacticalHeroes.Admin.Shared.Model;
+
 namespace TacticalHeroes.Admin.Modules.Identity.Entities.Users.Model;
 
-public sealed record UserStatus(string Name, string DisplayName);
+public sealed record UserStatus(string Name, string DisplayName) : IEnumeration;
