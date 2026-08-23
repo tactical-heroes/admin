@@ -45,14 +45,17 @@ public static class IdentityRoutes
     {
         return RouteUriBuilder.Build(
             Login,
-            ("mode", mode is null ? null : GetValue(mode.Value)),
-            ("returnUrl", returnUrl),
-            ("error", error is null ? null : GetValue(error.Value)));
+            new
+            {
+                mode = mode is null ? null : GetValue(mode.Value),
+                returnUrl,
+                error = error is null ? null : GetValue(error.Value),
+            });
     }
 
     public static string Challenge(string returnUrl = "/")
     {
-        return RouteUriBuilder.Build(AuthenticationChallenge, ("returnUrl", returnUrl));
+        return RouteUriBuilder.Build(AuthenticationChallenge, new { returnUrl });
     }
 
     public static string ConfirmEmailPage(Guid userId, string emailConfirmationToken)
@@ -61,8 +64,7 @@ public static class IdentityRoutes
 
         return RouteUriBuilder.Build(
             ConfirmEmail,
-            ("userId", userId.ToString("D")),
-            ("emailConfirmationToken", emailConfirmationToken));
+            new { userId, emailConfirmationToken });
     }
 
     public static string ResetPasswordPage(Guid userId, string passwordResetToken)
@@ -71,8 +73,7 @@ public static class IdentityRoutes
 
         return RouteUriBuilder.Build(
             ResetPassword,
-            ("userId", userId.ToString("D")),
-            ("passwordResetToken", passwordResetToken));
+            new { userId, passwordResetToken });
     }
 
     private static string GetValue(LoginMode mode)

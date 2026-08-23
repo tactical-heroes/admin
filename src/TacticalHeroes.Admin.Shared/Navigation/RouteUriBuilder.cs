@@ -10,9 +10,46 @@ namespace TacticalHeroes.Admin.Shared.Navigation;
 
 public static class RouteUriBuilder
 {
-    public static string Build(
+    public static string Build<
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TQuery>(
         string path,
-        params (string Name, string? Value)[] parameters)
+        TQuery queryParameters)
+        where TQuery : notnull
+    {
+        var parameters = new List<(string Name, string? Value)>();
+        AddQueryParameters(parameters, queryParameters);
+
+        return BuildUri(path, parameters);
+    }
+
+    public static string BuildPaged<
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TFilter>(
+        string path,
+        TFilter filter,
+        int pageNumber,
+        int pageSize)
+        where TFilter : notnull
+    {
+        var parameters = new List<(string Name, string? Value)>();
+        AddQueryParameters(parameters, filter);
+
+        parameters.Add((
+            "page",
+            pageNumber == 1
+                ? null
+                : pageNumber.ToString(CultureInfo.InvariantCulture)));
+        parameters.Add((
+            "pageSize",
+            pageSize == PaginationOptions.DefaultPageSize
+                ? null
+                : pageSize.ToString(CultureInfo.InvariantCulture)));
+
+        return BuildUri(path, parameters);
+    }
+
+    private static string BuildUri(
+        string path,
+        IEnumerable<(string Name, string? Value)> parameters)
     {
         string[] query = parameters
             .Where(static parameter => !string.IsNullOrWhiteSpace(parameter.Value))
@@ -26,36 +63,19 @@ public static class RouteUriBuilder
             : $"{path}?{string.Join('&', query)}";
     }
 
-    public static string BuildPaged<
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TFilter>(
-        string path,
-        TFilter filter,
-        int pageNumber,
-        int pageSize)
-        where TFilter : notnull
+    private static void AddQueryParameters<
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TQuery>(
+        List<(string Name, string? Value)> parameters,
+        TQuery queryParameters)
+        where TQuery : notnull
     {
-        var parameters = new List<(string Name, string? Value)>();
-
-        foreach ((string name, PropertyInfo property) in FilterProperties<TFilter>.Items)
+        foreach ((string name, PropertyInfo property) in QueryProperties<TQuery>.Items)
         {
-            AddParameters(parameters, name, property.GetValue(filter));
+            AddParameterValues(parameters, name, property.GetValue(queryParameters));
         }
-
-        parameters.Add((
-            "page",
-            pageNumber == 1
-                ? null
-                : pageNumber.ToString(CultureInfo.InvariantCulture)));
-        parameters.Add((
-            "pageSize",
-            pageSize == PaginationOptions.DefaultPageSize
-                ? null
-                : pageSize.ToString(CultureInfo.InvariantCulture)));
-
-        return Build(path, [.. parameters]);
     }
 
-    private static void AddParameters(
+    private static void AddParameterValues(
         List<(string Name, string? Value)> parameters,
         string name,
         object? value)
@@ -86,11 +106,11 @@ public static class RouteUriBuilder
         };
     }
 
-    private static class FilterProperties<
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TFilter>
+    private static class QueryProperties<
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TQuery>
     {
         public static readonly (string Name, PropertyInfo Property)[] Items =
-            typeof(TFilter)
+            typeof(TQuery)
                 .GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(static property =>
                     property.GetMethod is not null
