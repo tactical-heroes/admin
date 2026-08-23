@@ -6,18 +6,18 @@ using MudBlazor;
 
 using PANiXiDA.Core.ResultPattern;
 
-using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Api;
-using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Model;
 using TacticalHeroes.Admin.Shared.Errors;
-using TacticalHeroes.Admin.Shared.Ui;
+using TacticalHeroes.Admin.Shared.Model;
 
-namespace TacticalHeroes.Admin.Modules.Identity.Entities.Users.Ui;
+namespace TacticalHeroes.Admin.Shared.Ui;
 
-public partial class UserStatusSelect(UserStatusApi userStatusApi)
+public partial class AsyncEnumerationSelect<TEnumeration>(
+    IEnumerationProvider<TEnumeration> provider)
     : CancelableComponentBase
+    where TEnumeration : class, IEnumeration
 {
     [PersistentState(AllowUpdates = true)]
-    public List<UserStatus>? Statuses { get; set; }
+    public List<TEnumeration>? Items { get; set; }
 
     [PersistentState(AllowUpdates = true)]
     public string? LoadError { get; set; }
@@ -54,11 +54,11 @@ public partial class UserStatusSelect(UserStatusApi userStatusApi)
 
     protected bool IsLoading { get; private set; }
 
-    protected IReadOnlyCollection<UserStatus> Items => Statuses ?? [];
+    protected IReadOnlyCollection<TEnumeration> EnumerationItems => Items ?? [];
 
     protected override async Task OnInitializedAsync()
     {
-        if (Statuses is not null)
+        if (Items is not null)
         {
             await ApplyDefaultValueAsync();
             return;
@@ -74,17 +74,17 @@ public partial class UserStatusSelect(UserStatusApi userStatusApi)
 
         try
         {
-            Result<IReadOnlyList<UserStatus>> result =
-                await userStatusApi.GetAllAsync(LifetimeToken);
+            Result<IReadOnlyList<TEnumeration>> result =
+                await provider.GetAllAsync(LifetimeToken);
 
             if (result.IsFailure)
             {
-                Statuses = null;
+                Items = null;
                 LoadError = ApiErrorMessage.FromErrors(result.Errors);
                 return;
             }
 
-            Statuses = result.Value.ToList();
+            Items = result.Value.ToList();
             await ApplyDefaultValueAsync();
         }
         finally
@@ -97,11 +97,11 @@ public partial class UserStatusSelect(UserStatusApi userStatusApi)
     {
         if (!UseFirstAsDefault ||
             !string.IsNullOrEmpty(Value) ||
-            Statuses?.FirstOrDefault() is not { } defaultStatus)
+            Items?.FirstOrDefault() is not { } defaultItem)
         {
             return;
         }
 
-        await ValueChanged.InvokeAsync(defaultStatus.Name);
+        await ValueChanged.InvokeAsync(defaultItem.Name);
     }
 }

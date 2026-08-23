@@ -3,7 +3,7 @@
 @attribute [Authorize]
 @attribute [StreamRendering]
 @using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Ui
-@using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Ui
+@using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Model
 @using TacticalHeroes.Admin.Modules.Identity.Pages.UpdateUserPage.Model
 
 <PageTitle>Редактирование пользователя · Tactical Heroes</PageTitle>
@@ -48,11 +48,12 @@
                                           MaxLength="256" />
                         </MudItem>
                         <MudItem xs="12" md="6">
-                            <UserStatusSelect @bind-Value="Model.Status"
-                                              For="@(() => Model.Status)"
-                                              Label="Статус"
-                                              Error="@Errors.HasError(nameof(UpdateUserFormModel.Status))"
-                                              ErrorText="@Errors.GetError(nameof(UpdateUserFormModel.Status))" />
+                            <AsyncEnumerationSelect TEnumeration="UserStatus"
+                                                    @bind-Value="Model.Status"
+                                                    For="@(() => Model.Status)"
+                                                    Label="Статус"
+                                                    Error="@Errors.HasError(nameof(UpdateUserFormModel.Status))"
+                                                    ErrorText="@Errors.GetError(nameof(UpdateUserFormModel.Status))" />
                         </MudItem>
                         <MudItem xs="12" md="6" Class="confirmed-field">
                             <MudSwitch T="bool"

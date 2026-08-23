@@ -1,3 +1,4 @@
+@typeparam TEnumeration where TEnumeration : class, IEnumeration
 @inherits CancelableComponentBase
 
 <LoadableContent Loading="IsLoading"
@@ -5,7 +6,7 @@
                  OnRetry="LoadAsync"
                  LoadingHeight="56px">
     <ChildContent>
-        <EnumerationSelect Items="Items"
+        <EnumerationSelect Items="EnumerationItems"
                            Value="Value"
                            ValueChanged="ValueChanged"
                            For="For"
