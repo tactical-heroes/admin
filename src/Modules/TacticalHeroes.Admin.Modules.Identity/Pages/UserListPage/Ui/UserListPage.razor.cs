@@ -15,21 +15,13 @@ public partial class UserListPage(
     NavigationManager navigation)
     : MudPagedListComponentBase<UserListItem, UserListFilter>(
         userListApi.GetPageAsync,
-        BuildListRoute,
+        IdentityRoutes.Users,
         navigation)
 {
     [SupplyParameterFromQuery(Name = "email")]
     public string? Email { get; set; }
 
     protected override UserListFilter AppliedFilter => new() { Email = Email };
-
-    private static string BuildListRoute(
-        UserListFilter filter,
-        int pageNumber,
-        int pageSize)
-    {
-        return IdentityRoutes.UsersPage(filter.Email, pageNumber, pageSize);
-    }
 
     private Task<Result> DeleteUserAsync(
         Guid id,

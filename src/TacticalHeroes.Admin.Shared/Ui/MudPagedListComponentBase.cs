@@ -1,9 +1,12 @@
+using System.Diagnostics.CodeAnalysis;
+
 using Microsoft.AspNetCore.Components;
 
 using PANiXiDA.Core.ResultPattern;
 
 using TacticalHeroes.Admin.Shared.Errors;
 using TacticalHeroes.Admin.Shared.Model;
+using TacticalHeroes.Admin.Shared.Navigation;
 
 using EmptyPagedListFilter = System.ValueTuple;
 
@@ -11,23 +14,25 @@ namespace TacticalHeroes.Admin.Shared.Ui;
 
 public abstract class MudPagedListComponentBase<TItem>(
     Func<int, int, CancellationToken, Task<Result<PaginationResult<TItem>>>> loadAsync,
-    Func<int, int, string> listRoute,
+    string listRoute,
     NavigationManager navigation)
     : MudPagedListComponentBase<TItem, EmptyPagedListFilter>(
         (pageNumber, pageSize, _, cancellationToken) =>
             loadAsync(pageNumber, pageSize, cancellationToken),
-        (_, pageNumber, pageSize) => listRoute(pageNumber, pageSize),
+        listRoute,
         navigation)
 {
     protected sealed override EmptyPagedListFilter AppliedFilter { get; } = new();
 }
 
-public abstract class MudPagedListComponentBase<TItem, TFilter>(
+public abstract class MudPagedListComponentBase<
+    TItem,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TFilter>(
     Func<int, int, TFilter, CancellationToken, Task<Result<PaginationResult<TItem>>>> loadAsync,
-    Func<TFilter, int, int, string> listRoute,
+    string listRoute,
     NavigationManager navigation)
     : CancelableComponentBase
-    where TFilter : new()
+    where TFilter : notnull, new()
 {
     private static readonly EqualityComparer<TFilter> FilterComparer =
         EqualityComparer<TFilter>.Default;
@@ -161,7 +166,11 @@ public abstract class MudPagedListComponentBase<TItem, TFilter>(
 
     protected void NavigateToList(TFilter filter, int pageNumber, int pageSize)
     {
-        navigation.NavigateTo(listRoute(filter, pageNumber, pageSize));
+        navigation.NavigateTo(RouteUriBuilder.BuildPaged(
+            listRoute,
+            filter,
+            pageNumber,
+            pageSize));
     }
 
     protected async Task OnItemRemovedAsync()

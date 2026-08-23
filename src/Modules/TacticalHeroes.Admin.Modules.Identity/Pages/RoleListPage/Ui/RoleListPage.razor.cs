@@ -13,7 +13,7 @@ public partial class RoleListPage(
     NavigationManager navigation)
     : MudPagedListComponentBase<RoleListItem>(
         roleListApi.GetPageAsync,
-        IdentityRoutes.RolesPage,
+        IdentityRoutes.Roles,
         navigation)
 {
     private Task<Result> DeleteRoleAsync(

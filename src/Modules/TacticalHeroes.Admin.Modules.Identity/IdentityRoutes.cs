@@ -1,5 +1,3 @@
-using System.Globalization;
-
 using TacticalHeroes.Admin.Shared.Navigation;
 
 namespace TacticalHeroes.Admin.Modules.Identity;
@@ -38,34 +36,6 @@ public static class IdentityRoutes
     public static string User(Guid id)
     {
         return $"{Users}/{id:D}";
-    }
-
-    public static string RolesPage(int pageNumber = 1, int pageSize = 10)
-    {
-        return RouteUriBuilder.Build(
-            Roles,
-            ("page", pageNumber == 1
-                ? null
-                : pageNumber.ToString(CultureInfo.InvariantCulture)),
-            ("pageSize", pageSize == 10
-                ? null
-                : pageSize.ToString(CultureInfo.InvariantCulture)));
-    }
-
-    public static string UsersPage(
-        string? email = null,
-        int pageNumber = 1,
-        int pageSize = 10)
-    {
-        return RouteUriBuilder.Build(
-            Users,
-            ("email", email),
-            ("page", pageNumber == 1
-                ? null
-                : pageNumber.ToString(CultureInfo.InvariantCulture)),
-            ("pageSize", pageSize == 10
-                ? null
-                : pageSize.ToString(CultureInfo.InvariantCulture)));
     }
 
     public static string LoginPage(

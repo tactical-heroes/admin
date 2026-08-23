@@ -65,13 +65,13 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
         component.ApplyDraftFilter();
 
         component.CurrentUri.ShouldEndWith(
-            "/items?email=moderator@example.test&minimumAge=21&page=1&pageSize=25");
+            "/items?email=moderator%40example.test&minimumAge=21&pageSize=25");
 
         component.ResetDraftFilter();
 
         component.DraftFilter.ShouldBe(new TestFilter());
         component.CurrentUri.ShouldEndWith(
-            "/items?email=&minimumAge=&page=1&pageSize=25");
+            "/items?pageSize=25");
     }
 
     [Fact(DisplayName = "Shows a load error and allows retrying the same route state")]
@@ -180,10 +180,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
             NavigationManager navigation)
             : base(
                 operations.LoadAsync,
-                static (filter, pageNumber, pageSize) =>
-                    $"/items?email={filter.Email}" +
-                    $"&minimumAge={filter.MinimumAge}" +
-                    $"&page={pageNumber}&pageSize={pageSize}",
+                "/items",
                 navigation)
         {
             _navigation = navigation;

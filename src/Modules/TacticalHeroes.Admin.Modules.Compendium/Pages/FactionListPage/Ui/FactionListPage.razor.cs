@@ -13,7 +13,7 @@ public partial class FactionListPage(
     NavigationManager navigation)
     : MudPagedListComponentBase<FactionListItem>(
         factionListApi.GetPageAsync,
-        CompendiumRoutes.FactionsPage,
+        CompendiumRoutes.Factions,
         navigation)
 {
     private Task<Result> DeleteFactionAsync(
