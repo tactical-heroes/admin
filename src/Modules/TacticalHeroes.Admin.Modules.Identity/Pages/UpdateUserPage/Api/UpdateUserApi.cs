@@ -2,6 +2,7 @@ using PANiXiDA.Core.ResultPattern;
 
 using TacticalHeroes.Admin.Api.Errors;
 using TacticalHeroes.Admin.Api.Generated;
+using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Api;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Model;
 using TacticalHeroes.Admin.Modules.Identity.Pages.UpdateUserPage.Model;
 
@@ -46,7 +47,7 @@ public sealed class UpdateUserApi(TacticalHeroesApiClient client)
                 cancellationToken: cancellationToken)
             .ToApiResultAsync(cancellationToken);
 
-        return result.Map(UpdateUserMapper.ToStatuses);
+        return result.Map(UserStatusMapper.ToValues);
     }
 
     public async Task<Result<Guid>> UpdateAsync(

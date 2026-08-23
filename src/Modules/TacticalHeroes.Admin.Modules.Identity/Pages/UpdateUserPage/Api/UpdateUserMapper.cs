@@ -3,7 +3,6 @@ using Riok.Mapperly.Abstractions;
 using TacticalHeroes.Admin.Api.Generated.Models;
 using TacticalHeroes.Admin.Api.Mapping;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Api;
-using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Model;
 using TacticalHeroes.Admin.Modules.Identity.Pages.UpdateUserPage.Model;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.UpdateUserPage.Api;
@@ -20,15 +19,4 @@ internal static partial class UpdateUserMapper
 
     [MapperIgnoreTarget(nameof(UpdateUserRequest.AdditionalData))]
     public static partial UpdateUserRequest ToRequest(UpdateUserFormModel user);
-
-    [MapperIgnoreSource(nameof(UserStatusResponse.AdditionalData))]
-    [MapperIgnoreSource(nameof(UserStatusResponse.Id))]
-    private static partial UserStatus ToStatus(UserStatusResponse response);
-
-    [MapperIgnore]
-    public static IReadOnlyList<UserStatus> ToStatuses(
-        IReadOnlyCollection<UserStatusResponse> response)
-    {
-        return response.Select(ToStatus).ToArray();
-    }
 }
