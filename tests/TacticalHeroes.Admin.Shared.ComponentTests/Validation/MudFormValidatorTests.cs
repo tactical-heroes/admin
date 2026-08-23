@@ -19,6 +19,19 @@ public sealed class MudFormValidatorTests
         errors.ShouldBe(["Name is required."]);
     }
 
+    [Fact(DisplayName = "Creates a field validator for a selected model property")]
+    public void For_Should_ReturnErrorsOnlyForSelectedProperty()
+    {
+        var validator = new TestModelValidator();
+        var model = new TestModel();
+
+        string[] errors = validator
+            .For(model, static model => model.Name)(model.Name)
+            .ToArray();
+
+        errors.ShouldBe(["Name is required."]);
+    }
+
     private sealed class TestModelValidator : MudFormValidator<TestModel>
     {
         public TestModelValidator()

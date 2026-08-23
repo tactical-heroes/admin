@@ -44,9 +44,9 @@
                                   Label="Тип"
                                   Variant="Variant.Outlined"
                                   Margin="Margin.Dense"
-                                  Validation="@((string _) => Validator.ValidateValue(
+                                  Validation="@Validator.For(
                                                   claim,
-                                                  nameof(ClaimValue.Type)))" />
+                                                  static claim => claim.Type)" />
                 </MudItem>
                 <MudItem xs="12" md="6">
                     <MudTextField T="string"
@@ -54,9 +54,9 @@
                                   Label="Значение"
                                   Variant="Variant.Outlined"
                                   Margin="Margin.Dense"
-                                  Validation="@((string _) => Validator.ValidateValue(
+                                  Validation="@Validator.For(
                                                   claim,
-                                                  nameof(ClaimValue.Value)))" />
+                                                  static claim => claim.Value)" />
                 </MudItem>
                 <MudItem xs="12" md="1"
                          Class="claim-remove">
