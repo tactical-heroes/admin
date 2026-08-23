@@ -1,0 +1,96 @@
+@inherits MudPagedListComponentBase<UserListItem, UserListFilter>
+@attribute [Route(IdentityRoutes.Users)]
+@attribute [Authorize]
+@attribute [StreamRendering]
+@using TacticalHeroes.Admin.Modules.Identity.Pages.UserListPage.Model
+
+<PageTitle>Пользователи · Tactical Heroes</PageTitle>
+
+<PageHeader Title="Пользователи"
+            Subtitle="Управление аккаунтами Tactical Heroes">
+    <Actions>
+        <MudButton Href="@IdentityRoutes.CreateUser"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add">
+            Добавить пользователя
+        </MudButton>
+    </Actions>
+</PageHeader>
+
+<EntityList TItem="UserListItem"
+            Items="Page?.Items"
+            Loading="IsLoading"
+            LoadError="@LoadError"
+            EmptyText="Пользователи не найдены"
+            RefreshLabel="Обновить список пользователей"
+            HasFilters="true"
+            HasActiveFilters="HasActiveFilter"
+            OnApplyFilters="ApplyFilter"
+            OnResetFilters="ResetFilter"
+            OnRefresh="LoadPageAsync"
+            PageNumber="CurrentPageNumber"
+            PageSize="CurrentPageSize"
+            TotalPages="TotalPages"
+            TotalCount="TotalCount"
+            OnPageNumberChanged="ChangePage"
+            OnPageSizeChanged="ChangePageSize">
+    <Filters>
+        <DebouncedTextFilter @bind-Value="FilterDraft.Email"
+                             Label="Поиск по Email"
+                             Placeholder="user@example.com"
+                             MinimumLength="3"
+                             OnFilterChanged="ApplyFilter"
+                             HelperText="Автоматический запрос выполняется после ввода 3 символов"
+                             Disabled="IsLoading" />
+    </Filters>
+    <HeaderContent>
+        <MudTh>Пользователь</MudTh>
+        <MudTh>Email</MudTh>
+        <MudTh>Статус</MudTh>
+        <MudTh>Подтверждение</MudTh>
+        <MudTh Class="actions-column">Действия</MudTh>
+    </HeaderContent>
+    <RowTemplate Context="user">
+        <MudTd DataLabel="Пользователь">
+            <MudText Typo="Typo.body2" Class="entity-name">
+                @user.UserName
+            </MudText>
+        </MudTd>
+        <MudTd DataLabel="Email">@user.Email</MudTd>
+        <MudTd DataLabel="Статус">
+            <MudChip T="string"
+                     Size="Size.Small"
+                     Variant="Variant.Outlined"
+                     Color="@user.StatusColor">
+                @user.StatusDisplayName
+            </MudChip>
+        </MudTd>
+        <MudTd DataLabel="Подтверждение">
+            <MudIcon Icon="@(user.IsConfirmed
+                              ? Icons.Material.Filled.CheckCircle
+                              : Icons.Material.Outlined.Cancel)"
+                     Color="@(user.IsConfirmed ? Color.Success : Color.Secondary)"
+                     Size="Size.Small" />
+        </MudTd>
+        <MudTd DataLabel="Действия" Class="actions-column">
+            <EntityRowActions>
+                <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                               Href="@IdentityRoutes.User(user.Id)"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               Disabled="IsLoading"
+                               aria-label="Редактировать пользователя" />
+                <EntityDeleteButton TKey="Guid"
+                                    EntityId="user.Id"
+                                    EntityType="пользователя"
+                                    EntityName="@user.UserName"
+                                    DeleteLabel="Удалить пользователя"
+                                    SuccessMessage="Пользователь удалён"
+                                    DeleteAsync="DeleteUserAsync"
+                                    OnDeleted="OnItemRemovedAsync"
+                                    Disabled="IsLoading" />
+            </EntityRowActions>
+        </MudTd>
+    </RowTemplate>
+</EntityList>

@@ -5,6 +5,7 @@
 
     <ItemGroup>
         <PackageReference Include="bunit" />
+        <PackageReference Include="FluentValidation" />
         <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
         <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
         <PackageReference Include="Shouldly" />

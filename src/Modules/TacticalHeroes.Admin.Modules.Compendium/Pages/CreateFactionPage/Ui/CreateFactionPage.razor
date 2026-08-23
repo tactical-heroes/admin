@@ -1,0 +1,46 @@
+@inherits MudCreateFormComponentBase<CreateFactionFormModel, CreateFactionFormModelValidator>
+@attribute [Route(CompendiumRoutes.CreateFaction)]
+@attribute [Authorize]
+@attribute [StreamRendering]
+@using TacticalHeroes.Admin.Modules.Compendium.Pages.CreateFactionPage.Model
+
+<PageTitle>Новая фракция · Tactical Heroes</PageTitle>
+
+<PageHeader Title="Новая фракция"
+            Subtitle="Добавьте новую игровую фракцию">
+    <Actions>
+        <PageBackButton Href="@CompendiumRoutes.Factions" />
+    </Actions>
+</PageHeader>
+
+<MudForm @ref="Form"
+         Model="Model"
+         Validation="@Validator.ValidateValue"
+         @bind-IsValid="IsValid">
+    <EditSection Title="Основные данные">
+        <MudStack Spacing="3">
+            <MudTextField T="string"
+                          @bind-Value="Model.Name"
+                          For="@(() => Model.Name)"
+                          Label="Название фракции"
+                          Variant="Variant.Outlined"
+                          Error="@Errors.HasError(nameof(CreateFactionFormModel.Name))"
+                          ErrorText="@Errors.GetError(nameof(CreateFactionFormModel.Name))"
+                          MaxLength="128" />
+            <MudTextField T="string"
+                          @bind-Value="Model.Description"
+                          For="@(() => Model.Description)"
+                          Label="Описание"
+                          Variant="Variant.Outlined"
+                          Error="@Errors.HasError(nameof(CreateFactionFormModel.Description))"
+                          ErrorText="@Errors.GetError(nameof(CreateFactionFormModel.Description))"
+                          MaxLength="2000"
+                          Lines="8" />
+        </MudStack>
+    </EditSection>
+
+    <EditFormActions CancelHref="@CompendiumRoutes.Factions"
+                     IsNew="true"
+                     Busy="IsSaving"
+                     OnSubmit="SubmitAsync" />
+</MudForm>

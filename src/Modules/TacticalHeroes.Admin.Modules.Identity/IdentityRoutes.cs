@@ -1,4 +1,4 @@
-using System.Globalization;
+using TacticalHeroes.Admin.Shared.Navigation;
 
 namespace TacticalHeroes.Admin.Modules.Identity;
 
@@ -38,91 +38,42 @@ public static class IdentityRoutes
         return $"{Users}/{id:D}";
     }
 
-    public static string RolesPage(int pageNumber = 1, int pageSize = 10)
-    {
-        ValidatePageNumber(pageNumber);
-        ValidatePageSize(pageSize);
-
-        return BuildUri(
-            Roles,
-            ("page", pageNumber == 1
-                ? null
-                : pageNumber.ToString(CultureInfo.InvariantCulture)),
-            ("pageSize", pageSize == 10
-                ? null
-                : pageSize.ToString(CultureInfo.InvariantCulture)));
-    }
-
-    public static string UsersPage(
-        string? email = null,
-        int pageNumber = 1,
-        int pageSize = 10)
-    {
-        ValidatePageNumber(pageNumber);
-        ValidatePageSize(pageSize);
-
-        return BuildUri(
-            Users,
-            ("email", string.IsNullOrWhiteSpace(email) ? null : email.Trim()),
-            ("page", pageNumber == 1
-                ? null
-                : pageNumber.ToString(CultureInfo.InvariantCulture)),
-            ("pageSize", pageSize == 10
-                ? null
-                : pageSize.ToString(CultureInfo.InvariantCulture)));
-    }
-
     public static string LoginPage(
         string? returnUrl = null,
         LoginMode? mode = null,
         LoginError? error = null)
     {
-        return BuildUri(
+        return RouteUriBuilder.Build(
             Login,
-            ("mode", mode is null ? null : GetValue(mode.Value)),
-            ("returnUrl", returnUrl),
-            ("error", error is null ? null : GetValue(error.Value)));
+            new
+            {
+                mode = mode is null ? null : GetValue(mode.Value),
+                returnUrl,
+                error = error is null ? null : GetValue(error.Value),
+            });
     }
 
     public static string Challenge(string returnUrl = "/")
     {
-        return BuildUri(AuthenticationChallenge, ("returnUrl", returnUrl));
+        return RouteUriBuilder.Build(AuthenticationChallenge, new { returnUrl });
     }
 
     public static string ConfirmEmailPage(Guid userId, string emailConfirmationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(emailConfirmationToken);
 
-        return BuildUri(
+        return RouteUriBuilder.Build(
             ConfirmEmail,
-            ("userId", userId.ToString("D")),
-            ("emailConfirmationToken", emailConfirmationToken));
+            new { userId, emailConfirmationToken });
     }
 
     public static string ResetPasswordPage(Guid userId, string passwordResetToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(passwordResetToken);
 
-        return BuildUri(
+        return RouteUriBuilder.Build(
             ResetPassword,
-            ("userId", userId.ToString("D")),
-            ("passwordResetToken", passwordResetToken));
-    }
-
-    private static string BuildUri(
-        string path,
-        params (string Name, string? Value)[] parameters)
-    {
-        string[] query = parameters
-            .Where(static parameter => !string.IsNullOrWhiteSpace(parameter.Value))
-            .Select(static parameter =>
-                $"{Uri.EscapeDataString(parameter.Name)}=" +
-                Uri.EscapeDataString(parameter.Value!))
-            .ToArray();
-
-        return query.Length == 0
-            ? path
-            : $"{path}?{string.Join('&', query)}";
+            new { userId, passwordResetToken });
     }
 
     private static string GetValue(LoginMode mode)
@@ -147,28 +98,6 @@ public static class IdentityRoutes
             LoginError.OAuth => "oauth",
             _ => throw new ArgumentOutOfRangeException(nameof(error), error, null),
         };
-    }
-
-    private static void ValidatePageNumber(int pageNumber)
-    {
-        if (pageNumber < 1)
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(pageNumber),
-                pageNumber,
-                "Page number must be greater than zero.");
-        }
-    }
-
-    private static void ValidatePageSize(int pageSize)
-    {
-        if (pageSize is not (10 or 25 or 50 or 100))
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(pageSize),
-                pageSize,
-                "Page size must be 10, 25, 50, or 100.");
-        }
     }
 }
 

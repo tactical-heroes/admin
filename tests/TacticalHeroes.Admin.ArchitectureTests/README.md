@@ -103,9 +103,10 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
 
 ## Единый вид списков
 
-14. `ListWidgets_Should_UseSharedComponents_When_AdminListsAreScanned` — списки
-    фракций, ролей и пользователей используют общий `EntityList` и единые
-    действия строки `EntityRowActions`, не создавая собственные таблицы.
+14. `ListSurfaces_Should_UseSharedComponents_When_AdminListsAreScanned` — списки
+    фракций, ролей и пользователей используют общий `EntityList` и контейнер
+    `EntityRowActions` для произвольной композиции действий строки, не создавая
+    собственные таблицы.
 
 15. `ListWidgets_Should_NotExposeIdentifiers_When_AdminListsAreScanned` — в
     пользовательской разметке списков запрещены колонки с техническим ID.

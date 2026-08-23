@@ -38,22 +38,4 @@ public sealed class IdentityRoutesTests
             "&emailConfirmationToken=token%2F%2B%3D%3D");
     }
 
-    [Fact(DisplayName = "Builds users route from filter and page")]
-    public void UsersPage_Should_EncodeState_When_FilterAndPageAreProvided()
-    {
-        string route = IdentityRoutes.UsersPage(
-            " hero@example.com ",
-            pageNumber: 3,
-            pageSize: 25);
-
-        route.ShouldBe("/users?email=hero%40example.com&page=3&pageSize=25");
-    }
-
-    [Fact(DisplayName = "Omits default roles page from query")]
-    public void RolesPage_Should_OmitPage_When_FirstPageIsProvided()
-    {
-        string route = IdentityRoutes.RolesPage();
-
-        route.ShouldBe("/roles");
-    }
 }

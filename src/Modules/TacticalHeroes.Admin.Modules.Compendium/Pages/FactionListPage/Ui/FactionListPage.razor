@@ -1,0 +1,70 @@
+@inherits MudPagedListComponentBase<FactionListItem>
+@attribute [Route(CompendiumRoutes.Factions)]
+@attribute [Authorize]
+@attribute [StreamRendering]
+@using TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Model
+
+<PageTitle>Фракции · Tactical Heroes</PageTitle>
+
+<PageHeader Title="Фракции"
+            Subtitle="Управление игровыми фракциями">
+    <Actions>
+        <MudButton Href="@CompendiumRoutes.CreateFaction"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add">
+            Добавить фракцию
+        </MudButton>
+    </Actions>
+</PageHeader>
+
+<EntityList TItem="FactionListItem"
+            Items="Page?.Items"
+            Loading="IsLoading"
+            LoadError="@LoadError"
+            EmptyText="Фракции не найдены"
+            RefreshLabel="Обновить список фракций"
+            OnRefresh="LoadPageAsync"
+            PageNumber="CurrentPageNumber"
+            PageSize="CurrentPageSize"
+            TotalPages="TotalPages"
+            TotalCount="TotalCount"
+            OnPageNumberChanged="ChangePage"
+            OnPageSizeChanged="ChangePageSize">
+    <HeaderContent>
+        <MudTh>Название</MudTh>
+        <MudTh>Описание</MudTh>
+        <MudTh Class="actions-column">Действия</MudTh>
+    </HeaderContent>
+    <RowTemplate Context="faction">
+        <MudTd DataLabel="Название">
+            <MudText Typo="Typo.body2" Class="entity-name">
+                @faction.Name
+            </MudText>
+        </MudTd>
+        <MudTd DataLabel="Описание">
+            <MudText Typo="Typo.body2" Class="entity-description">
+                @faction.Description
+            </MudText>
+        </MudTd>
+        <MudTd DataLabel="Действия" Class="actions-column">
+            <EntityRowActions>
+                <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                               Href="@CompendiumRoutes.Faction(faction.Id)"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               Disabled="IsLoading"
+                               aria-label="Редактировать фракцию" />
+                <EntityDeleteButton TKey="Guid"
+                                    EntityId="faction.Id"
+                                    EntityType="фракцию"
+                                    EntityName="@faction.Name"
+                                    DeleteLabel="Удалить фракцию"
+                                    SuccessMessage="Фракция удалена"
+                                    DeleteAsync="DeleteFactionAsync"
+                                    OnDeleted="OnItemRemovedAsync"
+                                    Disabled="IsLoading" />
+            </EntityRowActions>
+        </MudTd>
+    </RowTemplate>
+</EntityList>

@@ -7,6 +7,9 @@ public sealed class RazorArtifactConventionTests
     private static readonly Regex InlineCodeOrStyleRegex = new(
         "@(?:code|functions)\\s*\\{|@inject\\s|<style(?:\\s|>)",
         RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+    private static readonly Regex PropertyInjectionRegex = new(
+        @"\[(?:global::)?(?:[A-Za-z_][A-Za-z0-9_]*\.)*Inject(?:Attribute)?\b",
+        RegexOptions.CultureInvariant);
 
     [Fact(DisplayName = "Razor markup keeps code and styles in companion files")]
     public void RazorMarkup_Should_NotContainCodeOrStyles_When_SourceIsScanned()
@@ -53,6 +56,19 @@ public sealed class RazorArtifactConventionTests
                 violations.Add(Path.GetRelativePath(repositoryRoot, cssPath));
             }
         }
+
+        violations.ShouldBeEmpty();
+    }
+
+    [Fact(DisplayName = "Razor components use constructor injection")]
+    public void RazorComponents_Should_NotUsePropertyInjection()
+    {
+        string repositoryRoot = RepositoryPaths.FindRoot();
+        string sourceRoot = Path.Combine(repositoryRoot, "src");
+        string[] violations = EnumerateFiles(sourceRoot, "*.cs")
+            .Where(path => PropertyInjectionRegex.IsMatch(File.ReadAllText(path)))
+            .Select(path => Path.GetRelativePath(repositoryRoot, path))
+            .ToArray();
 
         violations.ShouldBeEmpty();
     }

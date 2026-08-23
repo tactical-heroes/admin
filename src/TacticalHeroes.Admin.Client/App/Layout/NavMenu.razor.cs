@@ -4,14 +4,11 @@ using TacticalHeroes.Admin.Shared.Navigation;
 
 namespace TacticalHeroes.Admin.Client.App.Layout;
 
-public partial class NavMenu
+public partial class NavMenu(NavigationManager navigation)
 {
-    [Inject]
-    private NavigationManager Navigation { get; set; } = null!;
-
     private bool IsCurrentGroup(AdminNavigationGroup group)
     {
-        string relativePath = Navigation.ToBaseRelativePath(Navigation.Uri);
+        string relativePath = navigation.ToBaseRelativePath(navigation.Uri);
         int suffixStart = relativePath.IndexOfAny(['?', '#']);
 
         if (suffixStart >= 0)

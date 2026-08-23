@@ -1,0 +1,40 @@
+@inherits MudCreateFormComponentBase<CreateRoleFormModel, CreateRoleFormModelValidator>
+@attribute [Route(IdentityRoutes.CreateRole)]
+@attribute [Authorize]
+@attribute [StreamRendering]
+@using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Ui
+@using TacticalHeroes.Admin.Modules.Identity.Pages.CreateRolePage.Model
+
+<PageTitle>Новая роль · Tactical Heroes</PageTitle>
+
+<PageHeader Title="Новая роль"
+            Subtitle="Создайте роль и назначьте ей атрибуты доступа">
+    <Actions>
+        <PageBackButton Href="@IdentityRoutes.Roles" />
+    </Actions>
+</PageHeader>
+
+<MudForm @ref="Form"
+         Model="Model"
+         Validation="@Validator.ValidateValue"
+         @bind-IsValid="IsValid">
+    <EditSection Title="Основные данные">
+        <MudTextField T="string"
+                      @bind-Value="Model.Name"
+                      For="@(() => Model.Name)"
+                      Label="Название роли"
+                      Variant="Variant.Outlined"
+                      Error="@Errors.HasError(nameof(CreateRoleFormModel.Name))"
+                      ErrorText="@Errors.GetError(nameof(CreateRoleFormModel.Name))"
+                      MaxLength="128" />
+    </EditSection>
+
+    <EditSection Title="Доступ">
+        <ClaimsEditor Claims="Model.Claims" />
+    </EditSection>
+
+    <EditFormActions CancelHref="@IdentityRoutes.Roles"
+                     IsNew="true"
+                     Busy="IsSaving"
+                     OnSubmit="SubmitAsync" />
+</MudForm>

@@ -1,0 +1,18 @@
+<MudSelect T="string"
+           Value="Value"
+           ValueChanged="ValueChanged"
+           For="For"
+           ToStringFunc="GetDisplayName"
+           Label="@Label"
+           Variant="Variant"
+           Margin="Margin"
+           Disabled="Disabled"
+           Error="Error"
+           ErrorText="@ErrorText">
+    @foreach (IEnumeration item in Items)
+    {
+        <MudSelectItem T="string" Value="@item.Name">
+            @item.DisplayName
+        </MudSelectItem>
+    }
+</MudSelect>

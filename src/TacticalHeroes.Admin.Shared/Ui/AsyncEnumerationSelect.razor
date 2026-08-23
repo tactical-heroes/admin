@@ -1,0 +1,20 @@
+@typeparam TEnumeration where TEnumeration : class, IEnumeration
+@inherits CancelableComponentBase
+
+<LoadableContent Loading="IsLoading"
+                 LoadError="@LoadError"
+                 OnRetry="LoadAsync"
+                 LoadingHeight="56px">
+    <ChildContent>
+        <EnumerationSelect Items="EnumerationItems"
+                           Value="Value"
+                           ValueChanged="ValueChanged"
+                           For="For"
+                           Label="@Label"
+                           Variant="Variant"
+                           Margin="Margin"
+                           Disabled="Disabled"
+                           Error="Error"
+                           ErrorText="@ErrorText" />
+    </ChildContent>
+</LoadableContent>

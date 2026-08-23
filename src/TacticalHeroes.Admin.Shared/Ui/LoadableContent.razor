@@ -1,0 +1,25 @@
+@if (Loading)
+{
+    <MudSkeleton SkeletonType="SkeletonType.Rectangle"
+                 Height="@LoadingHeight" />
+}
+else if (!string.IsNullOrWhiteSpace(LoadError))
+{
+    <MudAlert Severity="Severity.Warning"
+              Variant="Variant.Outlined">
+        <MudStack Row="true"
+                  AlignItems="AlignItems.Center"
+                  Justify="Justify.SpaceBetween">
+            <span>@LoadError</span>
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Warning"
+                       OnClick="OnRetry">
+                Повторить
+            </MudButton>
+        </MudStack>
+    </MudAlert>
+}
+else
+{
+    @ChildContent
+}

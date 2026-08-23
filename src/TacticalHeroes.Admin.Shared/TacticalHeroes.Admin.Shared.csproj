@@ -5,8 +5,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentValidation" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" />
     <PackageReference Include="MudBlazor" />
+    <PackageReference Include="PANiXiDA.Core.ResultPattern" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,46 @@
+@inherits MudUpdateFormComponentBase<UpdateRoleFormModel, UpdateRoleFormModelValidator>
+@attribute [Route(IdentityRoutes.RoleTemplate)]
+@attribute [Authorize]
+@attribute [StreamRendering]
+@using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Ui
+@using TacticalHeroes.Admin.Modules.Identity.Pages.UpdateRolePage.Model
+
+<PageTitle>Редактирование роли · Tactical Heroes</PageTitle>
+
+<PageHeader Title="Редактирование роли"
+            Subtitle="Измените название и атрибуты доступа роли">
+    <Actions>
+        <PageBackButton Href="@IdentityRoutes.Roles" />
+    </Actions>
+</PageHeader>
+
+<LoadableContent Loading="IsLoading"
+                 LoadError="@LoadError"
+                 LoadingHeight="280px"
+                 OnRetry="ReloadAsync">
+    <ChildContent>
+        <MudForm @ref="Form"
+                 Model="Model"
+                 Validation="@Validator.ValidateValue"
+                 @bind-IsValid="IsValid">
+            <EditSection Title="Основные данные">
+                <MudTextField T="string"
+                              @bind-Value="Model.Name"
+                              For="@(() => Model.Name)"
+                              Label="Название роли"
+                              Variant="Variant.Outlined"
+                              Error="@Errors.HasError(nameof(UpdateRoleFormModel.Name))"
+                              ErrorText="@Errors.GetError(nameof(UpdateRoleFormModel.Name))"
+                              MaxLength="128" />
+            </EditSection>
+
+            <EditSection Title="Доступ">
+                <ClaimsEditor Claims="Model.Claims" />
+            </EditSection>
+
+            <EditFormActions CancelHref="@IdentityRoutes.Roles"
+                             Busy="IsSaving"
+                             OnSubmit="SubmitAsync" />
+        </MudForm>
+    </ChildContent>
+</LoadableContent>

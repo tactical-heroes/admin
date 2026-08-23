@@ -9,12 +9,10 @@ public sealed class RouteStateConventionTests
         IReadOnlyDictionary<string, string[]> expectedQueries =
             new Dictionary<string, string[]>(StringComparer.Ordinal)
             {
-                ["src/Modules/TacticalHeroes.Admin.Modules.Compendium/Pages/Factions/FactionsPage.razor.cs"] =
+                ["src/TacticalHeroes.Admin.Shared/Ui/MudPagedListComponentBase.cs"] =
                     ["page", "pageSize"],
-                ["src/Modules/TacticalHeroes.Admin.Modules.Identity/Pages/Roles/RolesPage.razor.cs"] =
-                    ["page", "pageSize"],
-                ["src/Modules/TacticalHeroes.Admin.Modules.Identity/Pages/Users/UsersPage.razor.cs"] =
-                    ["page", "email", "pageSize"],
+                ["src/Modules/TacticalHeroes.Admin.Modules.Identity/Pages/UserListPage/Ui/UserListPage.razor.cs"] =
+                    ["email"],
             };
         List<string> violations = [];
 

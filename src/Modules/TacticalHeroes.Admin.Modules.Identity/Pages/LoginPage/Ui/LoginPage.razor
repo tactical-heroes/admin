@@ -1,0 +1,24 @@
+@attribute [Route(IdentityRoutes.Login)]
+@layout AccountLayout
+@attribute [AllowAnonymous]
+@using TacticalHeroes.Admin.Modules.Identity.Widgets.Auth
+
+<PageTitle>@Title</PageTitle>
+
+<AuthenticationShell>
+    @switch (NormalizedMode)
+    {
+        case "register":
+            <RegisterForm ReturnUrl="@ReturnUrl" />
+            break;
+        case "confirmation":
+            <ResendConfirmationForm ReturnUrl="@ReturnUrl" />
+            break;
+        case "recover":
+            <ForgotPasswordForm ReturnUrl="@ReturnUrl" />
+            break;
+        default:
+            <LoginForm ReturnUrl="@ReturnUrl" Error="@Error" />
+            break;
+    }
+</AuthenticationShell>

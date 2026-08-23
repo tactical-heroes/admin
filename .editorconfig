@@ -56,6 +56,7 @@ csharp_space_around_binary_operators = before_and_after
 dotnet_sort_system_directives_first = true
 dotnet_separate_import_directive_groups = true
 dotnet_diagnostic.CA1873.severity = none
+dotnet_diagnostic.RMG089.severity = warning
 
 #### Naming styles ####
 
