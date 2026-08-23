@@ -44,8 +44,9 @@
                                   Label="Тип"
                                   Variant="Variant.Outlined"
                                   Margin="Margin.Dense"
-                                  Required="true"
-                                  RequiredError="Укажите тип атрибута" />
+                                  Validation="@((string _) => Validator.ValidateValue(
+                                                  claim,
+                                                  nameof(ClaimValue.Type)))" />
                 </MudItem>
                 <MudItem xs="12" md="6">
                     <MudTextField T="string"
@@ -53,8 +54,9 @@
                                   Label="Значение"
                                   Variant="Variant.Outlined"
                                   Margin="Margin.Dense"
-                                  Required="true"
-                                  RequiredError="Укажите значение атрибута" />
+                                  Validation="@((string _) => Validator.ValidateValue(
+                                                  claim,
+                                                  nameof(ClaimValue.Value)))" />
                 </MudItem>
                 <MudItem xs="12" md="1"
                          Class="claim-remove">

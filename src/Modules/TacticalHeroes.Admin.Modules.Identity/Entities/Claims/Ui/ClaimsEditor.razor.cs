@@ -6,6 +6,8 @@ namespace TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Ui;
 
 public partial class ClaimsEditor
 {
+    private ClaimValueValidator Validator { get; } = new();
+
     [Parameter, EditorRequired]
     public IList<ClaimValue> Claims { get; set; } = [];
 

@@ -1,5 +1,6 @@
 using FluentValidation;
 
+using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Model;
 using TacticalHeroes.Admin.Shared.Validation;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.UpdateUserPage.Model;
@@ -26,5 +27,8 @@ public sealed class UpdateUserFormModelValidator
         RuleFor(user => user.Status)
             .NotEmpty()
             .WithMessage("Выберите статус");
+
+        RuleForEach(user => user.Claims)
+            .SetValidator(new ClaimValueValidator());
     }
 }

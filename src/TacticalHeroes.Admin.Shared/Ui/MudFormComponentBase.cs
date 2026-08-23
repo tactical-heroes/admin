@@ -1,3 +1,5 @@
+using FluentValidation.Results;
+
 using Microsoft.AspNetCore.Components;
 
 using MudBlazor;
@@ -50,8 +52,11 @@ public abstract class MudFormComponentBase<TModel, TValidator>(
         try
         {
             await Form.ValidateAsync();
+            ValidationResult validationResult = await Validator.ValidateAsync(
+                Model,
+                LifetimeToken);
 
-            if (IsValid)
+            if (IsValid && validationResult.IsValid)
             {
                 await SaveAsync(saveAsync);
             }

@@ -1,3 +1,5 @@
+using FluentValidation;
+
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -52,10 +54,24 @@ public sealed class MudFormComponentBaseTests : BunitContext
         component.Saving.ShouldBeFalse();
     }
 
-    private TestComponent CreateComponent(bool isValid)
+    [Fact(DisplayName = "Does not save a model rejected by FluentValidation")]
+    public async Task SubmitAsync_Should_NotSave_When_ModelValidationFails()
+    {
+        var component = CreateComponent(isValid: true, isModelValid: false);
+
+        await component.SubmitAsync();
+
+        component.SaveCount.ShouldBe(0);
+        component.Saving.ShouldBeFalse();
+    }
+
+    private TestComponent CreateComponent(
+        bool isValid,
+        bool isModelValid = true)
     {
         return new TestComponent(
             isValid,
+            isModelValid,
             Services.GetRequiredService<ISnackbar>(),
             Services.GetRequiredService<NavigationManager>());
     }
@@ -67,15 +83,22 @@ public sealed class MudFormComponentBaseTests : BunitContext
 
         public TestComponent(
             bool isValid,
+            bool isModelValid,
             ISnackbar snackbar,
             NavigationManager navigation)
-            : this(new TestSaveOperation(), isValid, snackbar, navigation)
+            : this(
+                new TestSaveOperation(),
+                isValid,
+                isModelValid,
+                snackbar,
+                navigation)
         {
         }
 
         private TestComponent(
             TestSaveOperation saveOperation,
             bool isValid,
+            bool isModelValid,
             ISnackbar snackbar,
             NavigationManager navigation)
             : base(
@@ -88,6 +111,7 @@ public sealed class MudFormComponentBaseTests : BunitContext
             _saveOperation = saveOperation;
             Form = new MudForm();
             IsValid = isValid;
+            Model.Name = isModelValid ? "Valid" : string.Empty;
         }
 
         public Func<Task> OnSave
@@ -129,11 +153,17 @@ public sealed class MudFormComponentBaseTests : BunitContext
         }
     }
 
-    private sealed class TestModel
-    {
-    }
-
     private sealed class TestValidator : MudFormValidator<TestModel>
     {
+        public TestValidator()
+        {
+            RuleFor(model => model.Name)
+                .NotEmpty();
+        }
+    }
+
+    private sealed class TestModel
+    {
+        public string Name { get; set; } = string.Empty;
     }
 }

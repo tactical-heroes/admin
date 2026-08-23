@@ -82,6 +82,25 @@ public sealed class CreateRolePageTests : BunitContext
         });
     }
 
+    [Fact(DisplayName = "Does not create a role when a claim is empty")]
+    public void Submit_Should_DisplayValidationErrors_When_ClaimIsEmpty()
+    {
+        var component = Render<CreateRolePageComponent>();
+        component.Find("input").Change("Administrators");
+        component.FindAll("button")
+            .Single(button => button.TextContent.Contains("Добавить", StringComparison.Ordinal))
+            .Click();
+
+        component.Find(".submit-action").Click();
+
+        component.WaitForAssertion(() =>
+        {
+            _handler.PostCount.ShouldBe(0);
+            component.Markup.ShouldContain("Укажите тип атрибута");
+            component.Markup.ShouldContain("Укажите значение атрибута");
+        });
+    }
+
     private sealed class CreateRoleHandler(Guid createdId) : HttpMessageHandler
     {
         public int PostCount { get; private set; }
