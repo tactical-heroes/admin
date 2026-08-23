@@ -16,29 +16,6 @@ public abstract class MudUpdateFormComponentBase<TModel, TValidator>(
     string successRoute,
     ISnackbar snackbar,
     NavigationManager navigation)
-    : MudUpdateFormComponentBase<TModel, TValidator, TModel>(
-        loadAsync,
-        updateAsync,
-        successMessage,
-        successRoute,
-        snackbar,
-        navigation)
-    where TModel : class, new()
-    where TValidator : MudFormValidator<TModel>, new()
-{
-    protected sealed override void ApplyLoadedState(TModel state)
-    {
-        Model = state;
-    }
-}
-
-public abstract class MudUpdateFormComponentBase<TModel, TValidator, TLoadedState>(
-    Func<Guid, CancellationToken, Task<Result<TLoadedState>>> loadAsync,
-    Func<Guid, TModel, CancellationToken, Task<Result<Guid>>> updateAsync,
-    string successMessage,
-    string successRoute,
-    ISnackbar snackbar,
-    NavigationManager navigation)
     : MudFormComponentBase<TModel, TValidator>(
         snackbar,
         navigation,
@@ -82,9 +59,7 @@ public abstract class MudUpdateFormComponentBase<TModel, TValidator, TLoadedStat
 
         try
         {
-            OnLoadStarted();
-
-            Result<TLoadedState> result = await loadAsync(id, LifetimeToken);
+            Result<TModel> result = await loadAsync(id, LifetimeToken);
 
             if (loadVersion != _loadVersion || id != Id)
             {
@@ -97,7 +72,7 @@ public abstract class MudUpdateFormComponentBase<TModel, TValidator, TLoadedStat
                 return;
             }
 
-            ApplyLoadedState(result.Value);
+            Model = result.Value;
         }
         finally
         {
@@ -107,12 +82,6 @@ public abstract class MudUpdateFormComponentBase<TModel, TValidator, TLoadedStat
             }
         }
     }
-
-    protected virtual void OnLoadStarted()
-    {
-    }
-
-    protected abstract void ApplyLoadedState(TLoadedState state);
 
     protected Task SubmitAsync()
     {
