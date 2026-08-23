@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Components;
 
-using MudBlazor;
-
 using PANiXiDA.Core.ResultPattern;
 
 using TacticalHeroes.Admin.Modules.Identity.Pages.UserListPage.Api;
@@ -28,15 +26,5 @@ public partial class UserListPage(
         CancellationToken cancellationToken)
     {
         return userListApi.DeleteAsync(id, cancellationToken);
-    }
-
-    private static Color GetStatusColor(string status)
-    {
-        return status.ToLowerInvariant() switch
-        {
-            "active" => Color.Success,
-            "blocked" => Color.Error,
-            _ => Color.Default,
-        };
     }
 }
