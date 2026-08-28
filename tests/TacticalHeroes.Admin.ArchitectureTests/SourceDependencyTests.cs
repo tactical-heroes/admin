@@ -2,10 +2,10 @@ using System.Text.RegularExpressions;
 
 namespace TacticalHeroes.Admin.ArchitectureTests;
 
-public sealed class SourceDependencyTests
+public sealed partial class SourceDependencyTests
 {
     private static readonly Dictionary<string, int> LayerRanks =
-        new Dictionary<string, int>(StringComparer.Ordinal)
+        new(StringComparer.Ordinal)
         {
             ["Entities"] = 1,
             ["Features"] = 2,
@@ -105,9 +105,7 @@ public sealed class SourceDependencyTests
             Path.Combine(repositoryRoot, "src", "TacticalHeroes.Admin.Client"),
             Path.Combine(repositoryRoot, "src", "Modules"),
         ];
-        Regex rawRouteRegex = new(
-            "@page\\s+\"|(?:Href|href|action)\\s*=\\s*\"/|NavigateTo\\(\\s*\"/",
-            RegexOptions.CultureInvariant);
+        Regex rawRouteRegex = RawRouteRegex();
         List<string> violations = [];
 
         foreach (string applicationRoot in applicationRoots)
@@ -151,4 +149,9 @@ public sealed class SourceDependencyTests
                     $"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}",
                     StringComparison.OrdinalIgnoreCase));
     }
+
+    [GeneratedRegex(
+        "@page\\s+\"|(?:Href|href|action)\\s*=\\s*\"/|NavigateTo\\(\\s*\"/",
+        RegexOptions.CultureInvariant)]
+    private static partial Regex RawRouteRegex();
 }

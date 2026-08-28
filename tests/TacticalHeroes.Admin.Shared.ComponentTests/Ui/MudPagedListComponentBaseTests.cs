@@ -198,7 +198,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
             set => _operations.OnLoad = value;
         }
 
-        public IReadOnlyList<LoadRequest> LoadRequests => _operations.LoadRequests;
+        public List<LoadRequest> LoadRequests => _operations.LoadRequests;
 
         public string? RouteEmail { get; private set; }
 

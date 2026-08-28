@@ -2,24 +2,26 @@ using System.Text.RegularExpressions;
 
 namespace TacticalHeroes.Admin.ArchitectureTests;
 
-public sealed class RazorArtifactConventionTests
+public sealed partial class RazorArtifactConventionTests
 {
-    private static readonly Regex InlineCodeOrStyleRegex = new(
+    [GeneratedRegex(
         "@(?:code|functions)\\s*\\{|@inject\\s|<style(?:\\s|>)",
-        RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
-    private static readonly Regex PropertyInjectionRegex = new(
+        RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)]
+    private static partial Regex InlineCodeOrStyleRegex();
+
+    [GeneratedRegex(
         @"\[(?:global::)?(?:[A-Za-z_][A-Za-z0-9_]*\.)*Inject(?:Attribute)?\b",
-        RegexOptions.CultureInvariant);
+        RegexOptions.CultureInvariant)]
+    private static partial Regex PropertyInjectionRegex();
 
     [Fact(DisplayName = "Razor markup keeps code and styles in companion files")]
     public void RazorMarkup_Should_NotContainCodeOrStyles_When_SourceIsScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
         string sourceRoot = Path.Combine(repositoryRoot, "src");
-        string[] violations = EnumerateFiles(sourceRoot, "*.razor")
-            .Where(path => InlineCodeOrStyleRegex.IsMatch(File.ReadAllText(path)))
-            .Select(path => Path.GetRelativePath(repositoryRoot, path))
-            .ToArray();
+        string[] violations = [.. EnumerateFiles(sourceRoot, "*.razor")
+            .Where(path => InlineCodeOrStyleRegex().IsMatch(File.ReadAllText(path)))
+            .Select(path => Path.GetRelativePath(repositoryRoot, path))];
 
         violations.ShouldBeEmpty();
     }
@@ -65,10 +67,9 @@ public sealed class RazorArtifactConventionTests
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
         string sourceRoot = Path.Combine(repositoryRoot, "src");
-        string[] violations = EnumerateFiles(sourceRoot, "*.cs")
-            .Where(path => PropertyInjectionRegex.IsMatch(File.ReadAllText(path)))
-            .Select(path => Path.GetRelativePath(repositoryRoot, path))
-            .ToArray();
+        string[] violations = [.. EnumerateFiles(sourceRoot, "*.cs")
+            .Where(path => PropertyInjectionRegex().IsMatch(File.ReadAllText(path)))
+            .Select(path => Path.GetRelativePath(repositoryRoot, path))];
 
         violations.ShouldBeEmpty();
     }

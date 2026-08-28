@@ -64,7 +64,7 @@ public static class ApiResultExtensions
         }
     }
 
-    private static IReadOnlyList<Error> MapErrors(Exception exception)
+    private static Error[] MapErrors(Exception exception)
     {
         if (exception is HttpValidationProblemDetails validationProblem)
         {
@@ -91,7 +91,7 @@ public static class ApiResultExtensions
         ];
     }
 
-    private static IReadOnlyList<Error> GetValidationErrors(
+    private static Error[] GetValidationErrors(
         HttpValidationProblemDetails problem)
     {
         Error[] errors = problem.Errors?.AdditionalData

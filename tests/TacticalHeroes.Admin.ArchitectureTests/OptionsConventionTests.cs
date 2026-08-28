@@ -2,11 +2,12 @@ using System.Text.RegularExpressions;
 
 namespace TacticalHeroes.Admin.ArchitectureTests;
 
-public sealed class OptionsConventionTests
+public sealed partial class OptionsConventionTests
 {
-    private static readonly Regex OptionsTypeRegex = new(
+    [GeneratedRegex(
         @"\b(?:public|internal)\s+(?<modifier>sealed|static)?\s*class\s+(?<name>[A-Za-z_]\w*Options)\b",
-        RegexOptions.CultureInvariant);
+        RegexOptions.CultureInvariant)]
+    private static partial Regex OptionsTypeRegex();
 
     [Fact(DisplayName = "Configuration options use dedicated folders with adjacent validators")]
     public void ConfigurationOptions_Should_HaveValidators_When_OptionsAreScanned()
@@ -123,7 +124,7 @@ public sealed class OptionsConventionTests
         {
             string source = File.ReadAllText(sourcePath);
 
-            foreach (Match match in OptionsTypeRegex.Matches(source))
+            foreach (Match match in OptionsTypeRegex().Matches(source))
             {
                 if (match.Groups["modifier"].Value.Equals(
                         "static",

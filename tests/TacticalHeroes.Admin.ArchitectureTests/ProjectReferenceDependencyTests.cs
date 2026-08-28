@@ -79,12 +79,11 @@ public sealed class ProjectReferenceDependencyTests
 
     private static string[] GetProjectReferences(string projectPath)
     {
-        return XDocument
+        return [.. XDocument
             .Load(projectPath)
             .Descendants("ProjectReference")
             .Select(reference => reference.Attribute("Include")?.Value)
             .Where(static path => !string.IsNullOrWhiteSpace(path))
-            .Select(static path => Path.GetFileNameWithoutExtension(path!.Replace('\\', '/')))
-            .ToArray();
+            .Select(static path => Path.GetFileNameWithoutExtension(path!.Replace('\\', '/')))];
     }
 }

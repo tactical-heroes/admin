@@ -148,9 +148,10 @@ public sealed class MudUpdateFormComponentBaseTests
 
         public static Task<Result<Guid>> UpdateAsync(
             Guid id,
-            TestModel model,
+            TestModel _,
             CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             return Task.FromResult(Result.Success(id));
         }
     }

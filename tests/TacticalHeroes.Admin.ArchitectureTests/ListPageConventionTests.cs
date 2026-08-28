@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace TacticalHeroes.Admin.ArchitectureTests;
 
-public sealed class ListPageConventionTests
+public sealed partial class ListPageConventionTests
 {
     private static readonly string[] ListPagePaths =
     [
@@ -18,9 +18,10 @@ public sealed class ListPageConventionTests
         "src/Modules/TacticalHeroes.Admin.Modules.Identity/Pages/UserListPage/Ui/UserListPage.razor",
     ];
 
-    private static readonly Regex IdentifierColumnRegex = new(
+    [GeneratedRegex(
         "<MudTh[^>]*>\\s*ID\\s*</MudTh>|DataLabel\\s*=\\s*\"ID\"",
-        RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)]
+    private static partial Regex IdentifierColumnRegex();
 
     [Fact(DisplayName = "List surfaces use the shared list and row action container")]
     public void ListSurfaces_Should_UseSharedComponents_When_AdminListsAreScanned()
@@ -47,10 +48,9 @@ public sealed class ListPageConventionTests
     public void ListSurfaces_Should_NotExposeIdentifiers_When_AdminListsAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
-        string[] violations = ListSurfacePaths
-            .Where(relativePath => IdentifierColumnRegex.IsMatch(
-                ReadSource(repositoryRoot, relativePath)))
-            .ToArray();
+        string[] violations = [.. ListSurfacePaths
+            .Where(relativePath => IdentifierColumnRegex().IsMatch(
+                ReadSource(repositoryRoot, relativePath)))];
 
         violations.ShouldBeEmpty();
     }
@@ -59,10 +59,9 @@ public sealed class ListPageConventionTests
     public void ListSurfaces_Should_BindLoadErrors_When_AdminListsAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
-        string[] violations = ListSurfacePaths
+        string[] violations = [.. ListSurfacePaths
             .Where(relativePath => !ReadSource(repositoryRoot, relativePath)
-                .Contains("LoadError=", StringComparison.Ordinal))
-            .ToArray();
+                .Contains("LoadError=", StringComparison.Ordinal))];
 
         violations.ShouldBeEmpty();
     }
