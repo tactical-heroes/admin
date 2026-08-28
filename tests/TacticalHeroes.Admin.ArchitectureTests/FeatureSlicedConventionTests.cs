@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace TacticalHeroes.Admin.ArchitectureTests;
 
-public sealed class FeatureSlicedConventionTests
+public sealed partial class FeatureSlicedConventionTests
 {
     private static readonly IReadOnlyDictionary<string, int> ClientLayerRanks =
         new Dictionary<string, int>(StringComparer.Ordinal)
@@ -119,9 +119,7 @@ public sealed class FeatureSlicedConventionTests
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
         string modulesRoot = Path.Combine(repositoryRoot, "src", "Modules");
-        Regex moduleReferenceRegex = new(
-            @"TacticalHeroes\.Admin\.Modules\.(?<module>[A-Za-z0-9_]+)",
-            RegexOptions.CultureInvariant);
+        Regex moduleReferenceRegex = ModuleReferenceRegex();
         List<string> violations = [];
 
         foreach (string moduleRoot in Directory.EnumerateDirectories(
@@ -238,9 +236,7 @@ public sealed class FeatureSlicedConventionTests
         List<string> violations)
     {
         HashSet<string> knownLayers = new(layers, StringComparer.Ordinal);
-        Regex namespaceRegex = new(
-            @"\bnamespace\s+(?<namespace>[A-Za-z0-9_.]+)\s*[;{]",
-            RegexOptions.CultureInvariant);
+        Regex namespaceRegex = NamespaceRegex();
 
         foreach (string sourcePath in EnumerateSourceFiles(root))
         {
@@ -327,4 +323,14 @@ public sealed class FeatureSlicedConventionTests
                     $"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}",
                     StringComparison.OrdinalIgnoreCase));
     }
+
+    [GeneratedRegex(
+        @"TacticalHeroes\.Admin\.Modules\.(?<module>[A-Za-z0-9_]+)",
+        RegexOptions.CultureInvariant)]
+    private static partial Regex ModuleReferenceRegex();
+
+    [GeneratedRegex(
+        @"\bnamespace\s+(?<namespace>[A-Za-z0-9_.]+)\s*[;{]",
+        RegexOptions.CultureInvariant)]
+    private static partial Regex NamespaceRegex();
 }

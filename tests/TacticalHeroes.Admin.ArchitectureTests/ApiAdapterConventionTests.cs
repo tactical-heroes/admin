@@ -2,11 +2,12 @@ using System.Text.RegularExpressions;
 
 namespace TacticalHeroes.Admin.ArchitectureTests;
 
-public sealed class ApiAdapterConventionTests
+public sealed partial class ApiAdapterConventionTests
 {
-    private static readonly Regex MappedResponseVariableRegex = new(
+    [GeneratedRegex(
         @"\.Map\(\s*(?<variable>[a-z][A-Za-z0-9_]*)\s*=>",
-        RegexOptions.CultureInvariant);
+        RegexOptions.CultureInvariant)]
+    private static partial Regex MappedResponseVariableRegex();
 
     [Fact(DisplayName = "API adapter types match their filenames")]
     public void ApiAdapters_Should_DeclareTypeMatchingFilename()
@@ -51,7 +52,7 @@ public sealed class ApiAdapterConventionTests
         {
             string source = File.ReadAllText(apiPath);
 
-            foreach (Match match in MappedResponseVariableRegex.Matches(source))
+            foreach (Match match in MappedResponseVariableRegex().Matches(source))
             {
                 string variable = Regex.Escape(match.Groups["variable"].Value);
                 if (Regex.IsMatch(

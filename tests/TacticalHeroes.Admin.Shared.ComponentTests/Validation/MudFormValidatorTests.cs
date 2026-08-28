@@ -12,9 +12,7 @@ public sealed class MudFormValidatorTests
         var validator = new TestModelValidator();
         var model = new TestModel();
 
-        string[] errors = validator
-            .ValidateValue(model, nameof(TestModel.Name))
-            .ToArray();
+        string[] errors = [.. validator.ValidateValue(model, nameof(TestModel.Name))];
 
         errors.ShouldBe(["Name is required."]);
     }
@@ -25,9 +23,8 @@ public sealed class MudFormValidatorTests
         var validator = new TestModelValidator();
         var model = new TestModel();
 
-        string[] errors = validator
-            .For(model, static model => model.Name)(model.Name)
-            .ToArray();
+        string[] errors = [.. validator
+            .For(model, static model => model.Name)(model.Name)];
 
         errors.ShouldBe(["Name is required."]);
     }

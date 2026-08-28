@@ -19,10 +19,9 @@ public sealed class FactionPageRouteTests
 
     private static string[] GetRoutes<TComponent>()
     {
-        return typeof(TComponent)
+        return [.. typeof(TComponent)
             .GetCustomAttributes(typeof(RouteAttribute), inherit: false)
             .Cast<RouteAttribute>()
-            .Select(attribute => attribute.Template)
-            .ToArray();
+            .Select(attribute => attribute.Template)];
     }
 }

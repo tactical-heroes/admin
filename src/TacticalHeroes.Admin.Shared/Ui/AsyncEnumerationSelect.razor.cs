@@ -84,7 +84,7 @@ public partial class AsyncEnumerationSelect<TEnumeration>(
                 return;
             }
 
-            Items = result.Value.ToList();
+            Items = [.. result.Value];
             await ApplyDefaultValueAsync();
         }
         finally

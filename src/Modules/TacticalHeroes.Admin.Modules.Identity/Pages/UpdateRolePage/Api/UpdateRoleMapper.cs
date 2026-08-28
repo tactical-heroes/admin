@@ -14,6 +14,10 @@ internal static partial class UpdateRoleMapper
 {
     [MapperIgnoreSource(nameof(GetRoleDetailsResponse.AdditionalData))]
     [MapperIgnoreSource(nameof(GetRoleDetailsResponse.Id))]
+    [MapProperty(
+        nameof(GetRoleDetailsResponse.Claims),
+        nameof(UpdateRoleFormModel.Claims),
+        SuppressNullMismatchDiagnostic = true)]
     public static partial UpdateRoleFormModel ToForm(GetRoleDetailsResponse response);
 
     [MapperIgnoreTarget(nameof(UpdateRoleRequest.AdditionalData))]

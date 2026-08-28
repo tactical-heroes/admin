@@ -143,9 +143,10 @@ public sealed class MudFormComponentBaseTests : BunitContext
         public int SaveCount { get; private set; }
 
         public async Task<Result<Guid>> SaveAsync(
-            TestModel model,
+            TestModel _,
             CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             SaveCount++;
             SaveStarted.TrySetResult();
             await OnSave();

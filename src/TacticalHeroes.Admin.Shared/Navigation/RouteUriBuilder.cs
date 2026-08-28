@@ -16,7 +16,7 @@ public static class RouteUriBuilder
         TQuery queryParameters)
         where TQuery : notnull
     {
-        var parameters = new List<(string Name, string? Value)>();
+        List<(string Name, string? Value)> parameters = [];
         AddQueryParameters(parameters, queryParameters);
 
         return BuildUri(path, parameters);
@@ -30,7 +30,7 @@ public static class RouteUriBuilder
         int pageSize)
         where TFilter : notnull
     {
-        var parameters = new List<(string Name, string? Value)>();
+        List<(string Name, string? Value)> parameters = [];
         AddQueryParameters(parameters, filter);
 
         parameters.Add((
@@ -51,12 +51,11 @@ public static class RouteUriBuilder
         string path,
         IEnumerable<(string Name, string? Value)> parameters)
     {
-        string[] query = parameters
+        string[] query = [.. parameters
             .Where(static parameter => !string.IsNullOrWhiteSpace(parameter.Value))
             .Select(static parameter =>
                 $"{Uri.EscapeDataString(parameter.Name)}=" +
-                Uri.EscapeDataString(parameter.Value!))
-            .ToArray();
+                Uri.EscapeDataString(parameter.Value!))];
 
         return query.Length == 0
             ? path
@@ -110,7 +109,7 @@ public static class RouteUriBuilder
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TQuery>
     {
         public static readonly (string Name, PropertyInfo Property)[] Items =
-            typeof(TQuery)
+            [.. typeof(TQuery)
                 .GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(static property =>
                     property.GetMethod is not null
@@ -118,7 +117,6 @@ public static class RouteUriBuilder
                 .OrderBy(static property => property.MetadataToken)
                 .Select(static property => (
                     JsonNamingPolicy.CamelCase.ConvertName(property.Name),
-                    property))
-                .ToArray();
+                    property))];
     }
 }
