@@ -1,10 +1,9 @@
-using System.ComponentModel.DataAnnotations;
-
 using Microsoft.AspNetCore.Components;
 
 using PANiXiDA.Core.ResultPattern;
 
 using TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Api;
+using TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Model;
 using TacticalHeroes.Admin.Shared.Errors;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui;
@@ -40,12 +39,5 @@ public partial class ResendConfirmationForm(LoginApi loginApi)
         }
 
         _submitting = false;
-    }
-
-    private sealed class EmailModel
-    {
-        [Required(ErrorMessage = "Укажите email.")]
-        [EmailAddress(ErrorMessage = "Укажите корректный email.")]
-        public string Email { get; set; } = string.Empty;
     }
 }

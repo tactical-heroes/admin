@@ -1,10 +1,9 @@
-using System.ComponentModel.DataAnnotations;
-
 using Microsoft.AspNetCore.Components;
 
 using PANiXiDA.Core.ResultPattern;
 
 using TacticalHeroes.Admin.Modules.Identity.Pages.ResetPasswordPage.Api;
+using TacticalHeroes.Admin.Modules.Identity.Pages.ResetPasswordPage.Model;
 using TacticalHeroes.Admin.Shared.Errors;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.ResetPasswordPage.Ui;
@@ -60,16 +59,5 @@ public partial class ResetPasswordPage(ResetPasswordApi resetPasswordApi)
     private void TogglePasswordConfirmationVisibility()
     {
         _showPasswordConfirmation = !_showPasswordConfirmation;
-    }
-
-    private sealed class ResetModel
-    {
-        [Required(ErrorMessage = "Укажите новый пароль.")]
-        [MinLength(8, ErrorMessage = "Пароль должен содержать минимум 8 символов.")]
-        public string Password { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Повторите новый пароль.")]
-        [Compare(nameof(Password), ErrorMessage = "Пароли не совпадают.")]
-        public string PasswordConfirmation { get; set; } = string.Empty;
     }
 }

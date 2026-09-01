@@ -136,3 +136,7 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
     production-исходники в подпапках `Model` не объявляют `record` или primary
     constructors. Формы, фильтры и read-модели используют единые parameterless
     классы с публичными свойствами.
+
+21. `PageModelSources_Should_UseModelFolders_When_IdentityPagesAreScanned` —
+    модели страниц Identity не объявляются локально в code-behind или других
+    каталогах страницы, а размещаются в соответствующей подпапке `Model`.

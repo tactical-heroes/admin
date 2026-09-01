@@ -33,9 +33,43 @@ public sealed partial class ModelConventionTests
         violations.ShouldBeEmpty();
     }
 
+    [Fact(DisplayName = "Identity page models are placed in Model folders")]
+    public void PageModelSources_Should_UseModelFolders_When_IdentityPagesAreScanned()
+    {
+        string repositoryRoot = RepositoryPaths.FindRoot();
+        string identityPagesRoot = Path.Combine(
+            repositoryRoot,
+            "src",
+            "Modules",
+            "TacticalHeroes.Admin.Modules.Identity",
+            "Pages");
+        string modelPathSegment =
+            $"{Path.DirectorySeparatorChar}Model{Path.DirectorySeparatorChar}";
+
+        string[] violations =
+        [
+            .. Directory
+                .EnumerateFiles(identityPagesRoot, "*.cs", SearchOption.AllDirectories)
+                .Where(path => !path.Contains(
+                    modelPathSegment,
+                    StringComparison.OrdinalIgnoreCase))
+                .Where(path => PageModelDeclarationRegex().IsMatch(
+                    File.ReadAllText(path)))
+                .Select(path => Path.GetRelativePath(repositoryRoot, path)),
+        ];
+
+        violations.ShouldBeEmpty();
+    }
+
     [GeneratedRegex(
         @"\brecord\s+(?:(?:class|struct)\s+)?[A-Za-z_]|" +
         @"\bclass\s+[A-Za-z_][A-Za-z0-9_]*(?:<[^>{}\r\n]+>)?\s*\(",
         RegexOptions.CultureInvariant)]
     private static partial Regex PositionalTypeDeclarationRegex();
+
+    [GeneratedRegex(
+        @"\b(?:class|record(?:\s+(?:class|struct))?)\s+" +
+        @"[A-Za-z_][A-Za-z0-9_]*Model\b",
+        RegexOptions.CultureInvariant)]
+    private static partial Regex PageModelDeclarationRegex();
 }

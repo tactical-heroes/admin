@@ -62,8 +62,6 @@ public static class IdentityRoutes
 
     public static string ConfirmEmailPage(Guid userId, string emailConfirmationToken)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(emailConfirmationToken);
-
         return RouteUriBuilder.Build(
             ConfirmEmail,
             new { userId, emailConfirmationToken });
@@ -71,8 +69,6 @@ public static class IdentityRoutes
 
     public static string ResetPasswordPage(Guid userId, string passwordResetToken)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(passwordResetToken);
-
         return RouteUriBuilder.Build(
             ResetPassword,
             new { userId, passwordResetToken });
