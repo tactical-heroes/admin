@@ -129,3 +129,9 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
 19. `ConfigurationOptions_Should_ValidateOnStart_When_RegistrationsAreScanned` —
     валидатор каждого options-класса зарегистрирован в DI, а сами настройки
     проверяются через `ValidateOnStart`.
+
+## Модели
+
+20. `ModelSources_Should_UseClasses_When_ModelFoldersAreScanned` — production-
+    исходники в подпапках `Model` не объявляют `record`. Изменяемые формы,
+    фильтры и неизменяемые read-модели используют единый тип `class`.
