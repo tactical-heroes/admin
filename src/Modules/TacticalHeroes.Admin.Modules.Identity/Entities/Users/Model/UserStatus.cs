@@ -2,9 +2,9 @@ using TacticalHeroes.Admin.Shared.Model;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Entities.Users.Model;
 
-public sealed class UserStatus(string name, string displayName) : IEnumeration
+public sealed class UserStatus : IEnumeration
 {
-    public string Name { get; } = name;
+    public string Name { get; set; } = string.Empty;
 
-    public string DisplayName { get; } = displayName;
+    public string DisplayName { get; set; } = string.Empty;
 }

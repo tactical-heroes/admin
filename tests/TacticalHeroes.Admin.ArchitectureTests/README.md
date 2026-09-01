@@ -132,6 +132,7 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
 
 ## Модели
 
-20. `ModelSources_Should_UseClasses_When_ModelFoldersAreScanned` — production-
-    исходники в подпапках `Model` не объявляют `record`. Изменяемые формы,
-    фильтры и неизменяемые read-модели используют единый тип `class`.
+20. `ModelSources_Should_UsePropertyBasedClasses_When_ModelFoldersAreScanned` —
+    production-исходники в подпапках `Model` не объявляют `record` или primary
+    constructors. Формы, фильтры и read-модели используют единые parameterless
+    классы с публичными свойствами.

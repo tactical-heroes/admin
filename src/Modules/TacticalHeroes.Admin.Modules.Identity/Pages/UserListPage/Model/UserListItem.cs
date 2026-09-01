@@ -2,25 +2,19 @@ using MudBlazor;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.UserListPage.Model;
 
-public sealed class UserListItem(
-    Guid id,
-    string email,
-    string userName,
-    bool isConfirmed,
-    string status,
-    string statusDisplayName)
+public sealed class UserListItem
 {
-    public Guid Id { get; } = id;
+    public Guid Id { get; set; }
 
-    public string Email { get; } = email;
+    public string Email { get; set; } = string.Empty;
 
-    public string UserName { get; } = userName;
+    public string UserName { get; set; } = string.Empty;
 
-    public bool IsConfirmed { get; } = isConfirmed;
+    public bool IsConfirmed { get; set; }
 
-    public string Status { get; } = status;
+    public string Status { get; set; } = string.Empty;
 
-    public string StatusDisplayName { get; } = statusDisplayName;
+    public string StatusDisplayName { get; set; } = string.Empty;
 
     public Color StatusColor => Status.ToLowerInvariant() switch
     {

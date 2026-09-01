@@ -1,29 +1,23 @@
 namespace TacticalHeroes.Admin.Shared.Model;
 
-public sealed class PaginationResult<T>(
-    IReadOnlyList<T> items,
-    int pageNumber,
-    int pageSize,
-    long totalCount,
-    int totalPages)
+public sealed class PaginationResult<T>
 {
-    public IReadOnlyList<T> Items { get; } = items;
+    public IReadOnlyList<T> Items { get; set; } = [];
 
-    public int PageNumber { get; } = pageNumber;
+    public int PageNumber { get; set; }
 
-    public int PageSize { get; } = pageSize;
+    public int PageSize { get; set; }
 
-    public long TotalCount { get; } = totalCount;
+    public long TotalCount { get; set; }
 
-    public int TotalPages { get; } = totalPages;
+    public int TotalPages { get; set; }
 
     public static PaginationResult<T> Empty(int pageNumber, int pageSize)
     {
-        return new PaginationResult<T>(
-            [],
-            pageNumber,
-            pageSize,
-            totalCount: 0,
-            totalPages: 0);
+        return new PaginationResult<T>
+        {
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+        };
     }
 }

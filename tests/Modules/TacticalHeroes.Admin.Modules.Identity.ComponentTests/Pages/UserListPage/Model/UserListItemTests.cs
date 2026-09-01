@@ -14,13 +14,15 @@ public sealed class UserListItemTests
         string status,
         Color expectedColor)
     {
-        var user = new UserListItem(
-            Guid.NewGuid(),
-            "user@example.com",
-            "user",
-            true,
-            status,
-            status);
+        var user = new UserListItem
+        {
+            Id = Guid.NewGuid(),
+            Email = "user@example.com",
+            UserName = "user",
+            IsConfirmed = true,
+            Status = status,
+            StatusDisplayName = status,
+        };
 
         user.StatusColor.ShouldBe(expectedColor);
     }
