@@ -4,7 +4,7 @@ namespace TacticalHeroes.Admin.Modules.Identity;
 
 public static class IdentityRoutes
 {
-    private const string Authentication = "/authentication";
+    public const string Authentication = "/authentication";
 
     public const string Login = "/login";
 
