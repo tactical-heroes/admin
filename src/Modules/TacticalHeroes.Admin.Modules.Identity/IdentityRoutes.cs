@@ -4,6 +4,8 @@ namespace TacticalHeroes.Admin.Modules.Identity;
 
 public static class IdentityRoutes
 {
+    private const string Authentication = "/authentication";
+
     public const string Login = "/login";
 
     public const string ConfirmEmail = "/confirm-email";
@@ -12,21 +14,21 @@ public static class IdentityRoutes
 
     public const string Roles = "/roles";
 
-    public const string CreateRole = "/roles/new";
+    public const string CreateRole = $"{Roles}/new";
 
-    public const string RoleTemplate = "/roles/{Id:guid}";
+    public const string RoleTemplate = $"{Roles}/{{Id:guid}}";
 
     public const string Users = "/users";
 
-    public const string CreateUser = "/users/new";
+    public const string CreateUser = $"{Users}/new";
 
-    public const string UserTemplate = "/users/{Id:guid}";
+    public const string UserTemplate = $"{Users}/{{Id:guid}}";
 
-    public const string AuthenticationChallenge = "/authentication/challenge";
+    public const string AuthenticationChallenge = $"{Authentication}/challenge";
 
-    public const string AuthenticationSignIn = "/authentication/sign-in";
+    public const string AuthenticationSignIn = $"{Authentication}/sign-in";
 
-    public const string AuthenticationLogout = "/authentication/logout";
+    public const string AuthenticationLogout = $"{Authentication}/logout";
 
     public static string Role(Guid id)
     {
