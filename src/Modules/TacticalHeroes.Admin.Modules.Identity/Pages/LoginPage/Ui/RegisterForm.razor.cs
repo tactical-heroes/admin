@@ -11,6 +11,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui;
 public partial class RegisterForm(LoginApi loginApi)
 {
     private readonly RegisterModel _model = new();
+    private readonly RegisterModelValidator _validator = new();
     private bool _submitting;
     private bool _registered;
     private bool _showPassword;

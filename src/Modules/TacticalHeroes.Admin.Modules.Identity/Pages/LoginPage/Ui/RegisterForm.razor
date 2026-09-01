@@ -1,4 +1,6 @@
 @inherits CancelableComponentBase
+@using TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Model
+@using TacticalHeroes.Admin.Shared.Validation
 @if (_registered)
 {
     <div class="auth-form">
@@ -21,7 +23,8 @@ else
               OnValidSubmit="SubmitAsync"
               FormName="register-account"
               class="auth-form">
-        <DataAnnotationsValidator />
+        <FluentValidationValidator TModel="RegisterModel"
+                                   Validator="_validator" />
 
         <header class="auth-form-header">
             <MudIcon Icon="@Icons.Material.Outlined.PersonAdd" Class="auth-state-icon" />

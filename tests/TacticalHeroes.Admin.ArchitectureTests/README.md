@@ -136,3 +136,7 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
     production-исходники в подпапках `Model` не объявляют `record` или primary
     constructors. Формы, фильтры и read-модели используют единые parameterless
     классы с публичными свойствами.
+
+21. `ModelSources_Should_HaveAdjacentValidators_When_ModelTypesAreScanned` —
+    каждый тип `*Model` в production-подпапке `Model` имеет рядом валидатор
+    `<ModelType>Validator`, наследующий `MudFormValidator<ModelType>`.

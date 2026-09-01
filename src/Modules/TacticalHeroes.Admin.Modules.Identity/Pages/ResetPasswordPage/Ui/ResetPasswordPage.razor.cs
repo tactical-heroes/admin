@@ -11,6 +11,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.Pages.ResetPasswordPage.Ui;
 public partial class ResetPasswordPage(ResetPasswordApi resetPasswordApi)
 {
     private readonly ResetModel _model = new();
+    private readonly ResetModelValidator _validator = new();
     private bool _submitting;
     private bool _completed;
     private bool _showPassword;

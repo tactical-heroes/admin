@@ -1,4 +1,6 @@
 @inherits CancelableComponentBase
+@using TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Model
+@using TacticalHeroes.Admin.Shared.Validation
 @if (_requested)
 {
     <div class="auth-form">
@@ -21,7 +23,8 @@ else
               OnValidSubmit="SubmitAsync"
               FormName="resend-confirmation"
               class="auth-form">
-        <DataAnnotationsValidator />
+        <FluentValidationValidator TModel="EmailModel"
+                                   Validator="_validator" />
 
         <header class="auth-form-header">
             <MudIcon Icon="@Icons.Material.Outlined.MarkEmailUnread" Class="auth-state-icon" />

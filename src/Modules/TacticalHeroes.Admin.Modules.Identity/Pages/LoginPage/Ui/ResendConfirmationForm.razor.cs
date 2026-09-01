@@ -11,6 +11,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui;
 public partial class ResendConfirmationForm(LoginApi loginApi)
 {
     private readonly EmailModel _model = new();
+    private readonly EmailModelValidator _validator = new();
     private bool _submitting;
     private bool _requested;
     private string? _error;
