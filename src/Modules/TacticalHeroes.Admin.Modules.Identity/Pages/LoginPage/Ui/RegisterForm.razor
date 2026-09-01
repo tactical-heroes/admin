@@ -1,4 +1,5 @@
 @inherits CancelableComponentBase
+@using TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Model
 @if (_registered)
 {
     <div class="auth-form">
@@ -17,11 +18,11 @@
 }
 else
 {
-    <EditForm Model="_model"
-              OnValidSubmit="SubmitAsync"
-              FormName="register-account"
-              class="auth-form">
-        <DataAnnotationsValidator />
+    <MudForm @ref="_form"
+             Model="_model"
+             Validation="@_validator.ValidateValue"
+             OnEnterPressed="SubmitAsync"
+             Class="auth-form">
 
         <header class="auth-form-header">
             <MudIcon Icon="@Icons.Material.Outlined.PersonAdd" Class="auth-state-icon" />
@@ -36,80 +37,80 @@ else
 
         <div class="auth-field">
             <label for="register-email">Email</label>
-            <span class="auth-input-shell">
-                <MudIcon Icon="@Icons.Material.Outlined.Email" Class="auth-field-icon" />
-                <InputText class="auth-input"
-                           id="register-email"
-                           @bind-Value="_model.Email"
-                           type="email"
-                           inputmode="email"
-                           autocomplete="email"
-                           placeholder="Введите email"
-                           disabled="@_submitting" />
-            </span>
-            <ValidationMessage For="@(() => _model.Email)" />
+            <MudTextField T="string"
+                          @bind-Value="_model.Email"
+                          For="@(() => _model.Email)"
+                          InputId="register-email"
+                          InputType="InputType.Email"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Outlined.Email"
+                          Variant="Variant.Outlined"
+                          Class="auth-text-field"
+                          Placeholder="Введите email"
+                          Disabled="_submitting"
+                          Immediate="true"
+                          autocomplete="email" />
         </div>
 
         <div class="auth-field">
             <label for="register-user-name">Имя пользователя</label>
-            <span class="auth-input-shell">
-                <MudIcon Icon="@Icons.Material.Outlined.Person" Class="auth-field-icon" />
-                <InputText class="auth-input"
-                           id="register-user-name"
-                           @bind-Value="_model.UserName"
-                           autocomplete="username"
-                           placeholder="Введите имя"
-                           disabled="@_submitting" />
-            </span>
-            <ValidationMessage For="@(() => _model.UserName)" />
+            <MudTextField T="string"
+                          @bind-Value="_model.UserName"
+                          For="@(() => _model.UserName)"
+                          InputId="register-user-name"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Outlined.Person"
+                          Variant="Variant.Outlined"
+                          Class="auth-text-field"
+                          Placeholder="Введите имя"
+                          Disabled="_submitting"
+                          Immediate="true"
+                          autocomplete="username" />
         </div>
 
         <div class="auth-field">
             <label for="register-password">Пароль</label>
-            <span class="auth-input-shell">
-                <MudIcon Icon="@Icons.Material.Outlined.Lock" Class="auth-field-icon" />
-                <InputText class="auth-input"
-                           id="register-password"
-                           @bind-Value="_model.Password"
-                           type="@(_showPassword ? "text" : "password")"
-                           autocomplete="new-password"
-                           placeholder="Введите пароль"
-                           disabled="@_submitting" />
-                <button class="auth-password-toggle"
-                        type="button"
-                        aria-label="@(_showPassword ? "Скрыть пароль" : "Показать пароль")"
-                        disabled="@_submitting"
-                        @onclick="TogglePasswordVisibility">
-                    <MudIcon Icon="@(_showPassword ? Icons.Material.Outlined.VisibilityOff : Icons.Material.Outlined.Visibility)" />
-                </button>
-            </span>
-            <ValidationMessage For="@(() => _model.Password)" />
+            <MudTextField T="string"
+                          @bind-Value="_model.Password"
+                          For="@(() => _model.Password)"
+                          InputId="register-password"
+                          InputType="@(_showPassword ? InputType.Text : InputType.Password)"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@(_showPassword ? Icons.Material.Outlined.VisibilityOff : Icons.Material.Outlined.Visibility)"
+                          AdornmentAriaLabel="@(_showPassword ? "Скрыть пароль" : "Показать пароль")"
+                          OnAdornmentClick="TogglePasswordVisibility"
+                          Variant="Variant.Outlined"
+                          Class="auth-text-field"
+                          Placeholder="Введите пароль"
+                          Disabled="_submitting"
+                          Immediate="true"
+                          autocomplete="new-password" />
             <span class="auth-helper">Минимум 8 символов: заглавная и строчная буквы, цифра и специальный символ.</span>
         </div>
 
         <div class="auth-field">
             <label for="register-password-confirmation">Повторите пароль</label>
-            <span class="auth-input-shell">
-                <MudIcon Icon="@Icons.Material.Outlined.LockReset" Class="auth-field-icon" />
-                <InputText class="auth-input"
-                           id="register-password-confirmation"
-                           @bind-Value="_model.PasswordConfirmation"
-                           type="@(_showPasswordConfirmation ? "text" : "password")"
-                           autocomplete="new-password"
-                           placeholder="Повторите пароль"
-                           disabled="@_submitting" />
-                <button class="auth-password-toggle"
-                        type="button"
-                        aria-label="@(_showPasswordConfirmation ? "Скрыть пароль" : "Показать пароль")"
-                        disabled="@_submitting"
-                        @onclick="TogglePasswordConfirmationVisibility">
-                    <MudIcon Icon="@(_showPasswordConfirmation ? Icons.Material.Outlined.VisibilityOff : Icons.Material.Outlined.Visibility)" />
-                </button>
-            </span>
-            <ValidationMessage For="@(() => _model.PasswordConfirmation)" />
+            <MudTextField T="string"
+                          @bind-Value="_model.PasswordConfirmation"
+                          For="@(() => _model.PasswordConfirmation)"
+                          InputId="register-password-confirmation"
+                          InputType="@(_showPasswordConfirmation ? InputType.Text : InputType.Password)"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@(_showPasswordConfirmation ? Icons.Material.Outlined.VisibilityOff : Icons.Material.Outlined.Visibility)"
+                          AdornmentAriaLabel="@(_showPasswordConfirmation ? "Скрыть пароль" : "Показать пароль")"
+                          OnAdornmentClick="TogglePasswordConfirmationVisibility"
+                          Variant="Variant.Outlined"
+                          Class="auth-text-field"
+                          Placeholder="Повторите пароль"
+                          Disabled="_submitting"
+                          Immediate="true"
+                          autocomplete="new-password" />
         </div>
 
-        <button type="submit" class="auth-command" disabled="@_submitting">
+        <button type="button"
+                class="auth-command"
+                disabled="@_submitting"
+                @onclick="SubmitAsync">
             @(_submitting ? "Создаём аккаунт…" : "Создать аккаунт")
         </button>
 
@@ -119,5 +120,5 @@ else
                 <a class="auth-link" href="@LoginHref">Войти</a>
             </p>
         </div>
-    </EditForm>
+    </MudForm>
 }

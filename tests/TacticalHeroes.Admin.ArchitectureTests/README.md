@@ -101,38 +101,46 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
     с именем компонента; каждый `.razor.css` также должен принадлежать
     существующему Razor-компоненту.
 
+14. `RazorForms_Should_UseMudForm_When_FormsAreScanned` — интерактивные формы
+    в production Razor используют `MudForm`; `EditForm` запрещён. Обычный HTML
+    `<form>` допустим для серверной отправки, когда Blazor-валидация не участвует.
+
 ## Единый вид списков
 
-14. `ListSurfaces_Should_UseSharedComponents_When_AdminListsAreScanned` — списки
+15. `ListSurfaces_Should_UseSharedComponents_When_AdminListsAreScanned` — списки
     фракций, ролей и пользователей используют общий `EntityList` и контейнер
     `EntityRowActions` для произвольной композиции действий строки, не создавая
     собственные таблицы.
 
-15. `ListWidgets_Should_NotExposeIdentifiers_When_AdminListsAreScanned` — в
+16. `ListWidgets_Should_NotExposeIdentifiers_When_AdminListsAreScanned` — в
     пользовательской разметке списков запрещены колонки с техническим ID.
 
-16. `ListWidgets_Should_BindLoadErrors_When_AdminListsAreScanned` — списки
+17. `ListWidgets_Should_BindLoadErrors_When_AdminListsAreScanned` — списки
     передают в общий компонент фактическое состояние ошибки загрузки, а не
     строковый литерал.
 
-17. `ListPages_Should_ExposeHeaderAndCreateAction_When_AdminListsAreScanned` —
+18. `ListPages_Should_ExposeHeaderAndCreateAction_When_AdminListsAreScanned` —
     каждая страница списка содержит общий заголовок с пояснением и действие
     создания сущности.
 
 ## Конфигурационные options
 
-18. `ConfigurationOptions_Should_HaveValidators_When_OptionsAreScanned` — каждый
+19. `ConfigurationOptions_Should_HaveValidators_When_OptionsAreScanned` — каждый
     конфигурационный options-класс является `sealed`, находится в отдельной
     подпапке `Options/<name>`, совпадает с именем файла и имеет рядом валидатор
     `<OptionsType>Validator`, реализующий `IValidateOptions<T>`.
 
-19. `ConfigurationOptions_Should_ValidateOnStart_When_RegistrationsAreScanned` —
+20. `ConfigurationOptions_Should_ValidateOnStart_When_RegistrationsAreScanned` —
     валидатор каждого options-класса зарегистрирован в DI, а сами настройки
     проверяются через `ValidateOnStart`.
 
 ## Модели
 
-20. `ModelSources_Should_UsePropertyBasedClasses_When_ModelFoldersAreScanned` —
+21. `ModelSources_Should_UsePropertyBasedClasses_When_ModelFoldersAreScanned` —
     production-исходники в подпапках `Model` не объявляют `record` или primary
     constructors. Формы, фильтры и read-модели используют единые parameterless
     классы с публичными свойствами.
+
+22. `ModelSources_Should_HaveAdjacentValidators_When_ModelTypesAreScanned` —
+    каждый тип `*Model` в production-подпапке `Model` имеет рядом валидатор
+    `<ModelType>Validator`, наследующий `MudFormValidator<ModelType>`.

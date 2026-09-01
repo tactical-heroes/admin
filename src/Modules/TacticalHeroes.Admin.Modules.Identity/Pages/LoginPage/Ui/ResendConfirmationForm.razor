@@ -1,4 +1,5 @@
 @inherits CancelableComponentBase
+@using TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Model
 @if (_requested)
 {
     <div class="auth-form">
@@ -17,11 +18,11 @@
 }
 else
 {
-    <EditForm Model="_model"
-              OnValidSubmit="SubmitAsync"
-              FormName="resend-confirmation"
-              class="auth-form">
-        <DataAnnotationsValidator />
+    <MudForm @ref="_form"
+             Model="_model"
+             Validation="@_validator.ValidateValue"
+             OnEnterPressed="SubmitAsync"
+             Class="auth-form">
 
         <header class="auth-form-header">
             <MudIcon Icon="@Icons.Material.Outlined.MarkEmailUnread" Class="auth-state-icon" />
@@ -38,21 +39,25 @@ else
 
         <div class="auth-field">
             <label for="confirmation-email">Email</label>
-            <span class="auth-input-shell">
-                <MudIcon Icon="@Icons.Material.Outlined.Email" Class="auth-field-icon" />
-                <InputText class="auth-input"
-                           id="confirmation-email"
-                           @bind-Value="_model.Email"
-                           type="email"
-                           inputmode="email"
-                           autocomplete="email"
-                           placeholder="Введите email"
-                           disabled="@_submitting" />
-            </span>
-            <ValidationMessage For="@(() => _model.Email)" />
+            <MudTextField T="string"
+                          @bind-Value="_model.Email"
+                          For="@(() => _model.Email)"
+                          InputId="confirmation-email"
+                          InputType="InputType.Email"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Outlined.Email"
+                          Variant="Variant.Outlined"
+                          Class="auth-text-field"
+                          Placeholder="Введите email"
+                          Disabled="_submitting"
+                          Immediate="true"
+                          autocomplete="email" />
         </div>
 
-        <button type="submit" class="auth-command" disabled="@_submitting">
+        <button type="button"
+                class="auth-command"
+                disabled="@_submitting"
+                @onclick="SubmitAsync">
             @(_submitting ? "Отправляем…" : "Отправить повторно")
         </button>
 
@@ -61,5 +66,5 @@ else
                 <a class="auth-link" href="@LoginHref">Вернуться ко входу</a>
             </p>
         </div>
-    </EditForm>
+    </MudForm>
 }

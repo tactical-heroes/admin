@@ -1,10 +1,11 @@
-using System.ComponentModel.DataAnnotations;
-
 using Microsoft.AspNetCore.Components;
+
+using MudBlazor;
 
 using PANiXiDA.Core.ResultPattern;
 
 using TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Api;
+using TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Model;
 using TacticalHeroes.Admin.Shared.Errors;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui;
@@ -12,6 +13,8 @@ namespace TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui;
 public partial class ResendConfirmationForm(LoginApi loginApi)
 {
     private readonly EmailModel _model = new();
+    private readonly EmailModelValidator _validator = new();
+    private MudForm? _form;
     private bool _submitting;
     private bool _requested;
     private string? _error;
@@ -23,6 +26,13 @@ public partial class ResendConfirmationForm(LoginApi loginApi)
 
     private async Task SubmitAsync()
     {
+        if (_form is null ||
+            _submitting ||
+            !await _validator.ValidateFormAsync(_form, _model, LifetimeToken))
+        {
+            return;
+        }
+
         _submitting = true;
         _error = null;
 
@@ -40,12 +50,5 @@ public partial class ResendConfirmationForm(LoginApi loginApi)
         }
 
         _submitting = false;
-    }
-
-    private sealed class EmailModel
-    {
-        [Required(ErrorMessage = "Укажите email.")]
-        [EmailAddress(ErrorMessage = "Укажите корректный email.")]
-        public string Email { get; set; } = string.Empty;
     }
 }

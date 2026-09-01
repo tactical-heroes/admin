@@ -3,6 +3,8 @@ using System.Linq.Expressions;
 using FluentValidation;
 using FluentValidation.Results;
 
+using MudBlazor;
+
 namespace TacticalHeroes.Admin.Shared.Validation;
 
 public abstract class MudFormValidator<TModel> : AbstractValidator<TModel>
@@ -14,6 +16,20 @@ public abstract class MudFormValidator<TModel> : AbstractValidator<TModel>
     }
 
     public Func<object, string, IEnumerable<string>> ValidateValue { get; }
+
+    public async Task<bool> ValidateFormAsync(
+        MudForm form,
+        TModel model,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(form);
+        ArgumentNullException.ThrowIfNull(model);
+
+        await form.ValidateAsync();
+        ValidationResult result = await ValidateAsync(model, cancellationToken);
+
+        return form.IsValid && result.IsValid;
+    }
 
     public Func<TProperty, IEnumerable<string>> For<TProperty>(
         TModel model,
