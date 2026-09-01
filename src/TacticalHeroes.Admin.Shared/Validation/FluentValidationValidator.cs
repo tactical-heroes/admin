@@ -21,7 +21,7 @@ public sealed class FluentValidationValidator<TModel> : ComponentBase, IDisposab
     protected override void OnInitialized()
     {
         _editContext = CurrentEditContext ?? throw new InvalidOperationException(
-            $"{nameof(FluentValidationValidator<TModel>)} requires a cascading " +
+            $"{nameof(FluentValidationValidator<>)} requires a cascading " +
             $"{nameof(EditContext)} parameter.");
 
         if (_editContext.Model is not TModel)
