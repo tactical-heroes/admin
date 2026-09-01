@@ -10,6 +10,11 @@ public sealed partial class RazorArtifactConventionTests
     private static partial Regex InlineCodeOrStyleRegex();
 
     [GeneratedRegex(
+        "<EditForm(?:\\s|>)",
+        RegexOptions.CultureInvariant)]
+    private static partial Regex EditFormRegex();
+
+    [GeneratedRegex(
         @"\[(?:global::)?(?:[A-Za-z_][A-Za-z0-9_]*\.)*Inject(?:Attribute)?\b",
         RegexOptions.CultureInvariant)]
     private static partial Regex PropertyInjectionRegex();
@@ -69,6 +74,18 @@ public sealed partial class RazorArtifactConventionTests
         string sourceRoot = Path.Combine(repositoryRoot, "src");
         string[] violations = [.. EnumerateFiles(sourceRoot, "*.cs")
             .Where(path => PropertyInjectionRegex().IsMatch(File.ReadAllText(path)))
+            .Select(path => Path.GetRelativePath(repositoryRoot, path))];
+
+        violations.ShouldBeEmpty();
+    }
+
+    [Fact(DisplayName = "Razor forms use MudForm instead of EditForm")]
+    public void RazorForms_Should_UseMudForm_When_FormsAreScanned()
+    {
+        string repositoryRoot = RepositoryPaths.FindRoot();
+        string sourceRoot = Path.Combine(repositoryRoot, "src");
+        string[] violations = [.. EnumerateFiles(sourceRoot, "*.razor")
+            .Where(path => EditFormRegex().IsMatch(File.ReadAllText(path)))
             .Select(path => Path.GetRelativePath(repositoryRoot, path))];
 
         violations.ShouldBeEmpty();
