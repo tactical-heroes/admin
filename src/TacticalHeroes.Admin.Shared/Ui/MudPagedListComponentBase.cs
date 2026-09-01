@@ -34,9 +34,6 @@ public abstract class MudPagedListComponentBase<
     : CancelableComponentBase
     where TFilter : notnull, new()
 {
-    private static readonly EqualityComparer<TFilter> FilterComparer =
-        EqualityComparer<TFilter>.Default;
-
     private long _loadVersion;
 
     [SupplyParameterFromQuery(Name = "page")]
@@ -74,7 +71,7 @@ public abstract class MudPagedListComponentBase<
 
     protected long TotalCount => Page?.TotalCount ?? 0;
 
-    protected bool HasActiveFilter => !FilterComparer.Equals(
+    protected bool HasActiveFilter => !FiltersEqual(
         AppliedFilter,
         new TFilter());
 
@@ -158,7 +155,7 @@ public abstract class MudPagedListComponentBase<
 
     protected void ChangeFilter(TFilter filter)
     {
-        if (!FilterComparer.Equals(filter, AppliedFilter))
+        if (!FiltersEqual(filter, AppliedFilter))
         {
             NavigateToList(filter, pageNumber: 1, CurrentPageSize);
         }
@@ -189,7 +186,7 @@ public abstract class MudPagedListComponentBase<
     {
         return LoadedPageNumber == CurrentPageNumber
             && LoadedPageSize == CurrentPageSize
-            && FilterComparer.Equals(LoadedFilter, AppliedFilter);
+            && FiltersEqual(LoadedFilter, AppliedFilter);
     }
 
     private bool IsCurrentLoad(
@@ -201,6 +198,19 @@ public abstract class MudPagedListComponentBase<
         return loadVersion == _loadVersion
             && pageNumber == CurrentPageNumber
             && pageSize == CurrentPageSize
-            && FilterComparer.Equals(filter, AppliedFilter);
+            && FiltersEqual(filter, AppliedFilter);
+    }
+
+    private bool FiltersEqual(TFilter? left, TFilter right)
+    {
+        if (left is null)
+        {
+            return false;
+        }
+
+        return string.Equals(
+            RouteUriBuilder.Build(listRoute, left),
+            RouteUriBuilder.Build(listRoute, right),
+            StringComparison.Ordinal);
     }
 }

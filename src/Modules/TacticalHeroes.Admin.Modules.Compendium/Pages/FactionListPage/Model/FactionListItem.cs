@@ -1,6 +1,10 @@
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Model;
 
-public sealed record FactionListItem(
-    Guid Id,
-    string Name,
-    string Description);
+public sealed class FactionListItem
+{
+    public Guid Id { get; set; }
+
+    public string Name { get; set; } = string.Empty;
+
+    public string Description { get; set; } = string.Empty;
+}

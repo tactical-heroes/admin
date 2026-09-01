@@ -25,10 +25,16 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
         await component.SetRouteAsync(2, 25, filter);
         await component.SetRouteAsync(3, 25, filter);
 
-        component.LoadRequests.ShouldBe(
+        component.LoadRequests
+            .Select(request => (
+                request.PageNumber,
+                request.PageSize,
+                request.Filter.Email,
+                request.Filter.MinimumAge))
+            .ShouldBe(
         [
-            new LoadRequest(2, 25, filter),
-            new LoadRequest(3, 25, filter),
+            (2, 25, "admin@example.test", 18),
+            (3, 25, "admin@example.test", 18),
         ]);
         component.Page?.PageNumber.ShouldBe(3);
     }
@@ -53,11 +59,8 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
             MinimumAge = 18,
         });
 
-        component.DraftFilter.ShouldBe(new TestFilter
-        {
-            Email = "admin@example.test",
-            MinimumAge = 18,
-        });
+        component.DraftFilter.Email.ShouldBe("admin@example.test");
+        component.DraftFilter.MinimumAge.ShouldBe(18);
         component.FilterIsActive.ShouldBeTrue();
 
         component.DraftFilter.Email = "moderator@example.test";
@@ -69,7 +72,8 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
 
         component.ResetDraftFilter();
 
-        component.DraftFilter.ShouldBe(new TestFilter());
+        component.DraftFilter.Email.ShouldBeNull();
+        component.DraftFilter.MinimumAge.ShouldBeNull();
         component.CurrentUri.ShouldEndWith(
             "/items?pageSize=25");
     }
@@ -136,12 +140,14 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
     {
         TestComponent component = CreateComponent();
         component.OnLoad = (pageNumber, pageSize, _, _) => Task.FromResult(
-            Result.Success(new PaginationResult<TestItem>(
-                [new TestItem(), new TestItem()],
-                pageNumber,
-                pageSize,
-                2,
-                1)));
+            Result.Success(new PaginationResult<TestItem>
+            {
+                Items = [new TestItem(), new TestItem()],
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalCount = 2,
+                TotalPages = 1,
+            }));
 
         await component.SetRouteAsync(1, 10);
         await component.NotifyItemRemovedAsync();
@@ -157,12 +163,14 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
 
     private static PaginationResult<TestItem> CreatePage(int pageNumber, int pageSize)
     {
-        return new PaginationResult<TestItem>(
-            [new TestItem()],
-            pageNumber,
-            pageSize,
-            1,
-            1);
+        return new PaginationResult<TestItem>
+        {
+            Items = [new TestItem()],
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalCount = 1,
+            TotalPages = 1,
+        };
     }
 
     private sealed class TestComponent : MudPagedListComponentBase<TestItem, TestFilter>
@@ -295,7 +303,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
     {
     }
 
-    private sealed record TestFilter
+    private sealed class TestFilter
     {
         public string? Email { get; set; }
 
