@@ -1,5 +1,3 @@
-using FluentValidation.Results;
-
 using Microsoft.AspNetCore.Components;
 
 using MudBlazor;
@@ -17,7 +15,6 @@ public partial class ResetPasswordPage(ResetPasswordApi resetPasswordApi)
     private readonly ResetModel _model = new();
     private readonly ResetModelValidator _validator = new();
     private MudForm? _form;
-    private bool _isValid;
     private bool _submitting;
     private bool _completed;
     private bool _showPassword;
@@ -35,17 +32,8 @@ public partial class ResetPasswordPage(ResetPasswordApi resetPasswordApi)
         if (!UserId.HasValue ||
             string.IsNullOrWhiteSpace(PasswordResetToken) ||
             _form is null ||
-            _submitting)
-        {
-            return;
-        }
-
-        await _form.ValidateAsync();
-        ValidationResult validationResult = await _validator.ValidateAsync(
-            _model,
-            LifetimeToken);
-
-        if (!_isValid || !validationResult.IsValid)
+            _submitting ||
+            !await _validator.ValidateFormAsync(_form, _model, LifetimeToken))
         {
             return;
         }

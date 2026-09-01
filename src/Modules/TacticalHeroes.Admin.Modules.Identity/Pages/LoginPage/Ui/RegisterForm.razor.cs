@@ -1,5 +1,3 @@
-using FluentValidation.Results;
-
 using Microsoft.AspNetCore.Components;
 
 using MudBlazor;
@@ -17,7 +15,6 @@ public partial class RegisterForm(LoginApi loginApi)
     private readonly RegisterModel _model = new();
     private readonly RegisterModelValidator _validator = new();
     private MudForm? _form;
-    private bool _isValid;
     private bool _submitting;
     private bool _registered;
     private bool _showPassword;
@@ -35,17 +32,9 @@ public partial class RegisterForm(LoginApi loginApi)
 
     private async Task SubmitAsync()
     {
-        if (_form is null || _submitting)
-        {
-            return;
-        }
-
-        await _form.ValidateAsync();
-        ValidationResult validationResult = await _validator.ValidateAsync(
-            _model,
-            LifetimeToken);
-
-        if (!_isValid || !validationResult.IsValid)
+        if (_form is null ||
+            _submitting ||
+            !await _validator.ValidateFormAsync(_form, _model, LifetimeToken))
         {
             return;
         }
