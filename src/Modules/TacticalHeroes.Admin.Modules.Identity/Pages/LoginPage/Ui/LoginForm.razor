@@ -1,9 +1,5 @@
-@if (!string.IsNullOrWhiteSpace(ErrorMessage))
-{
-    <div class="auth-feedback auth-feedback--error auth-feedback--login" role="alert">
-        @ErrorMessage
-    </div>
-}
+<AuthenticationFeedback Message="@ErrorMessage"
+                        Class="auth-feedback--login" />
 
 <div class="auth-form">
     <header class="auth-form-header">

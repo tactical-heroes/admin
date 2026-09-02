@@ -1,6 +1,8 @@
-@inherits CancelableComponentBase
+@inherits MudValidatedFormComponentBase<EmailModel, EmailModelValidator>
+
 @using TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Model
-@if (_requested)
+
+@if (IsSubmitted)
 {
     <div class="auth-form">
         <header class="auth-form-header">
@@ -10,17 +12,17 @@
                 Если аккаунт существует и ещё не подтверждён, новое письмо уже отправлено.
             </p>
         </header>
-        <div class="auth-feedback auth-feedback--success" role="status">
-            Если письмо не появилось в течение нескольких минут, проверьте папку «Спам».
-        </div>
+        <AuthenticationFeedback
+            Message="Если письмо не появилось в течение нескольких минут, проверьте папку «Спам»."
+            Severity="Severity.Success" />
         <a class="auth-command" href="@LoginHref">Вернуться ко входу</a>
     </div>
 }
 else
 {
-    <MudForm @ref="_form"
-             Model="_model"
-             Validation="@_validator.ValidateValue"
+    <MudForm @ref="Form"
+             Model="Model"
+             Validation="@Validator.ValidateValue"
              OnEnterPressed="SubmitAsync"
              Class="auth-form">
 
@@ -32,16 +34,13 @@ else
             </p>
         </header>
 
-        @if (!string.IsNullOrWhiteSpace(_error))
-        {
-            <div class="auth-feedback auth-feedback--error" role="alert">@_error</div>
-        }
+        <AuthenticationFeedback Message="@SubmissionError" />
 
         <div class="auth-field">
             <label for="confirmation-email">Email</label>
             <MudTextField T="string"
-                          @bind-Value="_model.Email"
-                          For="@(() => _model.Email)"
+                          @bind-Value="Model.Email"
+                          For="@(() => Model.Email)"
                           InputId="confirmation-email"
                           InputType="InputType.Email"
                           Adornment="Adornment.Start"
@@ -49,17 +48,17 @@ else
                           Variant="Variant.Outlined"
                           Class="auth-text-field"
                           Placeholder="Введите email"
-                          Disabled="_submitting"
+                          Disabled="IsSubmitting"
                           Immediate="true"
                           autocomplete="email" />
         </div>
 
-        <button type="button"
-                class="auth-command"
-                disabled="@_submitting"
-                @onclick="SubmitAsync">
-            @(_submitting ? "Отправляем…" : "Отправить повторно")
-        </button>
+        <AsyncActionButton Class="auth-command"
+                           Text="Отправить повторно"
+                           BusyText="Отправляем…"
+                           Busy="IsSubmitting"
+                           ShowProgress="false"
+                           OnClick="SubmitAsync" />
 
         <div class="auth-form-footer">
             <p>

@@ -1,5 +1,3 @@
-using FluentValidation.Results;
-
 using Microsoft.AspNetCore.Components;
 
 using MudBlazor;
@@ -16,63 +14,35 @@ public abstract class MudFormComponentBase<TModel, TValidator>(
     NavigationManager navigation,
     string successMessage,
     Func<Guid, string> successRoute)
-    : CancelableComponentBase
+    : MudValidatedFormComponentBase<TModel, TValidator>
     where TModel : class, new()
     where TValidator : MudFormValidator<TModel>, new()
 {
-    private TModel? _model;
-
     [PersistentState(AllowUpdates = true)]
-    public TModel Model
+    public override TModel Model
     {
-        get => _model ??= new();
-        set => _model = value;
+        get => base.Model;
+        set => base.Model = value;
     }
 
     protected FormErrorState<TModel> Errors { get; } = new();
 
-    protected TValidator Validator { get; } = new();
+    protected bool IsSaving => IsSubmitting;
 
-    protected MudForm? Form { get; set; }
-
-    protected bool IsValid { get; set; }
-
-    protected bool IsSaving { get; private set; }
-
-    protected async Task SubmitAsync(
+    protected Task SubmitAsync(
         Func<CancellationToken, Task<Result<Guid>>> saveAsync)
     {
-        if (Form is null || IsSaving)
-        {
-            return;
-        }
-
-        IsSaving = true;
-
-        try
-        {
-            await Form.ValidateAsync();
-            ValidationResult validationResult = await Validator.ValidateAsync(
-                Model,
-                LifetimeToken);
-
-            if (IsValid && validationResult.IsValid)
-            {
-                await SaveAsync(saveAsync);
-            }
-        }
-        finally
-        {
-            IsSaving = false;
-        }
+        return base.SubmitAsync(
+            cancellationToken => SaveAsync(saveAsync, cancellationToken));
     }
 
     private async Task SaveAsync(
-        Func<CancellationToken, Task<Result<Guid>>> saveAsync)
+        Func<CancellationToken, Task<Result<Guid>>> saveAsync,
+        CancellationToken cancellationToken)
     {
         Errors.Clear();
 
-        Result<Guid> result = await saveAsync(LifetimeToken);
+        Result<Guid> result = await saveAsync(cancellationToken);
 
         if (result.IsFailure)
         {

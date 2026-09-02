@@ -4,18 +4,9 @@
                Disabled="Busy">
         Отмена
     </MudButton>
-    <MudButton Class="submit-action"
-               Variant="Variant.Filled"
-               Color="Color.Primary"
-               StartIcon="@(IsNew ? Icons.Material.Filled.Add : Icons.Material.Filled.Save)"
-               Disabled="Busy"
-               OnClick="OnSubmit">
-        @if (Busy)
-        {
-            <MudProgressCircular Size="Size.Small"
-                                 Indeterminate="true"
-                                 Class="button-progress" />
-        }
-        @(IsNew ? "Создать" : "Сохранить")
-    </MudButton>
+    <AsyncActionButton Class="submit-action"
+                       Text="@ActionText"
+                       Busy="Busy"
+                       StartIcon="@ActionIcon"
+                       OnClick="OnSubmit" />
 </div>

@@ -367,8 +367,10 @@
     margin-top: 0.25rem;
     padding: 0.75rem 2.5rem;
     border: 0;
+    border-radius: 0;
     outline: none;
     background: #090908 url("/auth/primary-command-frame.png") center / 100% 100% no-repeat;
+    box-shadow: none;
     color: #f0dcae;
     cursor: pointer;
     font-family: "TH Cormorant", Georgia, serif;
@@ -419,36 +421,6 @@
 .auth-content ::deep .auth-form-footer-secondary,
 .auth-content ::deep .auth-form-footer-secondary .auth-link {
     font-size: 0.8rem;
-}
-
-.auth-content ::deep .auth-feedback {
-    display: grid;
-    justify-items: center;
-    gap: 0.75rem;
-    padding: 1rem 1.2rem;
-    border: 1px solid rgba(168, 121, 54, 0.55);
-    background: rgba(91, 61, 25, 0.18);
-    color: #d8c8aa;
-    font-family: "TH Inter", "Segoe UI", sans-serif;
-    font-size: 0.88rem;
-    line-height: 1.5;
-    text-align: center;
-}
-
-.auth-content ::deep .auth-feedback--error {
-    border-color: rgba(196, 82, 55, 0.62);
-    background: rgba(112, 31, 23, 0.22);
-    color: #efb49d;
-}
-
-.auth-content ::deep .auth-feedback--login {
-    margin-bottom: 2.65rem;
-}
-
-.auth-content ::deep .auth-feedback--success {
-    border-color: rgba(156, 142, 68, 0.62);
-    background: rgba(74, 78, 32, 0.2);
-    color: #d9d3a4;
 }
 
 .auth-content ::deep .auth-progress {
@@ -515,10 +487,6 @@
 
     .auth-content ::deep .auth-command {
         min-height: 60px;
-    }
-
-    .auth-content ::deep .auth-feedback--login {
-        margin-bottom: 0.8rem;
     }
 }
 
