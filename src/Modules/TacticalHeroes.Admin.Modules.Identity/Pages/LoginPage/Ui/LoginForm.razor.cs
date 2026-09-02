@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Components;
 
+using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Model;
+using TacticalHeroes.Admin.Shared.Model;
+
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui;
 
 public partial class LoginForm
@@ -10,17 +13,9 @@ public partial class LoginForm
     public string? ReturnUrl { get; set; }
 
     [Parameter]
-    public string? Error { get; set; }
+    public AuthenticationError? Error { get; set; }
 
-    private string? ErrorMessage => Error switch
-    {
-        "invalid_credentials" => "Неверный email или пароль.",
-        "forbidden" => "Аккаунт не подтверждён, заблокирован или временно заблокирован после неудачных попыток.",
-        "invalid_request" => "Ссылка входа устарела или повреждена. Начните вход заново.",
-        "unavailable" => "Сервис авторизации временно недоступен. Повторите попытку позже.",
-        "oauth" => "OAuth-вход не удалось завершить. Начните его заново.",
-        _ => null,
-    };
+    private string? ErrorMessage => Error?.GetDisplayName();
 
     private void TogglePasswordVisibility()
     {

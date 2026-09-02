@@ -4,6 +4,7 @@ using MudBlazor;
 
 using PANiXiDA.Core.ResultPattern;
 
+using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Model;
 using TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Api;
 using TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Model;
 using TacticalHeroes.Admin.Shared.Errors;

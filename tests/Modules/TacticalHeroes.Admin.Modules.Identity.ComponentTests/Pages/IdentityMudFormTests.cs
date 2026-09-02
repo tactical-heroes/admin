@@ -7,7 +7,9 @@ using Microsoft.Extensions.Http;
 using MudBlazor.Services;
 
 using TacticalHeroes.Admin.Api.DependencyInjection;
+using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Model;
 using TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui;
+using TacticalHeroes.Admin.Shared.Model;
 
 using ResetPasswordPageComponent =
     TacticalHeroes.Admin.Modules.Identity.Pages.ResetPasswordPage.Ui.ResetPasswordPage;
@@ -65,6 +67,16 @@ public sealed class IdentityMudFormTests : BunitContext
             _handler.PostCount.ShouldBe(1);
             component.Markup.ShouldContain("Аккаунт создан.");
         });
+    }
+
+    [Fact(DisplayName = "Login form displays the authentication error display name")]
+    public void Login_Should_DisplayErrorMessage_When_AuthenticationErrorIsProvided()
+    {
+        var component = Render<LoginForm>(parameters => parameters
+            .Add(form => form.Error, AuthenticationError.Unavailable));
+
+        component.Markup.ShouldContain(
+            AuthenticationError.Unavailable.GetDisplayName());
     }
 
     [Fact(DisplayName = "Forgot password form validates an empty model through MudForm")]

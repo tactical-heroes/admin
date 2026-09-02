@@ -9,6 +9,7 @@ using TacticalHeroes.Admin.Client.App.Routing;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Login;
 using TacticalHeroes.Admin.Infrastructure.Authentication.OpenIdConnect;
 using TacticalHeroes.Admin.Modules.Identity;
+using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Model;
 
 namespace TacticalHeroes.Admin.Infrastructure.Authentication.Endpoints;
 
@@ -38,7 +39,9 @@ internal static class AuthenticationEndpointRouteBuilderExtensions
                         authorizationPath);
                     if (returnUrl is null)
                     {
-                        return RedirectToLogin(error: LoginError.InvalidRequest, returnUrl: null);
+                        return RedirectToLogin(
+                            error: AuthenticationError.InvalidRequest,
+                            returnUrl: null);
                     }
 
                     using var response = await gateway.SignInAsync(
@@ -62,7 +65,7 @@ internal static class AuthenticationEndpointRouteBuilderExtensions
                     if (setCookieHeaders.Length == 0)
                     {
                         return RedirectToLogin(
-                            error: LoginError.Unavailable,
+                            error: AuthenticationError.Unavailable,
                             returnUrl: returnUrl);
                     }
 
@@ -87,19 +90,21 @@ internal static class AuthenticationEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    private static RedirectHttpResult RedirectToLogin(LoginError error, string? returnUrl)
+    private static RedirectHttpResult RedirectToLogin(
+        AuthenticationError error,
+        string? returnUrl)
     {
         return TypedResults.Redirect(IdentityRoutes.LoginPage(returnUrl, error: error));
     }
 
-    private static LoginError GetErrorCode(HttpStatusCode statusCode)
+    private static AuthenticationError GetErrorCode(HttpStatusCode statusCode)
     {
         return statusCode switch
         {
-            HttpStatusCode.Unauthorized => LoginError.InvalidCredentials,
-            HttpStatusCode.Forbidden => LoginError.Forbidden,
-            HttpStatusCode.BadRequest => LoginError.InvalidRequest,
-            _ => LoginError.Unavailable,
+            HttpStatusCode.Unauthorized => AuthenticationError.InvalidCredentials,
+            HttpStatusCode.Forbidden => AuthenticationError.Forbidden,
+            HttpStatusCode.BadRequest => AuthenticationError.InvalidRequest,
+            _ => AuthenticationError.Unavailable,
         };
     }
 

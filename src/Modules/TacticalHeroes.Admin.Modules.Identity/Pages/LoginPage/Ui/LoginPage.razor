@@ -6,19 +6,19 @@
 <PageTitle>@Title</PageTitle>
 
 <AuthenticationShell>
-    @switch (NormalizedMode)
+    @switch (SelectedMode)
     {
-        case "register":
+        case LoginMode.Register:
             <RegisterForm ReturnUrl="@ReturnUrl" />
             break;
-        case "confirmation":
+        case LoginMode.Confirmation:
             <ResendConfirmationForm ReturnUrl="@ReturnUrl" />
             break;
-        case "recover":
+        case LoginMode.Recover:
             <ForgotPasswordForm ReturnUrl="@ReturnUrl" />
             break;
         default:
-            <LoginForm ReturnUrl="@ReturnUrl" Error="@Error" />
+            <LoginForm ReturnUrl="@ReturnUrl" Error="@ParsedError" />
             break;
     }
 </AuthenticationShell>
