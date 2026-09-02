@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using TacticalHeroes.Admin.Client.App.Routing;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Options.OpenIdConnect;
 using TacticalHeroes.Admin.Modules.Identity;
-using TacticalHeroes.Admin.Shared.Errors;
+using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Model;
 
 namespace TacticalHeroes.Admin.Infrastructure.Authentication.OpenIdConnect;
 

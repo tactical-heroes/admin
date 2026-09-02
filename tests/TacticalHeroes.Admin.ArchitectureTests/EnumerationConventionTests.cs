@@ -44,26 +44,55 @@ public sealed partial class EnumerationConventionTests
         violations.ShouldBeEmpty();
     }
 
+    [Theory(DisplayName = "Enumeration scanner recognizes valid explicit initializers")]
+    [InlineData("-1")]
+    [InlineData("0x10")]
+    [InlineData("Read | Write")]
+    public void EnumerationScanner_Should_ReadValue_When_InitializerIsValid(string initializer)
+    {
+        string source = $$"""
+            public enum TestEnumeration
+            {
+                [Display(Name = "Test value")]
+                Value = {{initializer}},
+            }
+            """;
+
+        EnumerationMember member = EnumerateMembers("test.cs", source).ShouldHaveSingleItem();
+
+        member.NumericValue.ShouldBe(initializer);
+    }
+
     private static IEnumerable<EnumerationMember> EnumerateMembers(string sourceRoot)
     {
         foreach (string sourcePath in EnumerateSourceFiles(sourceRoot))
         {
             string source = File.ReadAllText(sourcePath);
 
-            foreach (Match enumerationMatch in EnumerationRegex().Matches(source))
+            foreach (EnumerationMember member in EnumerateMembers(sourcePath, source))
             {
-                string enumerationName = enumerationMatch.Groups["name"].Value;
-                string body = enumerationMatch.Groups["body"].Value;
+                yield return member;
+            }
+        }
+    }
 
-                foreach (Match memberMatch in EnumerationMemberRegex().Matches(body))
-                {
-                    yield return new EnumerationMember(
-                        sourcePath,
-                        enumerationName,
-                        memberMatch.Groups["name"].Value,
-                        memberMatch.Groups["value"].Value,
-                        memberMatch.Groups["attributes"].Value);
-                }
+    private static IEnumerable<EnumerationMember> EnumerateMembers(
+        string sourcePath,
+        string source)
+    {
+        foreach (Match enumerationMatch in EnumerationRegex().Matches(source))
+        {
+            string enumerationName = enumerationMatch.Groups["name"].Value;
+            string body = enumerationMatch.Groups["body"].Value;
+
+            foreach (Match memberMatch in EnumerationMemberRegex().Matches(body))
+            {
+                yield return new EnumerationMember(
+                    sourcePath,
+                    enumerationName,
+                    memberMatch.Groups["name"].Value,
+                    memberMatch.Groups["value"].Value.Trim(),
+                    memberMatch.Groups["attributes"].Value);
             }
         }
     }
@@ -104,7 +133,7 @@ public sealed partial class EnumerationConventionTests
     [GeneratedRegex(
         @"(?m)(?<attributes>(?:^[ \t]*\[[^\]\r\n]+\][ \t]*\r?\n)*)" +
         @"^[ \t]*(?<name>[A-Za-z_][A-Za-z0-9_]*)[ \t]*" +
-        @"(?:=[ \t]*(?<value>\d+))?[ \t]*,?[ \t]*(?://.*)?$",
+        @"(?:=[ \t]*(?<value>.+?))?[ \t]*,?[ \t]*(?://.*)?$",
         RegexOptions.CultureInvariant)]
     private static partial Regex EnumerationMemberRegex();
 

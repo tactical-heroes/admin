@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace TacticalHeroes.Admin.Shared.Errors;
+namespace TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Model;
 
 public enum AuthenticationError
 {

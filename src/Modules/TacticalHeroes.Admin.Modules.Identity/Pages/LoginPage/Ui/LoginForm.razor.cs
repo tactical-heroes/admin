@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
 using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Model;
-using TacticalHeroes.Admin.Shared.Errors;
 using TacticalHeroes.Admin.Shared.Model;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui;

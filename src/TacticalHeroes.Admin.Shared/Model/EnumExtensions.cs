@@ -33,16 +33,15 @@ public static class EnumExtensions
         if (!string.IsNullOrWhiteSpace(value))
         {
             Type enumerationType = typeof(TEnum);
+            string? name = Enum.GetNames<TEnum>()
+                .FirstOrDefault(name => string.Equals(
+                    GetSnakeCaseName(enumerationType, name),
+                    value,
+                    StringComparison.OrdinalIgnoreCase));
 
-            foreach (string name in Enum.GetNames<TEnum>())
+            if (name is not null)
             {
-                if (string.Equals(
-                        GetSnakeCaseName(enumerationType, name),
-                        value,
-                        StringComparison.OrdinalIgnoreCase))
-                {
-                    return Enum.TryParse(name, out result);
-                }
+                return Enum.TryParse(name, out result);
             }
         }
 

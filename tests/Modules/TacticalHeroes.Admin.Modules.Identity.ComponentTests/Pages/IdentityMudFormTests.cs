@@ -7,8 +7,8 @@ using Microsoft.Extensions.Http;
 using MudBlazor.Services;
 
 using TacticalHeroes.Admin.Api.DependencyInjection;
+using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Model;
 using TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui;
-using TacticalHeroes.Admin.Shared.Errors;
 using TacticalHeroes.Admin.Shared.Model;
 
 using ResetPasswordPageComponent =

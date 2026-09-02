@@ -1,5 +1,4 @@
 using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Model;
-using TacticalHeroes.Admin.Shared.Errors;
 
 namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests;
 

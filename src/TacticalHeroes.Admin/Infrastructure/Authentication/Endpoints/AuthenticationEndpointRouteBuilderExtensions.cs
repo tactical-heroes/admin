@@ -9,7 +9,7 @@ using TacticalHeroes.Admin.Client.App.Routing;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Login;
 using TacticalHeroes.Admin.Infrastructure.Authentication.OpenIdConnect;
 using TacticalHeroes.Admin.Modules.Identity;
-using TacticalHeroes.Admin.Shared.Errors;
+using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Model;
 
 namespace TacticalHeroes.Admin.Infrastructure.Authentication.Endpoints;
 
