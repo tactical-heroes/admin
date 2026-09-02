@@ -10,9 +10,8 @@
                 Аккаунт создан. Перейдите по ссылке из письма, чтобы подтвердить email.
             </p>
         </header>
-        <div class="auth-feedback auth-feedback--success" role="status">
-            Если письмо не пришло, запросите его повторно.
-        </div>
+        <AuthenticationFeedback Message="Если письмо не пришло, запросите его повторно."
+                                Severity="Severity.Success" />
         <a class="auth-command" href="@ConfirmationHref">Отправить письмо повторно</a>
     </div>
 }
@@ -30,10 +29,7 @@ else
             <p class="auth-form-copy">Регистрация в Tactical Heroes.</p>
         </header>
 
-        @if (!string.IsNullOrWhiteSpace(SubmissionError))
-        {
-            <div class="auth-feedback auth-feedback--error" role="alert">@SubmissionError</div>
-        }
+        <AuthenticationFeedback Message="@SubmissionError" />
 
         <div class="auth-field">
             <label for="register-email">Email</label>
@@ -107,12 +103,12 @@ else
                           autocomplete="new-password" />
         </div>
 
-        <button type="button"
-                class="auth-command"
-                disabled="@IsSubmitting"
-                @onclick="SubmitAsync">
-            @(IsSubmitting ? "Создаём аккаунт…" : "Создать аккаунт")
-        </button>
+        <AsyncActionButton Class="auth-command"
+                           Text="Создать аккаунт"
+                           BusyText="Создаём аккаунт…"
+                           Busy="IsSubmitting"
+                           ShowProgress="false"
+                           OnClick="SubmitAsync" />
 
         <div class="auth-form-footer">
             <p>

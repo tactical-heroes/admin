@@ -1,0 +1,17 @@
+<MudButton Class="@Class"
+           Variant="@Variant"
+           Color="@Color"
+           StartIcon="@StartIcon"
+           ButtonType="@ButtonType"
+           Disabled="@(Disabled || Busy)"
+           aria-busy="@AriaBusy"
+           OnClick="@OnClick">
+    @if (Busy && ShowProgress)
+    {
+        <span class="async-action-progress">
+            <MudProgressCircular Size="Size.Small"
+                                 Indeterminate="true" />
+        </span>
+    }
+    @DisplayText
+</MudButton>

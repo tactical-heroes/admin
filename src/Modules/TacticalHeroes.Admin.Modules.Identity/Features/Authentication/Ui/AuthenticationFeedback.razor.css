@@ -1,0 +1,35 @@
+.auth-feedback {
+    display: grid;
+    justify-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.2rem;
+    border: 1px solid rgba(168, 121, 54, 0.55);
+    background: rgba(91, 61, 25, 0.18);
+    color: #d8c8aa;
+    font-family: "TH Inter", "Segoe UI", sans-serif;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.auth-feedback--error {
+    border-color: rgba(196, 82, 55, 0.62);
+    background: rgba(112, 31, 23, 0.22);
+    color: #efb49d;
+}
+
+.auth-feedback--login {
+    margin-bottom: 2.65rem;
+}
+
+.auth-feedback--success {
+    border-color: rgba(156, 142, 68, 0.62);
+    background: rgba(74, 78, 32, 0.2);
+    color: #d9d3a4;
+}
+
+@media (min-width: 901px) and (max-height: 800px) {
+    .auth-feedback--login {
+        margin-bottom: 0.8rem;
+    }
+}

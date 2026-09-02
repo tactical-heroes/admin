@@ -4,7 +4,3 @@
     gap: 0.75rem;
     padding-top: 0.5rem;
 }
-
-.form-actions ::deep .button-progress {
-    margin-right: 0.5rem;
-}
