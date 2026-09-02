@@ -1,3 +1,6 @@
+using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Model;
+using TacticalHeroes.Admin.Shared.Errors;
+
 namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests;
 
 public sealed class IdentityRoutesTests
@@ -18,12 +21,20 @@ public sealed class IdentityRoutesTests
         string route = IdentityRoutes.LoginPage(
             "/connect/authorize?client_id=admin",
             LoginMode.Register,
-            LoginError.InvalidRequest);
+            AuthenticationError.InvalidRequest);
 
         route.ShouldBe(
             "/login?mode=register" +
             "&returnUrl=%2Fconnect%2Fauthorize%3Fclient_id%3Dadmin" +
             "&error=invalid_request");
+    }
+
+    [Fact(DisplayName = "Builds OAuth error route with its configured enum name")]
+    public void LoginPage_Should_UseConfiguredName_When_OAuthErrorIsProvided()
+    {
+        string route = IdentityRoutes.LoginPage(error: AuthenticationError.OAuth);
+
+        route.ShouldBe("/login?error=oauth");
     }
 
     [Fact(DisplayName = "Builds confirmation route from typed parameters")]
@@ -37,5 +48,4 @@ public sealed class IdentityRoutesTests
             "/confirm-email?userId=bc49d005-4cbc-4941-985d-1354cb6c68d3" +
             "&emailConfirmationToken=token%2F%2B%3D%3D");
     }
-
 }

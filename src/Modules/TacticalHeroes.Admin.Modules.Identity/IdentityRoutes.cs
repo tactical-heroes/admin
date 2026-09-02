@@ -1,3 +1,5 @@
+using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Model;
+using TacticalHeroes.Admin.Shared.Errors;
 using TacticalHeroes.Admin.Shared.Navigation;
 
 namespace TacticalHeroes.Admin.Modules.Identity;
@@ -43,15 +45,15 @@ public static class IdentityRoutes
     public static string LoginPage(
         string? returnUrl = null,
         LoginMode? mode = null,
-        LoginError? error = null)
+        AuthenticationError? error = null)
     {
         return RouteUriBuilder.Build(
             Login,
             new
             {
-                mode = mode is null ? null : GetValue(mode.Value),
+                mode,
                 returnUrl,
-                error = error is null ? null : GetValue(error.Value),
+                error,
             });
     }
 
@@ -73,44 +75,4 @@ public static class IdentityRoutes
             ResetPassword,
             new { userId, passwordResetToken });
     }
-
-    private static string GetValue(LoginMode mode)
-    {
-        return mode switch
-        {
-            LoginMode.Register => "register",
-            LoginMode.Confirmation => "confirmation",
-            LoginMode.Recover => "recover",
-            _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null),
-        };
-    }
-
-    private static string GetValue(LoginError error)
-    {
-        return error switch
-        {
-            LoginError.InvalidCredentials => "invalid_credentials",
-            LoginError.Forbidden => "forbidden",
-            LoginError.InvalidRequest => "invalid_request",
-            LoginError.Unavailable => "unavailable",
-            LoginError.OAuth => "oauth",
-            _ => throw new ArgumentOutOfRangeException(nameof(error), error, null),
-        };
-    }
-}
-
-public enum LoginMode
-{
-    Register,
-    Confirmation,
-    Recover,
-}
-
-public enum LoginError
-{
-    InvalidCredentials,
-    Forbidden,
-    InvalidRequest,
-    Unavailable,
-    OAuth,
 }

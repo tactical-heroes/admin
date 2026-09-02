@@ -98,6 +98,7 @@ public static class RouteUriBuilder
         {
             null => null,
             string text => text,
+            Enum enumeration => enumeration.ToSnakeCase(),
             IFormattable formattable => formattable.ToString(
                 format: null,
                 CultureInfo.InvariantCulture),

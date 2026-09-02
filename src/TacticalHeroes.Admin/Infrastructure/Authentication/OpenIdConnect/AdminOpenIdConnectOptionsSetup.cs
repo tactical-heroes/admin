@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using TacticalHeroes.Admin.Client.App.Routing;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Options.OpenIdConnect;
 using TacticalHeroes.Admin.Modules.Identity;
+using TacticalHeroes.Admin.Shared.Errors;
 
 namespace TacticalHeroes.Admin.Infrastructure.Authentication.OpenIdConnect;
 
@@ -71,7 +72,8 @@ internal sealed class AdminOpenIdConnectOptionsSetup(
             OnRemoteFailure = context =>
             {
                 context.HandleResponse();
-                context.Response.Redirect(IdentityRoutes.LoginPage(error: LoginError.OAuth));
+                context.Response.Redirect(
+                    IdentityRoutes.LoginPage(error: AuthenticationError.OAuth));
                 return Task.CompletedTask;
             },
         };

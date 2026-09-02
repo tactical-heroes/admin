@@ -1,5 +1,9 @@
 using Microsoft.AspNetCore.Components;
 
+using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Model;
+using TacticalHeroes.Admin.Shared.Errors;
+using TacticalHeroes.Admin.Shared.Model;
+
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui;
 
 public partial class LoginPage
@@ -13,19 +17,20 @@ public partial class LoginPage
     [SupplyParameterFromQuery(Name = "mode")]
     public string? Mode { get; set; }
 
-    private string NormalizedMode => Mode?.ToLowerInvariant() switch
-    {
-        "register" => "register",
-        "confirmation" => "confirmation",
-        "recover" => "recover",
-        _ => "login",
-    };
+    private LoginMode? SelectedMode => Mode.TryParseSnakeCase(out LoginMode mode)
+        ? mode
+        : null;
 
-    private string Title => NormalizedMode switch
+    private AuthenticationError? ParsedError =>
+        Error.TryParseSnakeCase(out AuthenticationError error)
+            ? error
+            : null;
+
+    private string Title => SelectedMode switch
     {
-        "register" => "Регистрация · Tactical Heroes",
-        "confirmation" => "Подтверждение email · Tactical Heroes",
-        "recover" => "Восстановление доступа · Tactical Heroes",
+        LoginMode.Register => "Регистрация · Tactical Heroes",
+        LoginMode.Confirmation => "Подтверждение email · Tactical Heroes",
+        LoginMode.Recover => "Восстановление доступа · Tactical Heroes",
         _ => "Вход · Tactical Heroes",
     };
 }

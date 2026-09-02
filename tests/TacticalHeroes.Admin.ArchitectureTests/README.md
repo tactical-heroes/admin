@@ -144,3 +144,13 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
 22. `ModelSources_Should_HaveAdjacentValidators_When_ModelTypesAreScanned` —
     каждый тип `*Model` в production-подпапке `Model` имеет рядом валидатор
     `<ModelType>Validator`, наследующий `MudFormValidator<ModelType>`.
+
+## Перечисления
+
+23. `EnumerationMembers_Should_HaveExplicitNumericValues_When_SourceIsScanned`
+    — каждый элемент production-enum имеет явно заданное целочисленное значение,
+    чтобы добавление и перестановка элементов не меняли существующие значения.
+
+24. `EnumerationMembers_Should_HaveEnglishDisplayNames_When_SourceIsScanned`
+    — каждый элемент production-enum имеет непустой английский
+    `[Display(Name = "...")]`, пригодный для единообразного отображения в UI.
