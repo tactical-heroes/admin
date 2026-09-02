@@ -31,6 +31,45 @@ public sealed partial class RazorArtifactConventionTests
         violations.ShouldBeEmpty();
     }
 
+    [Fact(DisplayName = "Razor import blocks are separated from directives and markup")]
+    public void RazorImports_Should_UseSeparateBlocks_When_SourceIsScanned()
+    {
+        string repositoryRoot = RepositoryPaths.FindRoot();
+        string sourceRoot = Path.Combine(repositoryRoot, "src");
+        List<string> violations = [];
+
+        foreach (string path in EnumerateFiles(sourceRoot, "*.razor"))
+        {
+            string[] lines = File.ReadAllLines(path);
+
+            for (int index = 0; index < lines.Length; index++)
+            {
+                if (!IsUsingDirective(lines[index]))
+                {
+                    continue;
+                }
+
+                string relativePath = Path.GetRelativePath(repositoryRoot, path);
+
+                if (index > 0 &&
+                    !IsUsingDirective(lines[index - 1]) &&
+                    !string.IsNullOrWhiteSpace(lines[index - 1]))
+                {
+                    violations.Add($"{relativePath}:{index + 1}: add a blank line before the @using block");
+                }
+
+                if (index + 1 < lines.Length &&
+                    !IsUsingDirective(lines[index + 1]) &&
+                    !string.IsNullOrWhiteSpace(lines[index + 1]))
+                {
+                    violations.Add($"{relativePath}:{index + 1}: add a blank line after the @using block");
+                }
+            }
+        }
+
+        violations.ShouldBeEmpty();
+    }
+
     [Fact(DisplayName = "Razor companion files belong to an existing component")]
     public void RazorCompanions_Should_HaveComponent_When_CompanionsAreScanned()
     {
@@ -102,5 +141,10 @@ public sealed partial class RazorArtifactConventionTests
                 !path.Contains(
                     $"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}",
                     StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsUsingDirective(string line)
+    {
+        return line.StartsWith("@using ", StringComparison.Ordinal);
     }
 }
