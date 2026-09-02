@@ -1,6 +1,6 @@
-@inherits CancelableComponentBase
+@inherits MudValidatedFormComponentBase<RegisterModel, RegisterModelValidator>
 @using TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Model
-@if (_registered)
+@if (IsSubmitted)
 {
     <div class="auth-form">
         <header class="auth-form-header">
@@ -18,9 +18,9 @@
 }
 else
 {
-    <MudForm @ref="_form"
-             Model="_model"
-             Validation="@_validator.ValidateValue"
+    <MudForm @ref="Form"
+             Model="Model"
+             Validation="@Validator.ValidateValue"
              OnEnterPressed="SubmitAsync"
              Class="auth-form">
 
@@ -30,16 +30,16 @@ else
             <p class="auth-form-copy">Регистрация в Tactical Heroes.</p>
         </header>
 
-        @if (!string.IsNullOrWhiteSpace(_error))
+        @if (!string.IsNullOrWhiteSpace(SubmissionError))
         {
-            <div class="auth-feedback auth-feedback--error" role="alert">@_error</div>
+            <div class="auth-feedback auth-feedback--error" role="alert">@SubmissionError</div>
         }
 
         <div class="auth-field">
             <label for="register-email">Email</label>
             <MudTextField T="string"
-                          @bind-Value="_model.Email"
-                          For="@(() => _model.Email)"
+                          @bind-Value="Model.Email"
+                          For="@(() => Model.Email)"
                           InputId="register-email"
                           InputType="InputType.Email"
                           Adornment="Adornment.Start"
@@ -47,7 +47,7 @@ else
                           Variant="Variant.Outlined"
                           Class="auth-text-field"
                           Placeholder="Введите email"
-                          Disabled="_submitting"
+                          Disabled="IsSubmitting"
                           Immediate="true"
                           autocomplete="email" />
         </div>
@@ -55,15 +55,15 @@ else
         <div class="auth-field">
             <label for="register-user-name">Имя пользователя</label>
             <MudTextField T="string"
-                          @bind-Value="_model.UserName"
-                          For="@(() => _model.UserName)"
+                          @bind-Value="Model.UserName"
+                          For="@(() => Model.UserName)"
                           InputId="register-user-name"
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Outlined.Person"
                           Variant="Variant.Outlined"
                           Class="auth-text-field"
                           Placeholder="Введите имя"
-                          Disabled="_submitting"
+                          Disabled="IsSubmitting"
                           Immediate="true"
                           autocomplete="username" />
         </div>
@@ -71,8 +71,8 @@ else
         <div class="auth-field">
             <label for="register-password">Пароль</label>
             <MudTextField T="string"
-                          @bind-Value="_model.Password"
-                          For="@(() => _model.Password)"
+                          @bind-Value="Model.Password"
+                          For="@(() => Model.Password)"
                           InputId="register-password"
                           InputType="@(_showPassword ? InputType.Text : InputType.Password)"
                           Adornment="Adornment.End"
@@ -82,7 +82,7 @@ else
                           Variant="Variant.Outlined"
                           Class="auth-text-field"
                           Placeholder="Введите пароль"
-                          Disabled="_submitting"
+                          Disabled="IsSubmitting"
                           Immediate="true"
                           autocomplete="new-password" />
             <span class="auth-helper">Минимум 8 символов: заглавная и строчная буквы, цифра и специальный символ.</span>
@@ -91,8 +91,8 @@ else
         <div class="auth-field">
             <label for="register-password-confirmation">Повторите пароль</label>
             <MudTextField T="string"
-                          @bind-Value="_model.PasswordConfirmation"
-                          For="@(() => _model.PasswordConfirmation)"
+                          @bind-Value="Model.PasswordConfirmation"
+                          For="@(() => Model.PasswordConfirmation)"
                           InputId="register-password-confirmation"
                           InputType="@(_showPasswordConfirmation ? InputType.Text : InputType.Password)"
                           Adornment="Adornment.End"
@@ -102,16 +102,16 @@ else
                           Variant="Variant.Outlined"
                           Class="auth-text-field"
                           Placeholder="Повторите пароль"
-                          Disabled="_submitting"
+                          Disabled="IsSubmitting"
                           Immediate="true"
                           autocomplete="new-password" />
         </div>
 
         <button type="button"
                 class="auth-command"
-                disabled="@_submitting"
+                disabled="@IsSubmitting"
                 @onclick="SubmitAsync">
-            @(_submitting ? "Создаём аккаунт…" : "Создать аккаунт")
+            @(IsSubmitting ? "Создаём аккаунт…" : "Создать аккаунт")
         </button>
 
         <div class="auth-form-footer">

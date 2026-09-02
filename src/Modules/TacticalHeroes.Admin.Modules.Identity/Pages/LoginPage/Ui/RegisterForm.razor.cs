@@ -1,26 +1,14 @@
 using Microsoft.AspNetCore.Components;
 
-using MudBlazor;
-
-using PANiXiDA.Core.ResultPattern;
-
 using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Model;
 using TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Api;
-using TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Model;
-using TacticalHeroes.Admin.Shared.Errors;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui;
 
 public partial class RegisterForm(LoginApi loginApi)
 {
-    private readonly RegisterModel _model = new();
-    private readonly RegisterModelValidator _validator = new();
-    private MudForm? _form;
-    private bool _submitting;
-    private bool _registered;
     private bool _showPassword;
     private bool _showPasswordConfirmation;
-    private string? _error;
 
     [Parameter]
     public string? ReturnUrl { get; set; }
@@ -31,34 +19,14 @@ public partial class RegisterForm(LoginApi loginApi)
         ReturnUrl,
         LoginMode.Confirmation);
 
-    private async Task SubmitAsync()
+    private Task SubmitAsync()
     {
-        if (_form is null ||
-            _submitting ||
-            !await _validator.ValidateFormAsync(_form, _model, LifetimeToken))
-        {
-            return;
-        }
-
-        _submitting = true;
-        _error = null;
-
-        Result<Guid> result = await loginApi.RegisterAsync(
-            _model.Email,
-            _model.UserName,
-            _model.Password,
-            LifetimeToken);
-
-        if (result.IsFailure)
-        {
-            _error = ApiErrorMessage.FromErrors(result.Errors);
-        }
-        else
-        {
-            _registered = true;
-        }
-
-        _submitting = false;
+        return SubmitResultAsync(cancellationToken =>
+            loginApi.RegisterAsync(
+                Model.Email,
+                Model.UserName,
+                Model.Password,
+                cancellationToken));
     }
 
     private void TogglePasswordVisibility()

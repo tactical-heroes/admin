@@ -24,7 +24,7 @@ public sealed class MudFormComponentBaseTests : BunitContext
     [Fact(DisplayName = "Saves a valid form once while submission is in progress")]
     public async Task SubmitAsync_Should_SaveOnce_When_FormIsValidAndAlreadySubmitting()
     {
-        var component = CreateComponent(isValid: true);
+        var component = CreateComponent();
         var saveCompletion = new TaskCompletionSource(
             TaskCreationOptions.RunContinuationsAsynchronously);
         component.OnSave = () => saveCompletion.Task;
@@ -43,10 +43,10 @@ public sealed class MudFormComponentBaseTests : BunitContext
         component.Saving.ShouldBeFalse();
     }
 
-    [Fact(DisplayName = "Does not save an invalid form")]
-    public async Task SubmitAsync_Should_NotSave_When_FormIsInvalid()
+    [Fact(DisplayName = "Does not save when the form is unavailable")]
+    public async Task SubmitAsync_Should_NotSave_When_FormIsUnavailable()
     {
-        var component = CreateComponent(isValid: false);
+        var component = CreateComponent(hasForm: false);
 
         await component.SubmitAsync();
 
@@ -57,7 +57,7 @@ public sealed class MudFormComponentBaseTests : BunitContext
     [Fact(DisplayName = "Does not save a model rejected by FluentValidation")]
     public async Task SubmitAsync_Should_NotSave_When_ModelValidationFails()
     {
-        var component = CreateComponent(isValid: true, isModelValid: false);
+        var component = CreateComponent(isModelValid: false);
 
         await component.SubmitAsync();
 
@@ -66,11 +66,11 @@ public sealed class MudFormComponentBaseTests : BunitContext
     }
 
     private TestComponent CreateComponent(
-        bool isValid,
+        bool hasForm = true,
         bool isModelValid = true)
     {
         return new TestComponent(
-            isValid,
+            hasForm,
             isModelValid,
             Services.GetRequiredService<ISnackbar>(),
             Services.GetRequiredService<NavigationManager>());
@@ -82,13 +82,13 @@ public sealed class MudFormComponentBaseTests : BunitContext
         private readonly TestSaveOperation _saveOperation;
 
         public TestComponent(
-            bool isValid,
+            bool hasForm,
             bool isModelValid,
             ISnackbar snackbar,
             NavigationManager navigation)
             : this(
                 new TestSaveOperation(),
-                isValid,
+                hasForm,
                 isModelValid,
                 snackbar,
                 navigation)
@@ -97,7 +97,7 @@ public sealed class MudFormComponentBaseTests : BunitContext
 
         private TestComponent(
             TestSaveOperation saveOperation,
-            bool isValid,
+            bool hasForm,
             bool isModelValid,
             ISnackbar snackbar,
             NavigationManager navigation)
@@ -109,8 +109,7 @@ public sealed class MudFormComponentBaseTests : BunitContext
                 navigation)
         {
             _saveOperation = saveOperation;
-            Form = new MudForm();
-            IsValid = isValid;
+            Form = hasForm ? new MudForm() : null;
             Model.Name = isModelValid ? "Valid" : string.Empty;
         }
 
@@ -130,7 +129,6 @@ public sealed class MudFormComponentBaseTests : BunitContext
         {
             return base.SubmitAsync();
         }
-
     }
 
     private sealed class TestSaveOperation
