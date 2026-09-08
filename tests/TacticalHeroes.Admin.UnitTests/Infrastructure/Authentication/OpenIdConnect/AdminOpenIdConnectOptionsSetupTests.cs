@@ -69,14 +69,15 @@ public sealed class AdminOpenIdConnectOptionsSetupTests
     }
 
     [Theory(DisplayName = "Redirect should use public origin when provider endpoint is absolute")]
-    [InlineData(false, "https", "admin.example.test", "", "https://admin.example.test/connect/authorize?request_uri=urn%3Arequest")]
-    [InlineData(true, "https", "admin.example.test:8443", "/admin", "https://admin.example.test:8443/admin/connect/authorize?request_uri=urn%3Arequest")]
-    [InlineData(false, "http", "localhost:5000", "/admin", "http://localhost:5000/admin/connect/authorize?request_uri=urn%3Arequest")]
+    [InlineData(false, "https", "admin.example.test", "", "https", "https://admin.example.test/connect/authorize?request_uri=urn%3Arequest")]
+    [InlineData(true, "https", "admin.example.test:8443", "/admin", "http", "https://admin.example.test:8443/admin/connect/authorize?request_uri=urn%3Arequest")]
+    [InlineData(false, "http", "localhost:5000", "/admin", "https", "http://localhost:5000/admin/connect/authorize?request_uri=urn%3Arequest")]
     public async Task Redirect_Should_UsePublicOrigin_When_ProviderEndpointIsAbsolute(
         bool signOut,
         string scheme,
         string host,
         string pathBase,
+        string providerScheme,
         string expectedAddress)
     {
         var options = CreateOptions();
@@ -88,7 +89,7 @@ public sealed class AdminOpenIdConnectOptionsSetupTests
         {
             ProtocolMessage = new OpenIdConnectMessage
             {
-                IssuerAddress = "https://identity.internal/connect/authorize?request_uri=urn%3Arequest"
+                IssuerAddress = $"{providerScheme}://identity.internal/connect/authorize?request_uri=urn%3Arequest"
             }
         };
 
@@ -102,8 +103,14 @@ public sealed class AdminOpenIdConnectOptionsSetupTests
     [Theory(DisplayName = "Redirect should reject endpoint when provider address is invalid")]
     [InlineData(false, "")]
     [InlineData(false, "/connect/authorize")]
+    [InlineData(false, "connect/authorize")]
+    [InlineData(false, "file:///connect/authorize")]
+    [InlineData(false, "ftp://identity.example.test/connect/authorize")]
     [InlineData(true, "")]
     [InlineData(true, "/connect/logout")]
+    [InlineData(true, "connect/logout")]
+    [InlineData(true, "file:///connect/logout")]
+    [InlineData(true, "ftp://identity.example.test/connect/logout")]
     public async Task Redirect_Should_RejectEndpoint_When_ProviderAddressIsInvalid(bool signOut, string address)
     {
         var options = CreateOptions();

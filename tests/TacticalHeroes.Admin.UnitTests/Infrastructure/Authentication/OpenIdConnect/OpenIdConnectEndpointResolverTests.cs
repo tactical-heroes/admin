@@ -14,6 +14,7 @@ public sealed class OpenIdConnectEndpointResolverTests
     [Theory(DisplayName = "GetAuthorizationPathAsync should extract path when metadata endpoint is absolute")]
     [InlineData("https://identity.example.test/connect/authorize", "/connect/authorize")]
     [InlineData("https://identity.example.test/tenant/authorize?client_id=admin", "/tenant/authorize")]
+    [InlineData("http://localhost:5000/connect/authorize", "/connect/authorize")]
     public async Task GetAuthorizationPathAsync_Should_ExtractPath_When_MetadataEndpointIsAbsolute(
         string endpoint,
         string expectedPath)
@@ -31,6 +32,9 @@ public sealed class OpenIdConnectEndpointResolverTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("/connect/authorize")]
+    [InlineData("connect/authorize")]
+    [InlineData("file:///connect/authorize")]
+    [InlineData("ftp://identity.example.test/connect/authorize")]
     public async Task GetAuthorizationPathAsync_Should_RejectMetadata_When_AuthorizationEndpointIsInvalid(string? endpoint)
     {
         var configuration = new OpenIdConnectConfiguration { AuthorizationEndpoint = endpoint };
