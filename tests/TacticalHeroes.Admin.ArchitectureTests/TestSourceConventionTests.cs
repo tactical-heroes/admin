@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
@@ -114,6 +115,59 @@ public sealed partial class TestSourceConventionTests
         methods.Select(method => method.DisplayName).ShouldBe(["A fact", "A theory"]);
     }
 
+    [Theory(DisplayName = "Test source discovery should resolve attribute aliases when using directives rename attributes")]
+    [InlineData("using Test = Xunit.FactAttribute;", "Test", true)]
+    [InlineData("using Test = global::Xunit.TheoryAttribute;", "Test", true)]
+    [InlineData("using TestAttribute = Xunit.FactAttribute;", "Test", true)]
+    [InlineData("using Tests = Xunit;", "Tests::Fact", true)]
+    [InlineData("using Fact = System.ObsoleteAttribute;", "Fact", false)]
+    public void TestSourceDiscovery_Should_ResolveAttributeAliases_When_UsingDirectivesRenameAttributes(
+        string usingDirective,
+        string attributeName,
+        bool isTest)
+    {
+        string source = usingDirective + "\nclass ExampleTests { [" + attributeName + "] public void Example() { } }";
+
+        TestMethodSource[] methods = [.. TestSourceDiscovery.GetTestMethods("tests/ExampleTests.cs", source)];
+
+        methods.Length.ShouldBe(isTest ? 1 : 0);
+    }
+
+    [Fact(DisplayName = "Test source discovery should respect alias scopes when global and namespace aliases are declared")]
+    public void TestSourceDiscovery_Should_RespectAliasScopes_When_GlobalAndNamespaceAliasesAreDeclared()
+    {
+        SyntaxTree[] sources =
+        [
+            CSharpSyntaxTree.ParseText("global using Test = Xunit.FactAttribute;", path: "Aliases.cs",
+                cancellationToken: TestContext.Current.CancellationToken),
+            CSharpSyntaxTree.ParseText("""
+                namespace Example
+                {
+                    class ExampleTests
+                    {
+                        [Test(DisplayName = "A fact")]
+                        public void FactCase() { }
+                    }
+                }
+                namespace Other
+                {
+                    using Test = System.ObsoleteAttribute;
+                    class OtherTests
+                    {
+                        [Test]
+                        public void NotATest() { }
+                    }
+                }
+                """, path: "ExampleTests.cs", cancellationToken: TestContext.Current.CancellationToken)
+        ];
+
+        TestMethodSource[] methods = [.. TestSourceDiscovery.GetTestMethods(sources)];
+
+        methods.Select(method => method.Name).ShouldBe(["FactCase"]);
+        methods.Single().RelativePath.ShouldBe("ExampleTests.cs");
+        methods.Single().DisplayName.ShouldBe("A fact");
+    }
+
     [Theory(DisplayName = "Arrange Act Assert validation should recognize final assertions when test bodies are inspected")]
     [InlineData("var value = 1;\n\nvalue.ShouldBe(1);", true)]
     [InlineData("var action = CreateAction();\n\nawait Should.ThrowAsync<Exception>(action);", true)]
@@ -123,6 +177,13 @@ public sealed partial class TestSourceConventionTests
     [InlineData("var value = 1;\n// Assert\nvalue.ShouldBe(1);", false)]
     [InlineData("var value = 1;\n\nLog(\"Assert.True(false)\");", false)]
     [InlineData("var value = 1;\n\n// value.ShouldBe(1);\nLog(value);", false)]
+    [InlineData("var value = 1;\n\nAction verify = () => Assert.True(false);", false)]
+    [InlineData("var value = 1;\n\nvoid Verify() { Assert.True(false); }", false)]
+    [InlineData("var value = 1;\n\nAction verify = delegate { Assert.True(false); };", false)]
+    [InlineData("var value = 1;\n\nRegister(() => Assert.True(false));", false)]
+    [InlineData("var component = Render();\n\nAction verify = () => component.WaitForAssertion(() => Assert.True(false));", false)]
+    [InlineData("var component = Render();\n\ncomponent.WaitForAssertion(() => { Action verify = () => Assert.True(false); });", false)]
+    [InlineData("var component = Render();\n\ncomponent.WaitForAssertion(delegate { Assert.True(true); });", true)]
     public void ArrangeActAssert_Should_RecognizeFinalAssertions_When_TestBodiesAreInspected(string body, bool valid)
     {
         string source = "class ExampleTests { [Fact] public async Task Example() { " + body + " } }";
@@ -200,12 +261,20 @@ public sealed partial class TestSourceConventionTests
         return sections;
     }
 
-    private static bool ContainsAssertion(StatementSyntax statement)
+    private static bool ContainsAssertion(SyntaxNode node)
     {
-        return statement
-            .DescendantNodesAndSelf()
+        // ponytail: follow inline WaitForAssertion callbacks; resolve helper calls only when the suite needs them.
+        return node
+            .DescendantNodesAndSelf(child => child is not AnonymousFunctionExpressionSyntax and not LocalFunctionStatementSyntax)
             .OfType<InvocationExpressionSyntax>()
-            .Any(IsAssertion);
+            .Any(invocation => IsAssertion(invocation) ||
+                invocation.Expression is MemberAccessExpressionSyntax { Name.Identifier.ValueText: "WaitForAssertion" } &&
+                invocation.ArgumentList.Arguments.Any(argument => argument.Expression switch
+                {
+                    LambdaExpressionSyntax lambda => ContainsAssertion(lambda.Body),
+                    AnonymousMethodExpressionSyntax anonymous => ContainsAssertion(anonymous.Block),
+                    _ => false
+                }));
     }
 
     private static bool IsAssertion(InvocationExpressionSyntax invocation)
@@ -240,6 +309,13 @@ public sealed partial class TestSourceConventionTests
 internal static class TestSourceDiscovery
 {
     private const string TestsDirectoryName = "tests";
+    private static readonly SyntaxTree XunitUsing = CSharpSyntaxTree.ParseText("global using Xunit;");
+    private static readonly MetadataReference[] References =
+    [
+        MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+        MetadataReference.CreateFromFile(typeof(FactAttribute).Assembly.Location),
+        MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location)
+    ];
 
     public static TestMethodSource[] GetTestMethods()
     {
@@ -248,10 +324,15 @@ internal static class TestSourceDiscovery
 
         return
         [
-            .. GetSourceFiles(testsRoot)
-                .OrderBy(path => path, StringComparer.Ordinal)
-                .SelectMany(path =>
-                    GetTestMethods(Path.GetRelativePath(repositoryRoot, path), File.ReadAllText(path)))
+            .. Directory.EnumerateFiles(testsRoot, "*.csproj", SearchOption.AllDirectories)
+                .OrderBy(project => project, StringComparer.Ordinal)
+                .SelectMany(project => GetTestMethods(
+                [
+                    .. GetSourceFiles(Path.GetDirectoryName(project)!)
+                        .OrderBy(path => path, StringComparer.Ordinal)
+                        .Select(path => CSharpSyntaxTree.ParseText(File.ReadAllText(path),
+                            path: Path.GetRelativePath(repositoryRoot, path)))
+                ]))
         ];
     }
 
@@ -262,38 +343,38 @@ internal static class TestSourceDiscovery
 
     internal static IEnumerable<TestMethodSource> GetTestMethods(string relativePath, string source)
     {
-        var syntaxTree = CSharpSyntaxTree.ParseText(source);
-        var root = syntaxTree.GetRoot();
-
-        return root
-            .DescendantNodes()
-            .OfType<MethodDeclarationSyntax>()
-            .Select(method => new
-            {
-                Method = method,
-                TestAttribute = method.AttributeLists
-                    .SelectMany(attributeList => attributeList.Attributes)
-                    .FirstOrDefault(IsTestAttribute)
-            })
-            .Where(item => item.TestAttribute is not null)
-            .Select(item => new TestMethodSource(
-                RelativePath: relativePath,
-                Declaration: item.Method,
-                TestAttribute: item.TestAttribute!));
+        return GetTestMethods([CSharpSyntaxTree.ParseText(source, path: relativePath)]);
     }
 
-    private static bool IsTestAttribute(AttributeSyntax attribute)
+    internal static IEnumerable<TestMethodSource> GetTestMethods(SyntaxTree[] syntaxTrees)
     {
-        var name = attribute.Name switch
-        {
-            IdentifierNameSyntax identifier => identifier.Identifier.ValueText,
-            QualifiedNameSyntax qualifiedName => qualifiedName.Right.Identifier.ValueText,
-            AliasQualifiedNameSyntax aliasQualifiedName =>
-                aliasQualifiedName.Name.Identifier.ValueText,
-            _ => attribute.Name.ToString()
-        };
+        var compilation = CSharpCompilation.Create("TestSourceDiscovery", syntaxTrees.Append(XunitUsing), References);
 
-        return name is "Fact" or "FactAttribute" or "Theory" or "TheoryAttribute";
+        return syntaxTrees.SelectMany(syntaxTree =>
+        {
+            var semanticModel = compilation.GetSemanticModel(syntaxTree);
+            return syntaxTree.GetRoot()
+                .DescendantNodes()
+                .OfType<MethodDeclarationSyntax>()
+                .Select(method => new
+                {
+                    Method = method,
+                    TestAttribute = method.AttributeLists
+                        .SelectMany(attributeList => attributeList.Attributes)
+                        .FirstOrDefault(attribute => IsTestAttribute(attribute, semanticModel))
+                })
+                .Where(item => item.TestAttribute is not null)
+                .Select(item => new TestMethodSource(
+                    RelativePath: syntaxTree.FilePath,
+                    Declaration: item.Method,
+                    TestAttribute: item.TestAttribute!));
+        });
+    }
+
+    private static bool IsTestAttribute(AttributeSyntax attribute, SemanticModel semanticModel)
+    {
+        return semanticModel.GetTypeInfo(attribute).Type is { Name: "FactAttribute" or "TheoryAttribute" } type &&
+            type.ContainingNamespace.ToDisplayString() == "Xunit";
     }
 
     private static bool IsSourceFile(string path)

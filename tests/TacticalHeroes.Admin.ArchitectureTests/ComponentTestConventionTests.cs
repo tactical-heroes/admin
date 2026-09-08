@@ -12,10 +12,11 @@ public sealed class ComponentTestConventionTests
     public void Components_Should_HaveMirroredTests_When_ProductionComponentsAreDiscovered()
     {
         ComponentTarget[] targets = GetTargets();
+        TestMethodSource[] testMethods = TestSourceDiscovery.GetTestMethods();
 
         targets.ShouldNotBeEmpty();
         string[] violations = [.. targets
-            .Where(target => !File.Exists(target.TestPath) || GetTestMethods(target).Length == 0)
+            .Where(target => !File.Exists(target.TestPath) || GetTestMethods(target, testMethods).Length == 0)
             .Select(target => $"{target.Component.FullName}: add Fact/Theory tests in {target.TestPath}")];
 
         violations.ShouldBeEmpty();
@@ -25,9 +26,10 @@ public sealed class ComponentTestConventionTests
     public void ComponentTests_Should_CoverDeclaredMethods_When_ComponentsHaveBehavior()
     {
         ComponentTarget[] targets = GetTargets();
+        TestMethodSource[] testMethods = TestSourceDiscovery.GetTestMethods();
 
         string[] violations = [.. targets.SelectMany(target =>
-            MissingMethods(GetBehaviorMethods(target.Component), GetTestMethods(target))
+            MissingMethods(GetBehaviorMethods(target.Component), GetTestMethods(target, testMethods))
                 .Select(name => $"{target.Component.FullName}.{name}: add {name}_Should_*_When_* in {target.TestPath}"))];
 
         violations.ShouldBeEmpty();
@@ -75,6 +77,7 @@ public sealed class ComponentTestConventionTests
     [InlineData("namespace Other { class ComponentTestConventionTests { [Fact] public void TestCase() { } } }", false)]
     [InlineData("partial class ComponentTestConventionTests { [Fact] public void TestCase() { } }", true)]
     [InlineData("class ComponentTestConventionTests { [global::Xunit.Theory] public void TestCase() { } }", true)]
+    [InlineData("using Test = Xunit.FactAttribute; class ComponentTestConventionTests { [Test] public void TestCase() { } }", true)]
     public void GetTestMethods_Should_RequireTestsInTheExpectedClassAndFile_When_MirroredSourceIsInspected(
         string source,
         bool containsTest)
@@ -87,7 +90,8 @@ public sealed class ComponentTestConventionTests
             File.WriteAllText(path, "namespace TacticalHeroes.Admin.ArchitectureTests {\n" +
                 source.Replace("TestCase", testName, StringComparison.Ordinal) + "\n}");
             var target = new ComponentTarget(typeof(DiscoveryComponent), path, typeof(ComponentTestConventionTests));
-            string[] methods = GetTestMethods(target);
+            TestMethodSource[] declarations = [.. TestSourceDiscovery.GetTestMethods(path, File.ReadAllText(path))];
+            string[] methods = GetTestMethods(target, declarations);
 
             methods.ShouldBe(containsTest ? [testName] : []);
         }
@@ -127,7 +131,7 @@ public sealed class ComponentTestConventionTests
             .OrderBy(target => target.Component.FullName, StringComparer.Ordinal)];
     }
 
-    private static string[] GetTestMethods(ComponentTarget target)
+    private static string[] GetTestMethods(ComponentTarget target, TestMethodSource[] testMethods)
     {
         if (!File.Exists(target.TestPath) ||
             target.TestType is not { IsPublic: true, IsAbstract: false, ContainsGenericParameters: false } testType)
@@ -135,7 +139,10 @@ public sealed class ComponentTestConventionTests
             return [];
         }
 
-        var declaredTestNames = TestSourceDiscovery.GetTestMethods(target.TestPath, File.ReadAllText(target.TestPath))
+        string root = RepositoryPaths.FindRoot();
+        string testPath = Path.GetFullPath(target.TestPath);
+        var declaredTestNames = testMethods
+            .Where(source => Path.GetFullPath(source.RelativePath, root) == testPath)
             .Where(source => source.Declaration.Parent is ClassDeclarationSyntax { Parent: BaseNamespaceDeclarationSyntax } declaration
                 && declaration.Identifier.ValueText == testType.Name
                 && declaration.TypeParameterList is null
