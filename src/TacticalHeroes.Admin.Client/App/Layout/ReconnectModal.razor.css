@@ -21,7 +21,6 @@
 
 
 #components-reconnect-modal {
-    /* Visual Studio's CSS validator does not recognize overlay in transition-property. */
     --reconnect-overlay-transition: overlay;
     background-color: white;
     width: 20rem;
