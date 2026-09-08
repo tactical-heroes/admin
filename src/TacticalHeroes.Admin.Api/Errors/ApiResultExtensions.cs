@@ -148,9 +148,9 @@ public static class ApiResultExtensions
             ApiException { ResponseStatusCode: 409 } =>
                 "Изменения конфликтуют с текущим состоянием данных.",
             HttpRequestException =>
-                "Не удалось подключиться к Tactical Heroes API.",
+                "Не удалось подключиться к API.",
             TimeoutException or TimeoutRejectedException or TaskCanceledException =>
-                "Tactical Heroes API не ответил вовремя.",
+                "API не ответил вовремя.",
             _ =>
                 "Не удалось выполнить запрос. Повторите попытку.",
         };

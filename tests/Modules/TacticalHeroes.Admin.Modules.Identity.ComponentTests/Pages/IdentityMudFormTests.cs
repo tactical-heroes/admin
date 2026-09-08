@@ -84,11 +84,11 @@ public sealed class IdentityMudFormTests : BunitContext
     }
 
     [Theory(DisplayName = "Login page binds query parameters and displays the selected mode title")]
-    [InlineData("register", "Register - Tactical Heroes")]
-    [InlineData("confirmation", "Confirm email - Tactical Heroes")]
-    [InlineData("recover", "Recover access - Tactical Heroes")]
-    [InlineData("", "Sign in - Tactical Heroes")]
-    [InlineData("unknown", "Sign in - Tactical Heroes")]
+    [InlineData("register", "Register - " + Branding.GameName)]
+    [InlineData("confirmation", "Confirm email - " + Branding.GameName)]
+    [InlineData("recover", "Recover access - " + Branding.GameName)]
+    [InlineData("", "Sign in - " + Branding.GameName)]
+    [InlineData("unknown", "Sign in - " + Branding.GameName)]
     public void LoginPage_Should_BindQueryAndDisplayTitle_When_ModeIsProvided(
         string mode,
         string expectedTitle)
@@ -103,6 +103,10 @@ public sealed class IdentityMudFormTests : BunitContext
         component.Instance.Error.ShouldBe("unavailable");
         component.Instance.Mode.ShouldBe(mode);
         head.Find("title").TextContent.ShouldBe(expectedTitle);
+        component.Find(".auth-brand-title").GetAttribute("aria-label")
+            .ShouldBe(Branding.GameName);
+        string.Join(" ", component.FindAll(".auth-brand-title span")
+            .Select(span => span.TextContent)).ShouldBe(Branding.GameName);
     }
 
     [Fact(DisplayName = "Forgot password form validates an empty model through MudForm")]

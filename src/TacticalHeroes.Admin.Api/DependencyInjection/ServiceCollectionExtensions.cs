@@ -30,7 +30,7 @@ public static class ServiceCollectionExtensions
                     if (!baseAddress.IsAbsoluteUri)
                     {
                         throw new InvalidOperationException(
-                            "The Tactical Heroes API base address must be absolute.");
+                            "The API base address must be absolute.");
                     }
 
                     httpClient.BaseAddress = new Uri(

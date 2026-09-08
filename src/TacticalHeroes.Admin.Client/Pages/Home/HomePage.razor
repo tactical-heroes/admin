@@ -1,10 +1,10 @@
 @attribute [Route(AdminRoutes.Home)]
 @attribute [Authorize]
 
-<PageTitle>Главная · Tactical Heroes</PageTitle>
+<PageTitle>Главная · @(Branding.GameName)</PageTitle>
 
 <PageHeader Title="Главная"
-            Subtitle="Панель администрирования онлайн-игры Tactical Heroes" />
+            Subtitle="@($"Панель администрирования онлайн-игры {Branding.GameName}")" />
 
 <section class="welcome-panel" aria-labelledby="welcome-title">
     <div class="welcome-icon" aria-hidden="true">

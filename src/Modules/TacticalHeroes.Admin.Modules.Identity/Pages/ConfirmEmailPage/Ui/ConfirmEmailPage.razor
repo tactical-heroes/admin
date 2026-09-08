@@ -5,7 +5,7 @@
 
 @using TacticalHeroes.Admin.Modules.Identity.Widgets.Auth
 
-<PageTitle>Подтверждение email · Tactical Heroes</PageTitle>
+<PageTitle>Подтверждение email · @(Branding.GameName)</PageTitle>
 
 <AuthenticationShell>
 <div class="auth-form">
@@ -38,7 +38,7 @@
             <h1 class="auth-form-title">Email подтверждён</h1>
             <p class="auth-form-copy">Аккаунт готов к использованию.</p>
         </header>
-        <AuthenticationFeedback Message="Теперь можно войти в Tactical Heroes."
+        <AuthenticationFeedback Message="@($"Теперь можно войти в {Branding.GameName}.")"
                                 Severity="Severity.Success" />
         <a class="auth-command" href="@IdentityRoutes.Challenge()">Перейти ко входу</a>
     }
