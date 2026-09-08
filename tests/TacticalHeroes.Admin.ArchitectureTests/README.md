@@ -162,7 +162,8 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
 26. `Components_Should_HaveMirroredTests_When_ProductionComponentsAreDiscovered`
     — каждый компонент и базовый класс имеет зеркальный `<TypeName>Tests.cs`
     с исполняемыми `Fact`/`Theory`. Тесты с `Skip`, `Explicit`, `SkipWhen` или
-    `SkipUnless` не засчитываются в покрытие.
+    `SkipUnless` не засчитываются в покрытие. Теории с `SkipTestWithoutData = true`
+    также не засчитываются: при пустом наборе данных они могут быть пропущены.
 
 27. `ComponentTests_Should_CoverDeclaredMethods_When_ComponentsHaveBehavior`
     — собственные методы и перегрузки сопоставлены тестам по префиксу

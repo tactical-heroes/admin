@@ -123,6 +123,20 @@ public sealed class ComponentTestConventionTests
         attributes.Select(IsUnconditionallyRunnable).ShouldAllBe(actual => actual == expected);
     }
 
+    [Theory(DisplayName = "Runnable tests should exclude theories that skip without data when empty data handling is configured")]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    public void RunnableTests_Should_ExcludeTheoriesThatSkipWithoutData_When_EmptyDataHandlingIsConfigured(
+        bool skipTestWithoutData,
+        bool expected)
+    {
+        var attribute = new TheoryAttribute { SkipTestWithoutData = skipTestWithoutData };
+
+        bool runnable = IsUnconditionallyRunnable(attribute);
+
+        runnable.ShouldBe(expected);
+    }
+
     private static ComponentTarget[] GetTargets()
     {
         string root = RepositoryPaths.FindRoot();
@@ -182,7 +196,8 @@ public sealed class ComponentTestConventionTests
     private static bool IsUnconditionallyRunnable(FactAttribute attribute)
     {
         return attribute.Skip is null && !attribute.Explicit &&
-            attribute.SkipWhen is null && attribute.SkipUnless is null;
+            attribute.SkipWhen is null && attribute.SkipUnless is null &&
+            attribute is not TheoryAttribute { SkipTestWithoutData: true };
     }
 
     private static string[] GetBehaviorMethods(Type component)
