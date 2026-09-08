@@ -159,60 +159,27 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
 
 ## Зеркальные компонентные тесты
 
-`ComponentTestConventionTests` проверяет все компоненты Blazor и их базовые
-классы в Host, Client, Shared и модулях. `_Imports` не является тестируемым UI.
-Путь и namespace зеркалируются в `<ProductionProject>.ComponentTests`, например:
+26. `Components_Should_HaveMirroredTests_When_ProductionComponentsAreDiscovered`
+    — каждый компонент и базовый класс имеет зеркальный `<TypeName>Tests.cs`
+    с исполняемыми `Fact`/`Theory`.
 
-- `src/Modules/TacticalHeroes.Admin.Modules.Compendium/Pages/FactionListPage/Ui/FactionListPage.razor`
-- `tests/Modules/TacticalHeroes.Admin.Modules.Compendium.ComponentTests/Pages/FactionListPage/Ui/FactionListPageTests.cs`
+27. `ComponentTests_Should_CoverDeclaredMethods_When_ComponentsHaveBehavior`
+    — собственные методы и перегрузки сопоставлены тестам по префиксу
+    `MethodName_Should_`; унаследованные методы проверяются у объявляющей их базы.
 
-Файл должен существовать, а соответствующий публичный конкретный тестовый класс
-должен содержать скомпилированные `Fact`/`Theory` без `Skip` и `Explicit`.
-Пустой файл, комментарий с `[Fact]` или обычный вспомогательный метод не считаются тестом.
+## Имена и структура тестов
 
-Для каждого объявленного метода требуется отдельный тест с префиксом
-`MethodName_Should_`. Учитываются lifecycle overrides, закрытые обработчики UI
-и вспомогательные методы. Для перегрузок нужны разные тестовые методы.
-Свойства, конструкторы, абстрактные и сгенерированные методы не учитываются;
-унаследованные методы требуются только в тестах объявляющего их базового класса,
-а переопределённые методы — в тестах класса, который их переопределил.
+28. `TestMethods_Should_FollowNamingConvention_When_ATestIsDeclared` — полное
+    имя каждого теста соответствует `MethodName_Should_Behavior_When_Condition`.
 
-Соответствие определяется только префиксом имени теста. Вызовы закрытых методов
-проверяются через UI или доступное поведение, без reflection-вызовов.
-Один тест засчитывается для одного метода или одной из его перегрузок.
+29. `FactsAndTheories_Should_DeclareDisplayName_When_ATestIsDeclared` — каждый
+    `Fact`/`Theory` имеет непустой строковый литерал `DisplayName`.
 
-Это контроль наличия и явного соответствия тестов, а не доказательство покрытия
-всех ветвей или качества assertions. Новые тесты должны проверять наблюдаемое
-поведение: данные, события, навигацию, ошибки и переходы состояния.
-Архитектурный проект автоматически ссылается на ComponentTests-проекты через
-MSBuild glob и получает production-сборки через их зависимости.
-Новый компонент или модуль попадает под правило автоматически.
+30. `DisplayNames_Should_DescribeTestCondition_When_ATestIsDeclared` — английский
+    `DisplayName` имеет вид `… should … when …` и условие из части `_When_` имени.
 
-## Имена и структура всех тестов
+31. `TestMethods_Should_FollowArrangeActAssert_When_ATestIsDeclared` — минимум
+    две секции, разделённые пустой строкой; последняя содержит assertions.
 
-Правила распространяются на все `Fact`/`Theory` в `tests`, включая unit,
-component и архитектурные тесты. Каталоги `bin` и `obj` исключены.
-
-- Имя метода: `MethodName_Should_Behavior_When_Condition`, все три части в PascalCase.
-- `DisplayName` обязателен и задаётся строковым литералом на английском языке:
-  `<subject> should <behavior> when <condition>`. Условие должно совпадать с частью
-  `_When_` имени метода, разбитой на слова и приведённой к нижнему регистру.
-- Тело теста — блок с минимум двумя логическими секциями, разделёнными пустой
-  строкой. Завершающая секция содержит assertions. Это эвристическая проверка AAA,
-  которая допускает совместную секцию Arrange/Act и несколько шагов взаимодействия.
-  Она не доказывает, что assertions проверяют нужное поведение.
-- Namespace повторяет путь файла относительно тестового проекта, начиная
-  с его `RootNamespace` или имени проекта, если `RootNamespace` не задан.
-
-Например:
-
-```csharp
-[Fact(DisplayName = "SaveAsync should show an error when request fails")]
-public async Task SaveAsync_Should_ShowAnError_When_RequestFails()
-```
-
-`TestSourceConventionTests` и `TestDisplayNameConventionTests` используют подход
-API: Roslyn разбирает C#-синтаксис, поэтому комментарии и строки с примерами тестов
-не считаются объявлениями или assertions. Проверка AAA дополнена поддержкой
-Shouldly и bUnit: `Should.ThrowAsync`, `MarkupMatches` и вложенные assertions
-в `WaitForAssertion`.
+32. `TestNamespaces_Should_MatchProjectFolders_When_TestSourcesAreScanned` —
+    namespace соответствует папке относительно проекта и его корневому namespace.
