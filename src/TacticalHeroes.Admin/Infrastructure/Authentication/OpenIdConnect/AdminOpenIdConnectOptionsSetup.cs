@@ -81,7 +81,8 @@ internal sealed class AdminOpenIdConnectOptionsSetup(
 
     private static string BuildBffEndpoint(HttpRequest request, string? endpointAddress)
     {
-        if (!Uri.TryCreate(endpointAddress, UriKind.Absolute, out var endpoint))
+        if (!Uri.TryCreate(endpointAddress, UriKind.Absolute, out var endpoint) ||
+            (endpoint.Scheme != Uri.UriSchemeHttp && endpoint.Scheme != Uri.UriSchemeHttps))
         {
             throw new InvalidOperationException(
                 "The OIDC endpoint address is missing or invalid.");

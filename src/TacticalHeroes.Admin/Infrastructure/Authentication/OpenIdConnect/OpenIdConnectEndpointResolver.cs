@@ -18,7 +18,8 @@ internal sealed class OpenIdConnectEndpointResolver(
         if (!Uri.TryCreate(
                 configuration.AuthorizationEndpoint,
                 UriKind.Absolute,
-                out var endpoint))
+                out var endpoint) ||
+            (endpoint.Scheme != Uri.UriSchemeHttp && endpoint.Scheme != Uri.UriSchemeHttps))
         {
             throw new InvalidOperationException(
                 "The OIDC authorization endpoint is missing or invalid.");
