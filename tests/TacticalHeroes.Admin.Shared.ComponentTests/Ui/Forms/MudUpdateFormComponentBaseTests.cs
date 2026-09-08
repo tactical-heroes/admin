@@ -1,7 +1,31 @@
+using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
+
+using MudBlazor;
+using MudBlazor.Services;
+
 namespace TacticalHeroes.Admin.Shared.ComponentTests.Ui.Forms;
 
 public sealed class MudUpdateFormComponentBaseTests
 {
+    [Fact(DisplayName = "An update form passes the route identifier and current model to the save operation")]
+    public async Task SubmitAsync_Should_UpdateCurrentModel_When_FormIsValid()
+    {
+        using var context = new BunitContext();
+        context.Services.AddMudServices();
+        Guid id = Guid.NewGuid();
+        using var component = new TestComponent(
+            context.Services.GetRequiredService<ISnackbar>(),
+            context.Services.GetRequiredService<NavigationManager>());
+        await component.SetIdAsync(id);
+
+        await component.SubmitFormAsync();
+
+        component.SavedId.ShouldBe(id);
+        component.SavedModel.ShouldBeSameAs(component.Model);
+        context.Services.GetRequiredService<NavigationManager>().Uri.ShouldEndWith("/items");
+    }
+
     [Fact(DisplayName = "Loads once for the same route parameter and reloads for a new one")]
     public async Task OnParametersSetAsync_Should_LoadOnce_When_IdIsUnchanged()
     {
@@ -89,14 +113,20 @@ public sealed class MudUpdateFormComponentBaseTests
         {
         }
 
-        private TestComponent(TestOperations operations)
+        public TestComponent(ISnackbar snackbar, NavigationManager navigation)
+            : this(new TestOperations(), snackbar, navigation)
+        {
+            Form = new MudForm();
+        }
+
+        private TestComponent(TestOperations operations, ISnackbar? snackbar = null, NavigationManager? navigation = null)
             : base(
                 operations.LoadAsync,
-                TestOperations.UpdateAsync,
+                operations.UpdateAsync,
                 "Saved",
                 "/items",
-                null!,
-                null!)
+                snackbar!,
+                navigation!)
         {
             _operations = operations;
         }
@@ -112,6 +142,12 @@ public sealed class MudUpdateFormComponentBaseTests
         public string? Error => LoadError;
 
         public bool Loading => IsLoading;
+
+        public Guid? SavedId => _operations.SavedId;
+
+        public TestModel? SavedModel => _operations.SavedModel;
+
+        public Task SubmitFormAsync() => SubmitAsync();
 
         public Task SetIdAsync(Guid id)
         {
@@ -141,12 +177,18 @@ public sealed class MudUpdateFormComponentBaseTests
             return OnLoad(id, cancellationToken);
         }
 
-        public static Task<Result<Guid>> UpdateAsync(
+        public Guid? SavedId { get; private set; }
+
+        public TestModel? SavedModel { get; private set; }
+
+        public Task<Result<Guid>> UpdateAsync(
             Guid id,
-            TestModel _,
+            TestModel model,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            SavedId = id;
+            SavedModel = model;
             return Task.FromResult(Result.Success(id));
         }
     }

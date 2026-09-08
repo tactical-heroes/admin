@@ -7,6 +7,8 @@ namespace TacticalHeroes.Admin.Shared.ComponentTests.Ui.Forms;
 public sealed class MudValidatedFormComponentBaseTests
 {
     [Fact(DisplayName = "Marks a successful result submission as completed")]
+    [Trait("Covers", "PrepareResultSubmission")]
+    [Trait("Covers", "CompleteResultSubmission")]
     public async Task SubmitResultAsync_Should_Complete_When_ResultSucceeds()
     {
         var component = new TestComponent();

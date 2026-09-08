@@ -23,6 +23,7 @@ public sealed class EntityListTests : BunitContext
     }
 
     [Fact(DisplayName = "Invokes filter actions when filters are available")]
+    [Trait("Covers", "ToggleFilters")]
     public void FilterActions_Should_InvokeCallbacks_When_FiltersAreAvailable()
     {
         var applied = false;

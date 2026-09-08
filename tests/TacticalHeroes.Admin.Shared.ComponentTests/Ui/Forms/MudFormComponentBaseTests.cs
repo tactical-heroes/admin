@@ -17,6 +17,7 @@ public sealed class MudFormComponentBaseTests : BunitContext
     }
 
     [Fact(DisplayName = "Saves a valid form once while submission is in progress")]
+    [Trait("Covers", "SaveAsync")]
     public async Task SubmitAsync_Should_SaveOnce_When_FormIsValidAndAlreadySubmitting()
     {
         var component = CreateComponent();

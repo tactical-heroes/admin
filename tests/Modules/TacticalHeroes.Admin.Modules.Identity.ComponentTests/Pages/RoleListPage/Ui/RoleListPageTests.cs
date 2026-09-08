@@ -12,16 +12,16 @@ using MudBlazor.Services;
 
 using TacticalHeroes.Admin.Api.DependencyInjection;
 
-using UserListPageComponent = TacticalHeroes.Admin.Modules.Identity.Pages.UserListPage.Ui.UserListPage;
+using RoleListPageComponent = TacticalHeroes.Admin.Modules.Identity.Pages.RoleListPage.Ui.RoleListPage;
 
-namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Pages.UserListPage.Ui;
+namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Pages.RoleListPage.Ui;
 
-public sealed class UserListPageTests : BunitContext
+public sealed class RoleListPageTests : BunitContext
 {
     private static readonly Guid EntityId = Guid.Parse("f341ae7d-69c0-45c6-9a44-110f00127080");
     private readonly ListHandler _handler = new();
 
-    public UserListPageTests()
+    public RoleListPageTests()
     {
         Services.AddMudServices();
         Services.AddTacticalHeroesApiClient(
@@ -34,28 +34,28 @@ public sealed class UserListPageTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "The user list renders API data and create and edit links")]
+    [Fact(DisplayName = "The role list renders API data and create and edit links")]
     public void Render_Should_ShowRowsAndActions_When_LoadSucceeds()
     {
-        var component = Render<UserListPageComponent>();
+        var component = Render<RoleListPageComponent>();
 
         component.WaitForAssertion(() =>
         {
             component.Markup.ShouldContain("Administrator");
             component.FindAll("a").Select(link => link.GetAttribute("href"))
-                .ShouldContain(IdentityRoutes.CreateUser);
+                .ShouldContain(IdentityRoutes.CreateRole);
             component.FindAll("a").Select(link => link.GetAttribute("href"))
-                .ShouldContain(IdentityRoutes.User(EntityId));
+                .ShouldContain(IdentityRoutes.Role(EntityId));
         });
     }
 
-    [Fact(DisplayName = "The user list restores pagination from the page URL")]
+    [Fact(DisplayName = "The role list restores pagination from the page URL")]
     public void Render_Should_RequestSelectedPage_When_QueryContainsPagination()
     {
         Services.GetRequiredService<NavigationManager>().NavigateTo(
-            IdentityRoutes.Users + "?page=2&pageSize=25");
+            IdentityRoutes.Roles + "?page=2&pageSize=25");
 
-        var component = Render<UserListPageComponent>();
+        var component = Render<RoleListPageComponent>();
 
         component.WaitForAssertion(() =>
         {
@@ -66,22 +66,22 @@ public sealed class UserListPageTests : BunitContext
         });
     }
 
-    [Fact(DisplayName = "The user list shows an empty state when the API returns no rows")]
+    [Fact(DisplayName = "The role list shows an empty state when the API returns no rows")]
     public void Render_Should_ShowEmptyState_When_PageIsEmpty()
     {
         _handler.Empty = true;
 
-        var component = Render<UserListPageComponent>();
+        var component = Render<RoleListPageComponent>();
 
-        component.WaitForAssertion(() => component.Markup.ShouldContain("Пользователи не найдены"));
+        component.WaitForAssertion(() => component.Markup.ShouldContain("Роли не найдены"));
         component.FindAll("button[aria-label^='Удалить']").ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "The user list can retry after a failed request")]
+    [Fact(DisplayName = "The role list can retry after a failed request")]
     public void Render_Should_ReloadRows_When_LoadErrorIsRetried()
     {
         _handler.Fail = true;
-        var component = Render<UserListPageComponent>();
+        var component = Render<RoleListPageComponent>();
         component.WaitForAssertion(() => component.Markup.ShouldContain("Load failed."));
         _handler.Fail = false;
 
@@ -95,11 +95,11 @@ public sealed class UserListPageTests : BunitContext
         });
     }
 
-    [Fact(DisplayName = "Deleting a user uses its identifier and refreshes the list")]
-    public async Task DeleteUserAsync_Should_DeleteAndReload_When_DeletionIsConfirmed()
+    [Fact(DisplayName = "Deleting a role uses its identifier and refreshes the list")]
+    public async Task DeleteRoleAsync_Should_DeleteAndReload_When_DeletionIsConfirmed()
     {
         var dialogs = Render<MudDialogProvider>();
-        var component = Render<UserListPageComponent>();
+        var component = Render<RoleListPageComponent>();
         var button = component.WaitForElement("button[aria-label^='Удалить']");
 
         Task click = button.ClickAsync(new MouseEventArgs());
@@ -111,26 +111,7 @@ public sealed class UserListPageTests : BunitContext
         {
             _handler.DeletedId.ShouldBe(EntityId);
             _handler.Requests.Count.ShouldBe(2);
-            component.Markup.ShouldContain("Пользователи не найдены");
-        });
-    }
-
-    [Theory(DisplayName = "The user list restores the email query regardless of casing")]
-    [InlineData("email")]
-    [InlineData("Email")]
-    [InlineData("EMAIL")]
-    public void Render_Should_RestoreEmailFilter_When_QueryContainsEmail(string queryName)
-    {
-        const string email = "admin+support@example.test";
-        Services.GetRequiredService<NavigationManager>().NavigateTo(
-            IdentityRoutes.Users + "?" + queryName + "=" + Uri.EscapeDataString(email));
-
-        var component = Render<UserListPageComponent>();
-
-        component.WaitForAssertion(() =>
-        {
-            HttpUtility.ParseQueryString(_handler.Requests[0].Query)["email"].ShouldBe(email);
-            component.Find("input[placeholder='user@example.com']").GetAttribute("value").ShouldBe(email);
+            component.Markup.ShouldContain("Роли не найдены");
         });
     }
 
@@ -146,19 +127,19 @@ public sealed class UserListPageTests : BunitContext
         {
             if (request.Method == HttpMethod.Delete)
             {
-                request.RequestUri!.AbsolutePath.ShouldBe("/api/v1/users/" + EntityId);
+                request.RequestUri!.AbsolutePath.ShouldBe("/api/v1/roles/" + EntityId);
                 DeletedId = EntityId;
                 Empty = true;
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NoContent));
             }
 
             request.Method.ShouldBe(HttpMethod.Get);
-            request.RequestUri!.AbsolutePath.ShouldBe("/api/v1/users");
+            request.RequestUri!.AbsolutePath.ShouldBe("/api/v1/roles");
             Requests.Add(request.RequestUri);
             var query = HttpUtility.ParseQueryString(request.RequestUri.Query);
             int page = int.Parse(query["pageNumber"]!);
             int size = int.Parse(query["pageSize"]!);
-            string items = Empty ? "[]" : $$"""[{"id":"{{EntityId}}","userName":"Administrator","email":"admin@example.test","status":"active","statusDisplayName":"Active","isConfirmed":true}]""";
+            string items = Empty ? "[]" : $$"""[{"id":"{{EntityId}}","name":"Administrator"}]""";
             string json = Fail
                 ? """{"status":400,"detail":"Load failed."}"""
                 : $$"""{"items":{{items}},"pageNumber":{{page}},"pageSize":{{size}},"totalCount":{{(Empty ? 0 : 1)}},"totalPages":{{(Empty ? 0 : 1)}}}""";
@@ -170,3 +151,4 @@ public sealed class UserListPageTests : BunitContext
         }
     }
 }
+

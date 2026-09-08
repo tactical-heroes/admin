@@ -12,7 +12,7 @@ public sealed class DebouncedTextFilterTests : BunitContext
     }
 
     [Fact(DisplayName = "Applies a text filter when its minimum length is reached")]
-    public async Task Debounce_Should_ApplyFilter_When_MinimumLengthIsReached()
+    public async Task ApplyFilterAsync_Should_ApplyFilter_When_MinimumLengthIsReached()
     {
         int applyCount = 0;
         IRenderedComponent<DebouncedTextFilter> component = RenderFilter(

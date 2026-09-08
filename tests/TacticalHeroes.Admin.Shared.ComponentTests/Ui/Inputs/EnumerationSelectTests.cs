@@ -12,7 +12,7 @@ public sealed class EnumerationSelectTests : BunitContext
     }
 
     [Fact(DisplayName = "Renders enumeration values and resolves their display names")]
-    public void Render_Should_MapNamesToDisplayNames_When_ItemsAreProvided()
+    public void GetDisplayName_Should_MapNamesToDisplayNames_When_ItemsAreProvided()
     {
         IEnumeration[] items =
         [

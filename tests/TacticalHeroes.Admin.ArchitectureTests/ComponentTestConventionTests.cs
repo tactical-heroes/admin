@@ -1,0 +1,135 @@
+using System.Reflection;
+using System.Runtime.CompilerServices;
+
+using Microsoft.AspNetCore.Components;
+
+namespace TacticalHeroes.Admin.ArchitectureTests;
+
+public sealed class ComponentTestConventionTests
+{
+    [Fact(DisplayName = "Components and their bases have mirrored files containing runnable component tests")]
+    public void Components_Should_HaveMirroredTests_When_ProductionComponentsAreDiscovered()
+    {
+        ComponentTarget[] targets = GetTargets();
+
+        targets.ShouldNotBeEmpty();
+        string[] violations = [.. targets
+            .Where(target => !File.Exists(target.TestPath) || GetTestMethods(target).Length == 0)
+            .Select(target => $"{target.Component.FullName}: add Fact/Theory tests in {target.TestPath}")];
+
+        violations.ShouldBeEmpty();
+    }
+
+    [Fact(DisplayName = "Component tests name every declared lifecycle method and action including private handlers")]
+    public void ComponentTests_Should_CoverDeclaredMethods_When_ComponentsHaveBehavior()
+    {
+        ComponentTarget[] targets = GetTargets();
+
+        string[] violations = [.. targets.SelectMany(target =>
+            MissingMethods(GetBehaviorMethods(target.Component), GetTestMethods(target))
+                .Select(name => $"{target.Component.FullName}.{name}: add {name}_Should_*_When_* in {target.TestPath}"))];
+
+        violations.ShouldBeEmpty();
+    }
+
+    [Fact(DisplayName = "Method discovery includes private actions and lifecycle overrides but excludes inherited and generated members")]
+    public void GetBehaviorMethods_Should_IncludeOnlyDeclaredBehavior_When_ComponentHasMixedMembers()
+    {
+        string[] methods = GetBehaviorMethods(typeof(DiscoveryComponent));
+
+        methods.Order().ShouldBe(["OnInitialized", "Submit", "Submit"]);
+    }
+
+    [Theory(DisplayName = "Every overload needs a distinct test method with its exact method prefix")]
+    [InlineData("Submit_Should_Save_When_Valid", 1)]
+    [InlineData("SubmitAsync_Should_Save_When_Valid", 2)]
+    [InlineData("", 2)]
+    public void MissingMethods_Should_ReportUncoveredOverloads_When_TestNamesAreInsufficient(
+        string testName,
+        int missingCount)
+    {
+        string[] missing = MissingMethods(["Submit", "Submit"], [testName]);
+
+        missing.Length.ShouldBe(missingCount);
+    }
+
+    private static ComponentTarget[] GetTargets()
+    {
+        string root = RepositoryPaths.FindRoot();
+        string sourceRoot = Path.Combine(root, "src");
+
+        return [.. Directory.EnumerateFiles(sourceRoot, "*.csproj", SearchOption.AllDirectories)
+            .Where(path => Directory.EnumerateFiles(Path.GetDirectoryName(path)!, "*.razor", SearchOption.AllDirectories).Any())
+            .SelectMany(projectPath =>
+            {
+                string projectName = Path.GetFileNameWithoutExtension(projectPath);
+                string testProjectName = projectName + ".ComponentTests";
+                string projectParent = Path.GetRelativePath(sourceRoot, Path.GetDirectoryName(Path.GetDirectoryName(projectPath))!);
+                string testRoot = Path.Combine(root, "tests", projectParent, testProjectName);
+                Assembly productionAssembly = Assembly.Load(projectName);
+                Assembly testAssembly = Assembly.Load(testProjectName);
+
+                return productionAssembly.GetTypes()
+                    .Where(type => !type.IsNested && type.Name != "_Imports" && type.IsSubclassOf(typeof(ComponentBase)))
+                    .Select(type =>
+                    {
+                        string relativeName = type.FullName![(projectName.Length + 1)..].Split('`')[0];
+                        return new ComponentTarget(
+                            type,
+                            Path.Combine(testRoot, relativeName.Replace('.', Path.DirectorySeparatorChar) + "Tests.cs"),
+                            testAssembly.GetType(testProjectName + "." + relativeName + "Tests"));
+                    });
+            })
+            .OrderBy(target => target.Component.FullName, StringComparer.Ordinal)];
+    }
+
+    private static string[] GetTestMethods(ComponentTarget target)
+    {
+        if (target.TestType is not { IsPublic: true, IsAbstract: false, ContainsGenericParameters: false } testType)
+        {
+            return [];
+        }
+
+        return testType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
+            .Where(method => method.GetCustomAttributes<FactAttribute>().Any(attribute => attribute.Skip is null && !attribute.Explicit))
+            .SelectMany(method => method.GetCustomAttributes<TraitAttribute>()
+                .Where(trait => trait.Name == "Covers")
+                .Select(trait => trait.Value)
+                .Concat(method.Name.Contains("_Should_", StringComparison.Ordinal)
+                    ? [method.Name[..method.Name.IndexOf("_Should_", StringComparison.Ordinal)]]
+                    : [])
+                .Distinct(StringComparer.Ordinal)
+                .Select(name => name + "_Should_" + method.Name))
+            .ToArray();
+    }
+
+    private static string[] GetBehaviorMethods(Type component)
+    {
+        return [.. component.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
+            .Where(method => !method.IsSpecialName && !method.IsAbstract && method.Name != "BuildRenderTree"
+                && method.GetCustomAttribute<CompilerGeneratedAttribute>() is null)
+            .Select(method => method.Name)];
+    }
+
+    private static string[] MissingMethods(string[] methods, string[] tests)
+    {
+        return [.. methods.GroupBy(name => name, StringComparer.Ordinal)
+            .SelectMany(group => group.Skip(tests.Count(test => test.StartsWith(group.Key + "_Should_", StringComparison.Ordinal))))];
+    }
+
+    private sealed record ComponentTarget(Type Component, string TestPath, Type? TestType);
+
+    private sealed class DiscoveryComponent : ComponentBase
+    {
+        public string Value { get; set; } = string.Empty;
+
+        protected override void OnInitialized() { }
+
+        private void Submit() { }
+
+        private void Submit(string value) { }
+
+        [CompilerGenerated]
+        private void Generated() { }
+    }
+}
