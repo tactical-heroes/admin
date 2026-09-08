@@ -84,11 +84,11 @@ public sealed class IdentityMudFormTests : BunitContext
     }
 
     [Theory(DisplayName = "Login page binds query parameters and displays the selected mode title")]
-    [InlineData("register", "Регистрация · Tactical Heroes")]
-    [InlineData("confirmation", "Подтверждение email · Tactical Heroes")]
-    [InlineData("recover", "Восстановление доступа · Tactical Heroes")]
-    [InlineData("", "Вход · Tactical Heroes")]
-    [InlineData("unknown", "Вход · Tactical Heroes")]
+    [InlineData("register", "Register - Tactical Heroes")]
+    [InlineData("confirmation", "Confirm email - Tactical Heroes")]
+    [InlineData("recover", "Recover access - Tactical Heroes")]
+    [InlineData("", "Sign in - Tactical Heroes")]
+    [InlineData("unknown", "Sign in - Tactical Heroes")]
     public void LoginPage_Should_BindQueryAndDisplayTitle_When_ModeIsProvided(
         string mode,
         string expectedTitle)
