@@ -8,19 +8,23 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace TacticalHeroes.Admin.ArchitectureTests;
 
-public sealed class TestSourceConventionTests
+public sealed partial class TestSourceConventionTests
 {
-    private static readonly Regex TestMethodNamePattern = new(
+    [GeneratedRegex(
         @"^[A-Z][A-Za-z0-9]*_Should_[A-Z][A-Za-z0-9]*" +
         @"_When_[A-Z][A-Za-z0-9]*$",
-        RegexOptions.CultureInvariant);
+        RegexOptions.CultureInvariant)]
+    private static partial Regex TestMethodNameRegex();
+
+    [GeneratedRegex(@"\r?\n[\t ]*\r?\n", RegexOptions.CultureInvariant)]
+    private static partial Regex BlankLineRegex();
 
     [Fact(DisplayName = "Test methods should use MethodName Should Behavior When Condition naming when a test is declared")]
     public void TestMethods_Should_FollowNamingConvention_When_ATestIsDeclared()
     {
         var violations = TestSourceDiscovery.GetTestMethods()
             .Where(testMethod =>
-                !TestMethodNamePattern.IsMatch(testMethod.Name))
+                !TestMethodNameRegex().IsMatch(testMethod.Name))
             .Select(testMethod =>
                 $"{testMethod.Location}: {testMethod.Name}")
             .ToArray();
@@ -158,7 +162,7 @@ public sealed class TestSourceConventionTests
         return null;
     }
 
-    private static IReadOnlyList<IReadOnlyList<StatementSyntax>> GetSections(
+    private static List<IReadOnlyList<StatementSyntax>> GetSections(
         BlockSyntax body)
     {
         if (body.Statements.Count == 0)
@@ -182,7 +186,7 @@ public sealed class TestSourceConventionTests
                     previousStatement.Span.End,
                     currentStatement.SpanStart));
 
-            if (Regex.IsMatch(separator, @"\r?\n[\t ]*\r?\n", RegexOptions.CultureInvariant))
+            if (BlankLineRegex().IsMatch(separator))
             {
                 sections.Add(currentSection);
                 currentSection = [];
