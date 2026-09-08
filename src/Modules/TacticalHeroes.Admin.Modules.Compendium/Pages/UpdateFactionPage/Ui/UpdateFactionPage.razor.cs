@@ -4,7 +4,7 @@ using MudBlazor;
 
 using TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateFactionPage.Api;
 using TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateFactionPage.Model;
-using TacticalHeroes.Admin.Shared.Ui;
+using TacticalHeroes.Admin.Shared.Ui.Forms;
 
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateFactionPage.Ui;
 

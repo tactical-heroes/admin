@@ -4,7 +4,7 @@ using PANiXiDA.Core.ResultPattern;
 
 using TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Api;
 using TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Model;
-using TacticalHeroes.Admin.Shared.Ui;
+using TacticalHeroes.Admin.Shared.Ui.Lists;
 
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Ui;
 

@@ -4,7 +4,7 @@ using MudBlazor;
 
 using TacticalHeroes.Admin.Modules.Identity.Pages.UpdateRolePage.Api;
 using TacticalHeroes.Admin.Modules.Identity.Pages.UpdateRolePage.Model;
-using TacticalHeroes.Admin.Shared.Ui;
+using TacticalHeroes.Admin.Shared.Ui.Forms;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.UpdateRolePage.Ui;
 

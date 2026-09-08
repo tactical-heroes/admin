@@ -4,7 +4,7 @@ using MudBlazor;
 
 using TacticalHeroes.Admin.Modules.Compendium.Pages.CreateFactionPage.Api;
 using TacticalHeroes.Admin.Modules.Compendium.Pages.CreateFactionPage.Model;
-using TacticalHeroes.Admin.Shared.Ui;
+using TacticalHeroes.Admin.Shared.Ui.Forms;
 
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.CreateFactionPage.Ui;
 

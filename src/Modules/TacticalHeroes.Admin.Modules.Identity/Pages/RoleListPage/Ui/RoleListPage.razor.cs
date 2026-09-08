@@ -4,7 +4,7 @@ using PANiXiDA.Core.ResultPattern;
 
 using TacticalHeroes.Admin.Modules.Identity.Pages.RoleListPage.Api;
 using TacticalHeroes.Admin.Modules.Identity.Pages.RoleListPage.Model;
-using TacticalHeroes.Admin.Shared.Ui;
+using TacticalHeroes.Admin.Shared.Ui.Lists;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.RoleListPage.Ui;
 
