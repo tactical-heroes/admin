@@ -7,13 +7,13 @@ namespace TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui;
 
 public partial class LoginPage
 {
-    [SupplyParameterFromQuery(Name = "returnUrl")]
+    [SupplyParameterFromQuery]
     public string? ReturnUrl { get; set; }
 
-    [SupplyParameterFromQuery(Name = "error")]
+    [SupplyParameterFromQuery]
     public string? Error { get; set; }
 
-    [SupplyParameterFromQuery(Name = "mode")]
+    [SupplyParameterFromQuery]
     public string? Mode { get; set; }
 
     private LoginMode? SelectedMode => Mode.TryParseSnakeCase(out LoginMode mode)
@@ -25,11 +25,5 @@ public partial class LoginPage
             ? error
             : null;
 
-    private string Title => SelectedMode switch
-    {
-        LoginMode.Register => "Регистрация · Tactical Heroes",
-        LoginMode.Confirmation => "Подтверждение email · Tactical Heroes",
-        LoginMode.Recover => "Восстановление доступа · Tactical Heroes",
-        _ => "Вход · Tactical Heroes",
-    };
+    private string Title => $"{SelectedMode?.GetDisplayName() ?? "Sign in"} - {Branding.GameName}";
 }

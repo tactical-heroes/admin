@@ -1,6 +1,8 @@
 using System.Net;
 using System.Text;
 
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 
@@ -11,6 +13,8 @@ using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Model;
 using TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui;
 using TacticalHeroes.Admin.Shared.Model;
 
+using LoginPageComponent =
+    TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui.LoginPage;
 using ResetPasswordPageComponent =
     TacticalHeroes.Admin.Modules.Identity.Pages.ResetPasswordPage.Ui.ResetPasswordPage;
 
@@ -77,6 +81,28 @@ public sealed class IdentityMudFormTests : BunitContext
 
         component.Markup.ShouldContain(
             AuthenticationError.Unavailable.GetDisplayName());
+    }
+
+    [Theory(DisplayName = "Login page binds query parameters and displays the selected mode title")]
+    [InlineData("register", "Register - Tactical Heroes")]
+    [InlineData("confirmation", "Confirm email - Tactical Heroes")]
+    [InlineData("recover", "Recover access - Tactical Heroes")]
+    [InlineData("", "Sign in - Tactical Heroes")]
+    [InlineData("unknown", "Sign in - Tactical Heroes")]
+    public void LoginPage_Should_BindQueryAndDisplayTitle_When_ModeIsProvided(
+        string mode,
+        string expectedTitle)
+    {
+        Services.GetRequiredService<NavigationManager>().NavigateTo(
+            $"/login?returnUrl=%2Fusers&error=unavailable&mode={mode}");
+        var head = Render<HeadOutlet>();
+
+        var component = Render<LoginPageComponent>();
+
+        component.Instance.ReturnUrl.ShouldBe("/users");
+        component.Instance.Error.ShouldBe("unavailable");
+        component.Instance.Mode.ShouldBe(mode);
+        head.Find("title").TextContent.ShouldBe(expectedTitle);
     }
 
     [Fact(DisplayName = "Forgot password form validates an empty model through MudForm")]
