@@ -5,10 +5,10 @@
 
 @using TacticalHeroes.Admin.Modules.Identity.Pages.UserListPage.Model
 
-<PageTitle>Пользователи · Tactical Heroes</PageTitle>
+<PageTitle>Пользователи · @(Branding.GameName)</PageTitle>
 
 <PageHeader Title="Пользователи"
-            Subtitle="Управление аккаунтами Tactical Heroes">
+            Subtitle="@($"Управление аккаунтами {Branding.GameName}")">
     <Actions>
         <MudButton Href="@IdentityRoutes.CreateUser"
                    Variant="Variant.Filled"
