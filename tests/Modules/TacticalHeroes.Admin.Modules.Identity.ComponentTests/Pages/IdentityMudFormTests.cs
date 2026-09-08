@@ -11,7 +11,6 @@ using MudBlazor.Services;
 using TacticalHeroes.Admin.Api.DependencyInjection;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Model;
 using TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui;
-using TacticalHeroes.Admin.Shared.Model;
 
 using ConfirmEmailPageComponent =
     TacticalHeroes.Admin.Modules.Identity.Pages.ConfirmEmailPage.Ui.ConfirmEmailPage;

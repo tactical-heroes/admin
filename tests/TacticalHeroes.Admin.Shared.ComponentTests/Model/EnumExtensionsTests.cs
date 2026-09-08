@@ -1,8 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-using TacticalHeroes.Admin.Shared.Model;
-
 namespace TacticalHeroes.Admin.Shared.ComponentTests.Model;
 
 public sealed class EnumExtensionsTests

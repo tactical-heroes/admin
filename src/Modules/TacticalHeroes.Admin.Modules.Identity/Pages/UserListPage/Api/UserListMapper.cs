@@ -3,7 +3,6 @@ using Riok.Mapperly.Abstractions;
 using TacticalHeroes.Admin.Api.Generated.Models;
 using TacticalHeroes.Admin.Api.Mapping;
 using TacticalHeroes.Admin.Modules.Identity.Pages.UserListPage.Model;
-using TacticalHeroes.Admin.Shared.Model;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.UserListPage.Api;
 

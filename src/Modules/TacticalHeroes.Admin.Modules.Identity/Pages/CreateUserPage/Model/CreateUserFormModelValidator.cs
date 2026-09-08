@@ -1,7 +1,6 @@
 using FluentValidation;
 
 using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Model;
-using TacticalHeroes.Admin.Shared.Validation;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.CreateUserPage.Model;
 

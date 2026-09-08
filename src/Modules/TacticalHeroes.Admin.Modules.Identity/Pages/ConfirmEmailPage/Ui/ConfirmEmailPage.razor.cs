@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-using PANiXiDA.Core.ResultPattern;
-
 using TacticalHeroes.Admin.Modules.Identity.Pages.ConfirmEmailPage.Api;
-using TacticalHeroes.Admin.Shared.Errors;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.ConfirmEmailPage.Ui;
 

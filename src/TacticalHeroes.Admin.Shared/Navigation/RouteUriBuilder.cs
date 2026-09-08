@@ -4,8 +4,6 @@ using System.Globalization;
 using System.Reflection;
 using System.Text.Json;
 
-using TacticalHeroes.Admin.Shared.Model;
-
 namespace TacticalHeroes.Admin.Shared.Navigation;
 
 public static class RouteUriBuilder

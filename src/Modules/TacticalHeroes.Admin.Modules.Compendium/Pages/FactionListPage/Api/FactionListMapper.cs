@@ -3,7 +3,6 @@ using Riok.Mapperly.Abstractions;
 using TacticalHeroes.Admin.Api.Generated.Models;
 using TacticalHeroes.Admin.Api.Mapping;
 using TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Model;
-using TacticalHeroes.Admin.Shared.Model;
 
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Api;
 

@@ -9,7 +9,7 @@ public sealed class RouteStateConventionTests
         IReadOnlyDictionary<string, string[]> expectedQueries =
             new Dictionary<string, string[]>(StringComparer.Ordinal)
             {
-                ["src/TacticalHeroes.Admin.Shared/Ui/MudPagedListComponentBase.cs"] =
+                ["src/TacticalHeroes.Admin.Shared/Ui/Lists/MudPagedListComponentBase.cs"] =
                     ["page", "pageSize"],
             };
         List<string> violations = [];

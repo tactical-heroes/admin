@@ -1,7 +1,5 @@
 using FluentValidation;
 
-using TacticalHeroes.Admin.Shared.Validation;
-
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.ResetPasswordPage.Model;
 
 public sealed class ResetModelValidator : MudFormValidator<ResetModel>

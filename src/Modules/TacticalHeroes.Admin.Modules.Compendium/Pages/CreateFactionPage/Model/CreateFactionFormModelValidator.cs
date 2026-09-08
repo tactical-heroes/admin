@@ -1,7 +1,5 @@
 using FluentValidation;
 
-using TacticalHeroes.Admin.Shared.Validation;
-
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.CreateFactionPage.Model;
 
 public sealed class CreateFactionFormModelValidator

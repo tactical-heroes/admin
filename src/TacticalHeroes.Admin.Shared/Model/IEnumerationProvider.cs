@@ -1,5 +1,3 @@
-using PANiXiDA.Core.ResultPattern;
-
 namespace TacticalHeroes.Admin.Shared.Model;
 
 public interface IEnumerationProvider<TEnumeration>

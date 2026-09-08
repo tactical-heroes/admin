@@ -4,7 +4,6 @@ using MudBlazor;
 
 using TacticalHeroes.Admin.Modules.Identity.Pages.CreateUserPage.Api;
 using TacticalHeroes.Admin.Modules.Identity.Pages.CreateUserPage.Model;
-using TacticalHeroes.Admin.Shared.Ui;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.CreateUserPage.Ui;
 

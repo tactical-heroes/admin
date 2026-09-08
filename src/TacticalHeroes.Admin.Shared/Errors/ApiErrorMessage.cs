@@ -1,7 +1,5 @@
 using System.Reflection;
 
-using PANiXiDA.Core.ResultPattern;
-
 namespace TacticalHeroes.Admin.Shared.Errors;
 
 public static class ApiErrorMessage

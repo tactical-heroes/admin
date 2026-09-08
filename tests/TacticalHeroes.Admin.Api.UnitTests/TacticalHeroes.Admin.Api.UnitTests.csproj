@@ -15,6 +15,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Using Include="PANiXiDA.Core.ResultPattern" />
         <Using Include="Shouldly" />
         <Using Include="Xunit" />
     </ItemGroup>

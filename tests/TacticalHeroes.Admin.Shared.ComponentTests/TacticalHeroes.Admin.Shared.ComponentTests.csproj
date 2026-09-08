@@ -17,6 +17,16 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Using Include="PANiXiDA.Core.ResultPattern" />
+        <Using Include="TacticalHeroes.Admin.Shared.Errors" />
+        <Using Include="TacticalHeroes.Admin.Shared.Model" />
+        <Using Include="TacticalHeroes.Admin.Shared.Navigation" />
+        <Using Include="TacticalHeroes.Admin.Shared.Ui.Common" />
+        <Using Include="TacticalHeroes.Admin.Shared.Ui.Forms" />
+        <Using Include="TacticalHeroes.Admin.Shared.Ui.Inputs" />
+        <Using Include="TacticalHeroes.Admin.Shared.Ui.Layout" />
+        <Using Include="TacticalHeroes.Admin.Shared.Ui.Lists" />
+        <Using Include="TacticalHeroes.Admin.Shared.Validation" />
         <Using Include="Bunit" />
         <Using Include="Shouldly" />
         <Using Include="Xunit" />

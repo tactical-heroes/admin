@@ -1,10 +1,7 @@
 using Microsoft.AspNetCore.Components;
 
-using PANiXiDA.Core.ResultPattern;
-
 using TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Api;
 using TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Model;
-using TacticalHeroes.Admin.Shared.Ui;
 
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Ui;
 
