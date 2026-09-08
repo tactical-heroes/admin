@@ -5,18 +5,26 @@ namespace TacticalHeroes.Admin.Shared.ComponentTests.Ui.Lists;
 
 public sealed class MudPagedListComponentBaseTests : BunitContext
 {
-    [Theory(DisplayName = "Pagination preserves filters and resets to the first page when page size changes")]
-    [InlineData(false, "/items?email=admin%40example.test&page=3&pageSize=25")]
-    [InlineData(true, "/items?email=admin%40example.test&pageSize=50")]
-    [Trait("Covers", "ChangePageSize")]
-    public async Task ChangePage_Should_PreserveFilter_When_PaginationChanges(bool resize, string expectedUri)
+    [Fact(DisplayName = "Changing the page preserves filters and page size")]
+    public async Task ChangePage_Should_PreserveFilter_When_PageChanges()
     {
         TestComponent component = CreateComponent();
         await component.SetRouteAsync(2, 25, new TestFilter { Email = "admin@example.test" });
 
-        component.Paginate(resize);
+        component.ChangePage(3);
 
-        component.CurrentUri.ShouldEndWith(expectedUri);
+        component.CurrentUri.ShouldEndWith("/items?email=admin%40example.test&page=3&pageSize=25");
+    }
+
+    [Fact(DisplayName = "Changing page size preserves filters and resets to the first page")]
+    public async Task ChangePageSize_Should_ResetPage_When_PageSizeChanges()
+    {
+        TestComponent component = CreateComponent();
+        await component.SetRouteAsync(2, 25, new TestFilter { Email = "admin@example.test" });
+
+        component.ChangePageSize(50);
+
+        component.CurrentUri.ShouldEndWith("/items?email=admin%40example.test&pageSize=50");
     }
 
     [Fact(DisplayName = "Removing the final item on a later page navigates to the preceding page")]
@@ -31,8 +39,6 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
     }
 
     [Fact(DisplayName = "Loads once for the same route state and reloads when it changes")]
-    [Trait("Covers", "MatchesCurrentRoute")]
-    [Trait("Covers", "FiltersEqual")]
     public async Task OnParametersSetAsync_Should_LoadOnce_When_RouteStateIsUnchanged()
     {
         TestComponent component = CreateComponent();
@@ -70,12 +76,8 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
         component.ItemsCount.ShouldBe(0);
     }
 
-    [Fact(DisplayName = "Applies and resets all filter fields from the first page")]
-    [Trait("Covers", "ApplyFilter")]
-    [Trait("Covers", "ResetFilter")]
-    [Trait("Covers", "ChangeFilter")]
-    [Trait("Covers", "NavigateToList")]
-    public async Task FilterActions_Should_NavigateFromFirstPage_When_FilterChanges()
+    [Fact(DisplayName = "Applies every draft filter field from the first page")]
+    public async Task ApplyFilter_Should_NavigateFromFirstPage_When_DraftChanges()
     {
         TestComponent component = CreateComponent();
 
@@ -95,6 +97,17 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
 
         component.CurrentUri.ShouldEndWith(
             "/items?email=moderator%40example.test&minimumAge=21&pageSize=25");
+    }
+
+    [Fact(DisplayName = "Resets every filter field and navigates to the first page")]
+    public async Task ResetFilter_Should_ClearDraftAndNavigate_When_FilterIsActive()
+    {
+        TestComponent component = CreateComponent();
+        await component.SetRouteAsync(2, 25, new TestFilter
+        {
+            Email = "admin@example.test",
+            MinimumAge = 18,
+        });
 
         component.ResetDraftFilter();
 
@@ -104,9 +117,64 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
             "/items?pageSize=25");
     }
 
+    [Fact(DisplayName = "Does not navigate when applying an unchanged filter")]
+    public async Task ChangeFilter_Should_KeepCurrentUri_When_FilterIsUnchanged()
+    {
+        TestComponent component = CreateComponent();
+        await component.SetRouteAsync(2, 25, new TestFilter { Email = "admin@example.test" });
+        string originalUri = component.CurrentUri;
+
+        component.ApplyDraftFilter();
+
+        component.CurrentUri.ShouldBe(originalUri);
+    }
+
+    [Fact(DisplayName = "Builds the list URI from the supplied filter and pagination")]
+    public void NavigateToList_Should_IncludeFilterAndPagination_When_Navigating()
+    {
+        TestComponent component = CreateComponent();
+
+        component.NavigateToList(new TestFilter { Email = "admin+test@example.test" }, 3, 25);
+
+        component.CurrentUri.ShouldEndWith("/items?email=admin%2Btest%40example.test&page=3&pageSize=25");
+    }
+
+    [Fact(DisplayName = "Reuses the persisted page when its filter and pagination match the route")]
+    public async Task MatchesCurrentRoute_Should_ReusePage_When_PersistedStateMatches()
+    {
+        TestComponent component = CreateComponent();
+        PaginationResult<TestItem> page = CreatePage(2, 25);
+        component.Page = page;
+        component.LoadedPageNumber = 2;
+        component.LoadedPageSize = 25;
+        component.LoadedFilter = new TestFilter { Email = "admin@example.test" };
+
+        await component.SetRouteAsync(2, 25, new TestFilter { Email = "admin@example.test" });
+
+        component.LoadRequests.ShouldBeEmpty();
+        component.Page.ShouldBeSameAs(page);
+    }
+
+    [Theory(DisplayName = "Compares filter values rather than references to decide whether to reload")]
+    [InlineData("admin@example.test", 18, 1)]
+    [InlineData("other@example.test", 18, 2)]
+    [InlineData("admin@example.test", 21, 2)]
+    [InlineData(null, null, 2)]
+    public async Task FiltersEqual_Should_CompareValues_When_FilterInstancesDiffer(
+        string? email,
+        int? minimumAge,
+        int expectedLoads)
+    {
+        TestComponent component = CreateComponent();
+        await component.SetRouteAsync(2, 25, new TestFilter { Email = "admin@example.test", MinimumAge = 18 });
+
+        await component.SetRouteAsync(2, 25, new TestFilter { Email = email, MinimumAge = minimumAge });
+
+        component.LoadRequests.Count.ShouldBe(expectedLoads);
+    }
+
     [Fact(DisplayName = "Shows a load error and allows retrying the same route state")]
-    [Trait("Covers", "LoadPageAsync")]
-    public async Task ReloadAsync_Should_ClearError_When_RetrySucceeds()
+    public async Task LoadPageAsync_Should_ClearError_When_RetrySucceeds()
     {
         TestComponent component = CreateComponent();
         component.OnLoad = static (_, _, _, _) => Task.FromResult(
@@ -126,8 +194,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
     }
 
     [Fact(DisplayName = "Does not apply an obsolete load after route state changes")]
-    [Trait("Covers", "IsCurrentLoad")]
-    public async Task OnParametersSetAsync_Should_IgnoreObsoleteLoad_When_RouteStateChanges()
+    public async Task IsCurrentLoad_Should_IgnoreObsoleteLoad_When_RouteStateChanges()
     {
         var firstLoad = new TaskCompletionSource<Result<PaginationResult<TestItem>>>(
             TaskCreationOptions.RunContinuationsAsynchronously);
@@ -292,16 +359,19 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
             return OnItemRemovedAsync();
         }
 
-        public void Paginate(bool resize)
+        public new void ChangePage(int pageNumber)
         {
-            if (resize)
-            {
-                ChangePageSize(50);
-            }
-            else
-            {
-                ChangePage(3);
-            }
+            base.ChangePage(pageNumber);
+        }
+
+        public new void ChangePageSize(int pageSize)
+        {
+            base.ChangePageSize(pageSize);
+        }
+
+        public new void NavigateToList(TestFilter filter, int pageNumber, int pageSize)
+        {
+            base.NavigateToList(filter, pageNumber, pageSize);
         }
     }
 

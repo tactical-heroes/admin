@@ -10,8 +10,8 @@ public sealed class EntityListTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "Keeps filters collapsed until the user expands them")]
-    public void Filters_Should_BeCollapsed_When_ListIsRendered()
+    [Fact(DisplayName = "Expands and collapses filters when the user toggles them")]
+    public void ToggleFilters_Should_ToggleExpansion_When_ButtonIsClicked()
     {
         var component = RenderList(hasFilters: true);
 
@@ -20,10 +20,13 @@ public sealed class EntityListTests : BunitContext
         FindButton(component, "Фильтры").Click();
 
         component.FindComponent<ListFilters>().Instance.Expanded.ShouldBeTrue();
+
+        FindButton(component, "Фильтры").Click();
+
+        component.FindComponent<ListFilters>().Instance.Expanded.ShouldBeFalse();
     }
 
     [Fact(DisplayName = "Invokes filter actions when filters are available")]
-    [Trait("Covers", "ToggleFilters")]
     public void FilterActions_Should_InvokeCallbacks_When_FiltersAreAvailable()
     {
         var applied = false;

@@ -17,9 +17,7 @@ public sealed class AsyncEnumerationSelectTests : BunitContext
     }
 
     [Fact(DisplayName = "Loads enumeration items and selects the first one by default")]
-    [Trait("Covers", "OnInitializedAsync")]
-    [Trait("Covers", "ApplyDefaultValueAsync")]
-    public void LoadAsync_Should_SelectFirstItem_When_DefaultIsEnabled()
+    public void ApplyDefaultValueAsync_Should_SelectFirstItem_When_DefaultIsEnabled()
     {
         string? selectedItem = null;
 
@@ -35,6 +33,22 @@ public sealed class AsyncEnumerationSelectTests : BunitContext
             component.FindComponents<MudSelectItem<string>>()
                 .Select(item => item.Instance.Value)
                 .ShouldBe(["active", "blocked"]);
+        });
+    }
+
+    [Fact(DisplayName = "Initializes enumeration items without choosing a default value")]
+    public void OnInitializedAsync_Should_LoadItems_When_ComponentIsRendered()
+    {
+        var component = Render<AsyncEnumerationSelect<TestEnumeration>>(
+            parameters => parameters.Add(select => select.Label, "Статус"));
+
+        component.WaitForAssertion(() =>
+        {
+            _provider.RequestCount.ShouldBe(1);
+            component.FindComponents<MudSelectItem<string>>()
+                .Select(item => item.Instance.Value)
+                .ShouldBe(["active", "blocked"]);
+            component.Instance.Value.ShouldBeNull();
         });
     }
 

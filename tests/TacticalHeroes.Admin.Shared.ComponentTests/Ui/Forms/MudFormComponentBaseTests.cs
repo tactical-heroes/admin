@@ -16,135 +16,63 @@ public sealed class MudFormComponentBaseTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "Saves a valid form once while submission is in progress")]
-    [Trait("Covers", "SaveAsync")]
-    public async Task SubmitAsync_Should_SaveOnce_When_FormIsValidAndAlreadySubmitting()
+    [Fact(DisplayName = "Forwards the component lifetime token to the save operation")]
+    public async Task SubmitAsync_Should_ForwardLifetimeToken_When_FormIsValid()
     {
         var component = CreateComponent();
-        var saveCompletion = new TaskCompletionSource(
-            TaskCreationOptions.RunContinuationsAsynchronously);
-        component.OnSave = () => saveCompletion.Task;
+        CancellationToken? receivedToken = null;
 
-        Task firstSubmit = component.SubmitAsync();
-        await component.SaveStarted.Task;
-        Task secondSubmit = component.SubmitAsync();
+        await component.SubmitAsync(token =>
+        {
+            receivedToken = token;
+            return Task.FromResult(Result.Success(Guid.Empty));
+        });
 
-        component.SaveCount.ShouldBe(1);
-        component.Saving.ShouldBeTrue();
-        await secondSubmit;
-
-        saveCompletion.SetResult();
-        await firstSubmit;
-
-        component.Saving.ShouldBeFalse();
+        receivedToken.ShouldBe(component.Token);
     }
 
-    [Fact(DisplayName = "Does not save when the form is unavailable")]
-    public async Task SubmitAsync_Should_NotSave_When_FormIsUnavailable()
+    [Theory(DisplayName = "Shows the save result and navigates only after a successful save")]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task SaveAsync_Should_ShowResultAndNavigateOnSuccess_When_SaveCompletes(bool fails)
     {
-        var component = CreateComponent(hasForm: false);
+        var component = CreateComponent();
+        NavigationManager navigation = Services.GetRequiredService<NavigationManager>();
+        string originalUri = navigation.Uri;
+        Guid savedId = Guid.NewGuid();
+        Result<Guid> result = fails
+            ? Result.Failure<Guid>(Error.Failure("Save failed."))
+            : Result.Success(savedId);
 
-        await component.SubmitAsync();
+        await component.SubmitAsync(_ => Task.FromResult(result));
 
-        component.SaveCount.ShouldBe(0);
-        component.Saving.ShouldBeFalse();
+        Snackbar notification = Services.GetRequiredService<ISnackbar>().ShownSnackbars.Single();
+        notification.Message.ShouldBe(fails ? "Save failed." : "Saved");
+        notification.Severity.ShouldBe(fails ? MudBlazor.Severity.Error : MudBlazor.Severity.Success);
+        navigation.Uri.ShouldBe(fails ? originalUri : $"http://localhost/saved/{savedId}");
     }
 
-    [Fact(DisplayName = "Does not save a model rejected by FluentValidation")]
-    public async Task SubmitAsync_Should_NotSave_When_ModelValidationFails()
-    {
-        var component = CreateComponent(isModelValid: false);
-
-        await component.SubmitAsync();
-
-        component.SaveCount.ShouldBe(0);
-        component.Saving.ShouldBeFalse();
-    }
-
-    private TestComponent CreateComponent(
-        bool hasForm = true,
-        bool isModelValid = true)
+    private TestComponent CreateComponent()
     {
         return new TestComponent(
-            hasForm,
-            isModelValid,
             Services.GetRequiredService<ISnackbar>(),
             Services.GetRequiredService<NavigationManager>());
     }
 
-    private sealed class TestComponent
-        : MudCreateFormComponentBase<TestModel, TestValidator>
+    private sealed class TestComponent : MudFormComponentBase<TestModel, TestValidator>
     {
-        private readonly TestSaveOperation _saveOperation;
-
-        public TestComponent(
-            bool hasForm,
-            bool isModelValid,
-            ISnackbar snackbar,
-            NavigationManager navigation)
-            : this(
-                new TestSaveOperation(),
-                hasForm,
-                isModelValid,
-                snackbar,
-                navigation)
+        public TestComponent(ISnackbar snackbar, NavigationManager navigation)
+            : base(snackbar, navigation, "Saved", static id => $"/saved/{id}")
         {
+            Form = new MudForm();
+            Model.Name = "Valid";
         }
 
-        private TestComponent(
-            TestSaveOperation saveOperation,
-            bool hasForm,
-            bool isModelValid,
-            ISnackbar snackbar,
-            NavigationManager navigation)
-            : base(
-                saveOperation.SaveAsync,
-                "Saved",
-                static _ => "/saved",
-                snackbar,
-                navigation)
+        public CancellationToken Token => LifetimeToken;
+
+        public new Task SubmitAsync(Func<CancellationToken, Task<Result<Guid>>> saveAsync)
         {
-            _saveOperation = saveOperation;
-            Form = hasForm ? new MudForm() : null;
-            Model.Name = isModelValid ? "Valid" : string.Empty;
-        }
-
-        public Func<Task> OnSave
-        {
-            get => _saveOperation.OnSave;
-            set => _saveOperation.OnSave = value;
-        }
-
-        public TaskCompletionSource SaveStarted => _saveOperation.SaveStarted;
-
-        public int SaveCount => _saveOperation.SaveCount;
-
-        public bool Saving => IsSaving;
-
-        public new Task SubmitAsync()
-        {
-            return base.SubmitAsync();
-        }
-    }
-
-    private sealed class TestSaveOperation
-    {
-        public Func<Task> OnSave { get; set; } = () => Task.CompletedTask;
-
-        public TaskCompletionSource SaveStarted { get; } = new(
-            TaskCreationOptions.RunContinuationsAsynchronously);
-
-        public int SaveCount { get; private set; }
-
-        public async Task<Result<Guid>> SaveAsync(
-            TestModel _,
-            CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            SaveCount++;
-            SaveStarted.TrySetResult();
-            await OnSave();
-            return Result.Success(Guid.Empty);
+            return base.SubmitAsync(saveAsync);
         }
     }
 

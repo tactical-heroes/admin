@@ -40,6 +40,17 @@ public sealed class ComponentTestConventionTests
         methods.Order().ShouldBe(["OnInitialized", "Submit", "Submit"]);
     }
 
+    [Fact(DisplayName = "Inherited methods belong to base tests while overrides belong to the declaring component")]
+    public void GetBehaviorMethods_Should_SeparateBaseBehavior_When_ComponentInheritsMethods()
+    {
+        string[] baseMethods = GetBehaviorMethods(typeof(DiscoveryBase));
+        string[] componentMethods = GetBehaviorMethods(typeof(DiscoveryComponent));
+
+        baseMethods.Order().ShouldBe(["InheritedAction", "OnInitialized"]);
+        componentMethods.ShouldNotContain("InheritedAction");
+        componentMethods.ShouldContain("OnInitialized");
+    }
+
     [Theory(DisplayName = "Every overload needs a distinct test method with its exact method prefix")]
     [InlineData("Submit_Should_Save_When_Valid", 1)]
     [InlineData("SubmitAsync_Should_Save_When_Valid", 2)]
@@ -92,14 +103,7 @@ public sealed class ComponentTestConventionTests
 
         return testType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
             .Where(method => method.GetCustomAttributes<FactAttribute>().Any(attribute => attribute.Skip is null && !attribute.Explicit))
-            .SelectMany(method => method.GetCustomAttributes<TraitAttribute>()
-                .Where(trait => trait.Name == "Covers")
-                .Select(trait => trait.Value)
-                .Concat(method.Name.Contains("_Should_", StringComparison.Ordinal)
-                    ? [method.Name[..method.Name.IndexOf("_Should_", StringComparison.Ordinal)]]
-                    : [])
-                .Distinct(StringComparer.Ordinal)
-                .Select(name => name + "_Should_" + method.Name))
+            .Select(method => method.Name)
             .ToArray();
     }
 
@@ -119,7 +123,14 @@ public sealed class ComponentTestConventionTests
 
     private sealed record ComponentTarget(Type Component, string TestPath, Type? TestType);
 
-    private sealed class DiscoveryComponent : ComponentBase
+    private abstract class DiscoveryBase : ComponentBase
+    {
+        public void InheritedAction() { }
+
+        protected override void OnInitialized() { }
+    }
+
+    private sealed class DiscoveryComponent : DiscoveryBase
     {
         public string Value { get; set; } = string.Empty;
 
