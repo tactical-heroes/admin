@@ -13,6 +13,8 @@ using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Model;
 using TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui;
 using TacticalHeroes.Admin.Shared.Model;
 
+using ConfirmEmailPageComponent =
+    TacticalHeroes.Admin.Modules.Identity.Pages.ConfirmEmailPage.Ui.ConfirmEmailPage;
 using LoginPageComponent =
     TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui.LoginPage;
 using ResetPasswordPageComponent =
@@ -198,6 +200,54 @@ public sealed class IdentityMudFormTests : BunitContext
         });
     }
 
+    [Theory(DisplayName = "Email confirmation runs once after prerender and displays the API result")]
+    [InlineData(HttpStatusCode.NoContent, "Email подтверждён")]
+    [InlineData(HttpStatusCode.BadRequest, "Не удалось подтвердить")]
+    public void ConfirmEmail_Should_DisplayResultOnce_When_PageBecomesInteractive(
+        HttpStatusCode statusCode,
+        string expectedHeading)
+    {
+        Guid userId = Guid.NewGuid();
+        Services.GetRequiredService<NavigationManager>().NavigateTo(
+            IdentityRoutes.ConfirmEmailPage(userId, "token/+=="));
+        SetRendererInfo(new RendererInfo("Static", isInteractive: false));
+        var prerendered = Render<ConfirmEmailPageComponent>();
+        prerendered.Find("h1").TextContent.ShouldBe("Подтверждаем email");
+        _handler.PostCount.ShouldBe(0);
+        prerendered.Dispose();
+        SetRendererInfo(new RendererInfo("Server", isInteractive: true));
+
+        var component = Render<ConfirmEmailPageComponent>();
+
+        component.Instance.UserId.ShouldBe(userId);
+        component.Instance.EmailConfirmationToken.ShouldBe("token/+==");
+        component.Find("h1").TextContent.ShouldBe("Подтверждаем email");
+        component.Render();
+        _handler.PostCount.ShouldBe(1);
+        _handler.ConfirmationResponse.SetResult(new HttpResponseMessage(statusCode));
+        component.WaitForAssertion(() =>
+            component.Find("h1").TextContent.ShouldBe(expectedHeading));
+        component.Render();
+        _handler.PostCount.ShouldBe(1);
+    }
+
+    [Theory(DisplayName = "Email confirmation does not submit an incomplete link")]
+    [InlineData("")]
+    [InlineData("?userId=19641d4e-0c67-4892-a952-7eb71725a064")]
+    [InlineData("?emailConfirmationToken=token")]
+    [InlineData("?userId=19641d4e-0c67-4892-a952-7eb71725a064&emailConfirmationToken=%20")]
+    public void ConfirmEmail_Should_RejectLink_When_QueryParametersAreMissing(string query)
+    {
+        SetRendererInfo(new RendererInfo("Server", isInteractive: true));
+        Services.GetRequiredService<NavigationManager>().NavigateTo(
+            IdentityRoutes.ConfirmEmail + query);
+
+        var component = Render<ConfirmEmailPageComponent>();
+
+        component.Find("h1").TextContent.ShouldBe("Ссылка недействительна");
+        _handler.PostCount.ShouldBe(0);
+    }
+
     private IRenderedComponent<ResetPasswordPageComponent> RenderResetPasswordPage()
     {
         return Render<ResetPasswordPageComponent>(parameters => parameters
@@ -210,12 +260,22 @@ public sealed class IdentityMudFormTests : BunitContext
     {
         public int PostCount { get; private set; }
 
+        public TaskCompletionSource<HttpResponseMessage> ConfirmationResponse { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
             request.Method.ShouldBe(HttpMethod.Post);
             PostCount++;
+
+            if (request.RequestUri!.AbsolutePath.EndsWith(
+                    "/confirm-email",
+                    StringComparison.Ordinal))
+            {
+                return ConfirmationResponse.Task.WaitAsync(cancellationToken);
+            }
 
             if (request.RequestUri!.AbsolutePath.EndsWith(
                     "/register",
