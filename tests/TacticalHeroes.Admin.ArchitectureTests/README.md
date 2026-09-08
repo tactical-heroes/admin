@@ -84,9 +84,7 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
 
 11. `ListPages_Should_UseQueryParameters_When_ListStateIsDefined` — номер
     страницы и размер страницы списков фракций, ролей и пользователей читаются
-    из query string через `SupplyParameterFromQuery`. Привязку email-фильтра
-    пользователей из URL, его отображение и передачу в API проверяет компонентный
-    `UserListPageTests` в тестах модуля Identity.
+    из query string через `SupplyParameterFromQuery`.
 
 ## Razor-компоненты
 
