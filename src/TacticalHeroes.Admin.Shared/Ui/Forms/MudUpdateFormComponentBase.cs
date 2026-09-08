@@ -80,7 +80,7 @@ public abstract class MudUpdateFormComponentBase<TModel, TValidator>(
 
     protected Task SubmitAsync()
     {
-        return base.SubmitAsync(
+        return SubmitAsync(
             cancellationToken => updateAsync(Id, Model, cancellationToken));
     }
 }
