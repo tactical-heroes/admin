@@ -11,7 +11,6 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\src\TacticalHeroes.Admin.Client\TacticalHeroes.Admin.Client.csproj" />
-        <ProjectReference Include="..\..\src\TacticalHeroes.Admin.Shared\TacticalHeroes.Admin.Shared.csproj" />
         <ProjectReference Include="..\..\src\Modules\TacticalHeroes.Admin.Modules.Identity\TacticalHeroes.Admin.Modules.Identity.csproj" />
     </ItemGroup>
     <ItemGroup>
