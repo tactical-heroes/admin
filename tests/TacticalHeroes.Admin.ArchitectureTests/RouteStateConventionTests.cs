@@ -1,37 +1,32 @@
+using System.Reflection;
+
+using Microsoft.AspNetCore.Components;
+
 namespace TacticalHeroes.Admin.ArchitectureTests;
 
 public sealed class RouteStateConventionTests
 {
-    [Fact(DisplayName = "Paged lists expose pagination as query parameters")]
-    public void ListPages_Should_UseQueryParameters_When_ListStateIsDefined()
+    [Theory(DisplayName = "Paged list CLR properties expose the pagination query contract")]
+    [InlineData(typeof(MudPagedListComponentBase<>), nameof(MudPagedListComponentBase<object>.PageNumber), "page")]
+    [InlineData(typeof(MudPagedListComponentBase<>), nameof(MudPagedListComponentBase<object>.PageSize), "pageSize")]
+    [InlineData(typeof(MudPagedListComponentBase<,>), nameof(MudPagedListComponentBase<object>.PageNumber), "page")]
+    [InlineData(typeof(MudPagedListComponentBase<,>), nameof(MudPagedListComponentBase<object>.PageSize), "pageSize")]
+    public void ListPages_Should_UseQueryParameters_When_ListStateIsDefined(
+        Type componentType,
+        string propertyName,
+        string queryName)
     {
-        string repositoryRoot = RepositoryPaths.FindRoot();
-        IReadOnlyDictionary<string, string[]> expectedQueries =
-            new Dictionary<string, string[]>(StringComparer.Ordinal)
-            {
-                ["src/TacticalHeroes.Admin.Shared/Ui/Lists/MudPagedListComponentBase.cs"] =
-                    ["page", "pageSize"],
-            };
-        List<string> violations = [];
+        PropertyInfo? property = componentType.GetProperty(
+            propertyName,
+            BindingFlags.Public | BindingFlags.Instance);
 
-        foreach ((string relativePath, string[] queryNames) in expectedQueries)
-        {
-            string sourcePath = Path.Combine(
-                repositoryRoot,
-                relativePath.Replace('/', Path.DirectorySeparatorChar));
-            string source = File.ReadAllText(sourcePath);
-
-            foreach (string queryName in queryNames)
-            {
-                if (!source.Contains(
-                        $"[SupplyParameterFromQuery(Name = \"{queryName}\")]",
-                        StringComparison.Ordinal))
-                {
-                    violations.Add($"{relativePath}: {queryName}");
-                }
-            }
-        }
-
-        violations.ShouldBeEmpty();
+        property.ShouldNotBeNull();
+        property.PropertyType.ShouldBe(typeof(int?));
+        property.SetMethod.ShouldNotBeNull();
+        property.SetMethod.IsPublic.ShouldBeTrue();
+        var attribute = property.GetCustomAttribute<SupplyParameterFromQueryAttribute>();
+        attribute.ShouldNotBeNull();
+        StringComparer.OrdinalIgnoreCase.Equals(attribute.Name ?? property.Name, queryName)
+            .ShouldBeTrue($"{componentType.Name}.{propertyName} must bind query parameter '{queryName}'.");
     }
 }

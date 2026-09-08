@@ -11,6 +11,11 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\src\TacticalHeroes.Admin.Shared\TacticalHeroes.Admin.Shared.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="TacticalHeroes.Admin.Shared.Ui.Lists" />
         <Using Include="Shouldly" />
         <Using Include="Xunit" />
     </ItemGroup>
