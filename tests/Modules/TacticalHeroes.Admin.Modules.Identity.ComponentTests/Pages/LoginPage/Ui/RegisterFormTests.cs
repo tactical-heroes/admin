@@ -4,7 +4,6 @@ namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Pages.LoginPage.U
 
 public sealed class RegisterFormTests : AuthenticationComponentTestContext
 {
-
     [Fact(DisplayName = "TogglePasswordVisibility reveals and hides only its password field")]
     public void TogglePasswordVisibility_Should_ToggleInputType_When_ButtonIsClicked()
     {

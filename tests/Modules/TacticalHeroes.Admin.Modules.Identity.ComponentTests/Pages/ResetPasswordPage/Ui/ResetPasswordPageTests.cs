@@ -2,7 +2,6 @@ namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Pages.ResetPasswo
 
 public sealed class ResetPasswordPageTests : AuthenticationComponentTestContext
 {
-
     [Fact(DisplayName = "TogglePasswordVisibility reveals and hides only its password field")]
     public void TogglePasswordVisibility_Should_ToggleInputType_When_ButtonIsClicked()
     {

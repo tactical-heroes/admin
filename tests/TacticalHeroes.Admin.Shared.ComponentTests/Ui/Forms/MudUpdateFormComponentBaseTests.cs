@@ -159,7 +159,6 @@ public sealed class MudUpdateFormComponentBaseTests
         {
             return ReloadAsync();
         }
-
     }
 
     private sealed class TestOperations

@@ -22,7 +22,6 @@ public sealed class LoginFormTests : AuthenticationComponentTestContext
         component.Find("input[name='ReturnUrl']").GetAttribute("value").ShouldBe(returnUrl);
     }
 
-
     [Fact(DisplayName = "TogglePasswordVisibility reveals and hides only its password field")]
     public void TogglePasswordVisibility_Should_ToggleInputType_When_ButtonIsClicked()
     {
