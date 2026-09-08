@@ -11,4 +11,13 @@
     <PackageReference Include="PANiXiDA.Core.ResultPattern" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="PANiXiDA.Core.ResultPattern" />
+    <Using Include="TacticalHeroes.Admin.Shared.Errors" />
+    <Using Include="TacticalHeroes.Admin.Shared.Model" />
+    <Using Include="TacticalHeroes.Admin.Shared.Navigation" />
+    <Using Include="TacticalHeroes.Admin.Shared.Ui.Common" />
+    <Using Include="TacticalHeroes.Admin.Shared.Validation" />
+  </ItemGroup>
+
 </Project>

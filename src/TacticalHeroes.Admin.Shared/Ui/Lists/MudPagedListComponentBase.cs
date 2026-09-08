@@ -2,15 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 
 using Microsoft.AspNetCore.Components;
 
-using PANiXiDA.Core.ResultPattern;
-
-using TacticalHeroes.Admin.Shared.Errors;
-using TacticalHeroes.Admin.Shared.Model;
-using TacticalHeroes.Admin.Shared.Navigation;
-
 using EmptyPagedListFilter = System.ValueTuple;
-
-using TacticalHeroes.Admin.Shared.Ui.Common;
 
 namespace TacticalHeroes.Admin.Shared.Ui.Lists;
 

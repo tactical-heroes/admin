@@ -4,8 +4,6 @@ using Microsoft.AspNetCore.Components;
 
 using MudBlazor;
 
-using TacticalHeroes.Admin.Shared.Model;
-
 namespace TacticalHeroes.Admin.Shared.Ui.Inputs;
 
 public partial class EnumerationSelect

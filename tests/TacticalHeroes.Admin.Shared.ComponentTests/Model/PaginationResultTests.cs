@@ -1,5 +1,3 @@
-using TacticalHeroes.Admin.Shared.Model;
-
 namespace TacticalHeroes.Admin.Shared.ComponentTests.Model;
 
 public sealed class PaginationResultTests

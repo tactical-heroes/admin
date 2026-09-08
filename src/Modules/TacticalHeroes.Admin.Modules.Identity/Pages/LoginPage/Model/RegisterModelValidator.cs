@@ -1,7 +1,5 @@
 using FluentValidation;
 
-using TacticalHeroes.Admin.Shared.Validation;
-
 namespace TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Model;
 
 public sealed class RegisterModelValidator : MudFormValidator<RegisterModel>

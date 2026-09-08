@@ -4,12 +4,6 @@ using Microsoft.AspNetCore.Components;
 
 using MudBlazor;
 
-using PANiXiDA.Core.ResultPattern;
-
-using TacticalHeroes.Admin.Shared.Errors;
-using TacticalHeroes.Admin.Shared.Model;
-using TacticalHeroes.Admin.Shared.Ui.Common;
-
 namespace TacticalHeroes.Admin.Shared.Ui.Inputs;
 
 public partial class AsyncEnumerationSelect<TEnumeration>(

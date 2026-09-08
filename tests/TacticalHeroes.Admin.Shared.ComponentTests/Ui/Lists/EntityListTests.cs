@@ -1,8 +1,5 @@
 using MudBlazor.Services;
 
-
-using TacticalHeroes.Admin.Shared.Ui.Lists;
-
 namespace TacticalHeroes.Admin.Shared.ComponentTests.Ui.Lists;
 
 public sealed class EntityListTests : BunitContext

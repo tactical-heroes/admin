@@ -2,7 +2,6 @@ using System.Reflection;
 
 using TacticalHeroes.Admin.Modules.Compendium;
 using TacticalHeroes.Admin.Modules.Identity;
-using TacticalHeroes.Admin.Shared.Navigation;
 
 namespace TacticalHeroes.Admin.Client.App.Composition;
 

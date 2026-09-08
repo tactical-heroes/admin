@@ -2,11 +2,6 @@ using Microsoft.AspNetCore.Components;
 
 using MudBlazor;
 
-using PANiXiDA.Core.ResultPattern;
-
-using TacticalHeroes.Admin.Shared.Errors;
-using TacticalHeroes.Admin.Shared.Ui.Common;
-
 namespace TacticalHeroes.Admin.Shared.Ui.Dialogs;
 
 public partial class EntityDeleteButton<TKey>(

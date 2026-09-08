@@ -1,7 +1,5 @@
 using Microsoft.Kiota.Abstractions.Serialization;
 
-using PANiXiDA.Core.ResultPattern;
-
 using Polly.Timeout;
 
 using TacticalHeroes.Admin.Api.Errors;

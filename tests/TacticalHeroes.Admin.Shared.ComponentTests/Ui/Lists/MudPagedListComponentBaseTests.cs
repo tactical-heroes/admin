@@ -1,11 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 
-using PANiXiDA.Core.ResultPattern;
-
-using TacticalHeroes.Admin.Shared.Model;
-using TacticalHeroes.Admin.Shared.Ui.Lists;
-
 namespace TacticalHeroes.Admin.Shared.ComponentTests.Ui.Lists;
 
 public sealed class MudPagedListComponentBaseTests : BunitContext

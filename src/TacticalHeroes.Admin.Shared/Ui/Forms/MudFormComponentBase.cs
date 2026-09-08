@@ -2,11 +2,6 @@ using Microsoft.AspNetCore.Components;
 
 using MudBlazor;
 
-using PANiXiDA.Core.ResultPattern;
-
-using TacticalHeroes.Admin.Shared.Errors;
-using TacticalHeroes.Admin.Shared.Validation;
-
 namespace TacticalHeroes.Admin.Shared.Ui.Forms;
 
 public abstract class MudFormComponentBase<TModel, TValidator>(

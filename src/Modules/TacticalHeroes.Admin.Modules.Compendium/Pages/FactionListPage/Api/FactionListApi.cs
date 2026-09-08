@@ -1,9 +1,6 @@
-using PANiXiDA.Core.ResultPattern;
-
 using TacticalHeroes.Admin.Api.Errors;
 using TacticalHeroes.Admin.Api.Generated;
 using TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Model;
-using TacticalHeroes.Admin.Shared.Model;
 
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Api;
 

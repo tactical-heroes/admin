@@ -19,4 +19,8 @@
 		<ProjectReference Include="..\TacticalHeroes.Admin.Shared\TacticalHeroes.Admin.Shared.csproj" />
 	</ItemGroup>
 
+  <ItemGroup>
+    <Using Include="TacticalHeroes.Admin.Shared.Navigation" />
+  </ItemGroup>
+
 </Project>

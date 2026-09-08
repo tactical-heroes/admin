@@ -15,8 +15,6 @@ using TacticalHeroes.Admin.Modules.Identity.Pages.RoleListPage.Api;
 using TacticalHeroes.Admin.Modules.Identity.Pages.UpdateRolePage.Api;
 using TacticalHeroes.Admin.Modules.Identity.Pages.UpdateUserPage.Api;
 using TacticalHeroes.Admin.Modules.Identity.Pages.UserListPage.Api;
-using TacticalHeroes.Admin.Shared.Model;
-using TacticalHeroes.Admin.Shared.Navigation;
 
 namespace TacticalHeroes.Admin.Modules.Identity;
 

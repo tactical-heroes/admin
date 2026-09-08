@@ -1,5 +1,3 @@
-using TacticalHeroes.Admin.Shared.Ui.Common;
-
 namespace TacticalHeroes.Admin.Shared.ComponentTests.Ui.Common;
 
 public sealed class CancelableComponentBaseTests

@@ -7,7 +7,6 @@ using MudBlazor;
 using TacticalHeroes.Admin.Modules.Compendium.Pages.CreateFactionPage.Api;
 using TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Api;
 using TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateFactionPage.Api;
-using TacticalHeroes.Admin.Shared.Navigation;
 
 namespace TacticalHeroes.Admin.Modules.Compendium;
 

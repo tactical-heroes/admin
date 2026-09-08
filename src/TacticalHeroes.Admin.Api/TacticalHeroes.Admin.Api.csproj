@@ -19,6 +19,10 @@
     <PackageReference Include="Polly.Core" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="PANiXiDA.Core.ResultPattern" />
+  </ItemGroup>
+
   <Target Name="GenerateTacticalHeroesApiClient"
           BeforeTargets="CoreCompile"
           Condition="'$(BuildingInsideVisualStudio)' != 'true' or '$(DesignTimeBuild)' != 'true' or !Exists('$(KiotaGeneratedClientFile)')"
