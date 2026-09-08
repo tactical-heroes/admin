@@ -2,7 +2,7 @@ namespace TacticalHeroes.Admin.ArchitectureTests;
 
 public sealed class RouteStateConventionTests
 {
-    [Fact(DisplayName = "Paged lists expose page and filters as query parameters")]
+    [Fact(DisplayName = "Paged lists expose pagination as query parameters")]
     public void ListPages_Should_UseQueryParameters_When_ListStateIsDefined()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
@@ -11,8 +11,6 @@ public sealed class RouteStateConventionTests
             {
                 ["src/TacticalHeroes.Admin.Shared/Ui/MudPagedListComponentBase.cs"] =
                     ["page", "pageSize"],
-                ["src/Modules/TacticalHeroes.Admin.Modules.Identity/Pages/UserListPage/Ui/UserListPage.razor.cs"] =
-                    ["email"],
             };
         List<string> violations = [];
 
