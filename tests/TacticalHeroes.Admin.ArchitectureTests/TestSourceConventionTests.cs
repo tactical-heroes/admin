@@ -92,20 +92,35 @@ public sealed partial class TestSourceConventionTests
         (violations.Length == 0).ShouldBe(valid);
     }
 
-#if NET10_0 && NET10_0_OR_GREATER
-    [Fact(DisplayName = "Test source discovery should discover active tests when framework symbols are defined")]
-    public void TestSourceDiscovery_Should_DiscoverActiveTests_When_FrameworkSymbolsAreDefined()
+    [Theory(DisplayName = "Test source discovery should select the active branch when project symbols are applied")]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void TestSourceDiscovery_Should_SelectTheActiveBranch_When_ProjectSymbolsAreApplied(bool symbolsDefined)
     {
-        TestMethodSource[] methods = TestSourceDiscovery.GetTestMethods();
+        TestProjectSource project = TestSourceDiscovery.GetProjects().Single(project =>
+            project.Compilation.AssemblyName == typeof(TestSourceConventionTests).Assembly.GetName().Name);
+        var parseOptions = (CSharpParseOptions)project.SourceTrees[0].Options;
+        string[] symbols = [.. parseOptions.PreprocessorSymbolNames];
+        string source = $$"""
+            class ExampleTests
+            {
+            #if {{string.Join(" && ", symbols)}}
+                [Fact] public void ActiveTest() { }
+            #else
+                [Fact] public void InactiveTest() { }
+            #endif
+            }
+            """;
 
-        methods.ShouldContain(method => method.Name ==
-            nameof(TestSourceDiscovery_Should_DiscoverActiveTests_When_FrameworkSymbolsAreDefined));
-        methods.ShouldNotContain(method => method.Name == "InactiveFrameworkTest");
+        SyntaxTree tree = CSharpSyntaxTree.ParseText(source,
+            symbolsDefined ? parseOptions : parseOptions.WithPreprocessorSymbols(),
+            path: "tests/ExampleTests.cs", cancellationToken: TestContext.Current.CancellationToken);
+        TestMethodSource[] methods = [.. TestSourceDiscovery.GetTestMethods([tree])];
+
+        symbols.ShouldNotBeEmpty();
+        tree.GetDiagnostics(TestContext.Current.CancellationToken).ShouldBeEmpty();
+        methods.Select(method => method.Name).ShouldBe([symbolsDefined ? "ActiveTest" : "InactiveTest"]);
     }
-#else
-    [Fact]
-    public void InactiveFrameworkTest() { }
-#endif
 
     private static string[] GetNamespaceViolations(SyntaxTree tree, string expectedNamespace)
     {
@@ -457,9 +472,10 @@ internal static class TestSourceDiscovery
 
     internal static IEnumerable<TestMethodSource> GetTestMethods(SyntaxTree[] syntaxTrees)
     {
+        SyntaxTree xunitUsing = XunitUsing.WithRootAndOptions(XunitUsing.GetRoot(), syntaxTrees[0].Options);
         var compilation = GetProjects().Single(project =>
                 project.Compilation.AssemblyName == typeof(TestSourceDiscovery).Assembly.GetName().Name)
-            .Compilation.RemoveAllSyntaxTrees().AddSyntaxTrees(syntaxTrees.Append(XunitUsing));
+            .Compilation.RemoveAllSyntaxTrees().AddSyntaxTrees(syntaxTrees.Append(xunitUsing));
 
         return GetTestMethods(compilation, syntaxTrees);
     }
