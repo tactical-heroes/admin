@@ -13,4 +13,3 @@ public sealed class EditSectionTests : BunitContext
         component.Find("input[aria-label='Name']").ShouldNotBeNull();
     }
 }
-

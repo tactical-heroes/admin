@@ -15,4 +15,3 @@ public sealed class ReconnectModalTests : BunitContext
         component.Find("#components-seconds-to-next-attempt").ShouldNotBeNull();
     }
 }
-

@@ -22,4 +22,3 @@ public sealed class AccountLayoutTests : BunitContext
         component.Find("#blazor-error-ui .reload").GetAttribute("href").ShouldBe(".");
     }
 }
-

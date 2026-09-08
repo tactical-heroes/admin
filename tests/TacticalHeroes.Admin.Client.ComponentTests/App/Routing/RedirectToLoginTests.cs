@@ -23,4 +23,3 @@ public sealed class RedirectToLoginTests : BunitContext
         navigation.History.First().Options.ForceLoad.ShouldBeTrue();
     }
 }
-

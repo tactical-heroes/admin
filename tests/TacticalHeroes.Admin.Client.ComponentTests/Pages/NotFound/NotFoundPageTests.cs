@@ -14,4 +14,3 @@ public sealed class NotFoundPageTests : ClientComponentTestContext
         component.Find("a").GetAttribute("href").ShouldBe(AdminRoutes.Home);
     }
 }
-

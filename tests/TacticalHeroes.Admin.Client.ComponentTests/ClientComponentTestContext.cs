@@ -11,4 +11,3 @@ public abstract class ClientComponentTestContext : BunitContext
         AddAuthorization();
     }
 }
-

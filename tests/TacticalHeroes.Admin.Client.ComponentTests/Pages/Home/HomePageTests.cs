@@ -13,4 +13,3 @@ public sealed class HomePageTests : ClientComponentTestContext
         component.Find("#welcome-title").TextContent.Trim().ShouldBe("Добро пожаловать");
     }
 }
-

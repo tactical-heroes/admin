@@ -13,4 +13,3 @@ public sealed class BlazorErrorUiTests : BunitContext
         component.Find("button.dismiss").GetAttribute("aria-label").ShouldBe("Закрыть уведомление");
     }
 }
-

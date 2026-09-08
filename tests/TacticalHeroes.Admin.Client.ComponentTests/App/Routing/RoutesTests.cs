@@ -43,4 +43,3 @@ public sealed class RoutesTests : ClientComponentTestContext
         navigation.Uri.ShouldEndWith(IdentityRoutes.Challenge(returnUrl));
     }
 }
-

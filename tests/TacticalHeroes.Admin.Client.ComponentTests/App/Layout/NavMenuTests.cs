@@ -22,4 +22,3 @@ public sealed class NavMenuTests : ClientComponentTestContext
         component.Find("nav").GetAttribute("aria-label").ShouldBe("Основная навигация");
     }
 }
-

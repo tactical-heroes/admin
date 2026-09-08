@@ -21,4 +21,3 @@ public sealed class AdminSidebarTests : ClientComponentTestContext
         component.Find("img").GetAttribute("alt").ShouldNotBeNullOrWhiteSpace();
     }
 }
-
