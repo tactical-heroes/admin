@@ -15,4 +15,8 @@
     <ProjectReference Include="..\TacticalHeroes.Admin.Shared\TacticalHeroes.Admin.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="TacticalHeroes.Admin.UnitTests" />
+  </ItemGroup>
+
 </Project>
