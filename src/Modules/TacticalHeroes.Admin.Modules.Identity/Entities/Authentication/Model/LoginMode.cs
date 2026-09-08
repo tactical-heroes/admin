@@ -4,12 +4,12 @@ namespace TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Model;
 
 public enum LoginMode
 {
-    [Display(Name = "Register - Tactical Heroes")]
+    [Display(Name = "Register")]
     Register = 0,
 
-    [Display(Name = "Confirm email - Tactical Heroes")]
+    [Display(Name = "Confirm email")]
     Confirmation = 1,
 
-    [Display(Name = "Recover access - Tactical Heroes")]
+    [Display(Name = "Recover access")]
     Recover = 2,
 }
