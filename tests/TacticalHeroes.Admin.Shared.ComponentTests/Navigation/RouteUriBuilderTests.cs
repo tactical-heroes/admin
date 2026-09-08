@@ -2,7 +2,7 @@ namespace TacticalHeroes.Admin.Shared.ComponentTests.Navigation;
 
 public sealed class RouteUriBuilderTests
 {
-    [Fact(DisplayName = "Builds route from query object properties")]
+    [Fact(DisplayName = "Build should encode query properties when values are provided")]
     public void Build_Should_EncodeQueryProperties_When_ValuesAreProvided()
     {
         string route = RouteUriBuilder.Build(
@@ -18,7 +18,7 @@ public sealed class RouteUriBuilderTests
             "&token=token%2F%2B%3D%3D");
     }
 
-    [Fact(DisplayName = "Builds paged route from filter properties")]
+    [Fact(DisplayName = "BuildPaged should encode filter and pagination when values are provided")]
     public void BuildPaged_Should_EncodeFilterAndPagination_When_ValuesAreProvided()
     {
         var filter = new TestFilter
@@ -39,7 +39,7 @@ public sealed class RouteUriBuilderTests
             "&roles=admin&roles=moderator&page=3&pageSize=25");
     }
 
-    [Fact(DisplayName = "Omits empty filter and default pagination")]
+    [Fact(DisplayName = "BuildPaged should omit query when values are empty or default")]
     public void BuildPaged_Should_OmitQuery_When_ValuesAreEmptyOrDefault()
     {
         string route = RouteUriBuilder.BuildPaged(

@@ -2,8 +2,8 @@ namespace TacticalHeroes.Admin.Shared.ComponentTests.Errors;
 
 public sealed class ApiErrorMessageTests
 {
-    [Fact(DisplayName = "Maps only errors for writable form fields")]
-    public void FieldErrors_Should_KeepOnlyWritableFormFields()
+    [Fact(DisplayName = "GetFieldErrors should keep only writable form fields when errors include unknown fields")]
+    public void GetFieldErrors_Should_KeepOnlyWritableFormFields_When_ErrorsIncludeUnknownFields()
     {
         Error fieldError = Error.Validation("Name is required.").WithField("name");
         Error unknownFieldError = Error.Validation("Identifier is invalid.").WithField("Id");
@@ -17,8 +17,8 @@ public sealed class ApiErrorMessageTests
             .ShouldBe([unknownFieldError]);
     }
 
-    [Fact(DisplayName = "Treats errors without fields as unhandled")]
-    public void UnhandledErrors_Should_IncludeGeneralErrors()
+    [Fact(DisplayName = "GetUnhandledErrors should include general errors when errors have no field")]
+    public void GetUnhandledErrors_Should_IncludeGeneralErrors_When_ErrorsHaveNoField()
     {
         Error error = Error.Unexpected("API is unavailable.");
 

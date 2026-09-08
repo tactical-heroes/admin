@@ -4,7 +4,7 @@ namespace TacticalHeroes.Admin.ArchitectureTests;
 
 public sealed partial class ModelConventionTests
 {
-    [Fact(DisplayName = "Model folders use property-based classes")]
+    [Fact(DisplayName = "ModelSources should use property based classes when model folders are scanned")]
     public void ModelSources_Should_UsePropertyBasedClasses_When_ModelFoldersAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
@@ -21,7 +21,7 @@ public sealed partial class ModelConventionTests
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "Models use adjacent validators")]
+    [Fact(DisplayName = "ModelSources should have adjacent validators when model types are scanned")]
     public void ModelSources_Should_HaveAdjacentValidators_When_ModelTypesAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();

@@ -9,18 +9,24 @@ namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Pages;
 
 public sealed class IdentityPageRouteTests
 {
-    [Fact(DisplayName = "Create and update roles use separate route components")]
-    public void RolePages_Should_UseSeparateComponents()
+    [Fact(DisplayName = "RolePages should use separate components when routes are inspected")]
+    public void RolePages_Should_UseSeparateComponents_When_RoutesAreInspected()
     {
-        GetRoutes<CreateRolePageComponent>().ShouldBe([IdentityRoutes.CreateRole]);
-        GetRoutes<UpdateRolePageComponent>().ShouldBe([IdentityRoutes.RoleTemplate]);
+        string[] createRoutes = GetRoutes<CreateRolePageComponent>();
+        string[] updateRoutes = GetRoutes<UpdateRolePageComponent>();
+
+        createRoutes.ShouldBe([IdentityRoutes.CreateRole]);
+        updateRoutes.ShouldBe([IdentityRoutes.RoleTemplate]);
     }
 
-    [Fact(DisplayName = "Create and update users use separate route components")]
-    public void UserPages_Should_UseSeparateComponents()
+    [Fact(DisplayName = "UserPages should use separate components when routes are inspected")]
+    public void UserPages_Should_UseSeparateComponents_When_RoutesAreInspected()
     {
-        GetRoutes<CreateUserPageComponent>().ShouldBe([IdentityRoutes.CreateUser]);
-        GetRoutes<UpdateUserPageComponent>().ShouldBe([IdentityRoutes.UserTemplate]);
+        string[] createRoutes = GetRoutes<CreateUserPageComponent>();
+        string[] updateRoutes = GetRoutes<UpdateUserPageComponent>();
+
+        createRoutes.ShouldBe([IdentityRoutes.CreateUser]);
+        updateRoutes.ShouldBe([IdentityRoutes.UserTemplate]);
     }
 
     private static string[] GetRoutes<TComponent>()

@@ -34,7 +34,7 @@ public sealed class UpdateUserPageTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "Updates a valid user and returns to the list")]
+    [Fact(DisplayName = "Submit should navigate to list when user is valid")]
     public void Submit_Should_NavigateToList_When_UserIsValid()
     {
         var component = Render<UpdateUserPageComponent>(parameters => parameters
@@ -49,7 +49,7 @@ public sealed class UpdateUserPageTests : BunitContext
         });
     }
 
-    [Fact(DisplayName = "Does not update a user when email is empty")]
+    [Fact(DisplayName = "Submit should display validation error when email is empty")]
     public void Submit_Should_DisplayValidationError_When_EmailIsEmpty()
     {
         var component = Render<UpdateUserPageComponent>(parameters => parameters

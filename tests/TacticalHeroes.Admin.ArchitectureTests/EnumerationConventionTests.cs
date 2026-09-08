@@ -4,7 +4,7 @@ namespace TacticalHeroes.Admin.ArchitectureTests;
 
 public sealed partial class EnumerationConventionTests
 {
-    [Fact(DisplayName = "Enumeration members use explicit numeric values")]
+    [Fact(DisplayName = "EnumerationMembers should have explicit numeric values when source is scanned")]
     public void EnumerationMembers_Should_HaveExplicitNumericValues_When_SourceIsScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
@@ -22,7 +22,7 @@ public sealed partial class EnumerationConventionTests
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "Enumeration members have English display names")]
+    [Fact(DisplayName = "EnumerationMembers should have english display names when source is scanned")]
     public void EnumerationMembers_Should_HaveEnglishDisplayNames_When_SourceIsScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
@@ -44,7 +44,7 @@ public sealed partial class EnumerationConventionTests
         violations.ShouldBeEmpty();
     }
 
-    [Theory(DisplayName = "Enumeration scanner recognizes valid explicit initializers")]
+    [Theory(DisplayName = "EnumerationScanner should read value when initializer is valid")]
     [InlineData("-1")]
     [InlineData("0x10")]
     [InlineData("Read | Write")]

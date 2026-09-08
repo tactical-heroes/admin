@@ -34,7 +34,7 @@ public sealed class UpdateRolePageTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "Updates a valid role and returns to the list")]
+    [Fact(DisplayName = "Submit should navigate to list when role is valid")]
     public void Submit_Should_NavigateToList_When_RoleIsValid()
     {
         var component = Render<UpdateRolePageComponent>(parameters => parameters
@@ -49,7 +49,7 @@ public sealed class UpdateRolePageTests : BunitContext
         });
     }
 
-    [Fact(DisplayName = "Does not update a role when its name is empty")]
+    [Fact(DisplayName = "Submit should display validation error when role name is empty")]
     public void Submit_Should_DisplayValidationError_When_RoleNameIsEmpty()
     {
         var component = Render<UpdateRolePageComponent>(parameters => parameters

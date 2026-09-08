@@ -9,7 +9,7 @@ namespace TacticalHeroes.Admin.Api.UnitTests.Errors;
 
 public sealed class ApiResultExtensionsTests
 {
-    [Fact(DisplayName = "Returns a successful result with a value")]
+    [Fact(DisplayName = "ToApiResultAsync should return success when operation succeeds")]
     public async Task ToApiResultAsync_Should_ReturnSuccess_When_OperationSucceeds()
     {
         Result<string> result = await Task.FromResult<string?>("response").ToApiResultAsync(
@@ -19,7 +19,7 @@ public sealed class ApiResultExtensionsTests
         result.Value.ShouldBe("response");
     }
 
-    [Fact(DisplayName = "Returns a failure when API response is empty")]
+    [Fact(DisplayName = "ToApiResultAsync should return failure when response is null")]
     public async Task ToApiResultAsync_Should_ReturnFailure_When_ResponseIsNull()
     {
         Result<string> result = await Task.FromResult<string?>(null).ToApiResultAsync(
@@ -30,7 +30,7 @@ public sealed class ApiResultExtensionsTests
         result.FirstError.Message.ShouldBe("API вернул пустой ответ.");
     }
 
-    [Fact(DisplayName = "Maps validation messages and their fields")]
+    [Fact(DisplayName = "ToApiResultAsync should map field errors when server returns validation problem")]
     public async Task ToApiResultAsync_Should_MapFieldErrors_When_ServerReturnsValidationProblem()
     {
         var exception = new HttpValidationProblemDetails
@@ -60,7 +60,7 @@ public sealed class ApiResultExtensionsTests
             .ShouldAllBe(field => string.Equals(field as string, "Name", StringComparison.Ordinal));
     }
 
-    [Fact(DisplayName = "Maps problem detail and status to a typed error")]
+    [Fact(DisplayName = "ToApiResultAsync should map typed error when server returns problem")]
     public async Task ToApiResultAsync_Should_MapTypedError_When_ServerReturnsProblem()
     {
         var exception = new ProblemDetails
@@ -77,7 +77,7 @@ public sealed class ApiResultExtensionsTests
         result.FirstError.Message.ShouldBe("A role with this name already exists.");
     }
 
-    [Fact(DisplayName = "Hides server details for server errors")]
+    [Fact(DisplayName = "ToApiResultAsync should hide detail when server error occurs")]
     public async Task ToApiResultAsync_Should_HideDetail_When_ServerErrorOccurs()
     {
         var exception = new ProblemDetails
@@ -95,7 +95,7 @@ public sealed class ApiResultExtensionsTests
             "API временно недоступен. Попробуйте повторить запрос позже.");
     }
 
-    [Fact(DisplayName = "Preserves caller cancellation")]
+    [Fact(DisplayName = "ToApiResultAsync should throw when caller cancels operation")]
     public async Task ToApiResultAsync_Should_Throw_When_CallerCancelsOperation()
     {
         using var cancellationTokenSource = new CancellationTokenSource();
@@ -106,7 +106,7 @@ public sealed class ApiResultExtensionsTests
                 cancellationTokenSource.Token));
     }
 
-    [Fact(DisplayName = "Does not hide programming errors")]
+    [Fact(DisplayName = "ToApiResultAsync should throw when operation has programming error")]
     public async Task ToApiResultAsync_Should_Throw_When_OperationHasProgrammingError()
     {
         var exception = new InvalidOperationException("Mapping failed.");
@@ -118,7 +118,7 @@ public sealed class ApiResultExtensionsTests
         thrown.ShouldBeSameAs(exception);
     }
 
-    [Fact(DisplayName = "Maps resilience timeouts to unexpected errors")]
+    [Fact(DisplayName = "ToApiResultAsync should map unexpected error when resilience timeout occurs")]
     public async Task ToApiResultAsync_Should_MapUnexpectedError_When_ResilienceTimeoutOccurs()
     {
         Result result = await Task.FromException(new TimeoutRejectedException())

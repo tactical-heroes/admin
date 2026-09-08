@@ -5,7 +5,7 @@ namespace TacticalHeroes.Admin.Shared.ComponentTests.Model;
 
 public sealed class EnumExtensionsTests
 {
-    [Fact(DisplayName = "Returns the enum display name")]
+    [Fact(DisplayName = "GetDisplayName should return display name when attribute is present")]
     public void GetDisplayName_Should_ReturnDisplayName_When_AttributeIsPresent()
     {
         string displayName = TestStatus.ReadyForBattle.GetDisplayName();
@@ -13,7 +13,7 @@ public sealed class EnumExtensionsTests
         displayName.ShouldBe("Ready for battle");
     }
 
-    [Fact(DisplayName = "Falls back to the enum member name")]
+    [Fact(DisplayName = "GetDisplayName should return member name when attribute is missing")]
     public void GetDisplayName_Should_ReturnMemberName_When_AttributeIsMissing()
     {
         string displayName = TestStatus.Unknown.GetDisplayName();
@@ -21,7 +21,7 @@ public sealed class EnumExtensionsTests
         displayName.ShouldBe(nameof(TestStatus.Unknown));
     }
 
-    [Fact(DisplayName = "Converts the enum member name to snake case")]
+    [Fact(DisplayName = "ToSnakeCase should return snake case when value has multiple words")]
     public void ToSnakeCase_Should_ReturnSnakeCase_When_ValueHasMultipleWords()
     {
         string value = TestStatus.ReadyForBattle.ToSnakeCase();
@@ -29,7 +29,7 @@ public sealed class EnumExtensionsTests
         value.ShouldBe("ready_for_battle");
     }
 
-    [Fact(DisplayName = "Uses the configured enum member name")]
+    [Fact(DisplayName = "ToSnakeCase should return configured name when attribute is present")]
     public void ToSnakeCase_Should_ReturnConfiguredName_When_AttributeIsPresent()
     {
         string value = TestStatus.OAuth.ToSnakeCase();
@@ -37,7 +37,7 @@ public sealed class EnumExtensionsTests
         value.ShouldBe("oauth");
     }
 
-    [Theory(DisplayName = "Parses supported enum name formats")]
+    [Theory(DisplayName = "TryParseSnakeCase should return value when name is supported")]
     [InlineData("ready_for_battle")]
     [InlineData("ReadyForBattle")]
     [InlineData("0")]
@@ -49,7 +49,7 @@ public sealed class EnumExtensionsTests
         result.ShouldBe(TestStatus.ReadyForBattle);
     }
 
-    [Fact(DisplayName = "Parses the configured enum member name")]
+    [Fact(DisplayName = "TryParseSnakeCase should return value when configured name is valid")]
     public void TryParseSnakeCase_Should_ReturnValue_When_ConfiguredNameIsValid()
     {
         bool parsed = "oauth".TryParseSnakeCase(out TestStatus result);
@@ -58,7 +58,7 @@ public sealed class EnumExtensionsTests
         result.ShouldBe(TestStatus.OAuth);
     }
 
-    [Fact(DisplayName = "Rejects an unknown snake case enum name")]
+    [Fact(DisplayName = "TryParseSnakeCase should return false when name is unknown")]
     public void TryParseSnakeCase_Should_ReturnFalse_When_NameIsUnknown()
     {
         bool parsed = "not_available".TryParseSnakeCase(out TestStatus result);

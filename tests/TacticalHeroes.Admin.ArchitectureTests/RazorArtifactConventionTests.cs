@@ -19,7 +19,7 @@ public sealed partial class RazorArtifactConventionTests
         RegexOptions.CultureInvariant)]
     private static partial Regex PropertyInjectionRegex();
 
-    [Fact(DisplayName = "Razor markup keeps code and styles in companion files")]
+    [Fact(DisplayName = "RazorMarkup should not contain code or styles when source is scanned")]
     public void RazorMarkup_Should_NotContainCodeOrStyles_When_SourceIsScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
@@ -31,7 +31,7 @@ public sealed partial class RazorArtifactConventionTests
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "Razor import blocks are separated from directives and markup")]
+    [Fact(DisplayName = "RazorImports should use separate blocks when source is scanned")]
     public void RazorImports_Should_UseSeparateBlocks_When_SourceIsScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
@@ -70,7 +70,7 @@ public sealed partial class RazorArtifactConventionTests
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "Razor companion files belong to an existing component")]
+    [Fact(DisplayName = "RazorCompanions should have component when companions are scanned")]
     public void RazorCompanions_Should_HaveComponent_When_CompanionsAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
@@ -106,8 +106,8 @@ public sealed partial class RazorArtifactConventionTests
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "Razor components use constructor injection")]
-    public void RazorComponents_Should_NotUsePropertyInjection()
+    [Fact(DisplayName = "RazorComponents should not use property injection when source is scanned")]
+    public void RazorComponents_Should_NotUsePropertyInjection_When_SourceIsScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
         string sourceRoot = Path.Combine(repositoryRoot, "src");
@@ -118,7 +118,7 @@ public sealed partial class RazorArtifactConventionTests
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "Razor forms use MudForm instead of EditForm")]
+    [Fact(DisplayName = "RazorForms should use mud form when forms are scanned")]
     public void RazorForms_Should_UseMudForm_When_FormsAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();

@@ -7,7 +7,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Pages.CreateRoleP
 
 public sealed class CreateRoleFormModelValidatorTests
 {
-    [Fact(DisplayName = "Rejects a role containing an empty claim")]
+    [Fact(DisplayName = "Validate should return claim errors when claim is empty")]
     public void Validate_Should_ReturnClaimErrors_When_ClaimIsEmpty()
     {
         var model = new CreateRoleFormModel

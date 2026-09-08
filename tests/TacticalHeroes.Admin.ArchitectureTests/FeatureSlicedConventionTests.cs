@@ -23,7 +23,7 @@ public sealed partial class FeatureSlicedConventionTests
             ["Pages"] = 4,
         };
 
-    [Fact(DisplayName = "Client and modules use only FSD top-level layers")]
+    [Fact(DisplayName = "SourceFolders should use known layers when application roots are scanned")]
     public void SourceFolders_Should_UseKnownLayers_When_ApplicationRootsAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
@@ -56,7 +56,7 @@ public sealed partial class FeatureSlicedConventionTests
             .ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "FSD source namespaces match their folders")]
+    [Fact(DisplayName = "SourceNamespaces should match folders when fsd sources are scanned")]
     public void SourceNamespaces_Should_MatchFolders_When_FsdSourcesAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
@@ -86,7 +86,7 @@ public sealed partial class FeatureSlicedConventionTests
             .ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "FSD layers depend only on lower layers")]
+    [Fact(DisplayName = "SourceDependencies should follow layer direction when fsd sources are scanned")]
     public void SourceDependencies_Should_FollowLayerDirection_When_FsdSourcesAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
@@ -114,7 +114,7 @@ public sealed partial class FeatureSlicedConventionTests
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "Modules do not depend on other modules")]
+    [Fact(DisplayName = "ModuleSources should not reference other modules when modules are scanned")]
     public void ModuleSources_Should_NotReferenceOtherModules_When_ModulesAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
@@ -149,7 +149,7 @@ public sealed partial class FeatureSlicedConventionTests
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "Page slices do not depend on sibling page slices")]
+    [Fact(DisplayName = "PageSources should not reference sibling slices when pages are scanned")]
     public void PageSources_Should_NotReferenceSiblingSlices_When_PagesAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();

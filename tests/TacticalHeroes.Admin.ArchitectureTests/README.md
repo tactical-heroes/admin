@@ -156,3 +156,43 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
 25. `EnumerationMembers_Should_HaveEnglishDisplayNames_When_SourceIsScanned`
     — каждый элемент production-enum имеет непустой английский
     `[Display(Name = "...")]`, пригодный для единообразного отображения в UI.
+
+## Зеркальные компонентные тесты
+
+26. `Components_Should_HaveMirroredTests_When_ProductionComponentsAreDiscovered`
+    — каждый компонент и базовый класс имеет зеркальный `<TypeName>Tests.cs`
+    с исполняемыми `Fact`/`Theory`. Тесты с `Skip`, `Explicit`, `SkipWhen` или
+    `SkipUnless` не засчитываются в покрытие. Теории с `SkipTestWithoutData = true`
+    также не засчитываются: при пустом наборе данных они могут быть пропущены.
+
+27. `ComponentTests_Should_CoverDeclaredMethods_When_ComponentsHaveBehavior`
+    — собственные методы и перегрузки сопоставлены тестам по префиксу
+    `MethodName_Should_`; унаследованные методы проверяются у объявляющей их базы.
+
+## Имена и структура тестов
+
+28. `TestMethods_Should_FollowNamingConvention_When_ATestIsDeclared` — полное
+    имя каждого теста соответствует `MethodName_Should_Behavior_When_Condition`.
+
+29. `FactsAndTheories_Should_DeclareDisplayName_When_ATestIsDeclared` — каждый
+    `Fact`/`Theory` имеет непустой строковый литерал `DisplayName`.
+
+30. `DisplayNames_Should_DescribeTestCondition_When_ATestIsDeclared` — английский
+    `DisplayName` имеет вид `… should … when …` и условие из части `_When_` имени.
+
+31. `TestMethods_Should_FollowArrangeActAssert_When_ATestIsDeclared` — минимум
+    две секции, разделённые пустой строкой; последняя содержит вызовы проверок
+    xUnit, Shouldly или bUnit, разрешённые через Roslyn. Объявления лямбд и
+    локальных функций не считаются проверками; поддерживаются inline callbacks
+    настоящего bUnit `WaitForAssertion`.
+
+32. `TestNamespaces_Should_MatchProjectFolders_When_TestSourcesAreScanned` —
+    namespace типов соответствует папке относительно проекта и его корневому
+    namespace. Типы в глобальном namespace запрещены; файлы только с `using`
+    не требуют namespace.
+
+Исходники, ссылки, корневой namespace и параметры C# берутся из MSBuild в
+конфигурации запущенной архитектурной сборки. Анализ учитывает активные ветки
+`#if`, включая символы целевой платформы и `DefineConstants`, а также глобальные
+`using` проекта. Результат оценки проектов кешируется на время запуска тестов.
+Для запуска нужен .NET SDK и восстановленные зависимости всех тестовых проектов.

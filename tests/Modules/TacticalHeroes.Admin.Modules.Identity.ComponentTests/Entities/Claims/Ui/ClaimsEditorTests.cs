@@ -13,7 +13,7 @@ public sealed class ClaimsEditorTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "Adds a claim and renders its row")]
+    [Fact(DisplayName = "AddClaim should add claim and render row when claims are empty")]
     public void AddClaim_Should_AddClaimAndRenderRow_When_ClaimsAreEmpty()
     {
         IList<ClaimValue> claims = [];
@@ -27,7 +27,7 @@ public sealed class ClaimsEditorTests : BunitContext
         component.FindAll(".empty-claims").ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "Removes a claim and renders the empty state")]
+    [Fact(DisplayName = "RemoveClaim should remove claim and render empty state when claim exists")]
     public void RemoveClaim_Should_RemoveClaimAndRenderEmptyState_When_ClaimExists()
     {
         IList<ClaimValue> claims =

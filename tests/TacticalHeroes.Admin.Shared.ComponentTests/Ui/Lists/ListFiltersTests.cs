@@ -10,7 +10,7 @@ public sealed class ListFiltersTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "Disables actions when filters are unavailable")]
+    [Fact(DisplayName = "FilterActions should be disabled when filters are unavailable")]
     public void FilterActions_Should_BeDisabled_When_FiltersAreUnavailable()
     {
         var component = Render<ListFilters>(parameters => parameters

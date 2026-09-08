@@ -6,7 +6,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Pages.ResetPasswo
 
 public sealed class ResetModelTests
 {
-    [Fact(DisplayName = "Stores password values")]
+    [Fact(DisplayName = "ResetModel should store values when values are assigned")]
     public void ResetModel_Should_StoreValues_When_ValuesAreAssigned()
     {
         var model = new ResetModel
@@ -19,7 +19,7 @@ public sealed class ResetModelTests
         model.PasswordConfirmation.ShouldBe("secret-password");
     }
 
-    [Fact(DisplayName = "Validates required password values")]
+    [Fact(DisplayName = "ResetModelValidator should return required errors when model is empty")]
     public void ResetModelValidator_Should_ReturnRequiredErrors_When_ModelIsEmpty()
     {
         var model = new ResetModel();
@@ -31,7 +31,7 @@ public sealed class ResetModelTests
         result.Errors.ShouldContain(error => error.ErrorMessage == "Повторите новый пароль.");
     }
 
-    [Fact(DisplayName = "Validates password value formats")]
+    [Fact(DisplayName = "ResetModelValidator should return format errors when values are invalid")]
     public void ResetModelValidator_Should_ReturnFormatErrors_When_ValuesAreInvalid()
     {
         var model = new ResetModel
@@ -47,7 +47,7 @@ public sealed class ResetModelTests
         result.Errors.ShouldContain(error => error.ErrorMessage == "Пароли не совпадают.");
     }
 
-    [Fact(DisplayName = "Accepts valid password values")]
+    [Fact(DisplayName = "ResetModelValidator should return no errors when model is valid")]
     public void ResetModelValidator_Should_ReturnNoErrors_When_ModelIsValid()
     {
         var model = new ResetModel

@@ -34,7 +34,7 @@ public sealed class CreateFactionPageTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "Creates a valid faction and opens its update page")]
+    [Fact(DisplayName = "Submit should navigate to update page when faction is valid")]
     public void Submit_Should_NavigateToUpdatePage_When_FactionIsValid()
     {
         var component = Render<CreateFactionPageComponent>();
@@ -51,7 +51,7 @@ public sealed class CreateFactionPageTests : BunitContext
         });
     }
 
-    [Fact(DisplayName = "Does not create a faction when required fields are empty")]
+    [Fact(DisplayName = "Submit should display validation errors when required fields are empty")]
     public void Submit_Should_DisplayValidationErrors_When_RequiredFieldsAreEmpty()
     {
         var component = Render<CreateFactionPageComponent>();
@@ -66,7 +66,7 @@ public sealed class CreateFactionPageTests : BunitContext
         });
     }
 
-    [Fact(DisplayName = "Displays a server validation error on its field")]
+    [Fact(DisplayName = "Submit should display field error when server rejects faction name")]
     public void Submit_Should_DisplayFieldError_When_ServerRejectsFactionName()
     {
         _handler.RejectName = true;

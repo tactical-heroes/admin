@@ -16,8 +16,8 @@ public sealed class AsyncEnumerationSelectTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "Loads enumeration items and selects the first one by default")]
-    public void Load_Should_SelectFirstItem_When_DefaultIsEnabled()
+    [Fact(DisplayName = "ApplyDefaultValueAsync should select first item when default is enabled")]
+    public void ApplyDefaultValueAsync_Should_SelectFirstItem_When_DefaultIsEnabled()
     {
         string? selectedItem = null;
 
@@ -36,8 +36,24 @@ public sealed class AsyncEnumerationSelectTests : BunitContext
         });
     }
 
-    [Fact(DisplayName = "Shows a load error and retries loading enumeration items")]
-    public void Load_Should_Retry_When_FirstRequestFails()
+    [Fact(DisplayName = "OnInitializedAsync should load items when component is rendered")]
+    public void OnInitializedAsync_Should_LoadItems_When_ComponentIsRendered()
+    {
+        var component = Render<AsyncEnumerationSelect<TestEnumeration>>(
+            parameters => parameters.Add(select => select.Label, "Статус"));
+
+        component.WaitForAssertion(() =>
+        {
+            _provider.RequestCount.ShouldBe(1);
+            component.FindComponents<MudSelectItem<string>>()
+                .Select(item => item.Instance.Value)
+                .ShouldBe(["active", "blocked"]);
+            component.Instance.Value.ShouldBeNull();
+        });
+    }
+
+    [Fact(DisplayName = "LoadAsync should retry when first request fails")]
+    public void LoadAsync_Should_Retry_When_FirstRequestFails()
     {
         _provider.FailNextRequest = true;
         var component = Render<AsyncEnumerationSelect<TestEnumeration>>(

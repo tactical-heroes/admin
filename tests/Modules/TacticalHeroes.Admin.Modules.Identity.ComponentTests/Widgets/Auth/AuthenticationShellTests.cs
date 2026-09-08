@@ -4,7 +4,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Widgets.Auth;
 
 public sealed class AuthenticationShellTests : BunitContext
 {
-    [Fact(DisplayName = "Renders brand and child content")]
+    [Fact(DisplayName = "Render should show brand and child content when content is provided")]
     public void Render_Should_ShowBrandAndChildContent_When_ContentIsProvided()
     {
         var component = Render<AuthenticationShell>(parameters => parameters
@@ -15,7 +15,7 @@ public sealed class AuthenticationShellTests : BunitContext
         component.Find(".test-content").TextContent.ShouldBe("Login form");
     }
 
-    [Fact(DisplayName = "Does not render global navigation")]
+    [Fact(DisplayName = "Render should not show global navigation when content is provided")]
     public void Render_Should_NotShowGlobalNavigation_When_ContentIsProvided()
     {
         var component = Render<AuthenticationShell>(parameters => parameters

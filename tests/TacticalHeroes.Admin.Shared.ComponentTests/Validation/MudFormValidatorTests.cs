@@ -4,8 +4,8 @@ namespace TacticalHeroes.Admin.Shared.ComponentTests.Validation;
 
 public sealed class MudFormValidatorTests
 {
-    [Fact(DisplayName = "Validates only the field requested by MudForm")]
-    public void ValidateValue_Should_ReturnErrorsOnlyForRequestedProperty()
+    [Fact(DisplayName = "ValidateValue should return errors only for requested property when model has invalid fields")]
+    public void ValidateValue_Should_ReturnErrorsOnlyForRequestedProperty_When_ModelHasInvalidFields()
     {
         var validator = new TestModelValidator();
         var model = new TestModel();
@@ -15,8 +15,8 @@ public sealed class MudFormValidatorTests
         errors.ShouldBe(["Name is required."]);
     }
 
-    [Fact(DisplayName = "Creates a field validator for a selected model property")]
-    public void For_Should_ReturnErrorsOnlyForSelectedProperty()
+    [Fact(DisplayName = "For should return errors only for selected property when property is selected")]
+    public void For_Should_ReturnErrorsOnlyForSelectedProperty_When_PropertyIsSelected()
     {
         var validator = new TestModelValidator();
         var model = new TestModel();

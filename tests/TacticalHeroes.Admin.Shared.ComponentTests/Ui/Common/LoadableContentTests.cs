@@ -10,7 +10,7 @@ public sealed class LoadableContentTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "Shows loading content while loading")]
+    [Fact(DisplayName = "Render should show loading content when loading")]
     public void Render_Should_ShowLoadingContent_When_Loading()
     {
         var component = Render<LoadableContent>(parameters => parameters
@@ -26,7 +26,7 @@ public sealed class LoadableContentTests : BunitContext
         component.Markup.ShouldNotContain("Load failed.");
     }
 
-    [Fact(DisplayName = "Uses the configured loading height")]
+    [Fact(DisplayName = "Render should use loading height when provided")]
     public void Render_Should_UseLoadingHeight_When_Provided()
     {
         var component = Render<LoadableContent>(parameters => parameters
@@ -40,7 +40,7 @@ public sealed class LoadableContentTests : BunitContext
             .ShouldContain("height:280px");
     }
 
-    [Fact(DisplayName = "Shows an error and retries loading")]
+    [Fact(DisplayName = "Render should invoke retry when error is shown")]
     public void Render_Should_InvokeRetry_When_ErrorIsShown()
     {
         int retryCount = 0;
@@ -56,7 +56,7 @@ public sealed class LoadableContentTests : BunitContext
         component.FindAll(".content").ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "Shows child content after loading succeeds")]
+    [Fact(DisplayName = "Render should show child content when load succeeds")]
     public void Render_Should_ShowChildContent_When_LoadSucceeds()
     {
         var component = Render<LoadableContent>(parameters => parameters

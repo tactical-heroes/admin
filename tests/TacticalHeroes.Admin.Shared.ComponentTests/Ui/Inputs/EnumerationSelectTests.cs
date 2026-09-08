@@ -11,8 +11,8 @@ public sealed class EnumerationSelectTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "Renders enumeration values and resolves their display names")]
-    public void Render_Should_MapNamesToDisplayNames_When_ItemsAreProvided()
+    [Fact(DisplayName = "GetDisplayName should map names to display names when items are provided")]
+    public void GetDisplayName_Should_MapNamesToDisplayNames_When_ItemsAreProvided()
     {
         IEnumeration[] items =
         [

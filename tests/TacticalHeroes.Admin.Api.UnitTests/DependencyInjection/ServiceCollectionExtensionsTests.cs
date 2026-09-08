@@ -10,7 +10,7 @@ namespace TacticalHeroes.Admin.Api.UnitTests.DependencyInjection;
 
 public sealed class ServiceCollectionExtensionsTests
 {
-    [Fact(DisplayName = "Retries safe requests after transient failures")]
+    [Fact(DisplayName = "AddTacticalHeroesApiClient should retry get when transient failure occurs")]
     public async Task AddTacticalHeroesApiClient_Should_RetryGet_When_TransientFailureOccurs()
     {
         var handler = new SequenceHandler(
@@ -27,7 +27,7 @@ public sealed class ServiceCollectionExtensionsTests
         handler.AttemptCount.ShouldBe(2);
     }
 
-    [Fact(DisplayName = "Does not retry unsafe requests after transient failures")]
+    [Fact(DisplayName = "AddTacticalHeroesApiClient should not retry post when transient failure occurs")]
     public async Task AddTacticalHeroesApiClient_Should_NotRetryPost_When_TransientFailureOccurs()
     {
         var handler = new SequenceHandler(HttpStatusCode.ServiceUnavailable);

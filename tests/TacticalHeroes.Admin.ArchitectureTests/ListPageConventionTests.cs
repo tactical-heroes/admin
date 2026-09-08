@@ -23,7 +23,7 @@ public sealed partial class ListPageConventionTests
         RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)]
     private static partial Regex IdentifierColumnRegex();
 
-    [Fact(DisplayName = "List surfaces use the shared list and row action container")]
+    [Fact(DisplayName = "ListSurfaces should use shared components when admin lists are scanned")]
     public void ListSurfaces_Should_UseSharedComponents_When_AdminListsAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
@@ -44,7 +44,7 @@ public sealed partial class ListPageConventionTests
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "List surfaces do not expose identifier columns")]
+    [Fact(DisplayName = "ListSurfaces should not expose identifiers when admin lists are scanned")]
     public void ListSurfaces_Should_NotExposeIdentifiers_When_AdminListsAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
@@ -55,7 +55,7 @@ public sealed partial class ListPageConventionTests
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "List surfaces bind load errors instead of passing a literal")]
+    [Fact(DisplayName = "ListSurfaces should bind load errors when admin lists are scanned")]
     public void ListSurfaces_Should_BindLoadErrors_When_AdminListsAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
@@ -66,7 +66,7 @@ public sealed partial class ListPageConventionTests
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "List pages expose a page header and create action")]
+    [Fact(DisplayName = "ListPages should expose header and create action when admin lists are scanned")]
     public void ListPages_Should_ExposeHeaderAndCreateAction_When_AdminListsAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();

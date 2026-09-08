@@ -6,7 +6,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Features.Authenti
 
 public sealed class AuthenticationFeedbackTests : BunitContext
 {
-    [Fact(DisplayName = "Does not render empty feedback")]
+    [Fact(DisplayName = "Render should not render when message is empty")]
     public void Render_Should_NotRender_When_MessageIsEmpty()
     {
         var component = Render<AuthenticationFeedback>();
@@ -14,7 +14,7 @@ public sealed class AuthenticationFeedbackTests : BunitContext
         component.Markup.ShouldBeEmpty();
     }
 
-    [Theory(DisplayName = "Renders semantic feedback for its severity")]
+    [Theory(DisplayName = "Render should set semantics when severity is provided")]
     [InlineData(Severity.Error, "alert", "auth-feedback--error")]
     [InlineData(Severity.Warning, "alert", null)]
     [InlineData(Severity.Success, "status", "auth-feedback--success")]

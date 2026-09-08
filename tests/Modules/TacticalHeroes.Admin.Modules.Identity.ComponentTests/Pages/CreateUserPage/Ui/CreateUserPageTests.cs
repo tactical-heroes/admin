@@ -34,7 +34,7 @@ public sealed class CreateUserPageTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "Creates a valid user and opens its update page")]
+    [Fact(DisplayName = "Submit should navigate to update page when user is valid")]
     public void Submit_Should_NavigateToUpdatePage_When_UserIsValid()
     {
         var component = Render<CreateUserPageComponent>();
@@ -53,7 +53,7 @@ public sealed class CreateUserPageTests : BunitContext
         });
     }
 
-    [Fact(DisplayName = "Does not create a user when account fields are empty")]
+    [Fact(DisplayName = "Submit should display validation errors when account fields are empty")]
     public void Submit_Should_DisplayValidationErrors_When_AccountFieldsAreEmpty()
     {
         var component = Render<CreateUserPageComponent>();
