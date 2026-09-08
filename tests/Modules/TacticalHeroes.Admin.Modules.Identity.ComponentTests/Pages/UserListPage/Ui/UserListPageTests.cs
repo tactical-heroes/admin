@@ -34,7 +34,7 @@ public sealed class UserListPageTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "The user list renders API data and create and edit links")]
+    [Fact(DisplayName = "Render should show rows and actions when load succeeds")]
     public void Render_Should_ShowRowsAndActions_When_LoadSucceeds()
     {
         var component = Render<UserListPageComponent>();
@@ -49,7 +49,7 @@ public sealed class UserListPageTests : BunitContext
         });
     }
 
-    [Fact(DisplayName = "The user list restores pagination from the page URL")]
+    [Fact(DisplayName = "Render should request selected page when query contains pagination")]
     public void Render_Should_RequestSelectedPage_When_QueryContainsPagination()
     {
         Services.GetRequiredService<NavigationManager>().NavigateTo(
@@ -66,7 +66,7 @@ public sealed class UserListPageTests : BunitContext
         });
     }
 
-    [Fact(DisplayName = "The user list shows an empty state when the API returns no rows")]
+    [Fact(DisplayName = "Render should show empty state when page is empty")]
     public void Render_Should_ShowEmptyState_When_PageIsEmpty()
     {
         _handler.Empty = true;
@@ -77,7 +77,7 @@ public sealed class UserListPageTests : BunitContext
         component.FindAll("button[aria-label^='Удалить']").ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "The user list can retry after a failed request")]
+    [Fact(DisplayName = "Render should reload rows when load error is retried")]
     public void Render_Should_ReloadRows_When_LoadErrorIsRetried()
     {
         _handler.Fail = true;
@@ -95,7 +95,7 @@ public sealed class UserListPageTests : BunitContext
         });
     }
 
-    [Fact(DisplayName = "Deleting a user uses its identifier and refreshes the list")]
+    [Fact(DisplayName = "DeleteUserAsync should delete and reload when deletion is confirmed")]
     public async Task DeleteUserAsync_Should_DeleteAndReload_When_DeletionIsConfirmed()
     {
         var dialogs = Render<MudDialogProvider>();
@@ -115,7 +115,7 @@ public sealed class UserListPageTests : BunitContext
         });
     }
 
-    [Theory(DisplayName = "The user list restores the email query regardless of casing")]
+    [Theory(DisplayName = "Render should restore email filter when query contains email")]
     [InlineData("email")]
     [InlineData("Email")]
     [InlineData("EMAIL")]

@@ -5,7 +5,7 @@ namespace TacticalHeroes.Admin.Shared.ComponentTests.Ui.Lists;
 
 public sealed class ListPaginationTests : BunitContext
 {
-    [Fact(DisplayName = "Selecting a page size forwards the selected value")]
+    [Fact(DisplayName = "ChangePageSizeAsync should notify parent when size changes")]
     public async Task ChangePageSizeAsync_Should_NotifyParent_When_SizeChanges()
     {
         int selectedSize = 0;
@@ -25,7 +25,7 @@ public sealed class ListPaginationTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "Shows page summary and configured navigation range")]
+    [Fact(DisplayName = "Render should show summary and range when page is provided")]
     public void Render_Should_ShowSummaryAndRange_When_PageIsProvided()
     {
         var component = Render<ListPagination>(parameters => parameters

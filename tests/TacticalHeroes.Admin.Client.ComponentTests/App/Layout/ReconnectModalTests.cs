@@ -4,7 +4,7 @@ namespace TacticalHeroes.Admin.Client.ComponentTests.App.Layout;
 
 public sealed class ReconnectModalTests : BunitContext
 {
-    [Fact(DisplayName = "The reconnect surface exposes retry and resume controls with its script module")]
+    [Fact(DisplayName = "Render should show recovery controls when connection ui is rendered")]
     public void Render_Should_ShowRecoveryControls_When_ConnectionUiIsRendered()
     {
         var component = Render<ReconnectModal>();

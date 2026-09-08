@@ -5,7 +5,7 @@ namespace TacticalHeroes.Admin.Shared.ComponentTests.Ui.Lists;
 
 public sealed class MudPagedListComponentBaseTests : BunitContext
 {
-    [Fact(DisplayName = "Changing the page preserves filters and page size")]
+    [Fact(DisplayName = "ChangePage should preserve filter when page changes")]
     public async Task ChangePage_Should_PreserveFilter_When_PageChanges()
     {
         TestComponent component = CreateComponent();
@@ -16,7 +16,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
         component.CurrentUri.ShouldEndWith("/items?email=admin%40example.test&page=3&pageSize=25");
     }
 
-    [Fact(DisplayName = "Changing page size preserves filters and resets to the first page")]
+    [Fact(DisplayName = "ChangePageSize should reset page when page size changes")]
     public async Task ChangePageSize_Should_ResetPage_When_PageSizeChanges()
     {
         TestComponent component = CreateComponent();
@@ -27,7 +27,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
         component.CurrentUri.ShouldEndWith("/items?email=admin%40example.test&pageSize=50");
     }
 
-    [Fact(DisplayName = "Removing the final item on a later page navigates to the preceding page")]
+    [Fact(DisplayName = "OnItemRemovedAsync should navigate back when last item is removed")]
     public async Task OnItemRemovedAsync_Should_NavigateBack_When_LastItemIsRemoved()
     {
         TestComponent component = CreateComponent();
@@ -38,7 +38,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
         component.CurrentUri.ShouldEndWith("/items?pageSize=25");
     }
 
-    [Fact(DisplayName = "Loads once for the same route state and reloads when it changes")]
+    [Fact(DisplayName = "OnParametersSetAsync should load once when route state is unchanged")]
     public async Task OnParametersSetAsync_Should_LoadOnce_When_RouteStateIsUnchanged()
     {
         TestComponent component = CreateComponent();
@@ -67,7 +67,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
         component.Page?.PageNumber.ShouldBe(3);
     }
 
-    [Fact(DisplayName = "Exposes zero totals before a page is loaded")]
+    [Fact(DisplayName = "Totals should be zero when page is unavailable")]
     public void Totals_Should_BeZero_When_PageIsUnavailable()
     {
         TestComponent component = CreateComponent();
@@ -76,7 +76,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
         component.ItemsCount.ShouldBe(0);
     }
 
-    [Fact(DisplayName = "Applies every draft filter field from the first page")]
+    [Fact(DisplayName = "ApplyFilter should navigate from first page when draft changes")]
     public async Task ApplyFilter_Should_NavigateFromFirstPage_When_DraftChanges()
     {
         TestComponent component = CreateComponent();
@@ -99,7 +99,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
             "/items?email=moderator%40example.test&minimumAge=21&pageSize=25");
     }
 
-    [Fact(DisplayName = "Resets every filter field and navigates to the first page")]
+    [Fact(DisplayName = "ResetFilter should clear draft and navigate when filter is active")]
     public async Task ResetFilter_Should_ClearDraftAndNavigate_When_FilterIsActive()
     {
         TestComponent component = CreateComponent();
@@ -117,7 +117,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
             "/items?pageSize=25");
     }
 
-    [Fact(DisplayName = "Does not navigate when applying an unchanged filter")]
+    [Fact(DisplayName = "ChangeFilter should keep current uri when filter is unchanged")]
     public async Task ChangeFilter_Should_KeepCurrentUri_When_FilterIsUnchanged()
     {
         TestComponent component = CreateComponent();
@@ -129,7 +129,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
         component.CurrentUri.ShouldBe(originalUri);
     }
 
-    [Fact(DisplayName = "Builds the list URI from the supplied filter and pagination")]
+    [Fact(DisplayName = "NavigateToList should include filter and pagination when navigating")]
     public void NavigateToList_Should_IncludeFilterAndPagination_When_Navigating()
     {
         TestComponent component = CreateComponent();
@@ -139,7 +139,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
         component.CurrentUri.ShouldEndWith("/items?email=admin%2Btest%40example.test&page=3&pageSize=25");
     }
 
-    [Fact(DisplayName = "Reuses the persisted page when its filter and pagination match the route")]
+    [Fact(DisplayName = "MatchesCurrentRoute should reuse page when persisted state matches")]
     public async Task MatchesCurrentRoute_Should_ReusePage_When_PersistedStateMatches()
     {
         TestComponent component = CreateComponent();
@@ -155,7 +155,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
         component.Page.ShouldBeSameAs(page);
     }
 
-    [Theory(DisplayName = "Compares filter values rather than references to decide whether to reload")]
+    [Theory(DisplayName = "FiltersEqual should compare values when filter instances differ")]
     [InlineData("admin@example.test", 18, 1)]
     [InlineData("other@example.test", 18, 2)]
     [InlineData("admin@example.test", 21, 2)]
@@ -173,7 +173,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
         component.LoadRequests.Count.ShouldBe(expectedLoads);
     }
 
-    [Fact(DisplayName = "Shows a load error and allows retrying the same route state")]
+    [Fact(DisplayName = "LoadPageAsync should clear error when retry succeeds")]
     public async Task LoadPageAsync_Should_ClearError_When_RetrySucceeds()
     {
         TestComponent component = CreateComponent();
@@ -193,7 +193,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
         component.Page.ShouldNotBeNull();
     }
 
-    [Fact(DisplayName = "Does not apply an obsolete load after route state changes")]
+    [Fact(DisplayName = "IsCurrentLoad should ignore obsolete load when route state changes")]
     public async Task IsCurrentLoad_Should_IgnoreObsoleteLoad_When_RouteStateChanges()
     {
         var firstLoad = new TaskCompletionSource<Result<PaginationResult<TestItem>>>(
@@ -217,7 +217,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
         component.Loading.ShouldBeFalse();
     }
 
-    [Fact(DisplayName = "Stops loading when the load operation throws")]
+    [Fact(DisplayName = "OnParametersSetAsync should stop loading when load throws")]
     public async Task OnParametersSetAsync_Should_StopLoading_When_LoadThrows()
     {
         TestComponent component = CreateComponent();
@@ -230,7 +230,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
         component.Loading.ShouldBeFalse();
     }
 
-    [Fact(DisplayName = "Reloads the current page after an item is removed")]
+    [Fact(DisplayName = "OnItemRemovedAsync should reload when page still contains items")]
     public async Task OnItemRemovedAsync_Should_Reload_When_PageStillContainsItems()
     {
         TestComponent component = CreateComponent();

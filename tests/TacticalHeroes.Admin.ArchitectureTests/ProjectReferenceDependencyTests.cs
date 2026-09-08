@@ -35,7 +35,7 @@ public sealed class ProjectReferenceDependencyTests
             ],
         };
 
-    [Fact(DisplayName = "Production projects follow the allowed dependency graph")]
+    [Fact(DisplayName = "ProjectReferences should match allowed dependencies when production projects are loaded")]
     public void ProjectReferences_Should_MatchAllowedDependencies_When_ProductionProjectsAreLoaded()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
@@ -55,7 +55,7 @@ public sealed class ProjectReferenceDependencyTests
         }
     }
 
-    [Fact(DisplayName = "Modules do not reference other module projects")]
+    [Fact(DisplayName = "ModuleReferences should not contain modules when module projects are loaded")]
     public void ModuleReferences_Should_NotContainModules_When_ModuleProjectsAreLoaded()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();

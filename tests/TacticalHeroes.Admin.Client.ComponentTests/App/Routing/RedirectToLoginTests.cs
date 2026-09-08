@@ -10,7 +10,7 @@ namespace TacticalHeroes.Admin.Client.ComponentTests.App.Routing;
 
 public sealed class RedirectToLoginTests : BunitContext
 {
-    [Fact(DisplayName = "Redirecting to login preserves the current URL and forces a server navigation")]
+    [Fact(DisplayName = "OnInitialized should challenge with return url when component is rendered")]
     public void OnInitialized_Should_ChallengeWithReturnUrl_When_ComponentIsRendered()
     {
         var navigation = (BunitNavigationManager)Services.GetRequiredService<NavigationManager>();

@@ -7,7 +7,7 @@ namespace TacticalHeroes.Admin.ArchitectureTests;
 
 public sealed class ComponentTestConventionTests
 {
-    [Fact(DisplayName = "Components and their bases have mirrored files containing runnable component tests")]
+    [Fact(DisplayName = "Components should have mirrored tests when production components are discovered")]
     public void Components_Should_HaveMirroredTests_When_ProductionComponentsAreDiscovered()
     {
         ComponentTarget[] targets = GetTargets();
@@ -20,7 +20,7 @@ public sealed class ComponentTestConventionTests
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "Component tests name every declared lifecycle method and action including private handlers")]
+    [Fact(DisplayName = "ComponentTests should cover declared methods when components have behavior")]
     public void ComponentTests_Should_CoverDeclaredMethods_When_ComponentsHaveBehavior()
     {
         ComponentTarget[] targets = GetTargets();
@@ -32,7 +32,7 @@ public sealed class ComponentTestConventionTests
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "Method discovery includes private actions and lifecycle overrides but excludes inherited and generated members")]
+    [Fact(DisplayName = "GetBehaviorMethods should include only declared behavior when component has mixed members")]
     public void GetBehaviorMethods_Should_IncludeOnlyDeclaredBehavior_When_ComponentHasMixedMembers()
     {
         string[] methods = GetBehaviorMethods(typeof(DiscoveryComponent));
@@ -40,7 +40,7 @@ public sealed class ComponentTestConventionTests
         methods.Order().ShouldBe(["OnInitialized", "Submit", "Submit"]);
     }
 
-    [Fact(DisplayName = "Inherited methods belong to base tests while overrides belong to the declaring component")]
+    [Fact(DisplayName = "GetBehaviorMethods should separate base behavior when component inherits methods")]
     public void GetBehaviorMethods_Should_SeparateBaseBehavior_When_ComponentInheritsMethods()
     {
         string[] baseMethods = GetBehaviorMethods(typeof(DiscoveryBase));
@@ -51,7 +51,7 @@ public sealed class ComponentTestConventionTests
         componentMethods.ShouldContain("OnInitialized");
     }
 
-    [Theory(DisplayName = "Every overload needs a distinct test method with its exact method prefix")]
+    [Theory(DisplayName = "MissingMethods should report uncovered overloads when test names are insufficient")]
     [InlineData("Submit_Should_Save_When_Valid", 1)]
     [InlineData("SubmitAsync_Should_Save_When_Valid", 2)]
     [InlineData("", 2)]

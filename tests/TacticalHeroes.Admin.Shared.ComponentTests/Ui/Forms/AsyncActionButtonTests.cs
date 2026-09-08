@@ -11,7 +11,7 @@ public sealed class AsyncActionButtonTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "Shows busy state and disables the action")]
+    [Fact(DisplayName = "Render should show busy state when action is busy")]
     public void Render_Should_ShowBusyState_When_ActionIsBusy()
     {
         var component = Render<AsyncActionButton>(parameters => parameters
@@ -27,7 +27,7 @@ public sealed class AsyncActionButtonTests : BunitContext
         component.FindComponent<MudProgressCircular>();
     }
 
-    [Fact(DisplayName = "Invokes the action when the button is clicked")]
+    [Fact(DisplayName = "Click should invoke action when button is enabled")]
     public void Click_Should_InvokeAction_When_ButtonIsEnabled()
     {
         int clickCount = 0;

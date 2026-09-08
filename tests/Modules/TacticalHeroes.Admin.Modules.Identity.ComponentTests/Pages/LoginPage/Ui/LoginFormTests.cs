@@ -5,7 +5,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Pages.LoginPage.U
 
 public sealed class LoginFormTests : AuthenticationComponentTestContext
 {
-    [Theory(DisplayName = "Login mode links preserve the authorization return URL")]
+    [Theory(DisplayName = "BuildModeHref should preserve return url when mode link is rendered")]
     [InlineData(LoginMode.Register)]
     [InlineData(LoginMode.Recover)]
     [InlineData(LoginMode.Confirmation)]
@@ -22,7 +22,7 @@ public sealed class LoginFormTests : AuthenticationComponentTestContext
         component.Find("input[name='ReturnUrl']").GetAttribute("value").ShouldBe(returnUrl);
     }
 
-    [Fact(DisplayName = "TogglePasswordVisibility reveals and hides only its password field")]
+    [Fact(DisplayName = "TogglePasswordVisibility should toggle input type when button is clicked")]
     public void TogglePasswordVisibility_Should_ToggleInputType_When_ButtonIsClicked()
     {
         var component = Render<LoginForm>(parameters => parameters.Add(form => form.ReturnUrl, "/connect/authorize?client_id=admin"));
@@ -35,7 +35,7 @@ public sealed class LoginFormTests : AuthenticationComponentTestContext
         component.Find("#login-password").GetAttribute("type").ShouldBe("password");
     }
 
-    [Fact(DisplayName = "Login form displays the authentication error display name")]
+    [Fact(DisplayName = "Render should display error message when authentication error is provided")]
     public void Render_Should_DisplayErrorMessage_When_AuthenticationErrorIsProvided()
     {
         var component = Render<LoginForm>(parameters => parameters

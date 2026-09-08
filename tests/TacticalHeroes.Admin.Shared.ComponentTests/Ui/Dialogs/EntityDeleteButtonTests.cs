@@ -16,7 +16,7 @@ public sealed class EntityDeleteButtonTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Theory(DisplayName = "A delete button notifies its parent only after a successful confirmed deletion")]
+    [Theory(DisplayName = "ConfirmDeleteAsync should respect confirmation and result when action completes")]
     [InlineData(false, false, 0, 0)]
     [InlineData(true, false, 1, 1)]
     [InlineData(true, true, 1, 0)]

@@ -8,7 +8,7 @@ namespace TacticalHeroes.Admin.Shared.ComponentTests.Ui.Forms;
 
 public sealed class MudCreateFormComponentBaseTests : BunitContext
 {
-    [Fact(DisplayName = "A create form passes its model and lifetime token to the create operation")]
+    [Fact(DisplayName = "SubmitAsync should create and navigate when form is valid")]
     public async Task SubmitAsync_Should_CreateAndNavigate_When_FormIsValid()
     {
         Services.AddMudServices();

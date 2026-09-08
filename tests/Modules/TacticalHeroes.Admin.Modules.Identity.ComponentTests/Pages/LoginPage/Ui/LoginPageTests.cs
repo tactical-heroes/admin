@@ -9,7 +9,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Pages.LoginPage.U
 
 public sealed class LoginPageTests : AuthenticationComponentTestContext
 {
-    [Theory(DisplayName = "Login page binds query parameters and displays the selected mode title")]
+    [Theory(DisplayName = "Render should bind query and display title when mode is provided")]
     [InlineData("register", "Register - " + Branding.GameName)]
     [InlineData("confirmation", "Confirm email - " + Branding.GameName)]
     [InlineData("recover", "Recover access - " + Branding.GameName)]

@@ -4,7 +4,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Pages.LoginPage.U
 
 public sealed class ResendConfirmationFormTests : AuthenticationComponentTestContext
 {
-    [Fact(DisplayName = "Confirmation form validates an empty model through MudForm")]
+    [Fact(DisplayName = "SubmitAsync should display validation error when model is empty")]
     public void SubmitAsync_Should_DisplayValidationError_When_ModelIsEmpty()
     {
         var component = Render<ResendConfirmationForm>();
@@ -18,7 +18,7 @@ public sealed class ResendConfirmationFormTests : AuthenticationComponentTestCon
         });
     }
 
-    [Fact(DisplayName = "Confirmation form submits a valid MudForm model")]
+    [Fact(DisplayName = "SubmitAsync should submit when model is valid")]
     public void SubmitAsync_Should_Submit_When_ModelIsValid()
     {
         var component = Render<ResendConfirmationForm>();

@@ -4,7 +4,7 @@ namespace TacticalHeroes.Admin.Client.ComponentTests.App.Layout;
 
 public sealed class BlazorErrorUiTests : BunitContext
 {
-    [Fact(DisplayName = "The Blazor error surface exposes reload and accessible dismissal controls")]
+    [Fact(DisplayName = "Render should show recovery controls when error ui is rendered")]
     public void Render_Should_ShowRecoveryControls_When_ErrorUiIsRendered()
     {
         var component = Render<BlazorErrorUi>();

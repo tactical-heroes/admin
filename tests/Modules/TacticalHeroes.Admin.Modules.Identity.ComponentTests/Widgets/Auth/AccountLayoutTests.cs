@@ -7,7 +7,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Widgets.Auth;
 
 public sealed class AccountLayoutTests : BunitContext
 {
-    [Fact(DisplayName = "The account layout renders its body with dialog and snackbar providers")]
+    [Fact(DisplayName = "Render should compose body and providers when content is provided")]
     public void Render_Should_ComposeBodyAndProviders_When_ContentIsProvided()
     {
         Services.AddMudServices();

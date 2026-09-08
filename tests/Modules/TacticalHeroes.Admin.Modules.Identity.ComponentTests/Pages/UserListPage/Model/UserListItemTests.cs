@@ -6,11 +6,11 @@ namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Pages.UserListPag
 
 public sealed class UserListItemTests
 {
-    [Theory(DisplayName = "Maps user statuses to their presentation colors")]
+    [Theory(DisplayName = "StatusColor should return expected color when status is mapped")]
     [InlineData("Active", Color.Success)]
     [InlineData("Blocked", Color.Error)]
     [InlineData("Unknown", Color.Default)]
-    public void StatusColor_Should_ReturnExpectedColor(
+    public void StatusColor_Should_ReturnExpectedColor_When_StatusIsMapped(
         string status,
         Color expectedColor)
     {

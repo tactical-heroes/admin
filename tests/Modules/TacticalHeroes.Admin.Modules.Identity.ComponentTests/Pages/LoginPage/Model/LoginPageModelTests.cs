@@ -6,7 +6,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Pages.LoginPage.M
 
 public sealed class LoginPageModelTests
 {
-    [Fact(DisplayName = "Stores an email")]
+    [Fact(DisplayName = "EmailModel should store email when value is assigned")]
     public void EmailModel_Should_StoreEmail_When_ValueIsAssigned()
     {
         var model = new EmailModel
@@ -17,7 +17,7 @@ public sealed class LoginPageModelTests
         model.Email.ShouldBe("hero@example.com");
     }
 
-    [Fact(DisplayName = "Stores registration values")]
+    [Fact(DisplayName = "RegisterModel should store values when values are assigned")]
     public void RegisterModel_Should_StoreValues_When_ValuesAreAssigned()
     {
         var model = new RegisterModel
@@ -34,7 +34,7 @@ public sealed class LoginPageModelTests
         model.PasswordConfirmation.ShouldBe("secret-password");
     }
 
-    [Theory(DisplayName = "Validates an email")]
+    [Theory(DisplayName = "EmailModelValidator should return expected error when email is invalid")]
     [InlineData("", "Укажите email.")]
     [InlineData("invalid-email", "Укажите корректный email.")]
     public void EmailModelValidator_Should_ReturnExpectedError_When_EmailIsInvalid(
@@ -50,7 +50,7 @@ public sealed class LoginPageModelTests
             error.ErrorMessage == expectedError);
     }
 
-    [Fact(DisplayName = "Accepts a valid email")]
+    [Fact(DisplayName = "EmailModelValidator should return no errors when email is valid")]
     public void EmailModelValidator_Should_ReturnNoErrors_When_EmailIsValid()
     {
         var model = new EmailModel { Email = "hero@example.com" };
@@ -60,7 +60,7 @@ public sealed class LoginPageModelTests
         result.IsValid.ShouldBeTrue();
     }
 
-    [Fact(DisplayName = "Validates required registration values")]
+    [Fact(DisplayName = "RegisterModelValidator should return required errors when model is empty")]
     public void RegisterModelValidator_Should_ReturnRequiredErrors_When_ModelIsEmpty()
     {
         var model = new RegisterModel();
@@ -74,7 +74,7 @@ public sealed class LoginPageModelTests
         result.Errors.ShouldContain(error => error.ErrorMessage == "Повторите пароль.");
     }
 
-    [Fact(DisplayName = "Validates registration value formats")]
+    [Fact(DisplayName = "RegisterModelValidator should return format errors when values are invalid")]
     public void RegisterModelValidator_Should_ReturnFormatErrors_When_ValuesAreInvalid()
     {
         var model = new RegisterModel
@@ -96,7 +96,7 @@ public sealed class LoginPageModelTests
         result.Errors.ShouldContain(error => error.ErrorMessage == "Пароли не совпадают.");
     }
 
-    [Fact(DisplayName = "Accepts valid registration values")]
+    [Fact(DisplayName = "RegisterModelValidator should return no errors when model is valid")]
     public void RegisterModelValidator_Should_ReturnNoErrors_When_ModelIsValid()
     {
         var model = new RegisterModel

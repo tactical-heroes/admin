@@ -5,7 +5,7 @@ namespace TacticalHeroes.Admin.Client.ComponentTests.Pages.NotFound;
 
 public sealed class NotFoundPageTests : ClientComponentTestContext
 {
-    [Fact(DisplayName = "The not found page offers navigation back to the home page")]
+    [Fact(DisplayName = "Render should offer home link when page is not found")]
     public void Render_Should_OfferHomeLink_When_PageIsNotFound()
     {
         var component = Render<NotFoundPage>();

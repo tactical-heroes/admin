@@ -187,3 +187,32 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
 Архитектурный проект автоматически ссылается на ComponentTests-проекты через
 MSBuild glob и получает production-сборки через их зависимости.
 Новый компонент или модуль попадает под правило автоматически.
+
+## Имена и структура всех тестов
+
+Правила распространяются на все `Fact`/`Theory` в `tests`, включая unit,
+component и архитектурные тесты. Каталоги `bin` и `obj` исключены.
+
+- Имя метода: `MethodName_Should_Behavior_When_Condition`, все три части в PascalCase.
+- `DisplayName` обязателен и задаётся строковым литералом на английском языке:
+  `<subject> should <behavior> when <condition>`. Условие должно совпадать с частью
+  `_When_` имени метода, разбитой на слова и приведённой к нижнему регистру.
+- Тело теста — блок с минимум двумя логическими секциями, разделёнными пустой
+  строкой. Завершающая секция содержит assertions. Это эвристическая проверка AAA,
+  которая допускает совместную секцию Arrange/Act и несколько шагов взаимодействия.
+  Она не доказывает, что assertions проверяют нужное поведение.
+- Namespace повторяет путь файла относительно тестового проекта, начиная
+  с его `RootNamespace` или имени проекта, если `RootNamespace` не задан.
+
+Например:
+
+```csharp
+[Fact(DisplayName = "SaveAsync should show an error when request fails")]
+public async Task SaveAsync_Should_ShowAnError_When_RequestFails()
+```
+
+`TestSourceConventionTests` и `TestDisplayNameConventionTests` используют подход
+API: Roslyn разбирает C#-синтаксис, поэтому комментарии и строки с примерами тестов
+не считаются объявлениями или assertions. Проверка AAA дополнена поддержкой
+Shouldly и bUnit: `Should.ThrowAsync`, `MarkupMatches` и вложенные assertions
+в `WaitForAssertion`.

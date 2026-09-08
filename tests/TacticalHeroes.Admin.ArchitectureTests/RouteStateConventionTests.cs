@@ -2,7 +2,7 @@ namespace TacticalHeroes.Admin.ArchitectureTests;
 
 public sealed class RouteStateConventionTests
 {
-    [Fact(DisplayName = "Paged lists expose pagination as query parameters")]
+    [Fact(DisplayName = "ListPages should use query parameters when list state is defined")]
     public void ListPages_Should_UseQueryParameters_When_ListStateIsDefined()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();

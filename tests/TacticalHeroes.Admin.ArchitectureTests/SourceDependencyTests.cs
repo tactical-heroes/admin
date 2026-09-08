@@ -13,7 +13,7 @@ public sealed partial class SourceDependencyTests
             ["Pages"] = 4,
         };
 
-    [Fact(DisplayName = "Modules follow FSD dependency direction")]
+    [Fact(DisplayName = "ModuleSources should not depend on higher layers when modules are scanned")]
     public void ModuleSources_Should_NotDependOnHigherLayers_When_ModulesAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
@@ -59,7 +59,7 @@ public sealed partial class SourceDependencyTests
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "Foundation projects do not depend on application layers")]
+    [Fact(DisplayName = "FoundationSources should not depend on higher projects when sources are scanned")]
     public void FoundationSources_Should_NotDependOnHigherProjects_When_SourcesAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
@@ -96,7 +96,7 @@ public sealed partial class SourceDependencyTests
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "Application components use route contracts")]
+    [Fact(DisplayName = "ComponentRoutes should use contracts when application components are scanned")]
     public void ComponentRoutes_Should_UseContracts_When_ApplicationComponentsAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();

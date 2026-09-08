@@ -4,7 +4,7 @@ namespace TacticalHeroes.Admin.Client.ComponentTests.App.Layout;
 
 public sealed class MainLayoutTests : ClientComponentTestContext
 {
-    [Fact(DisplayName = "The layout toggles the sidebar while preserving its page body")]
+    [Fact(DisplayName = "ToggleDrawer should toggle sidebar when menu is clicked")]
     public void ToggleDrawer_Should_ToggleSidebar_When_MenuIsClicked()
     {
         ComponentFactories.AddStub<MudBlazor.MudDrawer>();

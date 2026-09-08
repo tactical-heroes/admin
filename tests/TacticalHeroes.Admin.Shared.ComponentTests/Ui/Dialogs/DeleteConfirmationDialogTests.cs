@@ -15,7 +15,7 @@ public sealed class DeleteConfirmationDialogTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "Confirming deletion returns a positive dialog result")]
+    [Fact(DisplayName = "Confirm should return positive result when delete is clicked")]
     public async Task Confirm_Should_ReturnPositiveResult_When_DeleteIsClicked()
     {
         var (provider, dialog) = await ShowDialogAsync();
@@ -28,7 +28,7 @@ public sealed class DeleteConfirmationDialogTests : BunitContext
         result.Data.ShouldBe(true);
     }
 
-    [Fact(DisplayName = "Cancelling deletion returns a cancelled dialog result")]
+    [Fact(DisplayName = "Cancel should return cancelled result when cancel is clicked")]
     public async Task Cancel_Should_ReturnCancelledResult_When_CancelIsClicked()
     {
         var (provider, dialog) = await ShowDialogAsync();

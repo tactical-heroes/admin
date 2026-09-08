@@ -8,7 +8,7 @@ namespace TacticalHeroes.Admin.Shared.ComponentTests.Ui.Forms;
 
 public sealed class MudUpdateFormComponentBaseTests
 {
-    [Fact(DisplayName = "An update form passes the route identifier and current model to the save operation")]
+    [Fact(DisplayName = "SubmitAsync should update current model when form is valid")]
     public async Task SubmitAsync_Should_UpdateCurrentModel_When_FormIsValid()
     {
         using var context = new BunitContext();
@@ -26,7 +26,7 @@ public sealed class MudUpdateFormComponentBaseTests
         context.Services.GetRequiredService<NavigationManager>().Uri.ShouldEndWith("/items");
     }
 
-    [Fact(DisplayName = "Loads once for the same route parameter and reloads for a new one")]
+    [Fact(DisplayName = "OnParametersSetAsync should load once when id is unchanged")]
     public async Task OnParametersSetAsync_Should_LoadOnce_When_IdIsUnchanged()
     {
         var component = new TestComponent();
@@ -41,7 +41,7 @@ public sealed class MudUpdateFormComponentBaseTests
         component.Model.Id.ShouldBe(secondId);
     }
 
-    [Fact(DisplayName = "Shows a load error and allows retrying the same route parameter")]
+    [Fact(DisplayName = "ReloadAsync should clear error when retry succeeds")]
     public async Task ReloadAsync_Should_ClearError_When_RetrySucceeds()
     {
         var component = new TestComponent
@@ -63,7 +63,7 @@ public sealed class MudUpdateFormComponentBaseTests
         component.Model.Id.ShouldBe(id);
     }
 
-    [Fact(DisplayName = "Does not apply an obsolete load after the route parameter changes")]
+    [Fact(DisplayName = "OnParametersSetAsync should ignore obsolete load when id changes")]
     public async Task OnParametersSetAsync_Should_IgnoreObsoleteLoad_When_IdChanges()
     {
         var firstLoad = new TaskCompletionSource<Result<TestModel>>(
@@ -89,7 +89,7 @@ public sealed class MudUpdateFormComponentBaseTests
         component.Loading.ShouldBeFalse();
     }
 
-    [Fact(DisplayName = "Stops loading when the load operation throws")]
+    [Fact(DisplayName = "OnParametersSetAsync should stop loading when load throws")]
     public async Task OnParametersSetAsync_Should_StopLoading_When_LoadThrows()
     {
         var component = new TestComponent

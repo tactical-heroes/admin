@@ -11,7 +11,7 @@ public sealed class DebouncedTextFilterTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "Applies a text filter when its minimum length is reached")]
+    [Fact(DisplayName = "ApplyFilterAsync should apply filter when minimum length is reached")]
     public async Task ApplyFilterAsync_Should_ApplyFilter_When_MinimumLengthIsReached()
     {
         int applyCount = 0;

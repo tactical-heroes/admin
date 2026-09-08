@@ -16,7 +16,7 @@ public sealed class MudFormComponentBaseTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "Forwards the component lifetime token to the save operation")]
+    [Fact(DisplayName = "SubmitAsync should forward lifetime token when form is valid")]
     public async Task SubmitAsync_Should_ForwardLifetimeToken_When_FormIsValid()
     {
         var component = CreateComponent();
@@ -31,7 +31,7 @@ public sealed class MudFormComponentBaseTests : BunitContext
         receivedToken.ShouldBe(component.Token);
     }
 
-    [Theory(DisplayName = "Shows the save result and navigates only after a successful save")]
+    [Theory(DisplayName = "SaveAsync should show result and navigate on success when save completes")]
     [InlineData(false)]
     [InlineData(true)]
     public async Task SaveAsync_Should_ShowResultAndNavigateOnSuccess_When_SaveCompletes(bool fails)

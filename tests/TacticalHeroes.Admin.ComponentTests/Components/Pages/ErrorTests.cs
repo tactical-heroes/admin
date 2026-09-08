@@ -9,7 +9,7 @@ namespace TacticalHeroes.Admin.ComponentTests.Components.Pages;
 
 public sealed class ErrorTests : BunitContext
 {
-    [Fact(DisplayName = "The error page displays the current activity identifier when one exists")]
+    [Fact(DisplayName = "OnInitialized should prefer activity id when activity exists")]
     public void OnInitialized_Should_PreferActivityId_When_ActivityExists()
     {
         using var activity = new Activity("error-page").Start();
@@ -22,13 +22,14 @@ public sealed class ErrorTests : BunitContext
         component.Find("code").TextContent.ShouldBe(activity.Id);
     }
 
-    [Theory(DisplayName = "The error page uses the request identifier without an activity and hides an empty identifier")]
+    [Theory(DisplayName = "OnInitialized should use request id when activity is unavailable")]
     [InlineData("request-id")]
     [InlineData("")]
     public void OnInitialized_Should_UseRequestId_When_ActivityIsUnavailable(string requestId)
     {
         Activity? previous = Activity.Current;
         Activity.Current = null;
+
         try
         {
             var context = new DefaultHttpContext { TraceIdentifier = requestId };

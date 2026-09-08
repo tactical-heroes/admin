@@ -2,7 +2,7 @@ namespace TacticalHeroes.Admin.Shared.ComponentTests.Ui.Common;
 
 public sealed class CancelableComponentBaseTests
 {
-    [Fact(DisplayName = "Disposal is idempotent and only managed disposal cancels the component lifetime")]
+    [Fact(DisplayName = "Dispose should cancel only once when disposal is repeated")]
     public void Dispose_Should_CancelOnlyOnce_When_DisposalIsRepeated()
     {
         var component = new TestComponent();
@@ -16,7 +16,7 @@ public sealed class CancelableComponentBaseTests
         token.IsCancellationRequested.ShouldBeTrue();
     }
 
-    [Fact(DisplayName = "Cancels the lifetime token when the component is disposed")]
+    [Fact(DisplayName = "Dispose should cancel lifetime token when component is disposed")]
     public void Dispose_Should_CancelLifetimeToken_When_ComponentIsDisposed()
     {
         var component = new TestComponent();

@@ -2,7 +2,7 @@ namespace TacticalHeroes.Admin.Shared.ComponentTests.Ui.Lists;
 
 public sealed class EntityRowActionsTests : BunitContext
 {
-    [Fact(DisplayName = "Renders arbitrary row actions in the supplied order")]
+    [Fact(DisplayName = "ChildContent should render all actions when composed")]
     public void ChildContent_Should_RenderAllActions_When_Composed()
     {
         IRenderedComponent<EntityRowActions> component = Render<EntityRowActions>(parameters =>

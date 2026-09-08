@@ -10,7 +10,7 @@ public sealed class PageHeaderTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "Renders title and subtitle when subtitle is provided")]
+    [Fact(DisplayName = "Render should show title and subtitle when subtitle provided")]
     public void Render_Should_ShowTitleAndSubtitle_When_SubtitleProvided()
     {
         var component = Render<PageHeader>(parameters => parameters
@@ -21,7 +21,7 @@ public sealed class PageHeaderTests : BunitContext
         component.Find(".page-subtitle").TextContent.Trim().ShouldBe("Manage application roles");
     }
 
-    [Fact(DisplayName = "Omits optional sections when they are not provided")]
+    [Fact(DisplayName = "Render should omit optional sections when they are not provided")]
     public void Render_Should_OmitOptionalSections_When_TheyAreNotProvided()
     {
         var component = Render<PageHeader>(parameters => parameters

@@ -6,7 +6,7 @@ namespace TacticalHeroes.Admin.Shared.ComponentTests.Ui.Forms;
 
 public sealed class MudValidatedFormComponentBaseTests
 {
-    [Fact(DisplayName = "Marks a successful result submission as completed")]
+    [Fact(DisplayName = "SubmitResultAsync should complete when result succeeds")]
     public async Task SubmitResultAsync_Should_Complete_When_ResultSucceeds()
     {
         var component = new TestComponent();
@@ -19,7 +19,7 @@ public sealed class MudValidatedFormComponentBaseTests
         component.Submitting.ShouldBeFalse();
     }
 
-    [Fact(DisplayName = "Exposes an error from a failed result submission")]
+    [Fact(DisplayName = "CompleteResultSubmission should set error when result fails")]
     public async Task CompleteResultSubmission_Should_SetError_When_ResultFails()
     {
         var component = new TestComponent();
@@ -33,7 +33,7 @@ public sealed class MudValidatedFormComponentBaseTests
         component.Submitting.ShouldBeFalse();
     }
 
-    [Fact(DisplayName = "Supports generic result submissions")]
+    [Fact(DisplayName = "SubmitResultAsync should complete when generic result succeeds")]
     public async Task SubmitResultAsync_Should_Complete_When_GenericResultSucceeds()
     {
         var component = new TestComponent();
@@ -45,7 +45,7 @@ public sealed class MudValidatedFormComponentBaseTests
         component.Error.ShouldBeNull();
     }
 
-    [Fact(DisplayName = "Stops submitting when the operation throws")]
+    [Fact(DisplayName = "SubmitAsync should stop submitting when operation throws")]
     public async Task SubmitAsync_Should_StopSubmitting_When_OperationThrows()
     {
         var component = new TestComponent();
@@ -57,7 +57,7 @@ public sealed class MudValidatedFormComponentBaseTests
         component.Submitting.ShouldBeFalse();
     }
 
-    [Theory(DisplayName = "Clears the previous success or error while a new submission is in progress")]
+    [Theory(DisplayName = "PrepareResultSubmission should clear previous result when submitting again")]
     [InlineData(false)]
     [InlineData(true)]
     public async Task PrepareResultSubmission_Should_ClearPreviousResult_When_SubmittingAgain(bool previousSuccess)
@@ -89,7 +89,7 @@ public sealed class MudValidatedFormComponentBaseTests
         component.Submitting.ShouldBeFalse();
     }
 
-    [Fact(DisplayName = "Invokes a valid submission only once while it is in progress")]
+    [Fact(DisplayName = "SubmitAsync should invoke once when already submitting")]
     public async Task SubmitAsync_Should_InvokeOnce_When_AlreadySubmitting()
     {
         var component = new TestComponent();
@@ -119,7 +119,7 @@ public sealed class MudValidatedFormComponentBaseTests
         component.Submitting.ShouldBeFalse();
     }
 
-    [Theory(DisplayName = "Does not submit when the form is missing or the model is invalid")]
+    [Theory(DisplayName = "SubmitAsync should not invoke when form cannot be validated")]
     [InlineData(false, true)]
     [InlineData(true, false)]
     public async Task SubmitAsync_Should_NotInvoke_When_FormCannotBeValidated(bool hasForm, bool isModelValid)

@@ -10,7 +10,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Pages.ConfirmEmai
 
 public sealed class ConfirmEmailPageTests : AuthenticationComponentTestContext
 {
-    [Theory(DisplayName = "Email confirmation runs once after prerender and displays the API result")]
+    [Theory(DisplayName = "OnInitializedAsync should display result once when page becomes interactive")]
     [InlineData(HttpStatusCode.NoContent, "Email подтверждён")]
     [InlineData(HttpStatusCode.BadRequest, "Не удалось подтвердить")]
     public void OnInitializedAsync_Should_DisplayResultOnce_When_PageBecomesInteractive(
@@ -41,7 +41,7 @@ public sealed class ConfirmEmailPageTests : AuthenticationComponentTestContext
         _handler.PostCount.ShouldBe(1);
     }
 
-    [Theory(DisplayName = "Email confirmation does not submit an incomplete link")]
+    [Theory(DisplayName = "OnInitializedAsync should reject link when query parameters are missing")]
     [InlineData("")]
     [InlineData("?userId=19641d4e-0c67-4892-a952-7eb71725a064")]
     [InlineData("?emailConfirmationToken=token")]

@@ -5,7 +5,7 @@ namespace TacticalHeroes.Admin.Client.ComponentTests.App.Layout;
 
 public sealed class AdminHeaderTests : ClientComponentTestContext
 {
-    [Fact(DisplayName = "The header invokes the menu action")]
+    [Fact(DisplayName = "Render should invoke menu action when menu is clicked")]
     public void Render_Should_InvokeMenuAction_When_MenuIsClicked()
     {
         int clicks = 0;
@@ -16,7 +16,7 @@ public sealed class AdminHeaderTests : ClientComponentTestContext
         clicks.ShouldBe(1);
     }
 
-    [Theory(DisplayName = "The header exposes the current user and logout only for authenticated users")]
+    [Theory(DisplayName = "Render should respect authentication when user state changes")]
     [InlineData(true)]
     [InlineData(false)]
     public void Render_Should_RespectAuthentication_When_UserStateChanges(bool authenticated)

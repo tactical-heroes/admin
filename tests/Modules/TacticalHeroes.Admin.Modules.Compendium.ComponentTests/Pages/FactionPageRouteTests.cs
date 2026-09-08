@@ -7,7 +7,7 @@ namespace TacticalHeroes.Admin.Modules.Compendium.ComponentTests.Pages;
 
 public sealed class FactionPageRouteTests
 {
-    [Fact(DisplayName = "Create and update factions use separate route components")]
+    [Fact(DisplayName = "Pages should use separate components when create and update routes are inspected")]
     public void Pages_Should_UseSeparateComponents_When_CreateAndUpdateRoutesAreInspected()
     {
         string[] createRoutes = GetRoutes<CreateFactionPageComponent>();

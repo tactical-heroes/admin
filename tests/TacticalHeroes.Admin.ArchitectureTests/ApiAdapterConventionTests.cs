@@ -9,8 +9,8 @@ public sealed partial class ApiAdapterConventionTests
         RegexOptions.CultureInvariant)]
     private static partial Regex MappedResponseVariableRegex();
 
-    [Fact(DisplayName = "API adapter types match their filenames")]
-    public void ApiAdapters_Should_DeclareTypeMatchingFilename()
+    [Fact(DisplayName = "ApiAdapters should declare type matching filename when source is scanned")]
+    public void ApiAdapters_Should_DeclareTypeMatchingFilename_When_SourceIsScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
         string modulesRoot = Path.Combine(repositoryRoot, "src", "Modules");
@@ -38,8 +38,8 @@ public sealed partial class ApiAdapterConventionTests
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "API adapters delegate generated response mapping")]
-    public void ApiAdapters_Should_DelegateGeneratedResponseMapping()
+    [Fact(DisplayName = "ApiAdapters should delegate generated response mapping when source is scanned")]
+    public void ApiAdapters_Should_DelegateGeneratedResponseMapping_When_SourceIsScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
         string modulesRoot = Path.Combine(repositoryRoot, "src", "Modules");

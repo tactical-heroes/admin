@@ -34,7 +34,7 @@ public sealed class CreateRolePageTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "Creates a valid role and opens its update page")]
+    [Fact(DisplayName = "Submit should navigate to update page when role is valid")]
     public void Submit_Should_NavigateToUpdatePage_When_RoleIsValid()
     {
         var component = Render<CreateRolePageComponent>();
@@ -50,7 +50,7 @@ public sealed class CreateRolePageTests : BunitContext
         });
     }
 
-    [Fact(DisplayName = "Creates a valid role with a claim")]
+    [Fact(DisplayName = "Submit should create role when claim is valid")]
     public void Submit_Should_CreateRole_When_ClaimIsValid()
     {
         var component = Render<CreateRolePageComponent>();
@@ -68,7 +68,7 @@ public sealed class CreateRolePageTests : BunitContext
         component.WaitForAssertion(() => _handler.PostCount.ShouldBe(1));
     }
 
-    [Fact(DisplayName = "Does not create a role when its name is empty")]
+    [Fact(DisplayName = "Submit should display validation error when role name is empty")]
     public void Submit_Should_DisplayValidationError_When_RoleNameIsEmpty()
     {
         var component = Render<CreateRolePageComponent>();
@@ -82,7 +82,7 @@ public sealed class CreateRolePageTests : BunitContext
         });
     }
 
-    [Fact(DisplayName = "Does not create a role when a claim is empty")]
+    [Fact(DisplayName = "Submit should display validation errors when claim is empty")]
     public void Submit_Should_DisplayValidationErrors_When_ClaimIsEmpty()
     {
         var component = Render<CreateRolePageComponent>();

@@ -2,7 +2,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Pages.ResetPasswo
 
 public sealed class ResetPasswordPageTests : AuthenticationComponentTestContext
 {
-    [Fact(DisplayName = "TogglePasswordVisibility reveals and hides only its password field")]
+    [Fact(DisplayName = "TogglePasswordVisibility should toggle input type when button is clicked")]
     public void TogglePasswordVisibility_Should_ToggleInputType_When_ButtonIsClicked()
     {
         var component = RenderResetPasswordPage();
@@ -15,7 +15,7 @@ public sealed class ResetPasswordPageTests : AuthenticationComponentTestContext
         component.Find("#reset-password").GetAttribute("type").ShouldBe("password");
     }
 
-    [Fact(DisplayName = "TogglePasswordConfirmationVisibility reveals and hides only its password field")]
+    [Fact(DisplayName = "TogglePasswordConfirmationVisibility should toggle input type when button is clicked")]
     public void TogglePasswordConfirmationVisibility_Should_ToggleInputType_When_ButtonIsClicked()
     {
         var component = RenderResetPasswordPage();
@@ -28,7 +28,7 @@ public sealed class ResetPasswordPageTests : AuthenticationComponentTestContext
         component.Find("#reset-password-confirmation").GetAttribute("type").ShouldBe("password");
     }
 
-    [Fact(DisplayName = "Reset password form validates an empty model through MudForm")]
+    [Fact(DisplayName = "SubmitAsync should display validation errors when model is empty")]
     public void SubmitAsync_Should_DisplayValidationErrors_When_ModelIsEmpty()
     {
         var component = RenderResetPasswordPage();
@@ -43,7 +43,7 @@ public sealed class ResetPasswordPageTests : AuthenticationComponentTestContext
         });
     }
 
-    [Fact(DisplayName = "Reset password form submits a valid MudForm model")]
+    [Fact(DisplayName = "SubmitAsync should submit when model is valid")]
     public void SubmitAsync_Should_Submit_When_ModelIsValid()
     {
         var component = RenderResetPasswordPage();

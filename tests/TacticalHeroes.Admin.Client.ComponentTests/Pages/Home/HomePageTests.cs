@@ -4,7 +4,7 @@ namespace TacticalHeroes.Admin.Client.ComponentTests.Pages.Home;
 
 public sealed class HomePageTests : ClientComponentTestContext
 {
-    [Fact(DisplayName = "The home page renders its heading and welcome content")]
+    [Fact(DisplayName = "Render should show welcome when page is rendered")]
     public void Render_Should_ShowWelcome_When_PageIsRendered()
     {
         var component = Render<HomePage>();

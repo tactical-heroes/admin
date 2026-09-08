@@ -16,7 +16,7 @@ public sealed class AsyncEnumerationSelectTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Fact(DisplayName = "Loads enumeration items and selects the first one by default")]
+    [Fact(DisplayName = "ApplyDefaultValueAsync should select first item when default is enabled")]
     public void ApplyDefaultValueAsync_Should_SelectFirstItem_When_DefaultIsEnabled()
     {
         string? selectedItem = null;
@@ -36,7 +36,7 @@ public sealed class AsyncEnumerationSelectTests : BunitContext
         });
     }
 
-    [Fact(DisplayName = "Initializes enumeration items without choosing a default value")]
+    [Fact(DisplayName = "OnInitializedAsync should load items when component is rendered")]
     public void OnInitializedAsync_Should_LoadItems_When_ComponentIsRendered()
     {
         var component = Render<AsyncEnumerationSelect<TestEnumeration>>(
@@ -52,7 +52,7 @@ public sealed class AsyncEnumerationSelectTests : BunitContext
         });
     }
 
-    [Fact(DisplayName = "Shows a load error and retries loading enumeration items")]
+    [Fact(DisplayName = "LoadAsync should retry when first request fails")]
     public void LoadAsync_Should_Retry_When_FirstRequestFails()
     {
         _provider.FailNextRequest = true;

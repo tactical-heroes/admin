@@ -4,7 +4,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests;
 
 public sealed class IdentityRoutesTests
 {
-    [Fact(DisplayName = "Builds role route from identifier")]
+    [Fact(DisplayName = "Role should build route when identifier is provided")]
     public void Role_Should_BuildRoute_When_IdentifierIsProvided()
     {
         var id = Guid.Parse("bde93e9c-b7b9-4647-a04a-6e58b0290082");
@@ -14,7 +14,7 @@ public sealed class IdentityRoutesTests
         route.ShouldBe("/roles/bde93e9c-b7b9-4647-a04a-6e58b0290082");
     }
 
-    [Fact(DisplayName = "Builds login route from typed query parameters")]
+    [Fact(DisplayName = "LoginPage should encode query when typed parameters are provided")]
     public void LoginPage_Should_EncodeQuery_When_TypedParametersAreProvided()
     {
         string route = IdentityRoutes.LoginPage(
@@ -28,7 +28,7 @@ public sealed class IdentityRoutesTests
             "&error=invalid_request");
     }
 
-    [Fact(DisplayName = "Builds OAuth error route with its configured enum name")]
+    [Fact(DisplayName = "LoginPage should use configured name when o auth error is provided")]
     public void LoginPage_Should_UseConfiguredName_When_OAuthErrorIsProvided()
     {
         string route = IdentityRoutes.LoginPage(error: AuthenticationError.OAuth);
@@ -36,7 +36,7 @@ public sealed class IdentityRoutesTests
         route.ShouldBe("/login?error=oauth");
     }
 
-    [Fact(DisplayName = "Builds confirmation route from typed parameters")]
+    [Fact(DisplayName = "ConfirmEmailPage should encode token when parameters are provided")]
     public void ConfirmEmailPage_Should_EncodeToken_When_ParametersAreProvided()
     {
         var userId = Guid.Parse("bc49d005-4cbc-4941-985d-1354cb6c68d3");

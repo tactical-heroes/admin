@@ -9,7 +9,7 @@ public sealed partial class OptionsConventionTests
         RegexOptions.CultureInvariant)]
     private static partial Regex OptionsTypeRegex();
 
-    [Fact(DisplayName = "Configuration options use dedicated folders with adjacent validators")]
+    [Fact(DisplayName = "ConfigurationOptions should have validators when options are scanned")]
     public void ConfigurationOptions_Should_HaveValidators_When_OptionsAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
@@ -74,7 +74,7 @@ public sealed partial class OptionsConventionTests
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "Configuration options register validators and validate on start")]
+    [Fact(DisplayName = "ConfigurationOptions should validate on start when registrations are scanned")]
     public void ConfigurationOptions_Should_ValidateOnStart_When_RegistrationsAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();

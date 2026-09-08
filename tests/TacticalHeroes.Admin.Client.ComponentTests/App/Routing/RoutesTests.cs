@@ -10,7 +10,7 @@ namespace TacticalHeroes.Admin.Client.ComponentTests.App.Routing;
 
 public sealed class RoutesTests : ClientComponentTestContext
 {
-    [Fact(DisplayName = "The router renders the home page for an authenticated user")]
+    [Fact(DisplayName = "Render should show home when user is authenticated")]
     public void Render_Should_ShowHome_When_UserIsAuthenticated()
     {
         AddAuthorization().SetAuthorized("Administrator");
@@ -21,7 +21,7 @@ public sealed class RoutesTests : ClientComponentTestContext
         component.Markup.ShouldContain("Добро пожаловать");
     }
 
-    [Fact(DisplayName = "The router discovers anonymous pages from module assemblies")]
+    [Fact(DisplayName = "Render should show module page when module route is requested")]
     public void Render_Should_ShowModulePage_When_ModuleRouteIsRequested()
     {
         Services.GetRequiredService<NavigationManager>().NavigateTo(IdentityRoutes.Login);
@@ -32,7 +32,7 @@ public sealed class RoutesTests : ClientComponentTestContext
         component.Markup.ShouldContain("Вход в аккаунт");
     }
 
-    [Fact(DisplayName = "The router challenges an anonymous user requesting an authorized page")]
+    [Fact(DisplayName = "Render should challenge when user is anonymous")]
     public void Render_Should_Challenge_When_UserIsAnonymous()
     {
         var navigation = Services.GetRequiredService<NavigationManager>();

@@ -7,7 +7,7 @@ namespace TacticalHeroes.Admin.Client.ComponentTests.App.Layout;
 
 public sealed class NavMenuTests : ClientComponentTestContext
 {
-    [Theory(DisplayName = "Navigation expands only the matching module and ignores URL query and fragment")]
+    [Theory(DisplayName = "IsCurrentGroup should expand matching module when route is rendered")]
     [InlineData("/factions", true, false)]
     [InlineData("/USERS/123?email=test#details", false, true)]
     [InlineData("/users-extra", false, false)]

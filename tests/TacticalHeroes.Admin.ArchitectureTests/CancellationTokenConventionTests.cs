@@ -9,7 +9,7 @@ public sealed partial class CancellationTokenConventionTests
         RegexOptions.CultureInvariant)]
     private static partial Regex DefaultCancellationTokenRegex();
 
-    [Fact(DisplayName = "Cancellation tokens are required parameters")]
+    [Fact(DisplayName = "CancellationTokens should not have default values when sources are scanned")]
     public void CancellationTokens_Should_NotHaveDefaultValues_When_SourcesAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();

@@ -10,7 +10,7 @@ public sealed class EditFormActionsTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Theory(DisplayName = "Shows the action matching the editing mode")]
+    [Theory(DisplayName = "Render should show expected action when mode is provided")]
     [InlineData(true, "Создать")]
     [InlineData(false, "Сохранить")]
     public void Render_Should_ShowExpectedAction_When_ModeIsProvided(
