@@ -9,36 +9,31 @@ namespace TacticalHeroes.Admin.Modules.Identity.Pages.ConfirmEmailPage.Ui;
 
 public partial class ConfirmEmailPage(ConfirmEmailApi confirmEmailApi)
 {
-    private bool _processed;
-    private string? _error;
+    private Result? ConfirmationResult { get; set; }
 
-    [Parameter]
+    [SupplyParameterFromQuery]
     public Guid? UserId { get; set; }
 
-    [Parameter]
+    [SupplyParameterFromQuery]
     public string? EmailConfirmationToken { get; set; }
 
     private bool HasValidParameters =>
         UserId.HasValue && !string.IsNullOrWhiteSpace(EmailConfirmationToken);
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private string? ConfirmationError => ConfirmationResult is { IsFailure: true } result
+        ? ApiErrorMessage.FromErrors(result.Errors)
+        : null;
+
+    protected override async Task OnInitializedAsync()
     {
-        if (!firstRender || !HasValidParameters)
+        if (!RendererInfo.IsInteractive || !HasValidParameters)
         {
             return;
         }
 
-        Result result = await confirmEmailApi.ConfirmEmailAsync(
+        ConfirmationResult = await confirmEmailApi.ConfirmEmailAsync(
             UserId!.Value,
             EmailConfirmationToken!,
             LifetimeToken);
-
-        if (result.IsFailure)
-        {
-            _error = ApiErrorMessage.FromErrors(result.Errors);
-        }
-
-        _processed = true;
-        StateHasChanged();
     }
 }

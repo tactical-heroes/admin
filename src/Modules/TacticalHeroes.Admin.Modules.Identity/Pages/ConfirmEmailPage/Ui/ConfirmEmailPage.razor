@@ -22,7 +22,7 @@
             Запросить новую ссылку
         </a>
     }
-    else if (!_processed)
+    else if (ConfirmationResult is null)
     {
         <header class="auth-form-header">
             <MudIcon Icon="@Icons.Material.Outlined.MarkEmailUnread" Class="auth-state-icon" />
@@ -31,7 +31,7 @@
         </header>
         <div class="auth-progress" role="status" aria-label="Подтверждение email"></div>
     }
-    else if (string.IsNullOrWhiteSpace(_error))
+    else if (ConfirmationResult.IsSuccess)
     {
         <header class="auth-form-header">
             <MudIcon Icon="@Icons.Material.Outlined.Verified" Class="auth-state-icon" />
@@ -49,7 +49,7 @@
             <h1 class="auth-form-title">Не удалось подтвердить</h1>
             <p class="auth-form-copy">Ссылка могла устареть или уже быть использована.</p>
         </header>
-        <AuthenticationFeedback Message="@_error" />
+        <AuthenticationFeedback Message="@ConfirmationError" />
         <a class="auth-command"
            href="@(IdentityRoutes.LoginPage(mode: LoginMode.Confirmation))">
             Запросить новую ссылку
