@@ -22,7 +22,7 @@ public sealed partial class EnumerationConventionTests
         violations.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "Enumeration members have English display names")]
+    [Fact(DisplayName = "Enumeration members have English display names except localized login titles")]
     public void EnumerationMembers_Should_HaveEnglishDisplayNames_When_SourceIsScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
@@ -33,8 +33,11 @@ public sealed partial class EnumerationConventionTests
         foreach (EnumerationMember member in members)
         {
             Match displayNameMatch = DisplayNameRegex().Match(member.Attributes);
+            // LoginMode display names are the localized page titles.
             if (!displayNameMatch.Success ||
-                !IsEnglishDisplayName(displayNameMatch.Groups["name"].Value))
+                string.IsNullOrWhiteSpace(displayNameMatch.Groups["name"].Value) ||
+                (member.EnumerationName != "LoginMode" &&
+                 !IsEnglishDisplayName(displayNameMatch.Groups["name"].Value)))
             {
                 violations.Add(FormatViolation(repositoryRoot, member));
             }

@@ -158,3 +158,4 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
 25. `EnumerationMembers_Should_HaveEnglishDisplayNames_When_SourceIsScanned`
     — каждый элемент production-enum имеет непустой английский
     `[Display(Name = "...")]`, пригодный для единообразного отображения в UI.
+    Исключение — `LoginMode`: его `Display` содержит русские заголовки страницы входа.
