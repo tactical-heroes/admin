@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 
 using Microsoft.AspNetCore.Components;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace TacticalHeroes.Admin.ArchitectureTests;
 
@@ -64,6 +65,38 @@ public sealed class ComponentTestConventionTests
         missing.Length.ShouldBe(missingCount);
     }
 
+    [Theory(DisplayName = "GetTestMethods should require tests in the expected class and file when mirrored source is inspected")]
+    [InlineData("", false)]
+    [InlineData("// [Fact] public void TestCase() { }", false)]
+    [InlineData("partial class ComponentTestConventionTests { }", false)]
+    [InlineData("class ComponentTestConventionTests { public void TestCase() { } }", false)]
+    [InlineData("class OtherTests { [Fact] public void TestCase() { } }", false)]
+    [InlineData("class Wrapper { class ComponentTestConventionTests { [Fact] public void TestCase() { } } }", false)]
+    [InlineData("namespace Other { class ComponentTestConventionTests { [Fact] public void TestCase() { } } }", false)]
+    [InlineData("partial class ComponentTestConventionTests { [Fact] public void TestCase() { } }", true)]
+    [InlineData("class ComponentTestConventionTests { [global::Xunit.Theory] public void TestCase() { } }", true)]
+    public void GetTestMethods_Should_RequireTestsInTheExpectedClassAndFile_When_MirroredSourceIsInspected(
+        string source,
+        bool containsTest)
+    {
+        string path = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.cs");
+        const string testName = nameof(GetBehaviorMethods_Should_IncludeOnlyDeclaredBehavior_When_ComponentHasMixedMembers);
+
+        try
+        {
+            File.WriteAllText(path, "namespace TacticalHeroes.Admin.ArchitectureTests {\n" +
+                source.Replace("TestCase", testName, StringComparison.Ordinal) + "\n}");
+            var target = new ComponentTarget(typeof(DiscoveryComponent), path, typeof(ComponentTestConventionTests));
+            string[] methods = GetTestMethods(target);
+
+            methods.ShouldBe(containsTest ? [testName] : []);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
     private static ComponentTarget[] GetTargets()
     {
         string root = RepositoryPaths.FindRoot();
@@ -96,14 +129,24 @@ public sealed class ComponentTestConventionTests
 
     private static string[] GetTestMethods(ComponentTarget target)
     {
-        if (target.TestType is not { IsPublic: true, IsAbstract: false, ContainsGenericParameters: false } testType)
+        if (!File.Exists(target.TestPath) ||
+            target.TestType is not { IsPublic: true, IsAbstract: false, ContainsGenericParameters: false } testType)
         {
             return [];
         }
 
+        var declaredTestNames = TestSourceDiscovery.GetTestMethods(target.TestPath, File.ReadAllText(target.TestPath))
+            .Where(source => source.Declaration.Parent is ClassDeclarationSyntax { Parent: BaseNamespaceDeclarationSyntax } declaration
+                && declaration.Identifier.ValueText == testType.Name
+                && declaration.TypeParameterList is null
+                && string.Join('.', declaration.Ancestors().OfType<BaseNamespaceDeclarationSyntax>()
+                    .Reverse().Select(node => node.Name.ToString())) == testType.Namespace)
+            .Select(source => source.Name);
+
         return testType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
             .Where(method => method.GetCustomAttributes<FactAttribute>().Any(attribute => attribute.Skip is null && !attribute.Explicit))
             .Select(method => method.Name)
+            .Intersect(declaredTestNames, StringComparer.Ordinal)
             .ToArray();
     }
 
