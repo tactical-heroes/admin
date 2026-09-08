@@ -25,5 +25,5 @@ public partial class LoginPage
             ? error
             : null;
 
-    private string Title => $"{SelectedMode?.GetDisplayName() ?? "Sign in"} - Tactical Heroes";
+    private string Title => $"{SelectedMode?.GetDisplayName() ?? "Sign in"} - {Branding.GameName}";
 }
