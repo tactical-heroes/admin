@@ -1,6 +1,8 @@
+using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reflection;
+using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -57,41 +59,63 @@ public sealed partial class TestSourceConventionTests
     public void TestNamespaces_Should_MatchProjectFolders_When_TestSourcesAreScanned()
     {
         string repositoryRoot = RepositoryPaths.FindRoot();
-        string testsRoot = Path.Combine(repositoryRoot, "tests");
         List<string> violations = [];
 
-        foreach (string project in Directory.EnumerateFiles(testsRoot, "*.csproj", SearchOption.AllDirectories))
+        foreach (TestProjectSource project in TestSourceDiscovery.GetProjects())
         {
-            string projectDirectory = Path.GetDirectoryName(project)!;
-            string rootNamespace = XDocument.Load(project).Descendants("RootNamespace")
-                .Select(element => element.Value).SingleOrDefault() ?? Path.GetFileNameWithoutExtension(project);
-
-            foreach (string path in TestSourceDiscovery.GetSourceFiles(projectDirectory))
+            foreach (SyntaxTree tree in project.SourceTrees)
             {
-                string relativeDirectory = Path.GetRelativePath(projectDirectory, Path.GetDirectoryName(path)!);
+                string path = Path.GetFullPath(tree.FilePath, repositoryRoot);
+                string relativeDirectory = Path.GetRelativePath(project.Directory, Path.GetDirectoryName(path)!);
                 string expectedNamespace = relativeDirectory == "."
-                    ? rootNamespace
-                    : rootNamespace + "." + relativeDirectory.Replace(Path.DirectorySeparatorChar, '.');
-                var root = CSharpSyntaxTree.ParseText(
-                    File.ReadAllText(path),
-                    cancellationToken: TestContext.Current.CancellationToken)
-                    .GetRoot(TestContext.Current.CancellationToken);
-
-                foreach (BaseNamespaceDeclarationSyntax declaration in root.DescendantNodes()
-                    .OfType<BaseNamespaceDeclarationSyntax>()
-                    .Where(declaration => !declaration.Members.OfType<BaseNamespaceDeclarationSyntax>().Any()))
-                {
-                    string actualNamespace = string.Join('.', declaration.AncestorsAndSelf()
-                        .OfType<BaseNamespaceDeclarationSyntax>().Reverse().Select(node => node.Name.ToString()));
-                    if (actualNamespace != expectedNamespace)
-                    {
-                        violations.Add($"{Path.GetRelativePath(repositoryRoot, path)}: '{actualNamespace}' must be '{expectedNamespace}'.");
-                    }
-                }
+                    ? project.RootNamespace
+                    : project.RootNamespace + "." + relativeDirectory.Replace(Path.DirectorySeparatorChar, '.');
+                violations.AddRange(GetNamespaceViolations(tree, expectedNamespace));
             }
         }
 
         violations.ShouldBeEmpty();
+    }
+
+    [Theory(DisplayName = "Namespace validation should reject misplaced types when source namespaces are inspected")]
+    [InlineData("class ExampleTests { }", false)]
+    [InlineData("namespace Expected; class ExampleTests { }", true)]
+    [InlineData("namespace Wrong; class ExampleTests { }", false)]
+    [InlineData("namespace Expected { class ExampleTests { } } class GlobalTests { }", false)]
+    [InlineData("global using Xunit;", true)]
+    public void NamespaceValidation_Should_RejectMisplacedTypes_When_SourceNamespacesAreInspected(string source, bool valid)
+    {
+        SyntaxTree tree = CSharpSyntaxTree.ParseText(source, cancellationToken: TestContext.Current.CancellationToken);
+
+        string[] violations = GetNamespaceViolations(tree, "Expected");
+
+        (violations.Length == 0).ShouldBe(valid);
+    }
+
+#if NET10_0 && NET10_0_OR_GREATER
+    [Fact(DisplayName = "Test source discovery should discover active tests when framework symbols are defined")]
+    public void TestSourceDiscovery_Should_DiscoverActiveTests_When_FrameworkSymbolsAreDefined()
+    {
+        TestMethodSource[] methods = TestSourceDiscovery.GetTestMethods();
+
+        methods.ShouldContain(method => method.Name ==
+            nameof(TestSourceDiscovery_Should_DiscoverActiveTests_When_FrameworkSymbolsAreDefined));
+        methods.ShouldNotContain(method => method.Name == "InactiveFrameworkTest");
+    }
+#else
+    [Fact]
+    public void InactiveFrameworkTest() { }
+#endif
+
+    private static string[] GetNamespaceViolations(SyntaxTree tree, string expectedNamespace)
+    {
+        return [.. tree.GetRoot(TestContext.Current.CancellationToken).DescendantNodes()
+            .Where(node => node is BaseTypeDeclarationSyntax or DelegateDeclarationSyntax)
+            .Select(node => string.Join('.', node.Ancestors().OfType<BaseNamespaceDeclarationSyntax>()
+                .Reverse().Select(declaration => declaration.Name.ToString())))
+            .Distinct(StringComparer.Ordinal)
+            .Where(actualNamespace => actualNamespace != expectedNamespace)
+            .Select(actualNamespace => $"{tree.FilePath}: '{actualNamespace}' must be '{expectedNamespace}'.")];
     }
 
     [Fact(DisplayName = "Test source discovery should ignore comments and strings when test attributes are scanned")]
@@ -184,13 +208,50 @@ public sealed partial class TestSourceConventionTests
     [InlineData("var component = Render();\n\nAction verify = () => component.WaitForAssertion(() => Assert.True(false));", false)]
     [InlineData("var component = Render();\n\ncomponent.WaitForAssertion(() => { Action verify = () => Assert.True(false); });", false)]
     [InlineData("var component = Render();\n\ncomponent.WaitForAssertion(delegate { Assert.True(true); });", true)]
+    [InlineData("var value = 1;\n\nCheck();", false)]
+    [InlineData("var value = 1;\n\nShouldRefresh();", false)]
+    [InlineData("var value = 1;\n\nAssertRefresh();", false)]
+    [InlineData("var value = 1;\n\nHelpers.ShouldBe(value);", false)]
+    [InlineData("var value = 1;\n\nHelpers.MarkupMatches(\"text\");", false)]
+    [InlineData("var value = 1;\n\nHelpers.WaitForAssertion(() => Assert.True(false));", false)]
+    [InlineData("var value = 1;\n\nglobal::Xunit.Assert.Equal(1, value);", true)]
+    [InlineData("var value = 1;\n\nVerify.Equal(1, value);", true)]
+    [InlineData("var value = 1;\n\nEqual(1, value);", true)]
     public void ArrangeActAssert_Should_RecognizeFinalAssertions_When_TestBodiesAreInspected(string body, bool valid)
     {
-        string source = "class ExampleTests { [Fact] public async Task Example() { " + body + " } }";
+        string source = """
+            using System;
+            using System.Threading.Tasks;
+            using Bunit;
+            using Shouldly;
+            using Verify = Xunit.Assert;
+            using static Xunit.Assert;
+            class ExampleTests
+            {
+                static IRenderedComponent<Microsoft.AspNetCore.Components.ComponentBase> Render() => null!;
+                static Func<Task> CreateAction() => () => Task.CompletedTask;
+                static void Log(object value) { }
+                static void Register(Action action) { }
+                static void Check() { }
+                static void ShouldRefresh() { }
+                static void AssertRefresh() { }
+                [Fact] public async Task Example() {
+            """ + body + """
+                }
+            }
+            static class Helpers
+            {
+                public static void ShouldBe(int value) { }
+                public static void MarkupMatches(string markup) { }
+                public static void WaitForAssertion(Action assertion) { }
+            }
+            """;
         TestMethodSource method = TestSourceDiscovery.GetTestMethods("tests/ExampleTests.cs", source).Single();
 
         string? violation = GetArrangeActAssertViolation(method);
 
+        method.SemanticModel.GetDiagnostics(cancellationToken: TestContext.Current.CancellationToken)
+            .Where(diagnostic => diagnostic.DefaultSeverity == DiagnosticSeverity.Error).ShouldBeEmpty();
         (violation is null).ShouldBe(valid);
     }
 
@@ -214,7 +275,7 @@ public sealed partial class TestSourceConventionTests
                 $"{minimumSectionCount}.";
         }
 
-        if (!sections[^1].Any(ContainsAssertion))
+        if (!sections[^1].Any(statement => ContainsAssertion(statement, testMethod.SemanticModel)))
         {
             return $"{testMethod.Location}: {testMethod.Name} must keep " +
                 $"assertions in its final logical section.";
@@ -261,48 +322,45 @@ public sealed partial class TestSourceConventionTests
         return sections;
     }
 
-    private static bool ContainsAssertion(SyntaxNode node)
+    private static bool ContainsAssertion(SyntaxNode node, SemanticModel semanticModel)
     {
-        // ponytail: follow inline WaitForAssertion callbacks; resolve helper calls only when the suite needs them.
         return node
             .DescendantNodesAndSelf(child => child is not AnonymousFunctionExpressionSyntax and not LocalFunctionStatementSyntax)
             .OfType<InvocationExpressionSyntax>()
-            .Any(invocation => IsAssertion(invocation) ||
-                invocation.Expression is MemberAccessExpressionSyntax { Name.Identifier.ValueText: "WaitForAssertion" } &&
+            .Any(invocation => IsAssertion(invocation, semanticModel) ||
+                IsBunitMethod(invocation, semanticModel, "RenderedComponentWaitForHelperExtensions", "WaitForAssertion") &&
                 invocation.ArgumentList.Arguments.Any(argument => argument.Expression switch
                 {
-                    LambdaExpressionSyntax lambda => ContainsAssertion(lambda.Body),
-                    AnonymousMethodExpressionSyntax anonymous => ContainsAssertion(anonymous.Block),
+                    LambdaExpressionSyntax lambda => ContainsAssertion(lambda.Body, semanticModel),
+                    AnonymousMethodExpressionSyntax anonymous => ContainsAssertion(anonymous.Block, semanticModel),
                     _ => false
                 }));
     }
 
-    private static bool IsAssertion(InvocationExpressionSyntax invocation)
+    private static bool IsAssertion(InvocationExpressionSyntax invocation, SemanticModel semanticModel)
     {
-        var name = invocation.Expression switch
+        if (semanticModel.GetSymbolInfo(invocation).Symbol is not IMethodSymbol method)
         {
-            MemberAccessExpressionSyntax memberAccess =>
-                memberAccess.Name.Identifier.ValueText,
-            IdentifierNameSyntax identifier =>
-                identifier.Identifier.ValueText,
-            _ => string.Empty
-        };
-
-        var containingType = invocation.Expression is
-            MemberAccessExpressionSyntax
-        {
-            Expression: IdentifierNameSyntax containingIdentifier
+            return false;
         }
-            ? containingIdentifier.Identifier.ValueText
-            : string.Empty;
 
-        return name.Contains("Should", StringComparison.Ordinal) ||
-               name.StartsWith("Assert", StringComparison.Ordinal) ||
-               containingType is "Assert" or "Should" ||
-               string.Equals(name, "MarkupMatches", StringComparison.Ordinal) ||
-               string.Equals(name, "Check", StringComparison.Ordinal) ||
-               string.Equals(name, "Received", StringComparison.Ordinal) ||
-               string.Equals(name, "DidNotReceive", StringComparison.Ordinal);
+        return method.ContainingAssembly.Name == typeof(Assert).Assembly.GetName().Name &&
+               method.ContainingType.ToDisplayString() == "Xunit.Assert" ||
+               method.ContainingAssembly.Name == typeof(Shouldly.Should).Assembly.GetName().Name &&
+               method.ContainingNamespace.ToDisplayString() == "Shouldly" &&
+               (method.Name.StartsWith("Should", StringComparison.Ordinal) || method.ContainingType.Name == "Should") ||
+               IsBunitMethod(invocation, semanticModel, "MarkupMatchesAssertExtensions", "MarkupMatches");
+    }
+
+    private static bool IsBunitMethod(
+        InvocationExpressionSyntax invocation,
+        SemanticModel semanticModel,
+        string typeName,
+        string methodName)
+    {
+        return semanticModel.GetSymbolInfo(invocation).Symbol is IMethodSymbol method &&
+            method.ContainingAssembly.Name == "bunit" && method.ContainingNamespace.ToDisplayString() == "Bunit" &&
+            method.ContainingType.Name == typeName && method.Name == methodName;
     }
 }
 
@@ -310,35 +368,86 @@ internal static class TestSourceDiscovery
 {
     private const string TestsDirectoryName = "tests";
     private static readonly SyntaxTree XunitUsing = CSharpSyntaxTree.ParseText("global using Xunit;");
-    private static readonly MetadataReference[] References =
-    [
-        MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-        MetadataReference.CreateFromFile(typeof(FactAttribute).Assembly.Location),
-        MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location)
-    ];
+    private static readonly ConcurrentDictionary<string, PortableExecutableReference> References = new(StringComparer.Ordinal);
+    private static readonly Lazy<TestProjectSource[]> Projects = new(() =>
+        [.. Directory.EnumerateFiles(Path.Combine(RepositoryPaths.FindRoot(), TestsDirectoryName), "*.csproj", SearchOption.AllDirectories)
+            .OrderBy(project => project, StringComparer.Ordinal)
+            .Select(LoadProject)]);
+    private static readonly Lazy<TestMethodSource[]> Methods = new(() =>
+        [.. GetProjects().SelectMany(project => GetTestMethods(project.Compilation, project.SourceTrees))]);
 
     public static TestMethodSource[] GetTestMethods()
     {
-        var repositoryRoot = RepositoryPaths.FindRoot();
-        var testsRoot = Path.Combine(repositoryRoot, TestsDirectoryName);
-
-        return
-        [
-            .. Directory.EnumerateFiles(testsRoot, "*.csproj", SearchOption.AllDirectories)
-                .OrderBy(project => project, StringComparer.Ordinal)
-                .SelectMany(project => GetTestMethods(
-                [
-                    .. GetSourceFiles(Path.GetDirectoryName(project)!)
-                        .OrderBy(path => path, StringComparer.Ordinal)
-                        .Select(path => CSharpSyntaxTree.ParseText(File.ReadAllText(path),
-                            path: Path.GetRelativePath(repositoryRoot, path)))
-                ]))
-        ];
+        return Methods.Value;
     }
 
-    internal static IEnumerable<string> GetSourceFiles(string root)
+    internal static TestProjectSource[] GetProjects()
     {
-        return Directory.EnumerateFiles(root, "*.cs", SearchOption.AllDirectories).Where(IsSourceFile);
+        return Projects.Value;
+    }
+
+    private static TestProjectSource LoadProject(string projectPath)
+    {
+        string projectDirectory = Path.GetDirectoryName(projectPath)!;
+        string configuration = typeof(TestSourceDiscovery).Assembly.GetCustomAttribute<AssemblyConfigurationAttribute>()!.Configuration;
+        var startInfo = new ProcessStartInfo("dotnet")
+        {
+            WorkingDirectory = RepositoryPaths.FindRoot(),
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true
+        };
+        string[] arguments =
+        [
+            "msbuild", projectPath, "-nologo", "-target:Compile",
+            "-property:DesignTimeBuild=true", "-property:BuildProjectReferences=false",
+            "-property:SkipCompilerExecution=true", "-property:ProvideCommandLineArgs=true",
+            // Force argument collection even when the existing compilation outputs are up to date.
+            $"-property:NonExistentFile={Guid.NewGuid():N}",
+            $"-property:Configuration={configuration}", "-getProperty:RootNamespace", "-getItem:CscCommandLineArgs"
+        ];
+        foreach (string argument in arguments)
+        {
+            startInfo.ArgumentList.Add(argument);
+        }
+
+        using var process = Process.Start(startInfo)!;
+        Task<string> output = process.StandardOutput.ReadToEndAsync();
+        Task<string> error = process.StandardError.ReadToEndAsync();
+        if (!process.WaitForExit(60_000))
+        {
+            process.Kill(entireProcessTree: true);
+            throw new TimeoutException($"MSBuild source discovery timed out for {projectPath}.");
+        }
+
+        string standardOutput = output.GetAwaiter().GetResult();
+        string standardError = error.GetAwaiter().GetResult();
+        if (process.ExitCode != 0)
+        {
+            throw new InvalidOperationException($"MSBuild source discovery failed for {projectPath}:\n{standardOutput}\n{standardError}");
+        }
+
+        using JsonDocument metadata = JsonDocument.Parse(standardOutput);
+        string[] compilerArguments = [.. metadata.RootElement.GetProperty("Items").GetProperty("CscCommandLineArgs")
+            .EnumerateArray().Select(item => item.GetProperty("Identity").GetString()!)];
+        if (compilerArguments.Length == 0)
+        {
+            throw new InvalidOperationException($"MSBuild returned no compiler arguments for {projectPath}.");
+        }
+
+        CSharpCommandLineArguments options = CSharpCommandLineParser.Default.Parse(compilerArguments, projectDirectory, sdkDirectory: null);
+        SyntaxTree[] trees = [.. options.SourceFiles.Select(source => CSharpSyntaxTree.ParseText(
+            File.ReadAllText(source.Path), options.ParseOptions,
+            path: Path.GetRelativePath(RepositoryPaths.FindRoot(), source.Path)))];
+        var compilation = CSharpCompilation.Create(Path.GetFileNameWithoutExtension(projectPath), trees,
+            options.MetadataReferences.Select(reference => References.GetOrAdd(reference.Reference,
+                path => MetadataReference.CreateFromFile(path)).WithProperties(reference.Properties)),
+            options.CompilationOptions);
+
+        return new TestProjectSource(projectDirectory,
+            metadata.RootElement.GetProperty("Properties").GetProperty("RootNamespace").GetString()!,
+            compilation, [.. trees.Where(tree => IsSourceFile(tree.FilePath))]);
     }
 
     internal static IEnumerable<TestMethodSource> GetTestMethods(string relativePath, string source)
@@ -348,8 +457,15 @@ internal static class TestSourceDiscovery
 
     internal static IEnumerable<TestMethodSource> GetTestMethods(SyntaxTree[] syntaxTrees)
     {
-        var compilation = CSharpCompilation.Create("TestSourceDiscovery", syntaxTrees.Append(XunitUsing), References);
+        var compilation = GetProjects().Single(project =>
+                project.Compilation.AssemblyName == typeof(TestSourceDiscovery).Assembly.GetName().Name)
+            .Compilation.RemoveAllSyntaxTrees().AddSyntaxTrees(syntaxTrees.Append(XunitUsing));
 
+        return GetTestMethods(compilation, syntaxTrees);
+    }
+
+    private static IEnumerable<TestMethodSource> GetTestMethods(CSharpCompilation compilation, SyntaxTree[] syntaxTrees)
+    {
         return syntaxTrees.SelectMany(syntaxTree =>
         {
             var semanticModel = compilation.GetSemanticModel(syntaxTree);
@@ -367,7 +483,8 @@ internal static class TestSourceDiscovery
                 .Select(item => new TestMethodSource(
                     RelativePath: syntaxTree.FilePath,
                     Declaration: item.Method,
-                    TestAttribute: item.TestAttribute!));
+                    TestAttribute: item.TestAttribute!,
+                    SemanticModel: semanticModel));
         });
     }
 
@@ -389,10 +506,17 @@ internal static class TestSourceDiscovery
     }
 }
 
+internal sealed record TestProjectSource(
+    string Directory,
+    string RootNamespace,
+    CSharpCompilation Compilation,
+    SyntaxTree[] SourceTrees);
+
 internal sealed record TestMethodSource(
     string RelativePath,
     MethodDeclarationSyntax Declaration,
-    AttributeSyntax TestAttribute)
+    AttributeSyntax TestAttribute,
+    SemanticModel SemanticModel)
 {
     public string Name => Declaration.Identifier.ValueText;
 

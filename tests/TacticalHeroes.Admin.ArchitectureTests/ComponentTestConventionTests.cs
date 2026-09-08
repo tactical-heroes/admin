@@ -101,6 +101,28 @@ public sealed class ComponentTestConventionTests
         }
     }
 
+    [Theory(DisplayName = "Runnable tests should exclude skip conditions when coverage eligibility is checked")]
+    [InlineData(null, false, null, null, true)]
+    [InlineData("Skipped", false, null, null, false)]
+    [InlineData(null, true, null, null, false)]
+    [InlineData(null, false, "Condition", null, false)]
+    [InlineData(null, false, null, "Condition", false)]
+    public void RunnableTests_Should_ExcludeSkipConditions_When_CoverageEligibilityIsChecked(
+        string? skip,
+        bool explicitlyRun,
+        string? skipWhen,
+        string? skipUnless,
+        bool expected)
+    {
+        FactAttribute[] attributes =
+        [
+            new() { Skip = skip, Explicit = explicitlyRun, SkipWhen = skipWhen, SkipUnless = skipUnless },
+            new TheoryAttribute { Skip = skip, Explicit = explicitlyRun, SkipWhen = skipWhen, SkipUnless = skipUnless }
+        ];
+
+        attributes.Select(IsUnconditionallyRunnable).ShouldAllBe(actual => actual == expected);
+    }
+
     private static ComponentTarget[] GetTargets()
     {
         string root = RepositoryPaths.FindRoot();
@@ -151,10 +173,16 @@ public sealed class ComponentTestConventionTests
             .Select(source => source.Name);
 
         return testType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
-            .Where(method => method.GetCustomAttributes<FactAttribute>().Any(attribute => attribute.Skip is null && !attribute.Explicit))
+            .Where(method => method.GetCustomAttributes<FactAttribute>().Any(IsUnconditionallyRunnable))
             .Select(method => method.Name)
             .Intersect(declaredTestNames, StringComparer.Ordinal)
             .ToArray();
+    }
+
+    private static bool IsUnconditionallyRunnable(FactAttribute attribute)
+    {
+        return attribute.Skip is null && !attribute.Explicit &&
+            attribute.SkipWhen is null && attribute.SkipUnless is null;
     }
 
     private static string[] GetBehaviorMethods(Type component)
