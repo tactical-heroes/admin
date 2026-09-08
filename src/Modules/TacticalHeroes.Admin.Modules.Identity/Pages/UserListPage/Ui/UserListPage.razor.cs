@@ -16,7 +16,7 @@ public partial class UserListPage(
         IdentityRoutes.Users,
         navigation)
 {
-    [SupplyParameterFromQuery(Name = "email")]
+    [SupplyParameterFromQuery]
     public string? Email { get; set; }
 
     protected override UserListFilter AppliedFilter => new() { Email = Email };
