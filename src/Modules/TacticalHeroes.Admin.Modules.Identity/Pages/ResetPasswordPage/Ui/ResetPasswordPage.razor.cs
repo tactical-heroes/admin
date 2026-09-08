@@ -9,10 +9,10 @@ public partial class ResetPasswordPage(ResetPasswordApi resetPasswordApi)
     private bool _showPassword;
     private bool _showPasswordConfirmation;
 
-    [Parameter]
+    [SupplyParameterFromQuery]
     public Guid? UserId { get; set; }
 
-    [Parameter]
+    [SupplyParameterFromQuery]
     public string? PasswordResetToken { get; set; }
 
     private Task SubmitAsync()
