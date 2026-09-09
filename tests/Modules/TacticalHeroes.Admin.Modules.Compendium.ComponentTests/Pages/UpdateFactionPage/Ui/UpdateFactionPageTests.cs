@@ -8,6 +8,8 @@ using Microsoft.Extensions.Http;
 using MudBlazor.Services;
 
 using TacticalHeroes.Admin.Api.DependencyInjection;
+using TacticalHeroes.Admin.Shared.Ui.Forms;
+using TacticalHeroes.Admin.Shared.Ui.Layout;
 
 using UpdateFactionPageComponent =
     TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateFactionPage.Ui.UpdateFactionPage;
@@ -32,6 +34,21 @@ public sealed class UpdateFactionPageTests : BunitContext
                 builder => builder.PrimaryHandler = _handler));
         Services.AddCompendiumAdminModule();
         JSInterop.Mode = JSRuntimeMode.Loose;
+    }
+
+    [Fact(DisplayName = "Render should link back and cancel to list when form is displayed")]
+    public void Render_Should_LinkBackAndCancelToList_When_FormIsDisplayed()
+    {
+        var component = Render<UpdateFactionPageComponent>(parameters => parameters
+            .Add(page => page.Id, _factionId));
+
+        component.WaitForAssertion(() =>
+        {
+            component.FindComponent<PageBackButton>().Find("a").GetAttribute("href")
+                .ShouldBe(CompendiumRoutes.Factions);
+            component.FindComponent<EditFormActions>().Find("a").GetAttribute("href")
+                .ShouldBe(CompendiumRoutes.Factions);
+        });
     }
 
     [Fact(DisplayName = "Submit should navigate to list when faction is valid")]
