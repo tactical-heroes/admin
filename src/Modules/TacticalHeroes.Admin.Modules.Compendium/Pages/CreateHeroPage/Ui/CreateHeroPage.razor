@@ -1,0 +1,30 @@
+@inherits MudCreateFormComponentBase<HeroFormModel, HeroFormModelValidator>
+@attribute [Route(CompendiumRoutes.CreateHero)]
+@attribute [Authorize]
+@attribute [StreamRendering]
+
+@using TacticalHeroes.Admin.Modules.Compendium.Features.HeroEditing.Model
+@using TacticalHeroes.Admin.Modules.Compendium.Features.HeroEditing.Ui
+
+<PageTitle>Новый герой · @(Branding.GameName)</PageTitle>
+
+<PageHeader Title="Новый герой"
+            Subtitle="Добавьте героя и задайте его характеристики">
+    <Actions>
+        <PageBackButton Href="@CompendiumRoutes.Heroes" />
+    </Actions>
+</PageHeader>
+
+<MudForm @ref="Form"
+         Model="Model"
+         Validation="@Validator.ValidateValue"
+         @bind-IsValid="IsValid">
+    <EditSection Title="Данные героя">
+        <HeroFormFields Model="Model" Errors="Errors" />
+    </EditSection>
+
+    <EditFormActions CancelHref="@CompendiumRoutes.Heroes"
+                     IsNew="true"
+                     Busy="IsSaving"
+                     OnSubmit="SubmitAsync" />
+</MudForm>

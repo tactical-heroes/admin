@@ -44,7 +44,7 @@ dotnet run --project src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj --laun
 
 - `src/TacticalHeroes.Admin/` - ASP.NET Core host and same-origin YARP gateway.
 - `src/TacticalHeroes.Admin.Client/` - Interactive Auto application shell, routing, layouts, and module composition.
-- `src/Modules/` - flat set of module RCL projects; Identity owns account administration and Compendium owns faction administration.
+- `src/Modules/` - flat set of module RCL projects; Identity owns account administration and Compendium owns faction and hero administration.
 - `src/TacticalHeroes.Admin.Api/` - generated Kiota client and shared API transport primitives.
 - `src/TacticalHeroes.Admin.Shared/` - reusable presentation primitives without domain dependencies.
 - `tests/` - module component, API unit, shared component, and architecture tests.

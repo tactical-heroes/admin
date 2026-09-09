@@ -1,0 +1,35 @@
+@inherits MudUpdateFormComponentBase<HeroFormModel, HeroFormModelValidator>
+@attribute [Route(CompendiumRoutes.HeroTemplate)]
+@attribute [Authorize]
+@attribute [StreamRendering]
+
+@using TacticalHeroes.Admin.Modules.Compendium.Features.HeroEditing.Model
+@using TacticalHeroes.Admin.Modules.Compendium.Features.HeroEditing.Ui
+
+<PageTitle>Редактирование героя · @(Branding.GameName)</PageTitle>
+
+<PageHeader Title="Редактирование героя"
+            Subtitle="Измените характеристики и фракцию героя">
+    <Actions>
+        <PageBackButton Href="@CompendiumRoutes.Heroes" />
+    </Actions>
+</PageHeader>
+
+<LoadableContent Loading="IsLoading"
+                 LoadError="@LoadError"
+                 OnRetry="ReloadAsync">
+    <ChildContent>
+        <MudForm @ref="Form"
+                 Model="Model"
+                 Validation="@Validator.ValidateValue"
+                 @bind-IsValid="IsValid">
+            <EditSection Title="Данные героя">
+                <HeroFormFields Model="Model" Errors="Errors" />
+            </EditSection>
+
+            <EditFormActions CancelHref="@CompendiumRoutes.Heroes"
+                             Busy="IsSaving"
+                             OnSubmit="SubmitAsync" />
+        </MudForm>
+    </ChildContent>
+</LoadableContent>
