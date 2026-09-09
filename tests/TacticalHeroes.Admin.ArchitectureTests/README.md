@@ -139,9 +139,9 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
 21. `FormPages_Should_InheritOperationBases_When_AdminFormsAreScanned` — create
     наследует `MudCreateFormComponentBase`, update/edit — `MudUpdateFormComponentBase`.
 
-22. `FormPages_Should_UseSharedComposition_When_AdminFormsAreScanned` — форма
-    использует `PageHeader`, `PageBackButton`, `MudForm`, `EditSection` и
-    `EditFormActions`; возврат и отмена ведут на один маршрут.
+22. `FormPages_Should_UseSharedComposition_When_AdminFormsAreScanned` — страница
+    содержит ровно один `MudForm`, использует `PageHeader`, `PageBackButton`,
+    `EditSection` и `EditFormActions`; возврат и отмена ведут на один маршрут.
 
 23. `FormPages_Should_BindValidationAndSubmission_When_AdminFormsAreScanned` —
     модель, валидация и отправка связаны с базой; действия учитывают `IsSaving`,

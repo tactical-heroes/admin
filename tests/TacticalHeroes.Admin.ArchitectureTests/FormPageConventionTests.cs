@@ -94,11 +94,17 @@ public sealed class FormPageConventionTests
     }
 
     [Theory(DisplayName = "Update conventions should protect the validated form when multiple forms are present")]
-    [InlineData(false, false, true)]
-    [InlineData(true, false, false)]
-    [InlineData(true, true, false)]
+    [InlineData("only", false, true)]
+    [InlineData("before", false, false)]
+    [InlineData("before", true, false)]
+    [InlineData("after", false, false)]
+    [InlineData("after", true, false)]
+    [InlineData("inside", false, false)]
+    [InlineData("inside", true, false)]
+    [InlineData("nested", false, false)]
+    [InlineData("nested", true, false)]
     public void UpdateConventions_Should_ProtectTheValidatedForm_When_MultipleFormsArePresent(
-        bool formOutside,
+        string placement,
         bool duplicateForm,
         bool expected)
     {
@@ -113,10 +119,18 @@ public sealed class FormPageConventionTests
                 <EditFormActions CancelHref="@ExampleRoutes.Examples" Busy="IsSaving" OnSubmit="SubmitAsync" />
             </MudForm>
             """;
-        string nestedForm = formOutside && !duplicateForm ? "<MudForm />" : form;
-        string markup = header + (formOutside ? form : "") +
+        string extraForm = duplicateForm ? form : "<MudForm />";
+        string content = placement switch
+        {
+            "before" => extraForm,
+            "inside" => form + extraForm,
+            "nested" => form.Replace("</MudForm>", extraForm + "</MudForm>", StringComparison.Ordinal),
+            _ => form
+        };
+        string markup = header + (placement == "before" ? form : "") +
             "<LoadableContent Loading=\"IsLoading\" LoadError=\"@LoadError\" OnRetry=\"ReloadAsync\">" +
-            "<ChildContent>" + nestedForm + "</ChildContent></LoadableContent>";
+            "<ChildContent>" + content + "</ChildContent></LoadableContent>" +
+            (placement == "after" ? extraForm : "");
 
         bool valid = UsesSharedComposition(markup) && BindsFormState(markup, isCreate: false) && BindsLoadState(markup);
 
@@ -143,7 +157,11 @@ public sealed class FormPageConventionTests
         Match submit = PageConventionSource.Element(form.Groups["content"].Value, "EditFormActions");
         string? backHref = PageConventionSource.Attribute(back, "Href");
 
-        return PageConventionSource.HasHeader(markup) && section.Success && submit.Success &&
+        // Search after the first opening '<' so nested forms are counted as well.
+        bool hasSingleForm = form.Success &&
+            !PageConventionSource.Element(markup[(form.Index + 1)..], "MudForm").Success;
+
+        return hasSingleForm && PageConventionSource.HasHeader(markup) && section.Success && submit.Success &&
             backHref?.StartsWith('@') == true && backHref == PageConventionSource.Attribute(submit, "CancelHref");
     }
 
