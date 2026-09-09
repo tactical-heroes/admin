@@ -93,6 +93,36 @@ public sealed class FormPageConventionTests
         BindsLoadState(broken).ShouldBeFalse();
     }
 
+    [Theory(DisplayName = "Update conventions should protect the validated form when multiple forms are present")]
+    [InlineData(false, false, true)]
+    [InlineData(true, false, false)]
+    [InlineData(true, true, false)]
+    public void UpdateConventions_Should_ProtectTheValidatedForm_When_MultipleFormsArePresent(
+        bool formOutside,
+        bool duplicateForm,
+        bool expected)
+    {
+        const string header = """
+            <PageHeader Title="Example" Subtitle="Edit example">
+                <Actions><PageBackButton Href="@ExampleRoutes.Examples" /></Actions>
+            </PageHeader>
+            """;
+        const string form = """
+            <MudForm @ref="Form" Model="Model" Validation="@Validator.ValidateValue" @bind-IsValid="IsValid">
+                <EditSection Title="Details" />
+                <EditFormActions CancelHref="@ExampleRoutes.Examples" Busy="IsSaving" OnSubmit="SubmitAsync" />
+            </MudForm>
+            """;
+        string nestedForm = formOutside && !duplicateForm ? "<MudForm />" : form;
+        string markup = header + (formOutside ? form : "") +
+            "<LoadableContent Loading=\"IsLoading\" LoadError=\"@LoadError\" OnRetry=\"ReloadAsync\">" +
+            "<ChildContent>" + nestedForm + "</ChildContent></LoadableContent>";
+
+        bool valid = UsesSharedComposition(markup) && BindsFormState(markup, isCreate: false) && BindsLoadState(markup);
+
+        valid.ShouldBe(expected);
+    }
+
     private static PageConventionSource[] DiscoverForms()
     {
         return PageConventionSource.Discover("Create*Page.razor", "Update*Page.razor", "Edit*Page.razor");
@@ -136,9 +166,12 @@ public sealed class FormPageConventionTests
     private static bool BindsLoadState(string markup)
     {
         Match loading = PageConventionSource.Element(markup, "LoadableContent");
+        Match form = PageConventionSource.Element(markup, "MudForm");
+        Group content = loading.Groups["content"];
+
         return PageConventionSource.Binds(loading, "Loading", "IsLoading") &&
             PageConventionSource.Binds(loading, "LoadError", "LoadError", explicitExpression: true) &&
             PageConventionSource.Binds(loading, "OnRetry", "ReloadAsync") &&
-            PageConventionSource.Element(loading.Groups["content"].Value, "MudForm").Success;
+            form.Success && form.Index >= content.Index && form.Index + form.Length <= content.Index + content.Length;
     }
 }
