@@ -4,13 +4,14 @@ using Microsoft.AspNetCore.Components;
 
 namespace TacticalHeroes.Admin.Shared.Ui.Inputs;
 
-public abstract partial class AsyncSelectOption<TId>(
-    Func<string?, int, CancellationToken, Task<Result<IReadOnlyList<SelectOption<TId>>>>> loadAsync,
+public abstract partial class AsyncSelectOption<TId, TOption>(
+    Func<string?, int, CancellationToken, Task<Result<IReadOnlyList<TOption>>>> loadAsync,
     string label,
     string emptyText,
     string? createHref = null,
     string createText = "Создать") : CancelableComponentBase
     where TId : notnull
+    where TOption : SelectOption<TId>
 {
     private long _loadVersion;
 
@@ -50,9 +51,9 @@ public abstract partial class AsyncSelectOption<TId>(
     public string? ErrorText { get; set; }
 
     [PersistentState(AllowUpdates = true)]
-    public SelectOption<TId>? SelectedOption { get; set; }
+    public TOption? SelectedOption { get; set; }
 
-    private IReadOnlyList<SelectOption<TId>> Options { get; set; } = [];
+    private IReadOnlyList<TOption> Options { get; set; } = [];
 
     private TId LoadedValue { get; set; } = default!;
 

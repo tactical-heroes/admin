@@ -18,6 +18,9 @@ public sealed class FactionSelectTests : HeroFormTestContext
         await component.WaitForAssertionAsync(() =>
         {
             Handler.FactionRequests.ShouldBe([null]);
+            component.Instance.SelectedOption.ShouldNotBeNull();
+            component.Instance.SelectedOption.Id.ShouldBe(selectedFactionId);
+            component.Instance.SelectedOption.Name.ShouldBe("Northern Alliance");
             component.FindComponent<MudAutocomplete<Guid>>().Find("input").GetAttribute("value").ShouldBe("Northern Alliance");
         });
     }

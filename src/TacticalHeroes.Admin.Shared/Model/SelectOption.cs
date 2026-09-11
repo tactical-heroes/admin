@@ -1,6 +1,6 @@
 namespace TacticalHeroes.Admin.Shared.Model;
 
-public sealed class SelectOption<TId> where TId : notnull
+public class SelectOption<TId> where TId : notnull
 {
     public TId Id { get; set; } = default!;
 

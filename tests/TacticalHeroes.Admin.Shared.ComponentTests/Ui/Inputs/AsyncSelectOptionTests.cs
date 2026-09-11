@@ -281,14 +281,14 @@ public sealed class AsyncSelectOptionTests : BunitContext
         component.FindComponent<MudAutocomplete<int>>().Find("input").GetAttribute("value").ShouldBe("Selected option");
     }
 
-    private sealed class StringSelect() : AsyncSelectOption<string>(
+    private sealed class StringSelect() : AsyncSelectOption<string, SelectOption<string>>(
         (search, _, _) => Task.FromResult(Result.Success<IReadOnlyList<SelectOption<string>>>(
             search is null ? [new() { Id = "alpha", Name = "Alpha" }] : [])),
         "Option",
         "No options.");
 
     private sealed class TestSelect(TestOptionsSource source)
-        : AsyncSelectOption<int>(source.LoadAsync, "Вариант", "Варианты не найдены.", "/options/create", "Создать вариант");
+        : AsyncSelectOption<int, SelectOption<int>>(source.LoadAsync, "Вариант", "Варианты не найдены.", "/options/create", "Создать вариант");
 
     private sealed class TestOptionsSource
     {
