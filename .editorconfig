@@ -153,8 +153,3 @@ dotnet_diagnostic.RCS1261.severity = warning
 [src/**/*.cs]
 dotnet_diagnostic.RCS1046.severity = warning
 dotnet_diagnostic.RCS1047.severity = warning
-
-[**/Migrations/**.cs]
-generated_code = true
-dotnet_diagnostic.IDE0005.severity = none
-dotnet_diagnostic.IDE0161.severity = none
