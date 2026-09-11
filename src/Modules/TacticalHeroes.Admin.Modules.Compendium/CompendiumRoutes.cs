@@ -14,6 +14,12 @@ public static class CompendiumRoutes
 
     public const string HeroTemplate = $"{Heroes}/{{Id:guid}}";
 
+    public const string Units = "/units";
+
+    public const string CreateUnit = $"{Units}/new";
+
+    public const string UnitTemplate = $"{Units}/{{Id:guid}}";
+
     public static string Faction(Guid id)
     {
         return $"{Factions}/{id:D}";
@@ -22,5 +28,10 @@ public static class CompendiumRoutes
     public static string Hero(Guid id)
     {
         return $"{Heroes}/{id:D}";
+    }
+
+    public static string Unit(Guid id)
+    {
+        return $"{Units}/{id:D}";
     }
 }
