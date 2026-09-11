@@ -10,6 +10,8 @@ namespace TacticalHeroes.Admin.Modules.Compendium.Features.HeroEditing.Ui;
 
 public partial class HeroFormFields(FactionOptionsApi factionOptionsApi) : CancelableComponentBase
 {
+    private const int FactionOptionLimit = 20;
+
     [Parameter, EditorRequired]
     public HeroFormModel Model { get; set; } = new();
 
@@ -17,40 +19,74 @@ public partial class HeroFormFields(FactionOptionsApi factionOptionsApi) : Cance
     public FormErrorState<HeroFormModel> Errors { get; set; } = new();
 
     [PersistentState(AllowUpdates = true)]
-    public List<FactionOption>? Factions { get; set; }
+    public FactionOption? SelectedFaction { get; set; }
 
-    [PersistentState(AllowUpdates = true)]
-    public string? FactionLoadError { get; set; }
+    private IReadOnlyList<FactionOption> Factions { get; set; } = [];
 
-    private bool IsLoadingFactions { get; set; }
+    private string? FactionLoadError { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    private string? FactionSearchError { get; set; }
+
+    private bool IsLoadingFaction { get; set; }
+
+    protected override async Task OnParametersSetAsync()
     {
-        if (Factions is null)
+        if (Model.FactionId != Guid.Empty && SelectedFaction?.Id != Model.FactionId)
         {
-            await LoadFactionsAsync();
+            await LoadSelectedFactionAsync();
         }
     }
 
-    private async Task LoadFactionsAsync()
+    private async Task LoadSelectedFactionAsync()
     {
-        IsLoadingFactions = true;
+        var factionId = Model.FactionId;
+        IsLoadingFaction = true;
         FactionLoadError = null;
 
         try
         {
-            var result = await factionOptionsApi.GetAllAsync(LifetimeToken);
+            var result = await factionOptionsApi.GetAsync(factionId, LifetimeToken);
+            if (Model.FactionId != factionId)
+            {
+                return;
+            }
+
             if (result.IsFailure)
             {
                 FactionLoadError = ApiErrorMessage.FromErrors(result.Errors);
                 return;
             }
 
-            Factions = [.. result.Value];
+            SelectedFaction = result.Value;
         }
         finally
         {
-            IsLoadingFactions = false;
+            IsLoadingFaction = false;
         }
+    }
+
+    private async Task<IEnumerable<Guid>> SearchFactionsAsync(string? search, CancellationToken cancellationToken)
+    {
+        using var source = CancellationTokenSource.CreateLinkedTokenSource(LifetimeToken, cancellationToken);
+        var result = await factionOptionsApi.SearchAsync(search, FactionOptionLimit, source.Token);
+        source.Token.ThrowIfCancellationRequested();
+        FactionSearchError = result.IsFailure ? ApiErrorMessage.FromErrors(result.Errors) : null;
+        Factions = result.IsSuccess ? result.Value : [];
+        await InvokeAsync(StateHasChanged);
+        return Factions.Select(faction => faction.Id);
+    }
+
+    private void SetFaction(Guid id)
+    {
+        Model.FactionId = id;
+        SelectedFaction = Factions.FirstOrDefault(faction => faction.Id == id)
+            ?? (SelectedFaction?.Id == id ? SelectedFaction : null);
+    }
+
+    private string GetFactionName(Guid id)
+    {
+        return SelectedFaction?.Id == id
+            ? SelectedFaction.Name
+            : Factions.FirstOrDefault(faction => faction.Id == id)?.Name ?? string.Empty;
     }
 }

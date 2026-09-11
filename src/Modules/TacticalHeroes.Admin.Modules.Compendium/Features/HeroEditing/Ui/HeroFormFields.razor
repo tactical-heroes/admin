@@ -14,30 +14,39 @@
                       MaxLength="128" />
     </MudItem>
     <MudItem xs="12" md="6">
-        <LoadableContent Loading="IsLoadingFactions"
+        <LoadableContent Loading="IsLoadingFaction"
                          LoadError="@FactionLoadError"
-                         OnRetry="LoadFactionsAsync"
+                         OnRetry="LoadSelectedFactionAsync"
                          LoadingHeight="56px">
             <ChildContent>
-                <MudSelect T="Guid"
-                           @bind-Value="Model.FactionId"
-                           For="@(() => Model.FactionId)"
-                           Label="Фракция"
-                           Variant="Variant.Outlined"
-                           ToStringFunc="id => Factions?.FirstOrDefault(faction => faction.Id == id)?.Name ?? string.Empty"
-                           Error="@Errors.HasError(nameof(HeroFormModel.FactionId))"
-                           ErrorText="@Errors.GetError(nameof(HeroFormModel.FactionId))">
-                    @foreach (var faction in Factions ?? [])
-                    {
-                        <MudSelectItem T="Guid" Value="faction.Id">@faction.Name</MudSelectItem>
-                    }
-                </MudSelect>
-                @if (Factions is { Count: 0 })
+                <MudAutocomplete T="Guid"
+                                 Value="Model.FactionId"
+                                 ValueChanged="SetFaction"
+                                 For="@(() => Model.FactionId)"
+                                 Label="Фракция"
+                                 Variant="Variant.Outlined"
+                                 ToStringFunc="GetFactionName"
+                                 SearchFunc="SearchFactionsAsync"
+                                 DebounceInterval="300"
+                                 MaxItems="FactionOptionLimit"
+                                 MaxLength="128"
+                                 Strict="false"
+                                 Clearable="true"
+                                 ResetValueOnEmptyText="true"
+                                 ShowProgressIndicator="true"
+                                 Error="@Errors.HasError(nameof(HeroFormModel.FactionId))"
+                                 ErrorText="@Errors.GetError(nameof(HeroFormModel.FactionId))">
+                    <NoItemsTemplate>
+                        @if (FactionSearchError is null)
+                        {
+                            <MudText Class="px-4 py-2">Фракции не найдены.</MudText>
+                            <MudLink Href="@CompendiumRoutes.CreateFaction" Class="px-4">Создать фракцию</MudLink>
+                        }
+                    </NoItemsTemplate>
+                </MudAutocomplete>
+                @if (FactionSearchError is not null)
                 {
-                    <MudAlert Severity="Severity.Info" Class="mt-2">
-                        Сначала <MudLink Href="@CompendiumRoutes.CreateFaction">создайте фракцию</MudLink>,
-                        чтобы назначить её герою.
-                    </MudAlert>
+                    <MudAlert Severity="Severity.Error" Class="mt-2">@FactionSearchError</MudAlert>
                 }
             </ChildContent>
         </LoadableContent>

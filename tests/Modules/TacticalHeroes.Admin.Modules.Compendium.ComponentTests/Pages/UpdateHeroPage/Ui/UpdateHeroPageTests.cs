@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 
 using MudBlazor;
@@ -26,7 +25,7 @@ public sealed class UpdateHeroPageTests : HeroFormTestContext
                 .Single(field => field.Instance.Label == "Имя героя").Find("input").GetAttribute("value")
                 .ShouldBe("Catherine");
             component.Find("textarea").TextContent.ShouldBe("Leader of the alliance.");
-            component.FindComponent<MudSelect<Guid>>().Find("input").GetAttribute("value").ShouldBe("Northern Alliance");
+            component.FindComponent<MudAutocomplete<Guid>>().Find("input").GetAttribute("value").ShouldBe("Northern Alliance");
             component.FindComponents<MudNumericField<int>>().Select(field => field.Find("input").GetAttribute("value"))
                 .ShouldBe(["12", "8", "3", "7", "4", "2"]);
             component.FindComponent<MudNumericField<double>>().Find("input").GetAttribute("value").ShouldBe("1.5");
@@ -34,14 +33,13 @@ public sealed class UpdateHeroPageTests : HeroFormTestContext
     }
 
     [Fact(DisplayName = "Submit should send edited fields and navigate to heroes when form is valid")]
-    public void Submit_Should_SendEditedFieldsAndNavigateToHeroes_When_FormIsValid()
+    public async Task Submit_Should_SendEditedFieldsAndNavigateToHeroes_When_FormIsValid()
     {
-        Handler.MultipleFactionPages = true;
         var component = Render<UpdateHeroPageComponent>(parameters => parameters.Add(page => page.Id, HeroId));
         component.WaitForElement("textarea").Change("Updated description.");
         component.FindComponents<MudNumericField<int>>()
             .Single(field => field.Instance.Label == "Атака").Find("input").Change("20");
-        component.FindComponent<MudSelect<Guid>>().Find(".mud-input-control").MouseDown(new MouseEventArgs());
+        await component.InvokeAsync(() => component.FindComponent<MudAutocomplete<Guid>>().Instance.OpenMenuAsync());
         Popovers.FindAll(".mud-list-item").Single(item => item.TextContent.Trim() == "Faction 1").Click();
 
         component.Find(".submit-action").Click();

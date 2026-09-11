@@ -20,10 +20,10 @@ public sealed class CreateHeroPageTests : HeroFormTestContext
     }
 
     [Fact(DisplayName = "Submit should send all fields and navigate to hero when form is valid")]
-    public void Submit_Should_SendAllFieldsAndNavigateToHero_When_FormIsValid()
+    public async Task Submit_Should_SendAllFieldsAndNavigateToHero_When_FormIsValid()
     {
         var component = Render<CreateHeroPageComponent>();
-        FillForm(component);
+        await FillFormAsync(component);
 
         component.Find(".submit-action").Click();
 
@@ -65,11 +65,11 @@ public sealed class CreateHeroPageTests : HeroFormTestContext
     [InlineData("Name")]
     [InlineData("FactionId")]
     [InlineData("MaximumDamage")]
-    public void Submit_Should_DisplayFieldErrors_When_ServerRejectsValue(string field)
+    public async Task Submit_Should_DisplayFieldErrors_When_ServerRejectsValue(string field)
     {
         Handler.RejectSaveField = field;
         var component = Render<CreateHeroPageComponent>();
-        FillForm(component);
+        await FillFormAsync(component);
 
         component.Find(".submit-action").Click();
 

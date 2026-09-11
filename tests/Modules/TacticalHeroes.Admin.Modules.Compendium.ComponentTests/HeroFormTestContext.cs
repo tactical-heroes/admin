@@ -4,7 +4,6 @@ using System.Text.Json;
 using System.Web;
 
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 
@@ -38,7 +37,7 @@ public abstract class HeroFormTestContext : BunitContext
         Popovers = Render<MudPopoverProvider>();
     }
 
-    protected void FillForm(IRenderedComponent<IComponent> component)
+    protected async Task FillFormAsync(IRenderedComponent<IComponent> component)
     {
         component.FindComponents<MudTextField<string>>()
             .Single(field => field.Instance.Label == "Имя героя").Find("input").Change("Catherine");
@@ -56,20 +55,26 @@ public abstract class HeroFormTestContext : BunitContext
             .Single(field => field.Instance.Label == "Мораль").Find("input").Change("4");
         component.FindComponents<MudNumericField<int>>()
             .Single(field => field.Instance.Label == "Удача").Find("input").Change("2");
-        component.FindComponent<MudSelect<Guid>>().Find(".mud-input-control").MouseDown(new MouseEventArgs());
+        await component.InvokeAsync(() => component.FindComponent<MudAutocomplete<Guid>>().Instance.OpenMenuAsync());
         Popovers.FindAll(".mud-list-item")
             .Single(item => item.TextContent.Trim() == "Northern Alliance").Click();
     }
 
     protected sealed class HeroFormHandler : HttpMessageHandler
     {
-        public List<int> FactionRequests { get; } = [];
+        public List<string?> FactionRequests { get; } = [];
 
-        public bool MultipleFactionPages { get; set; }
+        public int FactionDetailRequests { get; private set; }
 
         public bool EmptyFactions { get; set; }
 
-        public int? FailingFactionPage { get; set; }
+        public bool FailFactionSearch { get; set; }
+
+        public bool FailFactionLoad { get; set; }
+
+        public TaskCompletionSource<HttpResponseMessage>? PendingFactionSearch { get; set; }
+
+        public CancellationToken FactionSearchCancellation { get; private set; }
 
         public bool FailHeroLoad { get; set; }
 
@@ -87,10 +92,24 @@ public abstract class HeroFormTestContext : BunitContext
             HttpRequestMessage request, CancellationToken cancellationToken)
         {
             string path = request.RequestUri!.AbsolutePath;
-            if (path == "/api/v1/factions")
+            if (path == "/api/v1/factions/select-options")
             {
                 request.Method.ShouldBe(HttpMethod.Get);
+                if (PendingFactionSearch is not null)
+                {
+                    FactionSearchCancellation = cancellationToken;
+                    return await PendingFactionSearch.Task.WaitAsync(cancellationToken);
+                }
+
                 return GetFactions(request.RequestUri);
+            }
+
+            if (path == "/api/v1/factions/" + FactionId)
+            {
+                FactionDetailRequests++;
+                return FailFactionLoad
+                    ? JsonResponse(HttpStatusCode.BadRequest, new { status = 400, detail = "Faction unavailable." })
+                    : JsonResponse(HttpStatusCode.OK, new { id = FactionId, name = "Northern Alliance", description = "A faction." });
             }
 
             if (request.Method == HttpMethod.Get)
@@ -139,39 +158,24 @@ public abstract class HeroFormTestContext : BunitContext
         private HttpResponseMessage GetFactions(Uri uri)
         {
             var query = HttpUtility.ParseQueryString(uri.Query);
-            int page = int.Parse(query["pageNumber"]!);
-            query["pageSize"].ShouldBe("100");
-            FactionRequests.Add(page);
-            if (FailingFactionPage == page)
+            query["limit"].ShouldBe("20");
+            string? search = query["search"];
+            FactionRequests.Add(search);
+            if (FailFactionSearch)
             {
                 return JsonResponse(HttpStatusCode.BadRequest, new { status = 400, detail = "Factions unavailable." });
             }
 
-            object[] items = [new { id = FactionId, name = "Northern Alliance", description = "A coalition." }];
-            int totalCount = MultipleFactionPages ? 101 : 1;
-            if (EmptyFactions)
+            var options = new[]
             {
-                items = [];
-                totalCount = 0;
-            }
-            else if (MultipleFactionPages && page == 1)
-            {
-                items = [.. Enumerable.Range(1, 100).Select(index => (object)new
-                {
-                    id = new Guid(index, 0, 0, new byte[8]),
-                    name = $"Faction {index}",
-                    description = "A faction."
-                })];
-            }
+                new { id = new Guid(1, 0, 0, new byte[8]), name = "Faction 1" },
+                new { id = FactionId, name = "Northern Alliance" }
+            };
 
-            return JsonResponse(HttpStatusCode.OK, new
-            {
-                items,
-                pageNumber = page,
-                pageSize = 100,
-                totalCount,
-                totalPages = (totalCount + 99) / 100
-            });
+            return JsonResponse(HttpStatusCode.OK, EmptyFactions
+                ? []
+                : options.Where(option => string.IsNullOrWhiteSpace(search)
+                    || option.name.Contains(search.Trim(), StringComparison.OrdinalIgnoreCase)).ToArray());
         }
 
         private static HttpResponseMessage JsonResponse(HttpStatusCode status, object body)
