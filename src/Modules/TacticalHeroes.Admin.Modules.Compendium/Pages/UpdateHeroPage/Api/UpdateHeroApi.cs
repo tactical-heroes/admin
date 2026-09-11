@@ -1,12 +1,12 @@
 using TacticalHeroes.Admin.Api.Errors;
 using TacticalHeroes.Admin.Api.Generated;
-using TacticalHeroes.Admin.Modules.Compendium.Features.HeroEditing.Model;
+using TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateHeroPage.Model;
 
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateHeroPage.Api;
 
 public sealed class UpdateHeroApi(TacticalHeroesApiClient client)
 {
-    public async Task<Result<HeroFormModel>> GetAsync(
+    public async Task<Result<UpdateHeroFormModel>> GetAsync(
         Guid id,
         CancellationToken cancellationToken)
     {
@@ -19,7 +19,7 @@ public sealed class UpdateHeroApi(TacticalHeroesApiClient client)
 
     public async Task<Result<Guid>> UpdateAsync(
         Guid id,
-        HeroFormModel hero,
+        UpdateHeroFormModel hero,
         CancellationToken cancellationToken)
     {
         var request = UpdateHeroMapper.ToRequest(hero);

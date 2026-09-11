@@ -1,10 +1,10 @@
 using FluentValidation;
 
-namespace TacticalHeroes.Admin.Modules.Compendium.Features.HeroEditing.Model;
+namespace TacticalHeroes.Admin.Modules.Compendium.Pages.CreateHeroPage.Model;
 
-public sealed class HeroFormModelValidator : MudFormValidator<HeroFormModel>
+public sealed class CreateHeroFormModelValidator : MudFormValidator<CreateHeroFormModel>
 {
-    public HeroFormModelValidator()
+    public CreateHeroFormModelValidator()
     {
         RuleFor(hero => hero.Name)
             .NotEmpty().WithMessage("Укажите имя героя")

@@ -10,12 +10,8 @@ namespace TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Api;
 [UseStaticMapper(typeof(RequiredValueMapper))]
 internal static partial class FactionOptionsMapper
 {
-    public static partial IReadOnlyList<FactionOption> ToOptions(List<FactionSelectOptionResponse> response);
+    public static partial IReadOnlyList<FactionSelectOption> ToOptions(List<FactionSelectOptionResponse> response);
 
     [MapperIgnoreSource(nameof(FactionSelectOptionResponse.AdditionalData))]
-    private static partial FactionOption ToOption(FactionSelectOptionResponse response);
-
-    [MapperIgnoreSource(nameof(GetFactionDetailsResponse.AdditionalData))]
-    [MapperIgnoreSource(nameof(GetFactionDetailsResponse.Description))]
-    public static partial FactionOption ToOption(GetFactionDetailsResponse response);
+    private static partial FactionSelectOption ToOption(FactionSelectOptionResponse response);
 }

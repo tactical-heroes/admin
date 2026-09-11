@@ -1,6 +1,6 @@
-namespace TacticalHeroes.Admin.Modules.Compendium.Features.HeroEditing.Model;
+namespace TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateHeroPage.Model;
 
-public sealed class HeroFormModel
+public sealed class UpdateHeroFormModel
 {
     public string Name { get; set; } = string.Empty;
 

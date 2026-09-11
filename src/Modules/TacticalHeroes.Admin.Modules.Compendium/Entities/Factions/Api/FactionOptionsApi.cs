@@ -6,7 +6,7 @@ namespace TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Api;
 
 public sealed class FactionOptionsApi(TacticalHeroesApiClient client)
 {
-    public async Task<Result<IReadOnlyList<FactionOption>>> SearchAsync(
+    public async Task<Result<IReadOnlyList<FactionSelectOption>>> SearchAsync(
         string? search, int limit, CancellationToken cancellationToken)
     {
         var result = await client.Api.V1.Factions.SelectOptions.GetAsync(
@@ -19,13 +19,5 @@ public sealed class FactionOptionsApi(TacticalHeroesApiClient client)
             .ToApiResultAsync(cancellationToken);
 
         return result.Map(FactionOptionsMapper.ToOptions);
-    }
-
-    public async Task<Result<FactionOption>> GetAsync(Guid id, CancellationToken cancellationToken)
-    {
-        var result = await client.Api.V1.Factions[id].GetAsync(cancellationToken: cancellationToken)
-            .ToApiResultAsync(cancellationToken);
-
-        return result.Map(FactionOptionsMapper.ToOption);
     }
 }

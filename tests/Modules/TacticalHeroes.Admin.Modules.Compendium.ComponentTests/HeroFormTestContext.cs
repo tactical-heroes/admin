@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Web;
 
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 
@@ -57,21 +58,17 @@ public abstract class HeroFormTestContext : BunitContext
             .Single(field => field.Instance.Label == "Удача").Find("input").Change("2");
         component.FindComponent<MudAutocomplete<Guid>>().Find("input").Input("north");
         await Popovers.WaitForAssertionAsync(() => Popovers.Markup.ShouldContain("Northern Alliance"));
-        Popovers.FindAll(".mud-list-item")
-            .Single(item => item.TextContent.Trim() == "Northern Alliance").Click();
+        await Popovers.FindAll(".mud-list-item")
+            .Single(item => item.TextContent.Trim() == "Northern Alliance").ClickAsync(new MouseEventArgs());
     }
 
     protected sealed class HeroFormHandler : HttpMessageHandler
     {
         public List<string?> FactionRequests { get; } = [];
 
-        public int FactionDetailRequests { get; private set; }
-
         public bool EmptyFactions { get; set; }
 
         public bool FailFactionSearch { get; set; }
-
-        public bool FailFactionLoad { get; set; }
 
         public TaskCompletionSource<HttpResponseMessage>? PendingFactionSearch { get; set; }
 
@@ -103,14 +100,6 @@ public abstract class HeroFormTestContext : BunitContext
                 }
 
                 return GetFactions(request.RequestUri);
-            }
-
-            if (path == "/api/v1/factions/" + FactionId)
-            {
-                FactionDetailRequests++;
-                return FailFactionLoad
-                    ? JsonResponse(HttpStatusCode.BadRequest, new { status = 400, detail = "Faction unavailable." })
-                    : JsonResponse(HttpStatusCode.OK, new { id = FactionId, name = "Northern Alliance", description = "A faction." });
             }
 
             if (request.Method == HttpMethod.Get)

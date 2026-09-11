@@ -1,15 +1,15 @@
-using TacticalHeroes.Admin.Modules.Compendium.Features.HeroEditing.Model;
+using TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateHeroPage.Model;
 
-namespace TacticalHeroes.Admin.Modules.Compendium.ComponentTests.Features.HeroEditing.Model;
+namespace TacticalHeroes.Admin.Modules.Compendium.ComponentTests.Pages.UpdateHeroPage.Model;
 
-public sealed class HeroFormModelValidatorTests
+public sealed class UpdateHeroFormModelValidatorTests
 {
     [Fact(DisplayName = "Validate should require text and faction when model is empty")]
     public void Validate_Should_RequireTextAndFaction_When_ModelIsEmpty()
     {
-        var validator = new HeroFormModelValidator();
+        var validator = new UpdateHeroFormModelValidator();
 
-        var result = validator.Validate(new HeroFormModel());
+        var result = validator.Validate(new UpdateHeroFormModel());
 
         result.Errors.Select(error => error.PropertyName).ShouldBe(["Name", "Description", "FactionId"]);
     }
@@ -17,13 +17,13 @@ public sealed class HeroFormModelValidatorTests
     [Fact(DisplayName = "Validate should reject long text when field limits are exceeded")]
     public void Validate_Should_RejectLongText_When_FieldLimitsAreExceeded()
     {
-        var model = new HeroFormModel
+        var model = new UpdateHeroFormModel
         {
             Name = new string('a', 129),
             Description = new string('b', 2001),
             FactionId = Guid.NewGuid()
         };
-        var validator = new HeroFormModelValidator();
+        var validator = new UpdateHeroFormModelValidator();
 
         var result = validator.Validate(model);
 
@@ -48,7 +48,7 @@ public sealed class HeroFormModelValidatorTests
         int attack, int defense, int minimumDamage, int maximumDamage, double initiative,
         int morale, int luck, string field)
     {
-        var model = new HeroFormModel
+        var model = new UpdateHeroFormModel
         {
             Name = "Catherine",
             Description = "Leader of the alliance.",
@@ -61,7 +61,7 @@ public sealed class HeroFormModelValidatorTests
             Morale = morale,
             Luck = luck
         };
-        var validator = new HeroFormModelValidator();
+        var validator = new UpdateHeroFormModelValidator();
 
         var result = validator.Validate(model);
 
@@ -74,7 +74,7 @@ public sealed class HeroFormModelValidatorTests
     [InlineData(5, 5, 1.5)]
     public void Validate_Should_AcceptBoundaryStats_When_AllFieldsSatisfyDomainRules(int morale, int luck, double initiative)
     {
-        var model = new HeroFormModel
+        var model = new UpdateHeroFormModel
         {
             Name = new string('a', 128),
             Description = new string('b', 2000),
@@ -83,7 +83,7 @@ public sealed class HeroFormModelValidatorTests
             Luck = luck,
             Initiative = initiative
         };
-        var validator = new HeroFormModelValidator();
+        var validator = new UpdateHeroFormModelValidator();
 
         var result = validator.Validate(model);
 

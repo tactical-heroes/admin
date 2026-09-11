@@ -1,28 +1,40 @@
+using System.Linq.Expressions;
+
 using Microsoft.AspNetCore.Components;
 
 using TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Api;
 using TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Model;
-using TacticalHeroes.Admin.Modules.Compendium.Features.HeroEditing.Model;
 using TacticalHeroes.Admin.Shared.Errors;
 using TacticalHeroes.Admin.Shared.Ui.Common;
 
-namespace TacticalHeroes.Admin.Modules.Compendium.Features.HeroEditing.Ui;
+namespace TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Ui;
 
-public partial class HeroFormFields(FactionOptionsApi factionOptionsApi) : CancelableComponentBase
+public partial class FactionSelect(FactionOptionsApi factionOptionsApi) : CancelableComponentBase
 {
     private const int FactionOptionLimit = 20;
     private const int FactionSearchMinLength = 3;
 
-    [Parameter, EditorRequired]
-    public HeroFormModel Model { get; set; } = new();
+    [Parameter]
+    public Guid Value { get; set; }
 
-    [Parameter, EditorRequired]
-    public FormErrorState<HeroFormModel> Errors { get; set; } = new();
+    [Parameter]
+    public EventCallback<Guid> ValueChanged { get; set; }
+
+    [Parameter]
+    public Expression<Func<Guid>>? For { get; set; }
+
+    [Parameter]
+    public bool Error { get; set; }
+
+    [Parameter]
+    public string? ErrorText { get; set; }
 
     [PersistentState(AllowUpdates = true)]
-    public FactionOption? SelectedFaction { get; set; }
+    public FactionSelectOption? SelectedFaction { get; set; }
 
-    private IReadOnlyList<FactionOption> Factions { get; set; } = [];
+    private IReadOnlyList<FactionSelectOption> Factions { get; set; } = [];
+
+    private Guid? LoadedFactionId { get; set; }
 
     private string? FactionLoadError { get; set; }
 
@@ -32,7 +44,7 @@ public partial class HeroFormFields(FactionOptionsApi factionOptionsApi) : Cance
 
     protected override async Task OnParametersSetAsync()
     {
-        if (Model.FactionId != Guid.Empty && SelectedFaction?.Id != Model.FactionId)
+        if (Value != Guid.Empty && SelectedFaction?.Id != Value && LoadedFactionId != Value)
         {
             await LoadSelectedFactionAsync();
         }
@@ -40,14 +52,15 @@ public partial class HeroFormFields(FactionOptionsApi factionOptionsApi) : Cance
 
     private async Task LoadSelectedFactionAsync()
     {
-        var factionId = Model.FactionId;
+        var factionId = Value;
+        LoadedFactionId = factionId;
         IsLoadingFaction = true;
         FactionLoadError = null;
 
         try
         {
-            var result = await factionOptionsApi.GetAsync(factionId, LifetimeToken);
-            if (Model.FactionId != factionId)
+            var result = await factionOptionsApi.SearchAsync(null, FactionOptionLimit, LifetimeToken);
+            if (Value != factionId)
             {
                 return;
             }
@@ -58,7 +71,8 @@ public partial class HeroFormFields(FactionOptionsApi factionOptionsApi) : Cance
                 return;
             }
 
-            SelectedFaction = result.Value;
+            Factions = result.Value;
+            SelectedFaction = Factions.FirstOrDefault(faction => faction.Id == factionId);
         }
         finally
         {
@@ -86,11 +100,12 @@ public partial class HeroFormFields(FactionOptionsApi factionOptionsApi) : Cance
         return Factions.Select(faction => faction.Id);
     }
 
-    private void SetFaction(Guid id)
+    private async Task SetFactionAsync(Guid id)
     {
-        Model.FactionId = id;
+        Value = id;
         SelectedFaction = Factions.FirstOrDefault(faction => faction.Id == id)
             ?? (SelectedFaction?.Id == id ? SelectedFaction : null);
+        await ValueChanged.InvokeAsync(id);
     }
 
     private string GetFactionName(Guid id)

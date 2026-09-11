@@ -62,10 +62,11 @@ raw internal route strings. Kiota client code is generated from
 `openapi/tactical-heroes.json` into the API project's intermediate output during
 the build and is not committed to the repository.
 
-The client shell and module RCLs follow Feature-Sliced Design. Route-level
-components in `Pages` only read route state and compose `Widgets` or `Features`;
-business behavior and API access stay in lower layers. List filters and page
-numbers are query-string state, so list views can be bookmarked and restored.
+The client shell and module RCLs follow Feature-Sliced Design. Each `Pages` slice
+owns its route, form models, validators, and API adapters. Create and update flows
+use separate page slices; reusable domain controls belong in `Entities`.
+List filters and page numbers are query-string state, so list views can be
+bookmarked and restored.
 Razor markup, component code, and isolated styles are kept in `.razor`,
 `.razor.cs`, and `.razor.css` files respectively. Architecture tests enforce
 the allowed FSD folders, dependency direction, module isolation, typed route

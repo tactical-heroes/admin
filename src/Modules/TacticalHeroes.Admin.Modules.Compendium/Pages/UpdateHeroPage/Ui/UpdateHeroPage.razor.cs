@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Components;
 
 using MudBlazor;
 
-using TacticalHeroes.Admin.Modules.Compendium.Features.HeroEditing.Model;
 using TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateHeroPage.Api;
+using TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateHeroPage.Model;
 
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateHeroPage.Ui;
 
@@ -11,7 +11,7 @@ public partial class UpdateHeroPage(
     UpdateHeroApi updateHeroApi,
     ISnackbar snackbar,
     NavigationManager navigation)
-    : MudUpdateFormComponentBase<HeroFormModel, HeroFormModelValidator>(
+    : MudUpdateFormComponentBase<UpdateHeroFormModel, UpdateHeroFormModelValidator>(
         updateHeroApi.GetAsync,
         updateHeroApi.UpdateAsync,
         "Герой сохранён",

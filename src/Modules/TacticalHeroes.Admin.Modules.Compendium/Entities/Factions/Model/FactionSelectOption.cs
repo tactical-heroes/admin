@@ -1,6 +1,6 @@
 namespace TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Model;
 
-public sealed class FactionOption
+public sealed class FactionSelectOption
 {
     public Guid Id { get; set; }
 

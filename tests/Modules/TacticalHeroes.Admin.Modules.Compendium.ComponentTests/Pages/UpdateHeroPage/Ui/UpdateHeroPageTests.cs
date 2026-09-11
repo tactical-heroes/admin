@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 
 using MudBlazor;
@@ -12,6 +13,24 @@ namespace TacticalHeroes.Admin.Modules.Compendium.ComponentTests.Pages.UpdateHer
 
 public sealed class UpdateHeroPageTests : HeroFormTestContext
 {
+    [Fact(DisplayName = "Submit should preserve faction when current faction is absent from options")]
+    public void Submit_Should_PreserveFaction_When_CurrentFactionIsAbsentFromOptions()
+    {
+        Handler.EmptyFactions = true;
+        var component = Render<UpdateHeroPageComponent>(parameters => parameters.Add(page => page.Id, HeroId));
+        component.WaitForElement("textarea").Change("Updated description.");
+
+        component.Find(".submit-action").Click();
+
+        component.WaitForAssertion(() =>
+        {
+            Handler.Saves.ShouldBe(1);
+            Handler.SavedHero.GetProperty("factionId").GetGuid().ShouldBe(FactionId);
+            Handler.SavedHero.GetProperty("description").GetString().ShouldBe("Updated description.");
+            Handler.FactionRequests.ShouldBe([null]);
+        });
+    }
+
     [Fact(DisplayName = "Render should load all fields and link to heroes when hero exists")]
     public void Render_Should_LoadAllFieldsAndLinkToHeroes_When_HeroExists()
     {
@@ -41,7 +60,7 @@ public sealed class UpdateHeroPageTests : HeroFormTestContext
             .Single(field => field.Instance.Label == "Атака").Find("input").Change("20");
         component.FindComponent<MudAutocomplete<Guid>>().Find("input").Input("Faction 1");
         await Popovers.WaitForAssertionAsync(() => Popovers.Markup.ShouldContain("Faction 1"));
-        Popovers.FindAll(".mud-list-item").Single(item => item.TextContent.Trim() == "Faction 1").Click();
+        await Popovers.FindAll(".mud-list-item").Single(item => item.TextContent.Trim() == "Faction 1").ClickAsync(new MouseEventArgs());
 
         component.Find(".submit-action").Click();
 

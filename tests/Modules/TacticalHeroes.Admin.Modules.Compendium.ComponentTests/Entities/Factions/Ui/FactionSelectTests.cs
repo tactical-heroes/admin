@@ -1,11 +1,12 @@
+using Microsoft.AspNetCore.Components.Web;
+
 using MudBlazor;
 
-using TacticalHeroes.Admin.Modules.Compendium.Features.HeroEditing.Model;
-using TacticalHeroes.Admin.Modules.Compendium.Features.HeroEditing.Ui;
+using TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Ui;
 
-namespace TacticalHeroes.Admin.Modules.Compendium.ComponentTests.Features.HeroEditing.Ui;
+namespace TacticalHeroes.Admin.Modules.Compendium.ComponentTests.Entities.Factions.Ui;
 
-public sealed class HeroFormFieldsTests : HeroFormTestContext
+public sealed class FactionSelectTests : HeroFormTestContext
 {
     [Theory(DisplayName = "SearchFactionsAsync should avoid requests when trimmed search is shorter than three characters")]
     [InlineData(null)]
@@ -16,14 +17,13 @@ public sealed class HeroFormFieldsTests : HeroFormTestContext
     [InlineData(" no ")]
     public async Task SearchFactionsAsync_Should_AvoidRequests_When_TrimmedSearchIsShorterThanThreeCharacters(string? search)
     {
-        var component = Render<HeroFormFields>();
+        var component = Render<FactionSelect>();
         var autocomplete = component.FindComponent<MudAutocomplete<Guid>>();
 
         var options = await component.InvokeAsync(() => autocomplete.Instance.SearchFunc!(search, Xunit.TestContext.Current.CancellationToken)!);
 
         options.ShouldBeEmpty();
         Handler.FactionRequests.ShouldBeEmpty();
-        Handler.FactionDetailRequests.ShouldBe(0);
     }
 
     [Fact(DisplayName = "SearchFactionsAsync should cancel pending request when search is cancelled")]
@@ -31,11 +31,11 @@ public sealed class HeroFormFieldsTests : HeroFormTestContext
     {
         using var source = new CancellationTokenSource();
         Handler.PendingFactionSearch = new TaskCompletionSource<HttpResponseMessage>();
-        var component = Render<HeroFormFields>();
+        var component = Render<FactionSelect>();
         var autocomplete = component.FindComponent<MudAutocomplete<Guid>>();
 
         var search = component.InvokeAsync(() => autocomplete.Instance.SearchFunc!("north", source.Token)!);
-        component.WaitForAssertion(() => Handler.FactionSearchCancellation.CanBeCanceled.ShouldBeTrue());
+        await component.WaitForAssertionAsync(() => Handler.FactionSearchCancellation.CanBeCanceled.ShouldBeTrue());
         await source.CancelAsync();
 
         await Should.ThrowAsync<OperationCanceledException>(() => search);
@@ -44,16 +44,17 @@ public sealed class HeroFormFieldsTests : HeroFormTestContext
     }
 
     [Fact(DisplayName = "OnParametersSetAsync should load selected faction when form has faction identifier")]
-    public void OnParametersSetAsync_Should_LoadSelectedFaction_When_FormHasFactionIdentifier()
+    public async Task OnParametersSetAsync_Should_LoadSelectedFaction_When_FormHasFactionIdentifier()
     {
-        var model = new HeroFormModel { FactionId = FactionId };
+        var selectedFactionId = FactionId;
 
-        var component = Render<HeroFormFields>(parameters => parameters.Add(fields => fields.Model, model));
+        var component = Render<FactionSelect>(parameters => parameters
+            .Add(select => select.Value, selectedFactionId)
+            .Add(select => select.ValueChanged, value => selectedFactionId = value));
 
-        component.WaitForAssertion(() =>
+        await component.WaitForAssertionAsync(() =>
         {
-            Handler.FactionDetailRequests.ShouldBe(1);
-            Handler.FactionRequests.ShouldBeEmpty();
+            Handler.FactionRequests.ShouldBe([null]);
             component.FindComponent<MudAutocomplete<Guid>>().Find("input").GetAttribute("value").ShouldBe("Northern Alliance");
         });
     }
@@ -61,42 +62,45 @@ public sealed class HeroFormFieldsTests : HeroFormTestContext
     [Fact(DisplayName = "OnParametersSetAsync should avoid requests when form has no faction")]
     public void OnParametersSetAsync_Should_AvoidRequests_When_FormHasNoFaction()
     {
-        var model = new HeroFormModel();
+        var selectedFactionId = Guid.Empty;
 
-        var component = Render<HeroFormFields>(parameters => parameters.Add(fields => fields.Model, model));
+        var component = Render<FactionSelect>(parameters => parameters
+            .Add(select => select.Value, selectedFactionId)
+            .Add(select => select.ValueChanged, value => selectedFactionId = value));
 
-        Handler.FactionDetailRequests.ShouldBe(0);
         Handler.FactionRequests.ShouldBeEmpty();
         component.FindComponent<MudAutocomplete<Guid>>().Find("input").GetAttribute("value").ShouldBeEmpty();
     }
 
     [Fact(DisplayName = "LoadSelectedFactionAsync should retry loading when selected faction load fails")]
-    public void LoadSelectedFactionAsync_Should_RetryLoading_When_SelectedFactionLoadFails()
+    public async Task LoadSelectedFactionAsync_Should_RetryLoading_When_SelectedFactionLoadFails()
     {
-        Handler.FailFactionLoad = true;
-        var model = new HeroFormModel { FactionId = FactionId };
-        var component = Render<HeroFormFields>(parameters => parameters.Add(fields => fields.Model, model));
-        component.WaitForAssertion(() => component.Markup.ShouldContain("Faction unavailable."));
-        Handler.FailFactionLoad = false;
+        Handler.FailFactionSearch = true;
+        var selectedFactionId = FactionId;
+        var component = Render<FactionSelect>(parameters => parameters
+            .Add(select => select.Value, selectedFactionId)
+            .Add(select => select.ValueChanged, value => selectedFactionId = value));
+        await component.WaitForAssertionAsync(() => component.Markup.ShouldContain("Factions unavailable."));
+        Handler.FailFactionSearch = false;
 
         component.FindAll("button").Single(button => button.TextContent.Trim() == "Повторить").Click();
 
-        component.WaitForAssertion(() =>
+        await component.WaitForAssertionAsync(() =>
         {
-            Handler.FactionDetailRequests.ShouldBe(2);
+            Handler.FactionRequests.ShouldBe([null, null]);
             component.FindComponent<MudAutocomplete<Guid>>().Find("input").GetAttribute("value").ShouldBe("Northern Alliance");
-            component.Markup.ShouldNotContain("Faction unavailable.");
+            component.Markup.ShouldNotContain("Factions unavailable.");
         });
     }
 
     [Fact(DisplayName = "SearchFactionsAsync should request matching options when text is entered")]
-    public void SearchFactionsAsync_Should_RequestMatchingOptions_When_TextIsEntered()
+    public async Task SearchFactionsAsync_Should_RequestMatchingOptions_When_TextIsEntered()
     {
-        var component = Render<HeroFormFields>();
+        var component = Render<FactionSelect>();
 
         component.FindComponent<MudAutocomplete<Guid>>().Find("input").Input(" nor ");
 
-        component.WaitForAssertion(() =>
+        await Popovers.WaitForAssertionAsync(() =>
         {
             Handler.FactionRequests.ShouldBe(["nor"]);
             Popovers.Markup.ShouldContain("Northern Alliance");
@@ -105,29 +109,27 @@ public sealed class HeroFormFieldsTests : HeroFormTestContext
     }
 
     [Fact(DisplayName = "SearchFactionsAsync should recover from error when search is repeated")]
-    public void SearchFactionsAsync_Should_RecoverFromError_When_SearchIsRepeated()
+    public async Task SearchFactionsAsync_Should_RecoverFromError_When_SearchIsRepeated()
     {
         Handler.FailFactionSearch = true;
-        var component = Render<HeroFormFields>();
-        component.FindComponent<MudAutocomplete<Guid>>().Find("input").Input("nor");
-        component.WaitForAssertion(() => component.Markup.ShouldContain("Factions unavailable."));
+        var component = Render<FactionSelect>();
+        var autocomplete = component.FindComponent<MudAutocomplete<Guid>>();
+        await component.InvokeAsync(() => autocomplete.Instance.SearchFunc!("nor", Xunit.TestContext.Current.CancellationToken)!);
+        component.Markup.ShouldContain("Factions unavailable.");
         Handler.FailFactionSearch = false;
 
-        component.FindComponent<MudAutocomplete<Guid>>().Find("input").Input("north");
+        var options = await component.InvokeAsync(() => autocomplete.Instance.SearchFunc!("north", Xunit.TestContext.Current.CancellationToken)!);
 
-        component.WaitForAssertion(() =>
-        {
-            Handler.FactionRequests.ShouldBe(["nor", "north"]);
-            component.Markup.ShouldNotContain("Factions unavailable.");
-            Popovers.Markup.ShouldContain("Northern Alliance");
-        });
+        Handler.FactionRequests.ShouldBe(["nor", "north"]);
+        component.Markup.ShouldNotContain("Factions unavailable.");
+        options.ShouldBe([FactionId]);
     }
 
     [Fact(DisplayName = "Render should offer faction creation when search has no matches")]
     public async Task Render_Should_OfferFactionCreation_When_SearchHasNoMatches()
     {
         Handler.EmptyFactions = true;
-        var component = Render<HeroFormFields>();
+        var component = Render<FactionSelect>();
 
         component.FindComponent<MudAutocomplete<Guid>>().Find("input").Input("north");
         await Popovers.WaitForAssertionAsync(() => Popovers.Markup.ShouldContain("Фракции не найдены."));
@@ -136,44 +138,50 @@ public sealed class HeroFormFieldsTests : HeroFormTestContext
         Popovers.FindAll("a").Select(link => link.GetAttribute("href")).ShouldContain(CompendiumRoutes.CreateFaction);
     }
 
-    [Fact(DisplayName = "SetFaction should update faction identifier when option is selected")]
-    public async Task SetFaction_Should_UpdateFactionIdentifier_When_OptionIsSelected()
+    [Fact(DisplayName = "SetFactionAsync should update faction identifier when option is selected")]
+    public async Task SetFactionAsync_Should_UpdateFactionIdentifier_When_OptionIsSelected()
     {
-        var model = new HeroFormModel();
-        var component = Render<HeroFormFields>(parameters => parameters.Add(fields => fields.Model, model));
+        var selectedFactionId = Guid.Empty;
+        var component = Render<FactionSelect>(parameters => parameters
+            .Add(select => select.Value, selectedFactionId)
+            .Add(select => select.ValueChanged, value => selectedFactionId = value));
         component.FindComponent<MudAutocomplete<Guid>>().Find("input").Input("north");
         await Popovers.WaitForAssertionAsync(() => Popovers.Markup.ShouldContain("Northern Alliance"));
 
-        Popovers.FindAll(".mud-list-item").Single(item => item.TextContent.Trim() == "Northern Alliance").Click();
+        await Popovers.FindAll(".mud-list-item").Single(item => item.TextContent.Trim() == "Northern Alliance").ClickAsync(new MouseEventArgs());
 
-        model.FactionId.ShouldBe(FactionId);
+        selectedFactionId.ShouldBe(FactionId);
         component.FindComponent<MudAutocomplete<Guid>>().Find("input").GetAttribute("value").ShouldBe("Northern Alliance");
     }
 
-    [Fact(DisplayName = "SetFaction should clear faction identifier when selection is cleared")]
-    public async Task SetFaction_Should_ClearFactionIdentifier_When_SelectionIsCleared()
+    [Fact(DisplayName = "SetFactionAsync should clear faction identifier when selection is cleared")]
+    public async Task SetFactionAsync_Should_ClearFactionIdentifier_When_SelectionIsCleared()
     {
-        var model = new HeroFormModel { FactionId = FactionId };
-        var component = Render<HeroFormFields>(parameters => parameters.Add(fields => fields.Model, model));
+        var selectedFactionId = FactionId;
+        var component = Render<FactionSelect>(parameters => parameters
+            .Add(select => select.Value, selectedFactionId)
+            .Add(select => select.ValueChanged, value => selectedFactionId = value));
         component.WaitForElement("input");
 
         await component.InvokeAsync(() => component.FindComponent<MudAutocomplete<Guid>>().Instance.ClearAsync());
 
-        model.FactionId.ShouldBe(Guid.Empty);
+        selectedFactionId.ShouldBe(Guid.Empty);
         component.FindComponent<MudAutocomplete<Guid>>().Find("input").GetAttribute("value").ShouldBeEmpty();
     }
 
     [Fact(DisplayName = "GetFactionName should preserve selected label when other options are searched")]
     public async Task GetFactionName_Should_PreserveSelectedLabel_When_OtherOptionsAreSearched()
     {
-        var model = new HeroFormModel { FactionId = FactionId };
-        var component = Render<HeroFormFields>(parameters => parameters.Add(fields => fields.Model, model));
+        var selectedFactionId = FactionId;
+        var component = Render<FactionSelect>(parameters => parameters
+            .Add(select => select.Value, selectedFactionId)
+            .Add(select => select.ValueChanged, value => selectedFactionId = value));
         component.FindComponent<MudAutocomplete<Guid>>().Find("input").Input("Faction 1");
-        component.WaitForAssertion(() => Handler.FactionRequests.ShouldContain("Faction 1"));
+        await Popovers.WaitForAssertionAsync(() => Popovers.Markup.ShouldContain("Faction 1"));
 
         await component.InvokeAsync(() => component.FindComponent<MudAutocomplete<Guid>>().Instance.CloseMenuAsync());
 
-        model.FactionId.ShouldBe(FactionId);
+        selectedFactionId.ShouldBe(FactionId);
         component.FindComponent<MudAutocomplete<Guid>>().Find("input").GetAttribute("value").ShouldBe("Northern Alliance");
     }
 }

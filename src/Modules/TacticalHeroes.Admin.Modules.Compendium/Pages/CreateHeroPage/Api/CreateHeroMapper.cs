@@ -1,7 +1,7 @@
 using Riok.Mapperly.Abstractions;
 
 using TacticalHeroes.Admin.Api.Generated.Models;
-using TacticalHeroes.Admin.Modules.Compendium.Features.HeroEditing.Model;
+using TacticalHeroes.Admin.Modules.Compendium.Pages.CreateHeroPage.Model;
 
 namespace TacticalHeroes.Admin.Modules.Compendium.Pages.CreateHeroPage.Api;
 
@@ -9,7 +9,7 @@ namespace TacticalHeroes.Admin.Modules.Compendium.Pages.CreateHeroPage.Api;
 internal static partial class CreateHeroMapper
 {
     [MapperIgnoreTarget(nameof(CreateHeroRequest.AdditionalData))]
-    public static partial CreateHeroRequest ToRequest(HeroFormModel hero);
+    public static partial CreateHeroRequest ToRequest(CreateHeroFormModel hero);
 
     [MapperIgnore]
     public static Guid ToId(CreateHeroResponse response)
