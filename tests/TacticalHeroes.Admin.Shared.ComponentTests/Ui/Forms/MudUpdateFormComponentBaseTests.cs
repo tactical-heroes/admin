@@ -11,7 +11,7 @@ public sealed class MudUpdateFormComponentBaseTests
     [Fact(DisplayName = "SubmitAsync should update current model when form is valid")]
     public async Task SubmitAsync_Should_UpdateCurrentModel_When_FormIsValid()
     {
-        using var context = new BunitContext();
+        await using var context = new BunitContext();
         context.Services.AddMudServices();
         Guid id = Guid.NewGuid();
         using var component = new TestComponent(
