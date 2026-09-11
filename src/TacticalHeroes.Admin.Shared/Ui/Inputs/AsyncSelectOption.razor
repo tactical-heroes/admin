@@ -1,0 +1,44 @@
+@typeparam TId where TId : notnull
+@inherits CancelableComponentBase
+
+<LoadableContent Loading="IsLoading"
+                 LoadError="@LoadError"
+                 OnRetry="LoadAsync"
+                 LoadingHeight="56px">
+    <ChildContent>
+        <MudAutocomplete T="TId"
+                         Value="Value"
+                         ValueChanged="SetValueAsync"
+                         For="For"
+                         Label="@Label"
+                         Variant="Variant.Outlined"
+                         ToStringFunc="GetName"
+                         SearchFunc="SearchAsync"
+                         DebounceInterval="DebounceInterval"
+                         MinCharacters="MinCharacters"
+                         HelperText="@($"Введите минимум {MinCharacters} символа")"
+                         MaxItems="MaxItems"
+                         MaxLength="MaxLength"
+                         Strict="false"
+                         Clearable="true"
+                         ResetValueOnEmptyText="true"
+                         ShowProgressIndicator="true"
+                         Error="Error"
+                         ErrorText="@ErrorText">
+            <NoItemsTemplate>
+                @if (SearchError is null)
+                {
+                    <MudText Class="px-4 py-2">@EmptyText</MudText>
+                    @if (CreateHref is not null)
+                    {
+                        <MudLink Href="@CreateHref" Class="px-4">@CreateText</MudLink>
+                    }
+                }
+            </NoItemsTemplate>
+        </MudAutocomplete>
+        @if (SearchError is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mt-2">@SearchError</MudAlert>
+        }
+    </ChildContent>
+</LoadableContent>
