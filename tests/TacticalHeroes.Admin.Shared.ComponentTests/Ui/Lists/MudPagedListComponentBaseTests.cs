@@ -389,14 +389,14 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
 
         public List<LoadRequest> LoadRequests { get; } = [];
 
-        public async Task<Result<PaginationResult<TestItem>>> LoadAsync(
+        public Task<Result<PaginationResult<TestItem>>> LoadAsync(
             int pageNumber,
             int pageSize,
             TestFilter filter,
             CancellationToken cancellationToken)
         {
             LoadRequests.Add(new LoadRequest(pageNumber, pageSize, filter));
-            return await OnLoad(pageNumber, pageSize, filter, cancellationToken);
+            return OnLoad(pageNumber, pageSize, filter, cancellationToken);
         }
 
         public static Task<Result<PaginationResult<TestItem>>> SuccessfulLoadAsync(
