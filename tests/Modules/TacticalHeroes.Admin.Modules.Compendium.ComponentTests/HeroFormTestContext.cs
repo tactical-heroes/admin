@@ -55,7 +55,8 @@ public abstract class HeroFormTestContext : BunitContext
             .Single(field => field.Instance.Label == "Мораль").Find("input").Change("4");
         component.FindComponents<MudNumericField<int>>()
             .Single(field => field.Instance.Label == "Удача").Find("input").Change("2");
-        await component.InvokeAsync(() => component.FindComponent<MudAutocomplete<Guid>>().Instance.OpenMenuAsync());
+        component.FindComponent<MudAutocomplete<Guid>>().Find("input").Input("north");
+        await Popovers.WaitForAssertionAsync(() => Popovers.Markup.ShouldContain("Northern Alliance"));
         Popovers.FindAll(".mud-list-item")
             .Single(item => item.TextContent.Trim() == "Northern Alliance").Click();
     }

@@ -39,7 +39,8 @@ public sealed class UpdateHeroPageTests : HeroFormTestContext
         component.WaitForElement("textarea").Change("Updated description.");
         component.FindComponents<MudNumericField<int>>()
             .Single(field => field.Instance.Label == "Атака").Find("input").Change("20");
-        await component.InvokeAsync(() => component.FindComponent<MudAutocomplete<Guid>>().Instance.OpenMenuAsync());
+        component.FindComponent<MudAutocomplete<Guid>>().Find("input").Input("Faction 1");
+        await Popovers.WaitForAssertionAsync(() => Popovers.Markup.ShouldContain("Faction 1"));
         Popovers.FindAll(".mud-list-item").Single(item => item.TextContent.Trim() == "Faction 1").Click();
 
         component.Find(".submit-action").Click();

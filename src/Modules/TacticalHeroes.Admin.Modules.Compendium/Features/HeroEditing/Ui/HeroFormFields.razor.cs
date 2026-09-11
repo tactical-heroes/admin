@@ -11,6 +11,7 @@ namespace TacticalHeroes.Admin.Modules.Compendium.Features.HeroEditing.Ui;
 public partial class HeroFormFields(FactionOptionsApi factionOptionsApi) : CancelableComponentBase
 {
     private const int FactionOptionLimit = 20;
+    private const int FactionSearchMinLength = 3;
 
     [Parameter, EditorRequired]
     public HeroFormModel Model { get; set; } = new();
@@ -67,6 +68,15 @@ public partial class HeroFormFields(FactionOptionsApi factionOptionsApi) : Cance
 
     private async Task<IEnumerable<Guid>> SearchFactionsAsync(string? search, CancellationToken cancellationToken)
     {
+        search = search?.Trim();
+        if (search is null || search.Length < FactionSearchMinLength)
+        {
+            Factions = [];
+            FactionSearchError = null;
+            await InvokeAsync(StateHasChanged);
+            return [];
+        }
+
         using var source = CancellationTokenSource.CreateLinkedTokenSource(LifetimeToken, cancellationToken);
         var result = await factionOptionsApi.SearchAsync(search, FactionOptionLimit, source.Token);
         source.Token.ThrowIfCancellationRequested();

@@ -7,6 +7,25 @@ namespace TacticalHeroes.Admin.Modules.Compendium.ComponentTests.Features.HeroEd
 
 public sealed class HeroFormFieldsTests : HeroFormTestContext
 {
+    [Theory(DisplayName = "SearchFactionsAsync should avoid requests when trimmed search is shorter than three characters")]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("n")]
+    [InlineData("no")]
+    [InlineData("   ")]
+    [InlineData(" no ")]
+    public async Task SearchFactionsAsync_Should_AvoidRequests_When_TrimmedSearchIsShorterThanThreeCharacters(string? search)
+    {
+        var component = Render<HeroFormFields>();
+        var autocomplete = component.FindComponent<MudAutocomplete<Guid>>();
+
+        var options = await component.InvokeAsync(() => autocomplete.Instance.SearchFunc!(search, Xunit.TestContext.Current.CancellationToken)!);
+
+        options.ShouldBeEmpty();
+        Handler.FactionRequests.ShouldBeEmpty();
+        Handler.FactionDetailRequests.ShouldBe(0);
+    }
+
     [Fact(DisplayName = "SearchFactionsAsync should cancel pending request when search is cancelled")]
     public async Task SearchFactionsAsync_Should_CancelPendingRequest_When_SearchIsCancelled()
     {
@@ -75,11 +94,11 @@ public sealed class HeroFormFieldsTests : HeroFormTestContext
     {
         var component = Render<HeroFormFields>();
 
-        component.FindComponent<MudAutocomplete<Guid>>().Find("input").Input("north");
+        component.FindComponent<MudAutocomplete<Guid>>().Find("input").Input(" nor ");
 
         component.WaitForAssertion(() =>
         {
-            Handler.FactionRequests.ShouldBe(["north"]);
+            Handler.FactionRequests.ShouldBe(["nor"]);
             Popovers.Markup.ShouldContain("Northern Alliance");
             Popovers.Markup.ShouldNotContain("Faction 1");
         });
@@ -110,7 +129,8 @@ public sealed class HeroFormFieldsTests : HeroFormTestContext
         Handler.EmptyFactions = true;
         var component = Render<HeroFormFields>();
 
-        await component.InvokeAsync(() => component.FindComponent<MudAutocomplete<Guid>>().Instance.OpenMenuAsync());
+        component.FindComponent<MudAutocomplete<Guid>>().Find("input").Input("north");
+        await Popovers.WaitForAssertionAsync(() => Popovers.Markup.ShouldContain("Фракции не найдены."));
 
         Popovers.Markup.ShouldContain("Фракции не найдены.");
         Popovers.FindAll("a").Select(link => link.GetAttribute("href")).ShouldContain(CompendiumRoutes.CreateFaction);
@@ -121,7 +141,8 @@ public sealed class HeroFormFieldsTests : HeroFormTestContext
     {
         var model = new HeroFormModel();
         var component = Render<HeroFormFields>(parameters => parameters.Add(fields => fields.Model, model));
-        await component.InvokeAsync(() => component.FindComponent<MudAutocomplete<Guid>>().Instance.OpenMenuAsync());
+        component.FindComponent<MudAutocomplete<Guid>>().Find("input").Input("north");
+        await Popovers.WaitForAssertionAsync(() => Popovers.Markup.ShouldContain("Northern Alliance"));
 
         Popovers.FindAll(".mud-list-item").Single(item => item.TextContent.Trim() == "Northern Alliance").Click();
 
