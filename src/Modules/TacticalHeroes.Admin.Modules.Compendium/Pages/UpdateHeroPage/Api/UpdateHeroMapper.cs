@@ -16,9 +16,4 @@ internal static partial class UpdateHeroMapper
 
     [MapperIgnoreTarget(nameof(UpdateHeroRequest.AdditionalData))]
     public static partial UpdateHeroRequest ToRequest(UpdateHeroFormModel hero);
-
-    private static double ToRequiredDouble(double? value)
-    {
-        return value ?? throw new ArgumentNullException(nameof(value));
-    }
 }
