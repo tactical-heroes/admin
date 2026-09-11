@@ -382,12 +382,15 @@ public sealed partial class TestSourceConventionTests
 internal static class TestSourceDiscovery
 {
     private const string TestsDirectoryName = "tests";
+
     private static readonly SyntaxTree XunitUsing = CSharpSyntaxTree.ParseText("global using Xunit;");
     private static readonly ConcurrentDictionary<string, PortableExecutableReference> References = new(StringComparer.Ordinal);
+
     private static readonly Lazy<TestProjectSource[]> Projects = new(() =>
         [.. Directory.EnumerateFiles(Path.Combine(RepositoryPaths.FindRoot(), TestsDirectoryName), "*.csproj", SearchOption.AllDirectories)
             .OrderBy(project => project, StringComparer.Ordinal)
             .Select(LoadProject)]);
+
     private static readonly Lazy<TestMethodSource[]> Methods = new(() =>
         [.. GetProjects().SelectMany(project => GetTestMethods(project.Compilation, project.SourceTrees))]);
 
