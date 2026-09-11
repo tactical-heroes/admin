@@ -7,7 +7,9 @@ namespace TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Api;
 public sealed class FactionOptionsApi(TacticalHeroesApiClient client)
 {
     public async Task<Result<IReadOnlyList<FactionSelectOption>>> SearchAsync(
-        string? search, int limit, CancellationToken cancellationToken)
+        string? search,
+        int limit,
+        CancellationToken cancellationToken)
     {
         var result = await client.Api.V1.Factions.SelectOptions.GetAsync(
                 request =>
