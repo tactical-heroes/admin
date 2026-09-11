@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,8 +14,8 @@ namespace TacticalHeroes.Admin.Modules.Compendium.ComponentTests.Pages.CreateUni
 
 public sealed class CreateUnitPageTests : UnitFormTestContext
 {
-    [Fact(DisplayName = "Submit should omit ranged fields when creating a melee unit")]
-    public async Task Submit_Should_OmitRangedFields_When_CreatingAMeleeUnit()
+    [Fact(DisplayName = "Submit should send explicit null ranged fields when creating a melee unit")]
+    public async Task Submit_Should_SendExplicitNullRangedFields_When_CreatingAMeleeUnit()
     {
         var component = Render<CreateUnitPageComponent>();
         await FillFormAsync(component);
@@ -27,8 +29,8 @@ public sealed class CreateUnitPageTests : UnitFormTestContext
         component.WaitForAssertion(() =>
         {
             Handler.Saves.ShouldBe(1);
-            Handler.SavedUnit.TryGetProperty("shots", out _).ShouldBeFalse();
-            Handler.SavedUnit.TryGetProperty("rangedAttackRange", out _).ShouldBeFalse();
+            Handler.SavedUnit.GetProperty("shots").ValueKind.ShouldBe(JsonValueKind.Null);
+            Handler.SavedUnit.GetProperty("rangedAttackRange").ValueKind.ShouldBe(JsonValueKind.Null);
         });
     }
 

@@ -23,6 +23,15 @@ public sealed class UpdateUnitApi(TacticalHeroesApiClient client)
         CancellationToken cancellationToken)
     {
         var request = UpdateUnitMapper.ToRequest(unit);
+        if (request.Shots is null)
+        {
+            request.AdditionalData["shots"] = null!;
+        }
+
+        if (request.RangedAttackRange is null)
+        {
+            request.AdditionalData["rangedAttackRange"] = null!;
+        }
 
         Result result = await client.Api.V1.Units[id].PutAsync(
                 request,
