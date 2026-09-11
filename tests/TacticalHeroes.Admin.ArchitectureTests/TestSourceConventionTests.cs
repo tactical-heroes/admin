@@ -212,6 +212,11 @@ public sealed partial class TestSourceConventionTests
     [InlineData("var action = CreateAction();\n\nawait Should.ThrowAsync<Exception>(action);", true)]
     [InlineData("var component = Render();\n\ncomponent.MarkupMatches(\"<p />\");", true)]
     [InlineData("var component = Render();\n\ncomponent.WaitForAssertion(() => component.Markup.ShouldContain(\"text\"));", true)]
+    [InlineData("var component = Render();\n\nawait component.WaitForAssertionAsync(() => component.Markup.ShouldContain(\"text\"));", true)]
+    [InlineData("var component = Render();\n\ncomponent.WaitForAssertionAsync(() => Assert.True(false));", false)]
+    [InlineData("var component = Render();\n\nawait component.WaitForAssertionAsync(() => { Action verify = () => Assert.True(false); });", false)]
+    [InlineData("var component = Render();\n\nFunc<Task> verify = () => component.WaitForAssertionAsync(() => Assert.True(false));", false)]
+    [InlineData("var value = 1;\n\nawait Helpers.WaitForAssertionAsync(() => Assert.True(false));", false)]
     [InlineData("var value = 1; value.ShouldBe(1);", false)]
     [InlineData("var value = 1;\n// Assert\nvalue.ShouldBe(1);", false)]
     [InlineData("var value = 1;\n\nLog(\"Assert.True(false)\");", false)]
@@ -259,6 +264,7 @@ public sealed partial class TestSourceConventionTests
                 public static void ShouldBe(int value) { }
                 public static void MarkupMatches(string markup) { }
                 public static void WaitForAssertion(Action assertion) { }
+                public static Task WaitForAssertionAsync(Action assertion) => Task.CompletedTask;
             }
             """;
         TestMethodSource method = TestSourceDiscovery.GetTestMethods("tests/ExampleTests.cs", source).Single();
@@ -343,7 +349,9 @@ public sealed partial class TestSourceConventionTests
             .DescendantNodesAndSelf(child => child is not AnonymousFunctionExpressionSyntax and not LocalFunctionStatementSyntax)
             .OfType<InvocationExpressionSyntax>()
             .Any(invocation => IsAssertion(invocation, semanticModel) ||
-                IsBunitMethod(invocation, semanticModel, "RenderedComponentWaitForHelperExtensions", "WaitForAssertion") &&
+                (IsBunitMethod(invocation, semanticModel, "RenderedComponentWaitForHelperExtensions", "WaitForAssertion") ||
+                 invocation.Parent is AwaitExpressionSyntax &&
+                 IsBunitMethod(invocation, semanticModel, "RenderedComponentWaitForHelperExtensions", "WaitForAssertionAsync")) &&
                 invocation.ArgumentList.Arguments.Any(argument => argument.Expression switch
                 {
                     LambdaExpressionSyntax lambda => ContainsAssertion(lambda.Body, semanticModel),

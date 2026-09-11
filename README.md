@@ -44,7 +44,7 @@ dotnet run --project src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj --laun
 
 - `src/TacticalHeroes.Admin/` - ASP.NET Core host and same-origin YARP gateway.
 - `src/TacticalHeroes.Admin.Client/` - Interactive Auto application shell, routing, layouts, and module composition.
-- `src/Modules/` - flat set of module RCL projects; Identity owns account administration and Compendium owns faction administration.
+- `src/Modules/` - module RCL projects: Identity for account and access management, Compendium for game content administration.
 - `src/TacticalHeroes.Admin.Api/` - generated Kiota client and shared API transport primitives.
 - `src/TacticalHeroes.Admin.Shared/` - reusable presentation primitives without domain dependencies.
 - `tests/` - module component, API unit, shared component, and architecture tests.
@@ -62,10 +62,11 @@ raw internal route strings. Kiota client code is generated from
 `openapi/tactical-heroes.json` into the API project's intermediate output during
 the build and is not committed to the repository.
 
-The client shell and module RCLs follow Feature-Sliced Design. Route-level
-components in `Pages` only read route state and compose `Widgets` or `Features`;
-business behavior and API access stay in lower layers. List filters and page
-numbers are query-string state, so list views can be bookmarked and restored.
+The client shell and module RCLs follow Feature-Sliced Design. Each `Pages` slice
+owns its route, form models, validators, and API adapters. Create and update flows
+use separate page slices; reusable domain controls belong in `Entities`.
+List filters and page numbers are query-string state, so list views can be
+bookmarked and restored.
 Razor markup, component code, and isolated styles are kept in `.razor`,
 `.razor.cs`, and `.razor.css` files respectively. Architecture tests enforce
 the allowed FSD folders, dependency direction, module isolation, typed route

@@ -9,6 +9,7 @@ public sealed class NavMenuTests : ClientComponentTestContext
 {
     [Theory(DisplayName = "IsCurrentGroup should expand matching module when route is rendered")]
     [InlineData("/factions", true, false)]
+    [InlineData("/heroes/new", true, false)]
     [InlineData("/USERS/123?email=test#details", false, true)]
     [InlineData("/users-extra", false, false)]
     [InlineData("/", false, false)]

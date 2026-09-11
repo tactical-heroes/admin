@@ -1,0 +1,71 @@
+@inherits MudPagedListComponentBase<HeroListItem>
+@attribute [Route(CompendiumRoutes.Heroes)]
+@attribute [Authorize]
+@attribute [StreamRendering]
+
+@using TacticalHeroes.Admin.Modules.Compendium.Pages.HeroListPage.Model
+
+<PageTitle>Герои · @(Branding.GameName)</PageTitle>
+
+<PageHeader Title="Герои"
+            Subtitle="Управление игровыми героями и их фракциями">
+    <Actions>
+        <MudButton Href="@CompendiumRoutes.CreateHero"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add">
+            Добавить героя
+        </MudButton>
+    </Actions>
+</PageHeader>
+
+<EntityList TItem="HeroListItem"
+            Items="Page?.Items"
+            Loading="IsLoading"
+            LoadError="@LoadError"
+            EmptyText="Герои не найдены"
+            RefreshLabel="Обновить список героев"
+            OnRefresh="LoadPageAsync"
+            PageNumber="CurrentPageNumber"
+            PageSize="CurrentPageSize"
+            TotalPages="TotalPages"
+            TotalCount="TotalCount"
+            OnPageNumberChanged="ChangePage"
+            OnPageSizeChanged="ChangePageSize">
+    <HeaderContent>
+        <MudTh>Имя</MudTh>
+        <MudTh>Фракция</MudTh>
+        <MudTh Class="actions-column">Действия</MudTh>
+    </HeaderContent>
+    <RowTemplate Context="hero">
+        <MudTd DataLabel="Имя">
+            <MudText Typo="Typo.body2" Class="entity-name">
+                @hero.Name
+            </MudText>
+        </MudTd>
+        <MudTd DataLabel="Фракция">
+            <MudText Typo="Typo.body2" Class="entity-description">
+                @hero.FactionName
+            </MudText>
+        </MudTd>
+        <MudTd DataLabel="Действия" Class="actions-column">
+            <EntityRowActions>
+                <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                               Href="@CompendiumRoutes.Hero(hero.Id)"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               Disabled="IsLoading"
+                               aria-label="Редактировать героя" />
+                <EntityDeleteButton TKey="Guid"
+                                    EntityId="hero.Id"
+                                    EntityType="героя"
+                                    EntityName="@hero.Name"
+                                    DeleteLabel="Удалить героя"
+                                    SuccessMessage="Герой удалён"
+                                    DeleteAsync="DeleteHeroAsync"
+                                    OnDeleted="OnItemRemovedAsync"
+                                    Disabled="IsLoading" />
+            </EntityRowActions>
+        </MudTd>
+    </RowTemplate>
+</EntityList>
