@@ -20,7 +20,7 @@ public sealed class OpenIdConnectEndpointResolverTests
         string expectedPath)
     {
         var configuration = new OpenIdConnectConfiguration { AuthorizationEndpoint = endpoint };
-        using var services = CreateServices(new StaticConfigurationManager<OpenIdConnectConfiguration>(configuration));
+        await using var services = CreateServices(new StaticConfigurationManager<OpenIdConnectConfiguration>(configuration));
         var resolver = new OpenIdConnectEndpointResolver(services.GetRequiredService<IOptionsMonitor<OpenIdConnectOptions>>());
 
         string path = await resolver.GetAuthorizationPathAsync(TestContext.Current.CancellationToken);
@@ -38,7 +38,7 @@ public sealed class OpenIdConnectEndpointResolverTests
     public async Task GetAuthorizationPathAsync_Should_RejectMetadata_When_AuthorizationEndpointIsInvalid(string? endpoint)
     {
         var configuration = new OpenIdConnectConfiguration { AuthorizationEndpoint = endpoint };
-        using var services = CreateServices(new StaticConfigurationManager<OpenIdConnectConfiguration>(configuration));
+        await using var services = CreateServices(new StaticConfigurationManager<OpenIdConnectConfiguration>(configuration));
         var resolver = new OpenIdConnectEndpointResolver(services.GetRequiredService<IOptionsMonitor<OpenIdConnectOptions>>());
 
         var exception = await Should.ThrowAsync<InvalidOperationException>(
@@ -50,7 +50,7 @@ public sealed class OpenIdConnectEndpointResolverTests
     [Fact(DisplayName = "GetAuthorizationPathAsync should reject configuration when metadata manager is missing")]
     public async Task GetAuthorizationPathAsync_Should_RejectConfiguration_When_MetadataManagerIsMissing()
     {
-        using var services = CreateServices(null);
+        await using var services = CreateServices(null);
         var resolver = new OpenIdConnectEndpointResolver(services.GetRequiredService<IOptionsMonitor<OpenIdConnectOptions>>());
 
         var exception = await Should.ThrowAsync<InvalidOperationException>(
