@@ -8,12 +8,28 @@ namespace TacticalHeroes.Admin.Modules.Compendium.Pages.CreateUnitPage.Api;
 [Mapper]
 internal static partial class CreateUnitMapper
 {
-    [MapperIgnoreTarget(nameof(CreateUnitRequest.AdditionalData))]
+    [MapPropertyFromSource(nameof(CreateUnitRequest.AdditionalData), Use = nameof(ToAdditionalData))]
     public static partial CreateUnitRequest ToRequest(CreateUnitFormModel unit);
 
     [MapperIgnore]
     public static Guid ToId(CreateUnitResponse response)
     {
         return response.Id!.Value;
+    }
+
+    private static IDictionary<string?, object?> ToAdditionalData(CreateUnitFormModel unit)
+    {
+        Dictionary<string, object?> additionalData = [];
+        if (unit.Shots is null)
+        {
+            additionalData["shots"] = null;
+        }
+
+        if (unit.RangedAttackRange is null)
+        {
+            additionalData["rangedAttackRange"] = null;
+        }
+
+        return additionalData!;
     }
 }
