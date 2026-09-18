@@ -43,7 +43,7 @@ public static class RouteUriBuilder
                 ? null
                 : pageSize.ToString(CultureInfo.InvariantCulture)));
 
-        AddParameterValues(parameters, "sort", sorting);
+        AddParameterValues(parameters, "sort", sorting?.Select(SortingQuery.Format));
 
         return BuildUri(path, parameters);
     }

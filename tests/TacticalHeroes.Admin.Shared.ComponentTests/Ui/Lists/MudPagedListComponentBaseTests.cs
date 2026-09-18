@@ -258,7 +258,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
 
         component.ChangeSorting(["Email:desc", "Id:asc"]);
 
-        component.CurrentUri.ShouldEndWith("/items?email=admin%40example.test&pageSize=25&sort=Email%3Adesc&sort=Id%3Aasc");
+        component.CurrentUri.ShouldEndWith("/items?email=admin%40example.test&pageSize=25&sort=-email&sort=id");
     }
 
     [Fact(DisplayName = "Navigation should preserve sorting when pagination and filters change")]
@@ -268,11 +268,11 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
         await component.SetRouteAsync(3, 25, new TestFilter { Email = "admin@example.test" }, ["Email:desc"]);
 
         component.ChangePage(4);
-        component.CurrentUri.ShouldEndWith("/items?email=admin%40example.test&page=4&pageSize=25&sort=Email%3Adesc");
+        component.CurrentUri.ShouldEndWith("/items?email=admin%40example.test&page=4&pageSize=25&sort=-email");
         component.ChangePageSize(50);
-        component.CurrentUri.ShouldEndWith("/items?email=admin%40example.test&pageSize=50&sort=Email%3Adesc");
+        component.CurrentUri.ShouldEndWith("/items?email=admin%40example.test&pageSize=50&sort=-email");
         component.ResetDraftFilter();
-        component.CurrentUri.ShouldEndWith("/items?pageSize=25&sort=Email%3Adesc");
+        component.CurrentUri.ShouldEndWith("/items?pageSize=25&sort=-email");
     }
 
     [Fact(DisplayName = "Route changes should reload when sorting order changes or is cleared")]

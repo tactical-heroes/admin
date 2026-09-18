@@ -152,6 +152,26 @@ public sealed class UserListPageTests : BunitContext
         });
     }
 
+    [Fact(DisplayName = "Render should restore compact sorting when opened from url")]
+    public void Render_Should_RestoreCompactSorting_When_OpenedFromUrl()
+    {
+        Services.GetRequiredService<NavigationManager>().NavigateTo(
+            IdentityRoutes.Users + "?sort=isConfirmed&sort=-email");
+
+        var component = Render<UserListPageComponent>();
+
+        component.WaitForAssertion(() =>
+        {
+            _handler.Requests.Count.ShouldBe(1);
+            HttpUtility.ParseQueryString(_handler.Requests[0].Query).GetValues("Fields")
+                .ShouldBe(["isConfirmed:asc", "email:desc"]);
+            component.Find(".mud-direction-asc").ShouldNotBeNull();
+            component.Find(".mud-direction-desc").ShouldNotBeNull();
+            component.FindAll(".mud-sort-index:not(.invisible)").Select(element => element.TextContent.Trim())
+                .ShouldBe(["2", "1"]);
+        });
+    }
+
     [Fact(DisplayName = "Sorting should update URL and reload when clicked and restored by navigation")]
     public void Sorting_Should_UpdateUrlAndReload_When_ClickedAndRestoredByNavigation()
     {
@@ -167,11 +187,11 @@ public sealed class UserListPageTests : BunitContext
         {
             _handler.Requests.Count.ShouldBe(2);
             var query = HttpUtility.ParseQueryString(_handler.Requests[^1].Query);
-            query["Fields"].ShouldBe("Email:desc");
+            query["Fields"].ShouldBe("email:desc");
             query["Email"].ShouldBe("admin@example.test");
             query["pageNumber"].ShouldBe("1");
             query["pageSize"].ShouldBe("25");
-            HttpUtility.ParseQueryString(new Uri(navigation.Uri).Query)["sort"].ShouldBe("Email:desc");
+            HttpUtility.ParseQueryString(new Uri(navigation.Uri).Query)["sort"].ShouldBe("-email");
         });
         navigation.NavigateTo(original);
         component.WaitForAssertion(() =>
@@ -205,9 +225,9 @@ public sealed class UserListPageTests : BunitContext
         {
             _handler.Requests.Count.ShouldBe(2);
             HttpUtility.ParseQueryString(new Uri(navigation.Uri).Query).GetValues("sort")
-                .ShouldBe(["Email:desc", "UserName:asc"]);
+                .ShouldBe(["-email", "userName"]);
             HttpUtility.ParseQueryString(_handler.Requests[^1].Query).GetValues("Fields")
-                .ShouldBe(["Email:desc", "UserName:asc"]);
+                .ShouldBe(["email:desc", "userName:asc"]);
         });
 
         await component.InvokeAsync(() => component.FindComponent<MudSelect<int>>().Instance.ValueChanged.InvokeAsync(50));
@@ -217,7 +237,7 @@ public sealed class UserListPageTests : BunitContext
             var query = HttpUtility.ParseQueryString(_handler.Requests[^1].Query);
             query["pageSize"].ShouldBe("50");
             query["pageNumber"].ShouldBe("1");
-            query.GetValues("Fields").ShouldBe(["Email:desc", "UserName:asc"]);
+            query.GetValues("Fields").ShouldBe(["email:desc", "userName:asc"]);
         });
 
         await component.InvokeAsync(() => component.FindComponent<MudPagination>().Instance.SelectedChanged.InvokeAsync(2));
@@ -227,7 +247,7 @@ public sealed class UserListPageTests : BunitContext
             var query = HttpUtility.ParseQueryString(_handler.Requests[^1].Query);
             query["pageNumber"].ShouldBe("2");
             query["pageSize"].ShouldBe("50");
-            query.GetValues("Fields").ShouldBe(["Email:desc", "UserName:asc"]);
+            query.GetValues("Fields").ShouldBe(["email:desc", "userName:asc"]);
             HttpUtility.ParseQueryString(new Uri(navigation.Uri).Query)["page"].ShouldBe("2");
         });
     }

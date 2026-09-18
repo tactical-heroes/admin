@@ -36,7 +36,7 @@ public abstract class MudPagedListComponentBase<
     [PersistentState(AllowUpdates = true)]
     public string[]? LoadedSorting { get; set; }
 
-    protected string[] AppliedSorting => Sort ?? [];
+    protected string[] AppliedSorting => [.. (Sort ?? []).Select(SortingQuery.Parse)];
 
     [SupplyParameterFromQuery(Name = "page")]
     public int? PageNumber { get; set; }
