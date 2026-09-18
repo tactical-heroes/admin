@@ -31,41 +31,44 @@
             TotalPages="TotalPages"
             TotalCount="TotalCount"
             OnPageNumberChanged="ChangePage"
-            OnPageSizeChanged="ChangePageSize">
-    <HeaderContent>
-        <MudTh>Имя</MudTh>
-        <MudTh>Фракция</MudTh>
-        <MudTh Class="actions-column">Действия</MudTh>
-    </HeaderContent>
-    <RowTemplate Context="hero">
-        <MudTd DataLabel="Имя">
-            <MudText Typo="Typo.body2" Class="entity-name">
-                @hero.Name
-            </MudText>
-        </MudTd>
-        <MudTd DataLabel="Фракция">
-            <MudText Typo="Typo.body2" Class="entity-description">
-                @hero.FactionName
-            </MudText>
-        </MudTd>
-        <MudTd DataLabel="Действия" Class="actions-column">
-            <EntityRowActions>
-                <MudIconButton Icon="@Icons.Material.Outlined.Edit"
-                               Href="@CompendiumRoutes.Hero(hero.Id)"
-                               Color="Color.Primary"
-                               Size="Size.Small"
-                               Disabled="IsLoading"
-                               aria-label="Редактировать героя" />
-                <EntityDeleteButton TKey="Guid"
-                                    EntityId="hero.Id"
-                                    EntityType="героя"
-                                    EntityName="@hero.Name"
-                                    DeleteLabel="Удалить героя"
-                                    SuccessMessage="Герой удалён"
-                                    DeleteAsync="DeleteHeroAsync"
-                                    OnDeleted="OnItemRemovedAsync"
-                                    Disabled="IsLoading" />
-            </EntityRowActions>
-        </MudTd>
-    </RowTemplate>
+            OnPageSizeChanged="ChangePageSize"
+            Sorting="AppliedSorting"
+            OnSortingChanged="ChangeSorting">
+    <Columns>
+        <PropertyColumn T="HeroListItem" TProperty="string" Property="item => item.Name" Title="Имя">
+            <CellTemplate>
+                <MudText Typo="Typo.body2" Class="entity-name">
+                    @context.Item.Name
+                </MudText>
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn T="HeroListItem" TProperty="string" Property="item => item.FactionName" Title="Фракция">
+            <CellTemplate>
+                <MudText Typo="Typo.body2" Class="entity-description">
+                    @context.Item.FactionName
+                </MudText>
+            </CellTemplate>
+        </PropertyColumn>
+        <TemplateColumn T="HeroListItem" Title="Действия" Sortable="false" HeaderClass="actions-column" CellClass="actions-column">
+            <CellTemplate>
+                <EntityRowActions>
+                    <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                                   Href="@CompendiumRoutes.Hero(context.Item.Id)"
+                                   Color="Color.Primary"
+                                   Size="Size.Small"
+                                   Disabled="IsLoading"
+                                   aria-label="Редактировать героя" />
+                    <EntityDeleteButton TKey="Guid"
+                                        EntityId="context.Item.Id"
+                                        EntityType="героя"
+                                        EntityName="@context.Item.Name"
+                                        DeleteLabel="Удалить героя"
+                                        SuccessMessage="Герой удалён"
+                                        DeleteAsync="DeleteHeroAsync"
+                                        OnDeleted="OnItemRemovedAsync"
+                                        Disabled="IsLoading" />
+                </EntityRowActions>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
 </EntityList>

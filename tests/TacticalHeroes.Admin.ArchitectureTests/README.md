@@ -113,7 +113,7 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
 включая новые сущности и модули. Имена сущностей и пути страниц не перечисляются.
 
 16. `ListPages_Should_UseSharedComponents_When_AdminListsAreScanned` — списки
-    используют `EntityList` и `EntityRowActions` внутри шаблона строки;
+    используют `EntityList` и `EntityRowActions` внутри `Columns` грида;
     собственные `MudTable`, `MudDataGrid` и HTML-таблицы запрещены.
 
 17. `ListPages_Should_NotExposeIdentifiers_When_AdminListsAreScanned` — в
@@ -216,6 +216,15 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
     namespace типов соответствует папке относительно проекта и его корневому
     namespace. Типы в глобальном namespace запрещены; файлы только с `using`
     не требуют namespace.
+
+## Сортировка списков
+
+38. `ListPages_Should_BindSorting_When_AdminListsAreScanned` — на каждой
+    странице `*ListPage.razor` компонент `EntityList` обязан получать
+    `Sorting="AppliedSorting"` и `OnSortingChanged="ChangeSorting"` из базового
+    компонента. Отсутствие любой привязки или подмена её другим состоянием либо
+    обработчиком нарушает правило. Новые страницы обнаруживаются автоматически;
+    привязки в комментариях или на других компонентах не засчитываются.
 
 Исходники, ссылки, корневой namespace и параметры C# берутся из MSBuild в
 конфигурации запущенной архитектурной сборки. Анализ учитывает активные ветки
