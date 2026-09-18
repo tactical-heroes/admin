@@ -68,22 +68,24 @@
     }
     else if (Items is not null)
     {
-        <MudTable T="TItem"
-                  Items="Items"
-                  Hover="true"
-                  Loading="Loading"
-                  Elevation="0"
-                  Class="list-table">
-            <HeaderContent>
-                @HeaderContent
-            </HeaderContent>
-            <RowTemplate>
-                @RowTemplate(context)
-            </RowTemplate>
+        <MudDataGrid T="TItem"
+                     @ref="_grid"
+                     @key="(Items, string.Join('|', Sorting))"
+                     ServerData="GetGridPageAsync"
+                     SortMode="SortMode.Multiple"
+                     AllowUnsorted="true"
+                     SortDefinitions="_sortDefinitions"
+                     SortChanged="ChangeSortingAsync"
+                     Columns="Columns"
+                     Hover="true"
+                     Loading="Loading"
+                     ShowColumnOptions="false"
+                     Elevation="0"
+                     Class="list-table">
             <NoRecordsContent>
                 <div class="empty-table">@EmptyText</div>
             </NoRecordsContent>
-        </MudTable>
+        </MudDataGrid>
 
         <ListPagination PageNumber="PageNumber"
                         PageSize="PageSize"

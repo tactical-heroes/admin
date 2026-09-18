@@ -148,7 +148,7 @@ public sealed class UserListPageTests : BunitContext
             var query = HttpUtility.ParseQueryString(_handler.Requests[0].Query);
             query.GetValues("Fields").ShouldBe(["Email:desc", "Id:asc"]);
             query["pageNumber"].ShouldBe("2");
-            component.Find("th[aria-sort='descending']").ShouldNotBeNull();
+            component.Find(".mud-direction-desc").ShouldNotBeNull();
         });
     }
 
@@ -161,7 +161,7 @@ public sealed class UserListPageTests : BunitContext
         var component = Render<UserListPageComponent>();
         component.WaitForAssertion(() => _handler.Requests.Count.ShouldBe(1));
 
-        component.Find("button[aria-label='Сортировка: Email']").Click();
+        component.FindAll(".sortable-column-header").Single(header => header.TextContent.Trim() == "Email").Click();
 
         component.WaitForAssertion(() =>
         {
@@ -178,7 +178,7 @@ public sealed class UserListPageTests : BunitContext
         {
             _handler.Requests.Count.ShouldBe(3);
             HttpUtility.ParseQueryString(_handler.Requests[^1].Query)["Fields"].ShouldBe("Email:asc");
-            component.Find("th[aria-sort='ascending']").ShouldNotBeNull();
+            component.Find(".mud-direction-asc").ShouldNotBeNull();
         });
         component.FindAll("button").Single(button => button.TextContent.Trim() == "Сбросить сортировку").Click();
         component.WaitForAssertion(() =>
@@ -186,6 +186,49 @@ public sealed class UserListPageTests : BunitContext
             _handler.Requests.Count.ShouldBe(4);
             HttpUtility.ParseQueryString(_handler.Requests[^1].Query)["Fields"].ShouldBeNull();
             HttpUtility.ParseQueryString(new Uri(navigation.Uri).Query)["sort"].ShouldBeNull();
+        });
+    }
+
+    [Fact(DisplayName = "Sorting should preserve URL criteria with one request per action when grid and pagination change")]
+    public async Task Sorting_Should_PreserveUrlCriteriaWithOneRequestPerAction_When_GridAndPaginationChange()
+    {
+        var navigation = Services.GetRequiredService<NavigationManager>();
+        navigation.NavigateTo(IdentityRoutes.Users + "?pageSize=25&sort=Email%3Adesc");
+        var component = Render<UserListPageComponent>();
+        component.WaitForAssertion(() => _handler.Requests.Count.ShouldBe(1));
+
+        component.FindAll(".sortable-column-header")
+            .Single(header => header.TextContent.Trim() == "Пользователь")
+            .Click(new MouseEventArgs { CtrlKey = true });
+
+        component.WaitForAssertion(() =>
+        {
+            _handler.Requests.Count.ShouldBe(2);
+            HttpUtility.ParseQueryString(new Uri(navigation.Uri).Query).GetValues("sort")
+                .ShouldBe(["Email:desc", "UserName:asc"]);
+            HttpUtility.ParseQueryString(_handler.Requests[^1].Query).GetValues("Fields")
+                .ShouldBe(["Email:desc", "UserName:asc"]);
+        });
+
+        await component.InvokeAsync(() => component.FindComponent<MudSelect<int>>().Instance.ValueChanged.InvokeAsync(50));
+        component.WaitForAssertion(() =>
+        {
+            _handler.Requests.Count.ShouldBe(3);
+            var query = HttpUtility.ParseQueryString(_handler.Requests[^1].Query);
+            query["pageSize"].ShouldBe("50");
+            query["pageNumber"].ShouldBe("1");
+            query.GetValues("Fields").ShouldBe(["Email:desc", "UserName:asc"]);
+        });
+
+        await component.InvokeAsync(() => component.FindComponent<MudPagination>().Instance.SelectedChanged.InvokeAsync(2));
+        component.WaitForAssertion(() =>
+        {
+            _handler.Requests.Count.ShouldBe(4);
+            var query = HttpUtility.ParseQueryString(_handler.Requests[^1].Query);
+            query["pageNumber"].ShouldBe("2");
+            query["pageSize"].ShouldBe("50");
+            query.GetValues("Fields").ShouldBe(["Email:desc", "UserName:asc"]);
+            HttpUtility.ParseQueryString(new Uri(navigation.Uri).Query)["page"].ShouldBe("2");
         });
     }
 

@@ -130,7 +130,7 @@ public sealed class UnitListPageTests : BunitContext
             var query = HttpUtility.ParseQueryString(_handler.Requests[0].Query);
             query.GetValues("Fields").ShouldBe(["Name:desc", "Id:asc"]);
             query["pageNumber"].ShouldBe("2");
-            component.Find("th[aria-sort='descending']").ShouldNotBeNull();
+            component.Find(".mud-direction-desc").ShouldNotBeNull();
         });
     }
 

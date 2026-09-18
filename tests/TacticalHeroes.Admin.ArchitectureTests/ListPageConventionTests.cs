@@ -66,10 +66,10 @@ public sealed partial class ListPageConventionTests
     }
 
     [Theory(DisplayName = "List markup should reject missing shared composition when markup is inspected")]
-    [InlineData("<EntityList><RowTemplate><EntityRowActions /></RowTemplate></EntityList>", true)]
+    [InlineData("<EntityList><Columns><EntityRowActions /></Columns></EntityList>", true)]
     [InlineData("<EntityList /><EntityRowActions />", false)]
-    [InlineData("<EntityList><RowTemplate><EntityRowActions /></RowTemplate></EntityList><MudTable />", false)]
-    [InlineData("<EntityList><RowTemplate><EntityRowActions /></RowTemplate></EntityList><table></table>", false)]
+    [InlineData("<EntityList><Columns><EntityRowActions /></Columns></EntityList><MudTable />", false)]
+    [InlineData("<EntityList><Columns><EntityRowActions /></Columns></EntityList><table></table>", false)]
     public void ListMarkup_Should_RejectMissingSharedComposition_When_MarkupIsInspected(string markup, bool expected)
     {
         bool valid = UsesSharedComponents(markup);
@@ -89,6 +89,17 @@ public sealed partial class ListPageConventionTests
         string markup = "<PageHeader Title=\"Examples\" Subtitle=\"Manage examples\">" + actions + "</PageHeader>";
 
         HasHeaderAndCreateAction(markup).ShouldBe(expected);
+    }
+
+    [Theory(DisplayName = "Identifier columns should be detected when grid column titles are inspected")]
+    [InlineData("<PropertyColumn Property=\"item => item.Id\" Title=\"ID\" />", true)]
+    [InlineData("<TemplateColumn Title=\"ID\" />", true)]
+    [InlineData("<PropertyColumn Property=\"item => item.Name\" Title=\"Название\" />", false)]
+    public void IdentifierColumns_Should_BeDetected_When_GridColumnTitlesAreInspected(string markup, bool expected)
+    {
+        bool detected = IdentifierColumnRegex().IsMatch(markup);
+
+        detected.ShouldBe(expected);
     }
 
     [Fact(DisplayName = "Page discovery should include new entities and modules when source paths are scanned")]
@@ -146,7 +157,7 @@ public sealed partial class ListPageConventionTests
     private static bool UsesSharedComponents(string markup)
     {
         Match list = PageConventionSource.Element(markup, "EntityList");
-        Match row = PageConventionSource.Element(list.Groups["content"].Value, "RowTemplate");
+        Match row = PageConventionSource.Element(list.Groups["content"].Value, "Columns");
 
         return list.Success && PageConventionSource.Element(row.Groups["content"].Value, "EntityRowActions").Success &&
             !OwnTableRegex().IsMatch(markup);
@@ -190,7 +201,7 @@ public sealed partial class ListPageConventionTests
             PageConventionSource.Binds(list, "OnPageSizeChanged", "ChangePageSize");
     }
 
-    [GeneratedRegex("<MudTh[^>]*>\\s*ID\\s*</MudTh>|DataLabel\\s*=\\s*[\"']ID[\"']", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)]
+    [GeneratedRegex("""<MudTh[^>]*>\s*ID\s*</MudTh>|DataLabel\s*=\s*["']ID["']|<(?:PropertyColumn|TemplateColumn)\b(?:[^>"']|"[^"]*"|'[^']*')*\bTitle\s*=\s*["']ID["']""", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)]
     private static partial Regex IdentifierColumnRegex();
 
     [GeneratedRegex("<(?:MudTable|MudDataGrid|table)(?=[\\s/>])", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)]

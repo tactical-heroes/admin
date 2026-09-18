@@ -113,7 +113,7 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
 включая новые сущности и модули. Имена сущностей и пути страниц не перечисляются.
 
 16. `ListPages_Should_UseSharedComponents_When_AdminListsAreScanned` — списки
-    используют `EntityList` и `EntityRowActions` внутри шаблона строки;
+    используют `EntityList` и `EntityRowActions` внутри `Columns` грида;
     собственные `MudTable`, `MudDataGrid` и HTML-таблицы запрещены.
 
 17. `ListPages_Should_NotExposeIdentifiers_When_AdminListsAreScanned` — в
