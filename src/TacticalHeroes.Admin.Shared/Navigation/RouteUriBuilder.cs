@@ -43,7 +43,7 @@ public static class RouteUriBuilder
                 ? null
                 : pageSize.ToString(CultureInfo.InvariantCulture)));
 
-        AddParameterValues(parameters, "sort", sorting);
+        AddParameterValues(parameters, "sort", sorting?.Select(SortingQuery.Format));
 
         return BuildUri(path, parameters);
     }
@@ -55,15 +55,8 @@ public static class RouteUriBuilder
         string[] query = [.. parameters
             .Where(static parameter => !string.IsNullOrWhiteSpace(parameter.Value))
             .Select(static parameter =>
-            {
-                string value = Uri.EscapeDataString(parameter.Value!);
-                if (parameter.Name == "sort")
-                {
-                    value = value.Replace("%3A", ":", StringComparison.Ordinal);
-                }
-
-                return $"{Uri.EscapeDataString(parameter.Name)}={value}";
-            })];
+                $"{Uri.EscapeDataString(parameter.Name)}=" +
+                Uri.EscapeDataString(parameter.Value!))];
 
         return query.Length == 0
             ? path

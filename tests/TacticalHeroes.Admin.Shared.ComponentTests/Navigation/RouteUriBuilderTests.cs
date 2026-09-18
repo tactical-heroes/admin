@@ -62,9 +62,9 @@ public sealed class RouteUriBuilderTests
         var query = System.Web.HttpUtility.ParseQueryString(new Uri("https://example.test" + route).Query);
 
         route.ShouldBe("/users?email=name%3Atag%2Btest%26x%3D%23%253A%40example.test" +
-            "&sort=IsConfirmed:asc&sort=Email:desc&sort=Name%26x%3D%23%253A:asc");
+            "&sort=isConfirmed&sort=-email&sort=name%26x%3D%23%253A");
         query["email"].ShouldBe(email);
-        query.GetValues("sort").ShouldBe(sorting);
+        query.GetValues("sort").ShouldBe(["isConfirmed", "-email", "name&x=#%3A"]);
         query.AllKeys.ShouldBe(["email", "sort"]);
     }
 
