@@ -77,7 +77,7 @@ public sealed class EntityListTests : BunitContext
     public void GetGridPageAsync_Should_PreserveServerOrderAndAllRows_When_PageIsSupplied()
     {
         var component = RenderList(hasFilters: false);
-        TestRow[] rows = Enumerable.Range(1, 25).Select(id => new TestRow(id, $"Name {26 - id}")).ToArray();
+        TestRow[] rows = [.. Enumerable.Range(1, 25).Select(id => new TestRow(id, $"Name {26 - id}"))];
 
         component.Render(parameters => parameters
             .Add(list => list.Items, rows)
@@ -112,7 +112,7 @@ public sealed class EntityListTests : BunitContext
                 .ShouldBe(["1", "2"]);
             notifications.ShouldBe(0);
         });
-        component.Render(parameters => parameters.Add(list => list.Sorting, Array.Empty<string>()));
+        component.Render(parameters => parameters.Add(list => list.Sorting, []));
         component.FindAll(".mud-direction-desc, .mud-direction-asc").ShouldBeEmpty();
         notifications.ShouldBe(0);
     }

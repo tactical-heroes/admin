@@ -130,10 +130,9 @@ public partial class EntityList<TItem>
             return Task.CompletedTask;
         }
 
-        string[] sorting = definitions.Values
+        string[] sorting = [.. definitions.Values
             .OrderBy(definition => definition.Index)
-            .Select(definition => $"{definition.SortBy}:{(definition.Descending ? "desc" : "asc")}")
-            .ToArray();
+            .Select(definition => $"{definition.SortBy}:{(definition.Descending ? "desc" : "asc")}")];
         return OnSortingChanged.InvokeAsync(sorting);
     }
 
