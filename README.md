@@ -65,8 +65,12 @@ the build and is not committed to the repository.
 The client shell and module RCLs follow Feature-Sliced Design. Each `Pages` slice
 owns its route, form models, validators, and API adapters. Create and update flows
 use separate page slices; reusable domain controls belong in `Entities`.
-List filters and page numbers are query-string state, so list views can be
-bookmarked and restored.
+List filters, page numbers, and sorting are query-string state, so list views can be
+bookmarked and restored. Repeated `sort` parameters preserve sort priority, for example
+`?sort=Name%3Aasc&sort=Id%3Adesc`. Click column headings to cycle ascending, descending,
+and no sorting; additional columns are appended in selection order. Sorting changes
+reset the page while retaining filters and page size. The status display name column
+is not sortable until the API supports translating its projection to SQL.
 Razor markup, component code, and isolated styles are kept in `.razor`,
 `.razor.cs`, and `.razor.css` files respectively. Architecture tests enforce
 the allowed FSD folders, dependency direction, module isolation, typed route

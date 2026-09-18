@@ -31,10 +31,14 @@
             TotalPages="TotalPages"
             TotalCount="TotalCount"
             OnPageNumberChanged="ChangePage"
-            OnPageSizeChanged="ChangePageSize">
+            OnPageSizeChanged="ChangePageSize"
+            Sorting="AppliedSorting"
+            OnSortingChanged="ChangeSorting">
     <HeaderContent>
-        <MudTh>Имя</MudTh>
-        <MudTh>Фракция</MudTh>
+        <ListSortHeader Field="Name" Label="Имя"
+                        Sorting="AppliedSorting" SortingChanged="ChangeSorting" Disabled="IsLoading" />
+        <ListSortHeader Field="FactionName" Label="Фракция"
+                        Sorting="AppliedSorting" SortingChanged="ChangeSorting" Disabled="IsLoading" />
         <MudTh Class="actions-column">Действия</MudTh>
     </HeaderContent>
     <RowTemplate Context="hero">

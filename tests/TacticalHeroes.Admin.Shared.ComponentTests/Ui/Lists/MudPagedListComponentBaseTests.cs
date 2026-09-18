@@ -177,7 +177,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
     public async Task LoadPageAsync_Should_ClearError_When_RetrySucceeds()
     {
         TestComponent component = CreateComponent();
-        component.OnLoad = static (_, _, _, _) => Task.FromResult(
+        component.OnLoad = static (_, _, _, _, _) => Task.FromResult(
             Result.Failure<PaginationResult<TestItem>>(
                 Error.Unexpected("API is unavailable.")));
 
@@ -201,7 +201,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
         var secondLoad = new TaskCompletionSource<Result<PaginationResult<TestItem>>>(
             TaskCreationOptions.RunContinuationsAsynchronously);
         TestComponent component = CreateComponent();
-        component.OnLoad = (pageNumber, _, _, _) =>
+        component.OnLoad = (pageNumber, _, _, _, _) =>
             pageNumber == 1 ? firstLoad.Task : secondLoad.Task;
 
         Task firstTask = component.SetRouteAsync(1, 10);
@@ -221,7 +221,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
     public async Task OnParametersSetAsync_Should_StopLoading_When_LoadThrows()
     {
         TestComponent component = CreateComponent();
-        component.OnLoad = static (_, _, _, _) =>
+        component.OnLoad = static (_, _, _, _, _) =>
             throw new InvalidOperationException("Load failed.");
 
         await Should.ThrowAsync<InvalidOperationException>(
@@ -234,7 +234,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
     public async Task OnItemRemovedAsync_Should_Reload_When_PageStillContainsItems()
     {
         TestComponent component = CreateComponent();
-        component.OnLoad = (pageNumber, pageSize, _, _) => Task.FromResult(
+        component.OnLoad = (pageNumber, pageSize, _, _, _) => Task.FromResult(
             Result.Success(new PaginationResult<TestItem>
             {
                 Items = [new TestItem(), new TestItem()],
@@ -248,6 +248,66 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
         await component.NotifyItemRemovedAsync();
 
         component.LoadRequests.Count.ShouldBe(2);
+    }
+
+    [Fact(DisplayName = "ChangeSorting should reset page and preserve filter when sorting changes")]
+    public async Task ChangeSorting_Should_ResetPageAndPreserveFilter_When_SortingChanges()
+    {
+        TestComponent component = CreateComponent();
+        await component.SetRouteAsync(3, 25, new TestFilter { Email = "admin@example.test" });
+
+        component.ChangeSorting(["Email:desc", "Id:asc"]);
+
+        component.CurrentUri.ShouldEndWith("/items?email=admin%40example.test&pageSize=25&sort=Email%3Adesc&sort=Id%3Aasc");
+    }
+
+    [Fact(DisplayName = "Navigation should preserve sorting when pagination and filters change")]
+    public async Task Navigation_Should_PreserveSorting_When_PaginationAndFiltersChange()
+    {
+        TestComponent component = CreateComponent();
+        await component.SetRouteAsync(3, 25, new TestFilter { Email = "admin@example.test" }, ["Email:desc"]);
+
+        component.ChangePage(4);
+        component.CurrentUri.ShouldEndWith("/items?email=admin%40example.test&page=4&pageSize=25&sort=Email%3Adesc");
+        component.ChangePageSize(50);
+        component.CurrentUri.ShouldEndWith("/items?email=admin%40example.test&pageSize=50&sort=Email%3Adesc");
+        component.ResetDraftFilter();
+        component.CurrentUri.ShouldEndWith("/items?pageSize=25&sort=Email%3Adesc");
+    }
+
+    [Fact(DisplayName = "Route changes should reload when sorting order changes or is cleared")]
+    public async Task RouteChanges_Should_Reload_When_SortingOrderChangesOrIsCleared()
+    {
+        TestComponent component = CreateComponent();
+        await component.SetRouteAsync(1, 10, sorting: ["Email:asc", "Id:desc"]);
+        await component.SetRouteAsync(1, 10, sorting: ["Email:asc", "Id:desc"]);
+        await component.SetRouteAsync(1, 10, sorting: ["Id:desc", "Email:asc"]);
+        await component.SetRouteAsync(1, 10);
+
+        component.LoadRequests.Count.ShouldBe(3);
+        component.LoadRequests[0].Sorting.ShouldBe(["Email:asc", "Id:desc"]);
+        component.LoadRequests[1].Sorting.ShouldBe(["Id:desc", "Email:asc"]);
+        component.LoadRequests[2].Sorting.ShouldBeEmpty();
+    }
+
+    [Fact(DisplayName = "Sorting should keep newest result when earlier request finishes last")]
+    public async Task Sorting_Should_KeepNewestResult_When_EarlierRequestFinishesLast()
+    {
+        var first = new TaskCompletionSource<Result<PaginationResult<TestItem>>>();
+        var second = new TaskCompletionSource<Result<PaginationResult<TestItem>>>();
+        TestComponent component = CreateComponent();
+        component.OnLoad = (_, _, _, sorting, _) => sorting[0] == "Email:asc" ? first.Task : second.Task;
+
+        Task firstTask = component.SetRouteAsync(1, 10, sorting: ["Email:asc"]);
+        Task secondTask = component.SetRouteAsync(1, 10, sorting: ["Email:desc"]);
+        var newestPage = CreatePage(1, 10);
+        second.SetResult(Result.Success(newestPage));
+        await secondTask;
+        first.SetResult(Result.Success(CreatePage(1, 10)));
+        await firstTask;
+
+        component.Page.ShouldBeSameAs(newestPage);
+        component.LoadedSorting.ShouldBe(["Email:desc"]);
     }
 
     private TestComponent CreateComponent()
@@ -294,6 +354,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
             int,
             int,
             TestFilter,
+            string[],
             CancellationToken,
             Task<Result<PaginationResult<TestItem>>>> OnLoad
         {
@@ -330,8 +391,10 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
         public Task SetRouteAsync(
             int? pageNumber,
             int? pageSize,
-            TestFilter? filter = null)
+            TestFilter? filter = null,
+            string[]? sorting = null)
         {
+            Sort = sorting;
             PageNumber = pageNumber;
             PageSize = pageSize;
             RouteEmail = filter?.Email;
@@ -359,6 +422,11 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
             return OnItemRemovedAsync();
         }
 
+        public new void ChangeSorting(string[] sorting)
+        {
+            base.ChangeSorting(sorting);
+        }
+
         public new void ChangePage(int pageNumber)
         {
             base.ChangePage(pageNumber);
@@ -381,6 +449,7 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
             int,
             int,
             TestFilter,
+            string[],
             CancellationToken,
             Task<Result<PaginationResult<TestItem>>>>
             OnLoad
@@ -393,16 +462,18 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
             int pageNumber,
             int pageSize,
             TestFilter filter,
+            string[] sorting,
             CancellationToken cancellationToken)
         {
-            LoadRequests.Add(new LoadRequest(pageNumber, pageSize, filter));
-            return OnLoad(pageNumber, pageSize, filter, cancellationToken);
+            LoadRequests.Add(new LoadRequest(pageNumber, pageSize, filter, sorting));
+            return OnLoad(pageNumber, pageSize, filter, sorting, cancellationToken);
         }
 
         public static Task<Result<PaginationResult<TestItem>>> SuccessfulLoadAsync(
             int pageNumber,
             int pageSize,
             TestFilter filter,
+            string[] sorting,
             CancellationToken cancellationToken)
         {
             return Task.FromResult(Result.Success(CreatePage(pageNumber, pageSize)));
@@ -423,5 +494,6 @@ public sealed class MudPagedListComponentBaseTests : BunitContext
     private sealed record LoadRequest(
         int PageNumber,
         int PageSize,
-        TestFilter Filter);
+        TestFilter Filter,
+        string[] Sorting);
 }

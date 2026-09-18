@@ -25,7 +25,8 @@ public static class RouteUriBuilder
         string path,
         TFilter filter,
         int pageNumber,
-        int pageSize)
+        int pageSize,
+        IReadOnlyList<string>? sorting = null)
         where TFilter : notnull
     {
         List<(string Name, string? Value)> parameters = [];
@@ -41,6 +42,8 @@ public static class RouteUriBuilder
             pageSize == PaginationOptions.DefaultPageSize
                 ? null
                 : pageSize.ToString(CultureInfo.InvariantCulture)));
+
+        AddParameterValues(parameters, "sort", sorting);
 
         return BuildUri(path, parameters);
     }

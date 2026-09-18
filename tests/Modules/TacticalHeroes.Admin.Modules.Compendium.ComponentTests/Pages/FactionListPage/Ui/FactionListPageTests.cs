@@ -115,6 +115,24 @@ public sealed class FactionListPageTests : BunitContext
         });
     }
 
+    [Fact(DisplayName = "Render should restore sorting and send ordered criteria when opened from url")]
+    public void Render_Should_RestoreSortingAndSendOrderedCriteria_When_OpenedFromUrl()
+    {
+        Services.GetRequiredService<NavigationManager>().NavigateTo(
+            CompendiumRoutes.Factions + "?page=2&pageSize=25&sort=Name%3Adesc&sort=Id%3Aasc");
+
+        var component = Render<FactionListPageComponent>();
+
+        component.WaitForAssertion(() =>
+        {
+            _handler.Requests.Count.ShouldBe(1);
+            var query = HttpUtility.ParseQueryString(_handler.Requests[0].Query);
+            query.GetValues("Fields").ShouldBe(["Name:desc", "Id:asc"]);
+            query["pageNumber"].ShouldBe("2");
+            component.Find("th[aria-sort='descending']").ShouldNotBeNull();
+        });
+    }
+
     private sealed class ListHandler : HttpMessageHandler
     {
         public List<Uri> Requests { get; } = [];

@@ -12,6 +12,14 @@
                    OnClick="ToggleFilters">
             Фильтры
         </MudButton>
+        @if (Sorting.Length > 0)
+        {
+            <MudButton Variant="Variant.Text"
+                       Disabled="Loading"
+                       OnClick="ResetSortingAsync">
+                Сбросить сортировку
+            </MudButton>
+        }
         <MudIconButton Icon="@Icons.Material.Filled.Refresh"
                        Color="Color.Default"
                        Disabled="Loading"

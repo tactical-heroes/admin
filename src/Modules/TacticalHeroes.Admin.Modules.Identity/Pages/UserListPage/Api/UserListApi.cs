@@ -10,6 +10,7 @@ public sealed class UserListApi(TacticalHeroesApiClient client)
         int pageNumber,
         int pageSize,
         UserListFilter filter,
+        string[] sorting,
         CancellationToken cancellationToken)
     {
         var result = await client.Api.V1.Users.GetAsync(
@@ -17,6 +18,7 @@ public sealed class UserListApi(TacticalHeroesApiClient client)
                 {
                     request.QueryParameters.PageNumber = pageNumber;
                     request.QueryParameters.PageSize = pageSize;
+                    request.QueryParameters.Fields = sorting;
                     request.QueryParameters.Email = filter.Email;
                 },
                 cancellationToken)

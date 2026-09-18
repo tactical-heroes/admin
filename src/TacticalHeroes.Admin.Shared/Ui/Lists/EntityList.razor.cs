@@ -7,6 +7,14 @@ public partial class EntityList<TItem>
     private bool _filtersExpanded;
 
     [Parameter]
+    public string[] Sorting { get; set; } = [];
+
+    [Parameter]
+    public EventCallback<string[]> OnSortingChanged { get; set; }
+
+    private Task ResetSortingAsync() => OnSortingChanged.InvokeAsync([]);
+
+    [Parameter]
     public IReadOnlyList<TItem>? Items { get; set; }
 
     [Parameter]

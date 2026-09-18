@@ -134,6 +134,61 @@ public sealed class UserListPageTests : BunitContext
         });
     }
 
+    [Fact(DisplayName = "Render should restore sorting and send ordered criteria when opened from url")]
+    public void Render_Should_RestoreSortingAndSendOrderedCriteria_When_OpenedFromUrl()
+    {
+        Services.GetRequiredService<NavigationManager>().NavigateTo(
+            IdentityRoutes.Users + "?page=2&pageSize=25&sort=Email%3Adesc&sort=Id%3Aasc");
+
+        var component = Render<UserListPageComponent>();
+
+        component.WaitForAssertion(() =>
+        {
+            _handler.Requests.Count.ShouldBe(1);
+            var query = HttpUtility.ParseQueryString(_handler.Requests[0].Query);
+            query.GetValues("Fields").ShouldBe(["Email:desc", "Id:asc"]);
+            query["pageNumber"].ShouldBe("2");
+            component.Find("th[aria-sort='descending']").ShouldNotBeNull();
+        });
+    }
+
+    [Fact(DisplayName = "Sorting should update URL and reload when clicked and restored by navigation")]
+    public void Sorting_Should_UpdateUrlAndReload_When_ClickedAndRestoredByNavigation()
+    {
+        var navigation = Services.GetRequiredService<NavigationManager>();
+        string original = IdentityRoutes.Users + "?email=admin%40example.test&page=2&pageSize=25&sort=Email%3Aasc";
+        navigation.NavigateTo(original);
+        var component = Render<UserListPageComponent>();
+        component.WaitForAssertion(() => _handler.Requests.Count.ShouldBe(1));
+
+        component.Find("button[aria-label='Сортировка: Email']").Click();
+
+        component.WaitForAssertion(() =>
+        {
+            _handler.Requests.Count.ShouldBe(2);
+            var query = HttpUtility.ParseQueryString(_handler.Requests[^1].Query);
+            query["Fields"].ShouldBe("Email:desc");
+            query["Email"].ShouldBe("admin@example.test");
+            query["pageNumber"].ShouldBe("1");
+            query["pageSize"].ShouldBe("25");
+            HttpUtility.ParseQueryString(new Uri(navigation.Uri).Query)["sort"].ShouldBe("Email:desc");
+        });
+        navigation.NavigateTo(original);
+        component.WaitForAssertion(() =>
+        {
+            _handler.Requests.Count.ShouldBe(3);
+            HttpUtility.ParseQueryString(_handler.Requests[^1].Query)["Fields"].ShouldBe("Email:asc");
+            component.Find("th[aria-sort='ascending']").ShouldNotBeNull();
+        });
+        component.FindAll("button").Single(button => button.TextContent.Trim() == "Сбросить сортировку").Click();
+        component.WaitForAssertion(() =>
+        {
+            _handler.Requests.Count.ShouldBe(4);
+            HttpUtility.ParseQueryString(_handler.Requests[^1].Query)["Fields"].ShouldBeNull();
+            HttpUtility.ParseQueryString(new Uri(navigation.Uri).Query)["sort"].ShouldBeNull();
+        });
+    }
+
     private sealed class ListHandler : HttpMessageHandler
     {
         public List<Uri> Requests { get; } = [];

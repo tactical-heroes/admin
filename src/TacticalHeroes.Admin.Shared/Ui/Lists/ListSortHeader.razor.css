@@ -1,0 +1,10 @@
+::deep .sort-header {
+    padding: 0;
+    font-weight: inherit;
+    text-transform: none;
+}
+
+.sort-priority {
+    margin-left: 0.25rem;
+    font-size: 0.75rem;
+}

@@ -7,12 +7,12 @@ using EmptyPagedListFilter = System.ValueTuple;
 namespace TacticalHeroes.Admin.Shared.Ui.Lists;
 
 public abstract class MudPagedListComponentBase<TItem>(
-    Func<int, int, CancellationToken, Task<Result<PaginationResult<TItem>>>> loadAsync,
+    Func<int, int, string[], CancellationToken, Task<Result<PaginationResult<TItem>>>> loadAsync,
     string listRoute,
     NavigationManager navigation)
     : MudPagedListComponentBase<TItem, EmptyPagedListFilter>(
-        (pageNumber, pageSize, _, cancellationToken) =>
-            loadAsync(pageNumber, pageSize, cancellationToken),
+        (pageNumber, pageSize, _, sorting, cancellationToken) =>
+            loadAsync(pageNumber, pageSize, sorting, cancellationToken),
         listRoute,
         navigation)
 {
@@ -22,13 +22,21 @@ public abstract class MudPagedListComponentBase<TItem>(
 public abstract class MudPagedListComponentBase<
     TItem,
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TFilter>(
-    Func<int, int, TFilter, CancellationToken, Task<Result<PaginationResult<TItem>>>> loadAsync,
+    Func<int, int, TFilter, string[], CancellationToken, Task<Result<PaginationResult<TItem>>>> loadAsync,
     string listRoute,
     NavigationManager navigation)
     : CancelableComponentBase
     where TFilter : notnull, new()
 {
     private long _loadVersion;
+
+    [SupplyParameterFromQuery(Name = "sort")]
+    public string[]? Sort { get; set; }
+
+    [PersistentState(AllowUpdates = true)]
+    public string[]? LoadedSorting { get; set; }
+
+    protected string[] AppliedSorting => Sort ?? [];
 
     [SupplyParameterFromQuery(Name = "page")]
     public int? PageNumber { get; set; }
@@ -87,6 +95,7 @@ public abstract class MudPagedListComponentBase<
         int pageNumber = CurrentPageNumber;
         int pageSize = CurrentPageSize;
         TFilter filter = AppliedFilter;
+        string[] sorting = [.. AppliedSorting];
         long loadVersion = ++_loadVersion;
 
         IsLoading = true;
@@ -94,6 +103,7 @@ public abstract class MudPagedListComponentBase<
         LoadedPageNumber = pageNumber;
         LoadedPageSize = pageSize;
         LoadedFilter = filter;
+        LoadedSorting = sorting;
 
         try
         {
@@ -101,9 +111,10 @@ public abstract class MudPagedListComponentBase<
                 pageNumber,
                 pageSize,
                 filter,
+                sorting,
                 LifetimeToken);
 
-            if (!IsCurrentLoad(loadVersion, pageNumber, pageSize, filter))
+            if (!IsCurrentLoad(loadVersion, pageNumber, pageSize, filter, sorting))
             {
                 return;
             }
@@ -124,6 +135,12 @@ public abstract class MudPagedListComponentBase<
                 IsLoading = false;
             }
         }
+    }
+
+    protected void ChangeSorting(string[] sorting)
+    {
+        navigation.NavigateTo(RouteUriBuilder.BuildPaged(
+            listRoute, AppliedFilter, 1, CurrentPageSize, sorting));
     }
 
     protected void ChangePage(int pageNumber)
@@ -161,7 +178,8 @@ public abstract class MudPagedListComponentBase<
             listRoute,
             filter,
             pageNumber,
-            pageSize));
+            pageSize,
+            AppliedSorting));
     }
 
     protected async Task OnItemRemovedAsync()
@@ -180,19 +198,22 @@ public abstract class MudPagedListComponentBase<
     {
         return LoadedPageNumber == CurrentPageNumber
             && LoadedPageSize == CurrentPageSize
-            && FiltersEqual(LoadedFilter, AppliedFilter);
+            && FiltersEqual(LoadedFilter, AppliedFilter)
+            && (LoadedSorting ?? []).SequenceEqual(AppliedSorting);
     }
 
     private bool IsCurrentLoad(
         long loadVersion,
         int pageNumber,
         int pageSize,
-        TFilter filter)
+        TFilter filter,
+        string[] sorting)
     {
         return loadVersion == _loadVersion
             && pageNumber == CurrentPageNumber
             && pageSize == CurrentPageSize
-            && FiltersEqual(filter, AppliedFilter);
+            && FiltersEqual(filter, AppliedFilter)
+            && sorting.SequenceEqual(AppliedSorting);
     }
 
     private bool FiltersEqual(TFilter? left, TFilter right)

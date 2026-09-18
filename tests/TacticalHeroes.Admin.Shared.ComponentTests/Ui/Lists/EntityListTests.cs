@@ -45,6 +45,20 @@ public sealed class EntityListTests : BunitContext
         reset.ShouldBeTrue();
     }
 
+    [Fact(DisplayName = "ResetSortingAsync should clear criteria when reset is clicked")]
+    public void ResetSortingAsync_Should_ClearCriteria_When_ResetIsClicked()
+    {
+        string[] sorting = ["Name:asc"];
+        var component = RenderList(hasFilters: false);
+        component.Render(parameters => parameters
+            .Add(list => list.Sorting, sorting)
+            .Add(list => list.OnSortingChanged, value => sorting = value));
+
+        FindButton(component, "Сбросить сортировку").Click();
+
+        sorting.ShouldBeEmpty();
+    }
+
     private IRenderedComponent<EntityList<string>> RenderList(
         bool hasFilters,
         bool hasActiveFilters = false,

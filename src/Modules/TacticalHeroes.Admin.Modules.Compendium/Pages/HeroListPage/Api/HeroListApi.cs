@@ -9,6 +9,7 @@ public sealed class HeroListApi(TacticalHeroesApiClient client)
     public async Task<Result<PaginationResult<HeroListItem>>> GetPageAsync(
         int pageNumber,
         int pageSize,
+        string[] sorting,
         CancellationToken cancellationToken)
     {
         var result = await client.Api.V1.Heroes.GetAsync(
@@ -16,6 +17,7 @@ public sealed class HeroListApi(TacticalHeroesApiClient client)
                 {
                     request.QueryParameters.PageNumber = pageNumber;
                     request.QueryParameters.PageSize = pageSize;
+                    request.QueryParameters.Fields = sorting;
                 },
                 cancellationToken)
             .ToApiResultAsync(cancellationToken);

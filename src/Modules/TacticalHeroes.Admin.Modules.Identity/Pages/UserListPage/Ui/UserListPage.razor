@@ -35,7 +35,9 @@
             TotalPages="TotalPages"
             TotalCount="TotalCount"
             OnPageNumberChanged="ChangePage"
-            OnPageSizeChanged="ChangePageSize">
+            OnPageSizeChanged="ChangePageSize"
+            Sorting="AppliedSorting"
+            OnSortingChanged="ChangeSorting">
     <Filters>
         <DebouncedTextFilter @bind-Value="FilterDraft.Email"
                              Label="Поиск по Email"
@@ -46,10 +48,13 @@
                              Disabled="IsLoading" />
     </Filters>
     <HeaderContent>
-        <MudTh>Пользователь</MudTh>
-        <MudTh>Email</MudTh>
+        <ListSortHeader Field="UserName" Label="Пользователь"
+                        Sorting="AppliedSorting" SortingChanged="ChangeSorting" Disabled="IsLoading" />
+        <ListSortHeader Field="Email" Label="Email"
+                        Sorting="AppliedSorting" SortingChanged="ChangeSorting" Disabled="IsLoading" />
         <MudTh>Статус</MudTh>
-        <MudTh>Подтверждение</MudTh>
+        <ListSortHeader Field="IsConfirmed" Label="Подтверждение"
+                        Sorting="AppliedSorting" SortingChanged="ChangeSorting" Disabled="IsLoading" />
         <MudTh Class="actions-column">Действия</MudTh>
     </HeaderContent>
     <RowTemplate Context="user">

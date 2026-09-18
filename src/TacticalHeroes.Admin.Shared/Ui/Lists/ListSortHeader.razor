@@ -1,0 +1,16 @@
+<MudTh aria-sort="@AriaSort">
+    <MudButton Variant="Variant.Text"
+               Color="Color.Inherit"
+               Disabled="Disabled"
+               OnClick="ToggleAsync"
+               Class="sort-header"
+               aria-label="@($"Сортировка: {Label}")"
+               title="По возрастанию → по убыванию → без сортировки. Колонки применяются в порядке выбора.">
+        @Label
+        <MudIcon Icon="@SortIcon" Size="Size.Small" />
+        @if (Index >= 0)
+        {
+            <span class="sort-priority">@(Index + 1)</span>
+        }
+    </MudButton>
+</MudTh>

@@ -415,6 +415,19 @@
               "format": "int32",
               "default": 10
             }
+          },
+          {
+            "name": "Fields",
+            "in": "query",
+            "description": "Repeat for multiple sorting criteria in order of precedence. Format: field[:asc|desc]. Direction defaults to asc.",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         ],
         "responses": {
@@ -742,6 +755,19 @@
               "type": "integer",
               "format": "int32",
               "default": 10
+            }
+          },
+          {
+            "name": "Fields",
+            "in": "query",
+            "description": "Repeat for multiple sorting criteria in order of precedence. Format: field[:asc|desc]. Direction defaults to asc.",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -1412,6 +1438,19 @@
               "format": "int32",
               "default": 10
             }
+          },
+          {
+            "name": "Fields",
+            "in": "query",
+            "description": "Repeat for multiple sorting criteria in order of precedence. Format: field[:asc|desc]. Direction defaults to asc.",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         ],
         "responses": {
@@ -1659,6 +1698,19 @@
               "format": "int32",
               "default": 10
             }
+          },
+          {
+            "name": "Fields",
+            "in": "query",
+            "description": "Repeat for multiple sorting criteria in order of precedence. Format: field[:asc|desc]. Direction defaults to asc.",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         ],
         "responses": {
@@ -1905,6 +1957,19 @@
               "type": "integer",
               "format": "int32",
               "default": 10
+            }
+          },
+          {
+            "name": "Fields",
+            "in": "query",
+            "description": "Repeat for multiple sorting criteria in order of precedence. Format: field[:asc|desc]. Direction defaults to asc.",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],
