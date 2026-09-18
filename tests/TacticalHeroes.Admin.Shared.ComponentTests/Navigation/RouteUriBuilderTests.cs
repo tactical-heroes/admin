@@ -51,6 +51,23 @@ public sealed class RouteUriBuilderTests
         route.ShouldBe("/users");
     }
 
+    [Fact(DisplayName = "BuildPaged should preserve readable sorting and encoded values when special characters are provided")]
+    public void BuildPaged_Should_PreserveReadableSortingAndEncodedValues_When_SpecialCharactersAreProvided()
+    {
+        const string email = "name:tag+test&x=#%3A@example.test";
+        string[] sorting = ["IsConfirmed:asc", "Email:desc", "Name&x=#%3A:asc"];
+
+        string route = RouteUriBuilder.BuildPaged(
+            "/users", new TestFilter { Email = email }, 1, 10, sorting);
+        var query = System.Web.HttpUtility.ParseQueryString(new Uri("https://example.test" + route).Query);
+
+        route.ShouldBe("/users?email=name%3Atag%2Btest%26x%3D%23%253A%40example.test" +
+            "&sort=IsConfirmed:asc&sort=Email:desc&sort=Name%26x%3D%23%253A:asc");
+        query["email"].ShouldBe(email);
+        query.GetValues("sort").ShouldBe(sorting);
+        query.AllKeys.ShouldBe(["email", "sort"]);
+    }
+
     private sealed record TestFilter
     {
         public string? Email { get; set; }

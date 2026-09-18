@@ -55,8 +55,15 @@ public static class RouteUriBuilder
         string[] query = [.. parameters
             .Where(static parameter => !string.IsNullOrWhiteSpace(parameter.Value))
             .Select(static parameter =>
-                $"{Uri.EscapeDataString(parameter.Name)}=" +
-                Uri.EscapeDataString(parameter.Value!))];
+            {
+                string value = Uri.EscapeDataString(parameter.Value!);
+                if (parameter.Name == "sort")
+                {
+                    value = value.Replace("%3A", ":", StringComparison.Ordinal);
+                }
+
+                return $"{Uri.EscapeDataString(parameter.Name)}={value}";
+            })];
 
         return query.Length == 0
             ? path
