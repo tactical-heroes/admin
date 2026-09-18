@@ -65,6 +65,34 @@ public sealed partial class ListPageConventionTests
         violations.ShouldBeEmpty();
     }
 
+    [Fact(DisplayName = "ListPages should bind sorting when admin lists are scanned")]
+    public void ListPages_Should_BindSorting_When_AdminListsAreScanned()
+    {
+        PageConventionSource[] pages = PageConventionSource.Discover("*ListPage.razor");
+        string[] violations = [.. pages
+            .Where(page => !BindsSorting(page.Markup))
+            .Select(page => page.RelativePath)];
+
+        pages.ShouldNotBeEmpty();
+        violations.ShouldBeEmpty();
+    }
+
+    [Theory(DisplayName = "List sorting should require both base bindings when markup is inspected")]
+    [InlineData("<EntityList Sorting=\"AppliedSorting\" OnSortingChanged=\"ChangeSorting\" />", true)]
+    [InlineData("<EntityList Sorting='@(AppliedSorting)' OnSortingChanged='@ChangeSorting' />", true)]
+    [InlineData("<EntityList OnSortingChanged=\"ChangeSorting\" />", false)]
+    [InlineData("<EntityList Sorting=\"AppliedSorting\" />", false)]
+    [InlineData("<EntityList Sorting=\"OtherSorting\" OnSortingChanged=\"ChangeSorting\" />", false)]
+    [InlineData("<EntityList Sorting=\"AppliedSorting\" OnSortingChanged=\"OtherHandler\" />", false)]
+    [InlineData("<Other Sorting=\"AppliedSorting\" OnSortingChanged=\"ChangeSorting\" /><EntityList />", false)]
+    [InlineData("@* <EntityList Sorting=\"AppliedSorting\" OnSortingChanged=\"ChangeSorting\" /> *@<EntityList />", false)]
+    public void ListSorting_Should_RequireBothBaseBindings_When_MarkupIsInspected(string markup, bool expected)
+    {
+        bool valid = BindsSorting(PageConventionSource.WithoutComments(markup));
+
+        valid.ShouldBe(expected);
+    }
+
     [Theory(DisplayName = "List markup should reject missing shared composition when markup is inspected")]
     [InlineData("<EntityList><Columns><EntityRowActions /></Columns></EntityList>", true)]
     [InlineData("<EntityList /><EntityRowActions />", false)]
@@ -184,6 +212,14 @@ public sealed partial class ListPageConventionTests
         }
 
         return false;
+    }
+
+    private static bool BindsSorting(string markup)
+    {
+        Match list = PageConventionSource.Element(markup, "EntityList");
+
+        return PageConventionSource.Binds(list, "Sorting", "AppliedSorting") &&
+            PageConventionSource.Binds(list, "OnSortingChanged", "ChangeSorting");
     }
 
     private static bool BindsListState(string markup)
