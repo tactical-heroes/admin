@@ -1,7 +1,44 @@
+using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
+
+using ResetPasswordPageComponent =
+    TacticalHeroes.Admin.Modules.Identity.Pages.ResetPasswordPage.Ui.ResetPasswordPage;
+
 namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Pages.ResetPasswordPage.Ui;
 
 public sealed class ResetPasswordPageTests : AuthenticationComponentTestContext
 {
+    [Fact(DisplayName = "Render should read email link parameters when query contains an encoded token")]
+    public void Render_Should_ReadEmailLinkParameters_When_QueryContainsAnEncodedToken()
+    {
+        var userId = Guid.NewGuid();
+        const string token = "token/+==&?% value";
+        Services.GetRequiredService<NavigationManager>().NavigateTo(
+            IdentityRoutes.ResetPasswordPage(userId, token));
+
+        var component = Render<ResetPasswordPageComponent>();
+
+        component.Instance.UserId.ShouldBe(userId);
+        component.Instance.PasswordResetToken.ShouldBe(token);
+        component.Find("#reset-password").ShouldNotBeNull();
+        _handler.PostCount.ShouldBe(0);
+    }
+
+    [Theory(DisplayName = "Render should reject email link when query parameters are missing")]
+    [InlineData("")]
+    [InlineData("?userId=19641d4e-0c67-4892-a952-7eb71725a064")]
+    [InlineData("?passwordResetToken=token")]
+    [InlineData("?userId=19641d4e-0c67-4892-a952-7eb71725a064&passwordResetToken=%20")]
+    public void Render_Should_RejectEmailLink_When_QueryParametersAreMissing(string query)
+    {
+        Services.GetRequiredService<NavigationManager>().NavigateTo(IdentityRoutes.ResetPassword + query);
+
+        var component = Render<ResetPasswordPageComponent>();
+
+        component.Find("h1").TextContent.ShouldBe("Ссылка недействительна");
+        _handler.PostCount.ShouldBe(0);
+    }
+
     [Fact(DisplayName = "TogglePasswordVisibility should toggle input type when button is clicked")]
     public void TogglePasswordVisibility_Should_ToggleInputType_When_ButtonIsClicked()
     {
