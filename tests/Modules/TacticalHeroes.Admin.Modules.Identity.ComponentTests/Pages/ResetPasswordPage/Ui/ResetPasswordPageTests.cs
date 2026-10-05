@@ -1,7 +1,82 @@
+using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
+
+using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Model;
+
+using ResetPasswordPageComponent =
+    TacticalHeroes.Admin.Modules.Identity.Pages.ResetPasswordPage.Ui.ResetPasswordPage;
+
 namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Pages.ResetPasswordPage.Ui;
 
 public sealed class ResetPasswordPageTests : AuthenticationComponentTestContext
 {
+    [Fact(DisplayName = "Render should read email link parameters when query contains an encoded token")]
+    public void Render_Should_ReadEmailLinkParameters_When_QueryContainsAnEncodedToken()
+    {
+        var userId = Guid.NewGuid();
+        const string token = "token/+==&?% value";
+        Services.GetRequiredService<NavigationManager>().NavigateTo(
+            IdentityRoutes.ResetPasswordPage(userId, token));
+
+        var component = Render<ResetPasswordPageComponent>();
+
+        component.Instance.UserId.ShouldBe(userId.ToString("D"));
+        component.Instance.PasswordResetToken.ShouldBe(token);
+        component.Find("#reset-password").ShouldNotBeNull();
+        _handler.PostCount.ShouldBe(0);
+    }
+
+    [Theory(DisplayName = "Render should reject email link when query parameters are missing")]
+    [InlineData("")]
+    [InlineData("?userId=19641d4e-0c67-4892-a952-7eb71725a064")]
+    [InlineData("?passwordResetToken=token")]
+    [InlineData("?userId=19641d4e-0c67-4892-a952-7eb71725a064&passwordResetToken=%20")]
+    public void Render_Should_RejectEmailLink_When_QueryParametersAreMissing(string query)
+    {
+        Services.GetRequiredService<NavigationManager>().NavigateTo(IdentityRoutes.ResetPassword + query);
+
+        var component = Render<ResetPasswordPageComponent>();
+
+        component.Find("h1").TextContent.ShouldBe("Ссылка недействительна");
+        _handler.PostCount.ShouldBe(0);
+    }
+
+    [Theory(DisplayName = "Render should reject email link when user id is invalid")]
+    [InlineData("not-a-guid")]
+    [InlineData("19641d4e-0c67-4892-a952")]
+    [InlineData("")]
+    [InlineData("%20")]
+    [InlineData("00000000-0000-0000-0000-000000000000")]
+    public void Render_Should_RejectEmailLink_When_UserIdIsInvalid(string userId)
+    {
+        Services.GetRequiredService<NavigationManager>().NavigateTo(
+            IdentityRoutes.ResetPassword + $"?userId={userId}&passwordResetToken=token");
+
+        var component = Render<ResetPasswordPageComponent>();
+
+        component.Find("h1").TextContent.ShouldBe("Ссылка недействительна");
+        component.FindAll("#reset-password").ShouldBeEmpty();
+        component.Find("a.auth-command").GetAttribute("href").ShouldBe(
+            IdentityRoutes.LoginPage(mode: LoginMode.Recover));
+        _handler.PostCount.ShouldBe(0);
+    }
+
+    [Fact(DisplayName = "Render should reject email link when navigation changes user id to invalid")]
+    public void Render_Should_RejectEmailLink_When_NavigationChangesUserIdToInvalid()
+    {
+        var component = RenderResetPasswordPage();
+
+        Services.GetRequiredService<NavigationManager>().NavigateTo(
+            IdentityRoutes.ResetPassword + "?userId=not-a-guid&passwordResetToken=token");
+
+        component.WaitForAssertion(() =>
+        {
+            component.Find("h1").TextContent.ShouldBe("Ссылка недействительна");
+            component.FindAll("#reset-password").ShouldBeEmpty();
+            _handler.PostCount.ShouldBe(0);
+        });
+    }
+
     [Fact(DisplayName = "TogglePasswordVisibility should toggle input type when button is clicked")]
     public void TogglePasswordVisibility_Should_ToggleInputType_When_ButtonIsClicked()
     {

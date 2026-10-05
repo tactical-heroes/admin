@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 
@@ -33,10 +34,12 @@ public abstract class AuthenticationComponentTestContext : BunitContext
 
     protected IRenderedComponent<ResetPasswordPageComponent> RenderResetPasswordPage()
     {
-        return Render<ResetPasswordPageComponent>(parameters => parameters
-            .Add(component => component.UserId, Guid.Parse(
-                "19641d4e-0c67-4892-a952-7eb71725a064"))
-            .Add(component => component.PasswordResetToken, "reset-token"));
+        Services.GetRequiredService<NavigationManager>().NavigateTo(
+            IdentityRoutes.ResetPasswordPage(
+                Guid.Parse("19641d4e-0c67-4892-a952-7eb71725a064"),
+                "reset-token"));
+
+        return Render<ResetPasswordPageComponent>();
     }
 
     protected sealed class AuthenticationHandler : HttpMessageHandler
