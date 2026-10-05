@@ -42,7 +42,8 @@ public sealed class UnitListPageTests : BunitContext
         component.WaitForAssertion(() =>
         {
             component.Markup.ShouldContain("Archer");
-            component.Markup.ShouldContain("Northern Alliance");
+            component.Find("a[href='/factions/d1703c92-a294-4584-8a9a-78469111363d']")
+                .TextContent.Trim().ShouldBe("Northern Alliance");
             component.FindAll("a").Select(link => link.GetAttribute("href"))
                 .ShouldContain(CompendiumRoutes.CreateUnit);
             component.FindAll("a").Select(link => link.GetAttribute("href"))

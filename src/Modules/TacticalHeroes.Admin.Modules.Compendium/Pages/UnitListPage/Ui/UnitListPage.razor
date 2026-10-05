@@ -44,9 +44,8 @@
         </PropertyColumn>
         <PropertyColumn T="UnitListItem" TProperty="string" Property="item => item.FactionName" Title="Фракция">
             <CellTemplate>
-                <MudText Typo="Typo.body2" Class="entity-description">
-                    @context.Item.FactionName
-                </MudText>
+                <EntityLink Href="@CompendiumRoutes.Faction(context.Item.FactionId)"
+                            Text="@context.Item.FactionName" />
             </CellTemplate>
         </PropertyColumn>
         <TemplateColumn T="UnitListItem" Title="Действия" Sortable="false" HeaderClass="actions-column" CellClass="actions-column">
