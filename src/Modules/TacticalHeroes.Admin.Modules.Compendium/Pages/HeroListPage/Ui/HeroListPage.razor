@@ -44,9 +44,11 @@
         </PropertyColumn>
         <PropertyColumn T="HeroListItem" TProperty="string" Property="item => item.FactionName" Title="Фракция">
             <CellTemplate>
-                <MudText Typo="Typo.body2" Class="entity-description">
+                <MudLink Href="@CompendiumRoutes.Faction(context.Item.FactionId)"
+                         Typo="Typo.body2"
+                         Class="entity-description">
                     @context.Item.FactionName
-                </MudText>
+                </MudLink>
             </CellTemplate>
         </PropertyColumn>
         <TemplateColumn T="HeroListItem" Title="Действия" Sortable="false" HeaderClass="actions-column" CellClass="actions-column">
