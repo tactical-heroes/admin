@@ -36,7 +36,8 @@ public sealed class AsyncSelectOptionTests : BunitContext
         _source.Limit.ShouldBe(1);
         options.ShouldBe([1]);
         autocomplete.Instance.MaxItems.ShouldBe(1);
-        autocomplete.Instance.MinCharacters.ShouldBe(2);
+        component.Instance.MinCharacters.ShouldBe(2);
+        autocomplete.Instance.MinCharacters.ShouldBe(0);
     }
 
     [Fact(DisplayName = "OnParametersSetAsync should preserve selection when identifier is a string")]
@@ -105,11 +106,8 @@ public sealed class AsyncSelectOptionTests : BunitContext
     }
 
     [Theory(DisplayName = "SearchAsync should avoid requests when trimmed search is shorter than three characters")]
-    [InlineData(null)]
-    [InlineData("")]
     [InlineData("n")]
     [InlineData("no")]
-    [InlineData("   ")]
     [InlineData(" no ")]
     public async Task SearchAsync_Should_AvoidRequests_When_TrimmedSearchIsShorterThanThreeCharacters(string? search)
     {
@@ -122,15 +120,74 @@ public sealed class AsyncSelectOptionTests : BunitContext
         _source.Requests.ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "SearchAsync should cancel pending request when search is cancelled")]
-    public async Task SearchAsync_Should_CancelPendingRequest_When_SearchIsCancelled()
+    [Theory(DisplayName = "SearchAsync should request initial options when search is empty")]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task SearchAsync_Should_RequestInitialOptions_When_SearchIsEmpty(string? search)
+    {
+        var component = Render<TestSelect>();
+        var autocomplete = component.FindComponent<MudAutocomplete<int>>();
+
+        var options = await component.InvokeAsync(() => autocomplete.Instance.SearchFunc!(search, Xunit.TestContext.Current.CancellationToken)!);
+
+        _source.Requests.ShouldBe([null]);
+        _source.Limit.ShouldBe(20);
+        options.ShouldBe([1, OptionId]);
+    }
+
+    [Fact(DisplayName = "OpenMenuAsync should request initial options when empty select is opened")]
+    public async Task OpenMenuAsync_Should_RequestInitialOptions_When_EmptySelectIsOpened()
+    {
+        var component = Render<TestSelect>();
+        var autocomplete = component.FindComponent<MudAutocomplete<int>>();
+        _source.Requests.ShouldBeEmpty();
+
+        await component.InvokeAsync(() => autocomplete.Instance.OpenMenuAsync());
+
+        _source.Requests.ShouldBe([null]);
+        Popovers.Markup.ShouldContain("First option");
+        Popovers.Markup.ShouldContain("Selected option");
+    }
+
+    [Fact(DisplayName = "Render should hide creation link when search is shorter than minimum")]
+    public async Task Render_Should_HideCreationLink_When_SearchIsShorterThanMinimum()
+    {
+        var component = Render<TestSelect>();
+
+        component.FindComponent<MudAutocomplete<int>>().Find("input").Input("no");
+        await component.WaitForAssertionAsync(() =>
+            component.FindComponent<MudAutocomplete<int>>().Instance.Open.ShouldBeTrue());
+
+        _source.Requests.ShouldBeEmpty();
+        Popovers.Markup.ShouldNotContain("Варианты не найдены.");
+        Popovers.FindAll("a").ShouldBeEmpty();
+    }
+
+    [Fact(DisplayName = "SearchAsync should restore initial options when search is cleared")]
+    public async Task SearchAsync_Should_RestoreInitialOptions_When_SearchIsCleared()
+    {
+        var component = Render<TestSelect>();
+        var autocomplete = component.FindComponent<MudAutocomplete<int>>();
+        await component.InvokeAsync(() => autocomplete.Instance.SearchFunc!("sel", Xunit.TestContext.Current.CancellationToken)!);
+
+        var options = await component.InvokeAsync(() => autocomplete.Instance.SearchFunc!("", Xunit.TestContext.Current.CancellationToken)!);
+
+        _source.Requests.ShouldBe(["sel", null]);
+        options.ShouldBe([1, OptionId]);
+    }
+
+    [Theory(DisplayName = "SearchAsync should cancel pending request when search is cancelled")]
+    [InlineData(null)]
+    [InlineData("selected")]
+    public async Task SearchAsync_Should_CancelPendingRequest_When_SearchIsCancelled(string? searchText)
     {
         using var source = new CancellationTokenSource();
         _source.Pending = new TaskCompletionSource<Result<IReadOnlyList<SelectOption<int>>>>();
         var component = Render<TestSelect>();
         var autocomplete = component.FindComponent<MudAutocomplete<int>>();
 
-        var search = component.InvokeAsync(() => autocomplete.Instance.SearchFunc!("selected", source.Token)!);
+        var search = component.InvokeAsync(() => autocomplete.Instance.SearchFunc!(searchText, source.Token)!);
         await component.WaitForAssertionAsync(() => _source.Cancellation.CanBeCanceled.ShouldBeTrue());
         await source.CancelAsync();
 
@@ -241,7 +298,7 @@ public sealed class AsyncSelectOptionTests : BunitContext
         var component = Render<TestSelect>(parameters => parameters
             .Add(select => select.Value, selectedOptionId)
             .Add(select => select.ValueChanged, value => selectedOptionId = value));
-        component.FindComponent<MudAutocomplete<int>>().Find("input").Input("selected");
+        await component.InvokeAsync(() => component.FindComponent<MudAutocomplete<int>>().Instance.OpenMenuAsync());
         await Popovers.WaitForAssertionAsync(() => Popovers.Markup.ShouldContain("Selected option"));
 
         await Popovers.FindAll(".mud-list-item").Single(item => item.TextContent.Trim() == "Selected option").ClickAsync(new MouseEventArgs());
@@ -263,6 +320,33 @@ public sealed class AsyncSelectOptionTests : BunitContext
 
         selectedOptionId.ShouldBe(0);
         component.FindComponent<MudAutocomplete<int>>().Find("input").GetAttribute("value").ShouldBeEmpty();
+    }
+
+    [Fact(DisplayName = "Render should reload initial options when clear button is clicked")]
+    public async Task Render_Should_ReloadInitialOptions_When_ClearButtonIsClicked()
+    {
+        var selectedOptionId = OptionId;
+        var component = Render<TestSelect>(parameters => parameters
+            .Add(select => select.Value, selectedOptionId)
+            .Add(select => select.ValueChanged, value => selectedOptionId = value));
+        component.WaitForElement("input");
+
+        await component.FindComponents<MudIconButton>()
+            .Single(button => button.Instance.Icon == Icons.Material.Filled.Clear)
+            .Find("button").ClickAsync(new MouseEventArgs());
+
+        _source.Requests.ShouldBe([null, null]);
+        selectedOptionId.ShouldBe(0);
+        component.FindComponent<MudAutocomplete<int>>().Find("input").GetAttribute("value").ShouldBeEmpty();
+        Popovers.Markup.ShouldContain("First option");
+        Popovers.Markup.ShouldContain("Selected option");
+        Popovers.Markup.ShouldNotContain("Варианты не найдены.");
+        Popovers.FindAll("a").ShouldBeEmpty();
+
+        await Popovers.FindAll(".mud-list-item").Single(item => item.TextContent.Trim() == "First option").ClickAsync(new MouseEventArgs());
+
+        selectedOptionId.ShouldBe(1);
+        component.FindComponent<MudAutocomplete<int>>().Find("input").GetAttribute("value").ShouldBe("First option");
     }
 
     [Fact(DisplayName = "GetName should preserve selected label when other options are searched")]

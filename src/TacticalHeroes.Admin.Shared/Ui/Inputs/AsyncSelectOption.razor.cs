@@ -2,6 +2,8 @@ using System.Linq.Expressions;
 
 using Microsoft.AspNetCore.Components;
 
+using MudBlazor;
+
 namespace TacticalHeroes.Admin.Shared.Ui.Inputs;
 
 public abstract partial class AsyncSelectOption<TId, TOption>(
@@ -13,6 +15,7 @@ public abstract partial class AsyncSelectOption<TId, TOption>(
     where TId : notnull
     where TOption : SelectOption<TId>
 {
+    private MudAutocomplete<TId>? _autocomplete;
     private long _loadVersion;
 
     private string Label { get; } = label;
@@ -63,6 +66,8 @@ public abstract partial class AsyncSelectOption<TId, TOption>(
 
     private bool IsLoading { get; set; }
 
+    private bool IsSearchTooShort { get; set; }
+
     protected override async Task OnParametersSetAsync()
     {
         if (!EqualityComparer<TId>.Default.Equals(Value, default) &&
@@ -110,7 +115,9 @@ public abstract partial class AsyncSelectOption<TId, TOption>(
     private async Task<IEnumerable<TId>> SearchAsync(string? search, CancellationToken cancellationToken)
     {
         search = search?.Trim();
-        if (search is null || search.Length < MinCharacters)
+        search = string.IsNullOrEmpty(search) ? null : search;
+        IsSearchTooShort = search is not null && search.Length < MinCharacters;
+        if (IsSearchTooShort)
         {
             Options = [];
             SearchError = null;

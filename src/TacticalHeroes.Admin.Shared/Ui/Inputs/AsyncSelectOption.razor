@@ -7,7 +7,8 @@
                  OnRetry="LoadAsync"
                  LoadingHeight="56px">
     <ChildContent>
-        <MudAutocomplete T="TId"
+        <MudAutocomplete @ref="_autocomplete"
+                         T="TId"
                          Value="Value"
                          ValueChanged="SetValueAsync"
                          For="For"
@@ -16,18 +17,19 @@
                          ToStringFunc="GetName"
                          SearchFunc="SearchAsync"
                          DebounceInterval="DebounceInterval"
-                         MinCharacters="MinCharacters"
-                         HelperText="@($"Введите минимум {MinCharacters} символа")"
+                         MinCharacters="0"
+                         HelperText="@($"Для поиска введите минимум {MinCharacters} символа")"
                          MaxItems="MaxItems"
                          MaxLength="MaxLength"
                          Strict="false"
                          Clearable="true"
+                         OnClearButtonClick="@(() => _autocomplete?.OpenMenuAsync() ?? Task.CompletedTask)"
                          ResetValueOnEmptyText="true"
                          ShowProgressIndicator="true"
                          Error="Error"
                          ErrorText="@ErrorText">
             <NoItemsTemplate>
-                @if (SearchError is null)
+                @if (SearchError is null && !IsSearchTooShort)
                 {
                     <MudText Class="px-4 py-2">@EmptyText</MudText>
                     @if (CreateHref is not null)
