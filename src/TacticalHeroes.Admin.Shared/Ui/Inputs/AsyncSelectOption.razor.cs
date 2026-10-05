@@ -2,6 +2,8 @@ using System.Linq.Expressions;
 
 using Microsoft.AspNetCore.Components;
 
+using MudBlazor;
+
 namespace TacticalHeroes.Admin.Shared.Ui.Inputs;
 
 public abstract partial class AsyncSelectOption<TId, TOption>(
@@ -13,6 +15,7 @@ public abstract partial class AsyncSelectOption<TId, TOption>(
     where TId : notnull
     where TOption : SelectOption<TId>
 {
+    private MudAutocomplete<TId>? _autocomplete;
     private long _loadVersion;
 
     private string Label { get; } = label;

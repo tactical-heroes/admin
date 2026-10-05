@@ -322,6 +322,33 @@ public sealed class AsyncSelectOptionTests : BunitContext
         component.FindComponent<MudAutocomplete<int>>().Find("input").GetAttribute("value").ShouldBeEmpty();
     }
 
+    [Fact(DisplayName = "Render should reload initial options when clear button is clicked")]
+    public async Task Render_Should_ReloadInitialOptions_When_ClearButtonIsClicked()
+    {
+        var selectedOptionId = OptionId;
+        var component = Render<TestSelect>(parameters => parameters
+            .Add(select => select.Value, selectedOptionId)
+            .Add(select => select.ValueChanged, value => selectedOptionId = value));
+        component.WaitForElement("input");
+
+        await component.FindComponents<MudIconButton>()
+            .Single(button => button.Instance.Icon == Icons.Material.Filled.Clear)
+            .Find("button").ClickAsync(new MouseEventArgs());
+
+        _source.Requests.ShouldBe([null, null]);
+        selectedOptionId.ShouldBe(0);
+        component.FindComponent<MudAutocomplete<int>>().Find("input").GetAttribute("value").ShouldBeEmpty();
+        Popovers.Markup.ShouldContain("First option");
+        Popovers.Markup.ShouldContain("Selected option");
+        Popovers.Markup.ShouldNotContain("Варианты не найдены.");
+        Popovers.FindAll("a").ShouldBeEmpty();
+
+        await Popovers.FindAll(".mud-list-item").Single(item => item.TextContent.Trim() == "First option").ClickAsync(new MouseEventArgs());
+
+        selectedOptionId.ShouldBe(1);
+        component.FindComponent<MudAutocomplete<int>>().Find("input").GetAttribute("value").ShouldBe("First option");
+    }
+
     [Fact(DisplayName = "GetName should preserve selected label when other options are searched")]
     public async Task GetName_Should_PreserveSelectedLabel_When_OtherOptionsAreSearched()
     {

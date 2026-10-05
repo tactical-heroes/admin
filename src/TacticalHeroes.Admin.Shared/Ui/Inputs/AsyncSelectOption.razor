@@ -7,7 +7,8 @@
                  OnRetry="LoadAsync"
                  LoadingHeight="56px">
     <ChildContent>
-        <MudAutocomplete T="TId"
+        <MudAutocomplete @ref="_autocomplete"
+                         T="TId"
                          Value="Value"
                          ValueChanged="SetValueAsync"
                          For="For"
@@ -22,6 +23,7 @@
                          MaxLength="MaxLength"
                          Strict="false"
                          Clearable="true"
+                         OnClearButtonClick="@(() => _autocomplete?.OpenMenuAsync() ?? Task.CompletedTask)"
                          ResetValueOnEmptyText="true"
                          ShowProgressIndicator="true"
                          Error="Error"
