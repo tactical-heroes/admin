@@ -1,0 +1,7 @@
+.entity-link-host ::deep .entity-link {
+    display: -webkit-box;
+    max-width: 48rem;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
