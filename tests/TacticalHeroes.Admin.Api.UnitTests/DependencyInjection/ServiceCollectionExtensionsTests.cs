@@ -16,7 +16,7 @@ public sealed class ServiceCollectionExtensionsTests
         var handler = new SequenceHandler(
             HttpStatusCode.ServiceUnavailable,
             HttpStatusCode.OK);
-        using var serviceProvider = CreateServiceProvider(handler);
+        await using var serviceProvider = CreateServiceProvider(handler);
         var client = serviceProvider
             .GetRequiredService<IHttpClientFactory>()
             .CreateClient("TacticalHeroesApi");
@@ -31,7 +31,7 @@ public sealed class ServiceCollectionExtensionsTests
     public async Task AddTacticalHeroesApiClient_Should_NotRetryPost_When_TransientFailureOccurs()
     {
         var handler = new SequenceHandler(HttpStatusCode.ServiceUnavailable);
-        using var serviceProvider = CreateServiceProvider(handler);
+        await using var serviceProvider = CreateServiceProvider(handler);
         var client = serviceProvider
             .GetRequiredService<IHttpClientFactory>()
             .CreateClient("TacticalHeroesApi");

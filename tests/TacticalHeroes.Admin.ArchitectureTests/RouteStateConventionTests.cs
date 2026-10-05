@@ -10,7 +10,7 @@ public sealed class RouteStateConventionTests
             new Dictionary<string, string[]>(StringComparer.Ordinal)
             {
                 ["src/TacticalHeroes.Admin.Shared/Ui/Lists/MudPagedListComponentBase.cs"] =
-                    ["page", "pageSize"],
+                    ["page", "pageSize", "sort"],
             };
         List<string> violations = [];
 

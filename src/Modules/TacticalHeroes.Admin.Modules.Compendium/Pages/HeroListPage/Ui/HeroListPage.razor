@@ -1,0 +1,74 @@
+@inherits MudPagedListComponentBase<HeroListItem>
+@attribute [Route(CompendiumRoutes.Heroes)]
+@attribute [Authorize]
+@attribute [StreamRendering]
+
+@using TacticalHeroes.Admin.Modules.Compendium.Pages.HeroListPage.Model
+
+<PageTitle>Герои · @(Branding.GameName)</PageTitle>
+
+<PageHeader Title="Герои"
+            Subtitle="Управление игровыми героями и их фракциями">
+    <Actions>
+        <MudButton Href="@CompendiumRoutes.CreateHero"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add">
+            Добавить героя
+        </MudButton>
+    </Actions>
+</PageHeader>
+
+<EntityList TItem="HeroListItem"
+            Items="Page?.Items"
+            Loading="IsLoading"
+            LoadError="@LoadError"
+            EmptyText="Герои не найдены"
+            RefreshLabel="Обновить список героев"
+            OnRefresh="LoadPageAsync"
+            PageNumber="CurrentPageNumber"
+            PageSize="CurrentPageSize"
+            TotalPages="TotalPages"
+            TotalCount="TotalCount"
+            OnPageNumberChanged="ChangePage"
+            OnPageSizeChanged="ChangePageSize"
+            Sorting="AppliedSorting"
+            OnSortingChanged="ChangeSorting">
+    <Columns>
+        <PropertyColumn T="HeroListItem" TProperty="string" Property="item => item.Name" Title="Имя">
+            <CellTemplate>
+                <MudText Typo="Typo.body2" Class="entity-name">
+                    @context.Item.Name
+                </MudText>
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn T="HeroListItem" TProperty="string" Property="item => item.FactionName" Title="Фракция">
+            <CellTemplate>
+                <MudText Typo="Typo.body2" Class="entity-description">
+                    @context.Item.FactionName
+                </MudText>
+            </CellTemplate>
+        </PropertyColumn>
+        <TemplateColumn T="HeroListItem" Title="Действия" Sortable="false" HeaderClass="actions-column" CellClass="actions-column">
+            <CellTemplate>
+                <EntityRowActions>
+                    <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                                   Href="@CompendiumRoutes.Hero(context.Item.Id)"
+                                   Color="Color.Primary"
+                                   Size="Size.Small"
+                                   Disabled="IsLoading"
+                                   aria-label="Редактировать героя" />
+                    <EntityDeleteButton TKey="Guid"
+                                        EntityId="context.Item.Id"
+                                        EntityType="героя"
+                                        EntityName="@context.Item.Name"
+                                        DeleteLabel="Удалить героя"
+                                        SuccessMessage="Герой удалён"
+                                        DeleteAsync="DeleteHeroAsync"
+                                        OnDeleted="OnItemRemovedAsync"
+                                        Disabled="IsLoading" />
+                </EntityRowActions>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+</EntityList>

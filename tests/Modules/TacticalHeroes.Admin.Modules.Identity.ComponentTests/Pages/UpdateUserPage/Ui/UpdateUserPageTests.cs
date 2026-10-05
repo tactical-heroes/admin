@@ -8,6 +8,8 @@ using Microsoft.Extensions.Http;
 using MudBlazor.Services;
 
 using TacticalHeroes.Admin.Api.DependencyInjection;
+using TacticalHeroes.Admin.Shared.Ui.Forms;
+using TacticalHeroes.Admin.Shared.Ui.Layout;
 
 using UpdateUserPageComponent =
     TacticalHeroes.Admin.Modules.Identity.Pages.UpdateUserPage.Ui.UpdateUserPage;
@@ -32,6 +34,21 @@ public sealed class UpdateUserPageTests : BunitContext
                 builder => builder.PrimaryHandler = _handler));
         Services.AddIdentityAdminModule();
         JSInterop.Mode = JSRuntimeMode.Loose;
+    }
+
+    [Fact(DisplayName = "Render should link back and cancel to list when form is displayed")]
+    public void Render_Should_LinkBackAndCancelToList_When_FormIsDisplayed()
+    {
+        var component = Render<UpdateUserPageComponent>(parameters => parameters
+            .Add(page => page.Id, _userId));
+
+        component.WaitForAssertion(() =>
+        {
+            component.FindComponent<PageBackButton>().Find("a").GetAttribute("href")
+                .ShouldBe(IdentityRoutes.Users);
+            component.FindComponent<EditFormActions>().Find("a").GetAttribute("href")
+                .ShouldBe(IdentityRoutes.Users);
+        });
     }
 
     [Fact(DisplayName = "Submit should navigate to list when user is valid")]

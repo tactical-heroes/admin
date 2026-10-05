@@ -1,0 +1,74 @@
+@inherits MudPagedListComponentBase<UnitListItem>
+@attribute [Route(CompendiumRoutes.Units)]
+@attribute [Authorize]
+@attribute [StreamRendering]
+
+@using TacticalHeroes.Admin.Modules.Compendium.Pages.UnitListPage.Model
+
+<PageTitle>Юниты · @(Branding.GameName)</PageTitle>
+
+<PageHeader Title="Юниты"
+            Subtitle="Управление игровыми юнитами и их фракциями">
+    <Actions>
+        <MudButton Href="@CompendiumRoutes.CreateUnit"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add">
+            Добавить юнита
+        </MudButton>
+    </Actions>
+</PageHeader>
+
+<EntityList TItem="UnitListItem"
+            Items="Page?.Items"
+            Loading="IsLoading"
+            LoadError="@LoadError"
+            EmptyText="Юниты не найдены"
+            RefreshLabel="Обновить список юнитов"
+            OnRefresh="LoadPageAsync"
+            PageNumber="CurrentPageNumber"
+            PageSize="CurrentPageSize"
+            TotalPages="TotalPages"
+            TotalCount="TotalCount"
+            OnPageNumberChanged="ChangePage"
+            OnPageSizeChanged="ChangePageSize"
+            Sorting="AppliedSorting"
+            OnSortingChanged="ChangeSorting">
+    <Columns>
+        <PropertyColumn T="UnitListItem" TProperty="string" Property="item => item.Name" Title="Имя">
+            <CellTemplate>
+                <MudText Typo="Typo.body2" Class="entity-name">
+                    @context.Item.Name
+                </MudText>
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn T="UnitListItem" TProperty="string" Property="item => item.FactionName" Title="Фракция">
+            <CellTemplate>
+                <MudText Typo="Typo.body2" Class="entity-description">
+                    @context.Item.FactionName
+                </MudText>
+            </CellTemplate>
+        </PropertyColumn>
+        <TemplateColumn T="UnitListItem" Title="Действия" Sortable="false" HeaderClass="actions-column" CellClass="actions-column">
+            <CellTemplate>
+                <EntityRowActions>
+                    <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                                   Href="@CompendiumRoutes.Unit(context.Item.Id)"
+                                   Color="Color.Primary"
+                                   Size="Size.Small"
+                                   Disabled="IsLoading"
+                                   aria-label="Редактировать юнита" />
+                    <EntityDeleteButton TKey="Guid"
+                                        EntityId="context.Item.Id"
+                                        EntityType="юнита"
+                                        EntityName="@context.Item.Name"
+                                        DeleteLabel="Удалить юнита"
+                                        SuccessMessage="Юнит удалён"
+                                        DeleteAsync="DeleteUnitAsync"
+                                        OnDeleted="OnItemRemovedAsync"
+                                        Disabled="IsLoading" />
+                </EntityRowActions>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+</EntityList>

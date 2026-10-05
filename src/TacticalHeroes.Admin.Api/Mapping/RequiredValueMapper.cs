@@ -32,4 +32,9 @@ public static class RequiredValueMapper
     {
         return value ?? throw new ArgumentNullException(nameof(value));
     }
+
+    public static double ToRequiredDouble(double? value)
+    {
+        return value ?? throw new ArgumentNullException(nameof(value));
+    }
 }

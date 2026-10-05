@@ -1,0 +1,135 @@
+@inherits MudUpdateFormComponentBase<UpdateHeroFormModel, UpdateHeroFormModelValidator>
+@attribute [Route(CompendiumRoutes.HeroTemplate)]
+@attribute [Authorize]
+@attribute [StreamRendering]
+
+@using TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Ui
+@using TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateHeroPage.Model
+
+<PageTitle>Редактирование героя · @(Branding.GameName)</PageTitle>
+
+<PageHeader Title="Редактирование героя"
+            Subtitle="Измените характеристики и фракцию героя">
+    <Actions>
+        <PageBackButton Href="@CompendiumRoutes.Heroes" />
+    </Actions>
+</PageHeader>
+
+<LoadableContent Loading="IsLoading"
+                 LoadError="@LoadError"
+                 OnRetry="ReloadAsync">
+    <ChildContent>
+        <MudForm @ref="Form"
+                 Model="Model"
+                 Validation="@Validator.ValidateValue"
+                 @bind-IsValid="IsValid">
+            <EditSection Title="Данные героя">
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" md="6">
+                        <MudTextField T="string"
+                                      @bind-Value="Model.Name"
+                                      For="@(() => Model.Name)"
+                                      Label="Имя героя"
+                                      Variant="Variant.Outlined"
+                                      Error="@Errors.HasError(nameof(UpdateHeroFormModel.Name))"
+                                      ErrorText="@Errors.GetError(nameof(UpdateHeroFormModel.Name))"
+                                      MaxLength="128" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <FactionSelect @bind-Value="Model.FactionId"
+                                       For="@(() => Model.FactionId)"
+                                       Error="@Errors.HasError(nameof(UpdateHeroFormModel.FactionId))"
+                                       ErrorText="@Errors.GetError(nameof(UpdateHeroFormModel.FactionId))" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField T="string"
+                                      @bind-Value="Model.Description"
+                                      For="@(() => Model.Description)"
+                                      Label="Описание"
+                                      Variant="Variant.Outlined"
+                                      Error="@Errors.HasError(nameof(UpdateHeroFormModel.Description))"
+                                      ErrorText="@Errors.GetError(nameof(UpdateHeroFormModel.Description))"
+                                      MaxLength="2000"
+                                      Lines="4" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudNumericField T="int"
+                                         @bind-Value="Model.Attack"
+                                         For="@(() => Model.Attack)"
+                                         Label="Атака"
+                                         Variant="Variant.Outlined"
+                                         Min="0"
+                                         Error="@Errors.HasError(nameof(UpdateHeroFormModel.Attack))"
+                                         ErrorText="@Errors.GetError(nameof(UpdateHeroFormModel.Attack))" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudNumericField T="int"
+                                         @bind-Value="Model.Defense"
+                                         For="@(() => Model.Defense)"
+                                         Label="Защита"
+                                         Variant="Variant.Outlined"
+                                         Min="0"
+                                         Error="@Errors.HasError(nameof(UpdateHeroFormModel.Defense))"
+                                         ErrorText="@Errors.GetError(nameof(UpdateHeroFormModel.Defense))" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudNumericField T="int"
+                                         @bind-Value="Model.MinimumDamage"
+                                         For="@(() => Model.MinimumDamage)"
+                                         Label="Минимальный урон"
+                                         Variant="Variant.Outlined"
+                                         Min="0"
+                                         Error="@Errors.HasError(nameof(UpdateHeroFormModel.MinimumDamage))"
+                                         ErrorText="@Errors.GetError(nameof(UpdateHeroFormModel.MinimumDamage))" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudNumericField T="int"
+                                         @bind-Value="Model.MaximumDamage"
+                                         For="@(() => Model.MaximumDamage)"
+                                         Label="Максимальный урон"
+                                         Variant="Variant.Outlined"
+                                         Min="0"
+                                         Error="@Errors.HasError(nameof(UpdateHeroFormModel.MaximumDamage))"
+                                         ErrorText="@Errors.GetError(nameof(UpdateHeroFormModel.MaximumDamage))" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudNumericField T="double"
+                                         @bind-Value="Model.Initiative"
+                                         For="@(() => Model.Initiative)"
+                                         Label="Инициатива"
+                                         Variant="Variant.Outlined"
+                                         Min="0"
+                                         Error="@Errors.HasError(nameof(UpdateHeroFormModel.Initiative))"
+                                         ErrorText="@Errors.GetError(nameof(UpdateHeroFormModel.Initiative))" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudNumericField T="int"
+                                         @bind-Value="Model.Morale"
+                                         For="@(() => Model.Morale)"
+                                         Label="Мораль"
+                                         Variant="Variant.Outlined"
+                                         Min="0"
+                                         Max="5"
+                                         Error="@Errors.HasError(nameof(UpdateHeroFormModel.Morale))"
+                                         ErrorText="@Errors.GetError(nameof(UpdateHeroFormModel.Morale))" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudNumericField T="int"
+                                         @bind-Value="Model.Luck"
+                                         For="@(() => Model.Luck)"
+                                         Label="Удача"
+                                         Variant="Variant.Outlined"
+                                         Min="0"
+                                         Max="5"
+                                         Error="@Errors.HasError(nameof(UpdateHeroFormModel.Luck))"
+                                         ErrorText="@Errors.GetError(nameof(UpdateHeroFormModel.Luck))" />
+                    </MudItem>
+                </MudGrid>
+            </EditSection>
+
+            <EditFormActions CancelHref="@CompendiumRoutes.Heroes"
+                             Busy="IsSaving"
+                             OnSubmit="SubmitAsync" />
+        </MudForm>
+    </ChildContent>
+</LoadableContent>
