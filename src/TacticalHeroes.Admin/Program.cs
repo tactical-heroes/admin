@@ -6,6 +6,7 @@ using TacticalHeroes.Admin.Components;
 using TacticalHeroes.Admin.Infrastructure.Authentication.DependencyInjection;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Endpoints;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Tokens;
+using TacticalHeroes.Admin.Infrastructure.DataProtection;
 using TacticalHeroes.Admin.Infrastructure.Proxy;
 using TacticalHeroes.Admin.Modules.Compendium;
 using TacticalHeroes.Admin.Modules.Identity;
@@ -17,6 +18,7 @@ builder.Services.AddTacticalHeroesAdminClient(
     authenticationProviderFactory: services =>
         services.GetRequiredService<ServerAccessTokenAuthenticationProvider>());
 builder.Services.AddAdminAuthentication(builder.Configuration);
+builder.Services.AddAdminDataProtection(builder.Configuration);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents()

@@ -1,11 +1,5 @@
 replicaCount: 1
 
-persistence:
-  enabled: true
-  mountPath: /home/app/.aspnet/DataProtection-Keys
-  storageClass: nvme.network-drives.csi.timeweb.cloud
-  size: 10Gi
-
 nameOverride: ""
 fullnameOverride: ""
 component: admin
@@ -32,10 +26,11 @@ service:
   containerPort: 8080
 
 env:
-  secretName: ""
+  secretName: tactical-heroes-admin-app
   values:
     ASPNETCORE_HTTP_PORTS: "8080"
     ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+    DataProtection__Enabled: "true"
 
 externalSecrets:
   enabled: true
@@ -54,7 +49,9 @@ externalSecrets:
     authMountPath: kubernetes
     role: tactical-heroes-admin-development
   app:
-    enabled: false
+    enabled: true
+    targetName: tactical-heroes-admin-app
+    extractAll: true
   registry:
     enabled: true
     targetName: tactical-heroes-admin-registry
@@ -64,7 +61,10 @@ externalSecrets:
     passwordProperty: REGISTRY_TOKEN
 
 migrations:
-  enabled: false
+  enabled: true
+  image:
+    repository: ghcr.io/panixida/tactical-heroes/admin-ef-migrator
+    tag: "0"
 
 gateway:
   enabled: true
@@ -78,9 +78,7 @@ gateway:
 podAnnotations: {}
 podLabels: {}
 
-podSecurityContext:
-  fsGroup: 1654
-  fsGroupChangePolicy: OnRootMismatch
+podSecurityContext: {}
 
 securityContext:
   allowPrivilegeEscalation: false

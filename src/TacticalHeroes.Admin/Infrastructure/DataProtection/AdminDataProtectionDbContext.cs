@@ -1,0 +1,25 @@
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+namespace TacticalHeroes.Admin.Infrastructure.DataProtection;
+
+public sealed class AdminDataProtectionDbContext(DbContextOptions<AdminDataProtectionDbContext> options)
+    : DbContext(options), IDataProtectionKeyContext
+{
+    internal const string Schema = "admin";
+
+    public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<DataProtectionKey>(entity =>
+        {
+            entity.ToTable("data_protection_keys", Schema);
+            entity.Property(key => key.Id).HasColumnName("id");
+            entity.Property(key => key.FriendlyName).HasColumnName("friendly_name");
+            entity.Property(key => key.Xml).HasColumnName("xml");
+        });
+    }
+}

@@ -1,2 +1,6 @@
 image:
   tag: "0"
+
+migrations:
+  image:
+    tag: "0"

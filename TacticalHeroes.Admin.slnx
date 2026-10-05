@@ -32,6 +32,9 @@
     <Project Path="tests/TacticalHeroes.Admin.Shared.ComponentTests/TacticalHeroes.Admin.Shared.ComponentTests.csproj" />
     <Project Path="tests/TacticalHeroes.Admin.UnitTests/TacticalHeroes.Admin.UnitTests.csproj" />
   </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/TacticalHeroes.Admin.EfMigrator/TacticalHeroes.Admin.EfMigrator.csproj" />
+  </Folder>
   <Folder Name="/tests/Modules/">
     <Project Path="tests/Modules/TacticalHeroes.Admin.Modules.Compendium.ComponentTests/TacticalHeroes.Admin.Modules.Compendium.ComponentTests.csproj" />
     <Project Path="tests/Modules/TacticalHeroes.Admin.Modules.Identity.ComponentTests/TacticalHeroes.Admin.Modules.Identity.ComponentTests.csproj" />

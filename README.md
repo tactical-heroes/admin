@@ -55,33 +55,52 @@ dotnet run --project src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj --laun
 
 ### Data Protection keys
 
-The Helm deployment persists ASP.NET Core Data Protection keys at the container's
-default `/home/app/.aspnet/DataProtection-Keys` location. Each environment has its
-own namespace-scoped PVC, so development and production never share keys. The
-volume is writable by the non-root .NET container through `fsGroup: 1654`.
+The server host stores ASP.NET Core Data Protection keys in PostgreSQL when
+`DataProtection:Enabled` is true. `ConnectionStrings:DataProtection` is required in
+that mode and must come from secrets. Browser/client projects have no database
+dependency. Local development keeps the framework defaults unless enabled explicitly.
 
-Merge the persistent-volume support in the shared `ci-cd` application chart before
-deploying these values. Timeweb's NVMe minimum is 10 GiB; deployment creates one
-such disk per environment. The chart retains the PVC on Helm uninstall and Argo CD
-prune/deletion. Do not delete the PVC or key files while protected cookies are in use.
-Keys are not encrypted at rest by this configuration; access to the PVC and backups
-must be restricted as for other application secrets.
+The `core-platform` managed-PostgreSQL reconciliation provisions the separate
+`tactical_heroes_admin_dev` and `tactical_heroes_admin_prod` databases and users in
+the existing cluster, then writes their TLS connection strings to OpenBao under
+`applications/tactical-heroes-admin/development` and `production`. Deploy that
+infrastructure prerequisite before deploying the admin values. No extra disks or
+changes to the shared `ci-cd` application chart are required.
 
-The ReadWriteOnce volume requires one replica and the chart uses `Recreate` updates.
-Deployments therefore have a brief interruption while the previous pod stops and
-the replacement starts, including disk reattachment if it moves to another node.
-For multiple replicas, use a shared key repository instead.
+The EF context owns only `admin.data_protection_keys` and its migration history.
+The application discriminator is `TacticalHeroes.Admin`; environment isolation
+comes from separate databases. Key XML is sensitive and is not encrypted at rest
+by this configuration, so database and backup access must be restricted.
 
-The first rollout onto an empty PVC creates a new key ring, so existing sessions
-may require signing in again and open forms must be reloaded once. Subsequent pod
-replacements reuse the keys and keep existing protected cookies readable. To retain
-sessions during the first rollout, securely migrate the current pod's key files
-into the PVC before replacing it; never print or commit their contents.
+Migrations are generated explicitly, reviewed, and committed:
 
-To verify a deployed environment, open a form and record only the key filenames
-in the pod, replace the pod, then confirm the filenames are unchanged and the form
-still submits successfully. Check for new `key was not found in the key ring` errors
-without exposing cookies or key contents.
+```bash
+dotnet tool restore
+dotnet ef migrations add <MigrationName> --project src/TacticalHeroes.Admin \
+  --context AdminDataProtectionDbContext --output-dir Infrastructure/DataProtection/Migrations
+```
+
+The `TacticalHeroes.Admin.EfMigrator` image applies committed migrations once per
+Argo CD sync before the Deployment, using the existing migration Job in the shared
+chart. It never generates migrations at runtime. CI publishes the migrator before
+the application image; Kargo promotes both to the same build tag.
+
+For a manual local migration, supply the connection string through
+`ConnectionStrings__DataProtection`, then run:
+
+```bash
+dotnet run --project tools/TacticalHeroes.Admin.EfMigrator
+```
+
+The first switch from container-local keys to the new database key ring/application
+discriminator may require signing in and reloading open forms once. Subsequent pod
+replacements reuse the saved keys. Do not delete old keys while their cookies or
+tokens are still in use.
+
+With Docker running, the host unit tests exercise real PostgreSQL migrations,
+key persistence across recreated application service providers, and environment
+isolation. After deployment, check that an open form and session survive a pod
+replacement and that there are no new missing-key errors. Never log key XML or cookies.
 
 ### Application composition
 
