@@ -6,6 +6,18 @@ namespace TacticalHeroes.Admin.Modules.Compendium.ComponentTests.Entities.Factio
 
 public sealed class FactionSelectTests : HeroFormTestContext
 {
+    [Fact(DisplayName = "OpenMenuAsync should load factions when empty select is opened")]
+    public async Task OpenMenuAsync_Should_LoadFactions_When_EmptySelectIsOpened()
+    {
+        var component = Render<FactionSelect>();
+        Handler.FactionRequests.ShouldBeEmpty();
+
+        await component.InvokeAsync(() => component.FindComponent<MudAutocomplete<Guid>>().Instance.OpenMenuAsync());
+
+        Handler.FactionRequests.ShouldBe([null]);
+        Popovers.Markup.ShouldContain("Northern Alliance");
+    }
+
     [Fact(DisplayName = "Render should load selected faction when form has faction identifier")]
     public async Task Render_Should_LoadSelectedFaction_When_FormHasFactionIdentifier()
     {
