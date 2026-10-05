@@ -1,5 +1,11 @@
 replicaCount: 1
 
+persistence:
+  enabled: true
+  mountPath: /home/app/.aspnet/DataProtection-Keys
+  storageClass: nvme.network-drives.csi.timeweb.cloud
+  size: 10Gi
+
 nameOverride: ""
 fullnameOverride: ""
 component: admin
@@ -72,7 +78,9 @@ gateway:
 podAnnotations: {}
 podLabels: {}
 
-podSecurityContext: {}
+podSecurityContext:
+  fsGroup: 1654
+  fsGroupChangePolicy: OnRootMismatch
 
 securityContext:
   allowPrivilegeEscalation: false

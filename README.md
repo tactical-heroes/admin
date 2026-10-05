@@ -53,6 +53,38 @@ dotnet run --project src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj --laun
 
 ## Initialization Notes
 
+### Data Protection keys
+
+The Helm deployment persists ASP.NET Core Data Protection keys at the container's
+default `/home/app/.aspnet/DataProtection-Keys` location. Each environment has its
+own namespace-scoped PVC, so development and production never share keys. The
+volume is writable by the non-root .NET container through `fsGroup: 1654`.
+
+Merge the persistent-volume support in the shared `ci-cd` application chart before
+deploying these values. Timeweb's NVMe minimum is 10 GiB; deployment creates one
+such disk per environment. The chart retains the PVC on Helm uninstall and Argo CD
+prune/deletion. Do not delete the PVC or key files while protected cookies are in use.
+Keys are not encrypted at rest by this configuration; access to the PVC and backups
+must be restricted as for other application secrets.
+
+The ReadWriteOnce volume requires one replica and the chart uses `Recreate` updates.
+Deployments therefore have a brief interruption while the previous pod stops and
+the replacement starts, including disk reattachment if it moves to another node.
+For multiple replicas, use a shared key repository instead.
+
+The first rollout onto an empty PVC creates a new key ring, so existing sessions
+may require signing in again and open forms must be reloaded once. Subsequent pod
+replacements reuse the keys and keep existing protected cookies readable. To retain
+sessions during the first rollout, securely migrate the current pod's key files
+into the PVC before replacing it; never print or commit their contents.
+
+To verify a deployed environment, open a form and record only the key filenames
+in the pod, replace the pod, then confirm the filenames are unchanged and the form
+still submits successfully. Check for new `key was not found in the key ring` errors
+without exposing cookies or key contents.
+
+### Application composition
+
 The ASP.NET Core host renders one application on the server, serves the
 WebAssembly client, and proxies browser API requests through YARP. UI modules
 are Razor Class Libraries registered explicitly by the client shell; they are
