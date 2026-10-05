@@ -10,14 +10,18 @@ public partial class ResetPasswordPage(ResetPasswordApi resetPasswordApi)
     private bool _showPasswordConfirmation;
 
     [SupplyParameterFromQuery]
-    public Guid? UserId { get; set; }
+    public string? UserId { get; set; }
 
     [SupplyParameterFromQuery]
     public string? PasswordResetToken { get; set; }
 
+    private Guid? ParsedUserId =>
+        Guid.TryParse(UserId, out var userId) && userId != Guid.Empty ? userId : null;
+
     private Task SubmitAsync()
     {
-        if (!UserId.HasValue ||
+        var userId = ParsedUserId;
+        if (!userId.HasValue ||
             string.IsNullOrWhiteSpace(PasswordResetToken))
         {
             return Task.CompletedTask;
@@ -25,7 +29,7 @@ public partial class ResetPasswordPage(ResetPasswordApi resetPasswordApi)
 
         return SubmitResultAsync(cancellationToken =>
             resetPasswordApi.ResetPasswordAsync(
-                UserId.Value,
+                userId.Value,
                 PasswordResetToken,
                 Model.Password,
                 cancellationToken));
