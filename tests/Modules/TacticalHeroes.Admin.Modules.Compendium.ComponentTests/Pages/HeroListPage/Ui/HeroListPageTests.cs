@@ -42,7 +42,8 @@ public sealed class HeroListPageTests : BunitContext
         component.WaitForAssertion(() =>
         {
             component.Markup.ShouldContain("Catherine");
-            component.Markup.ShouldContain("Northern Alliance");
+            component.Find("a[href='/factions/d1703c92-a294-4584-8a9a-78469111363d']")
+                .TextContent.Trim().ShouldBe("Northern Alliance");
             component.FindAll("a").Select(link => link.GetAttribute("href"))
                 .ShouldContain(CompendiumRoutes.CreateHero);
             component.FindAll("a").Select(link => link.GetAttribute("href"))
