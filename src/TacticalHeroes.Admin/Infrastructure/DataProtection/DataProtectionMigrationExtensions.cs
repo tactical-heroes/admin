@@ -8,7 +8,7 @@ public static class DataProtectionMigrationExtensions
 {
     public static async Task ApplyAdminDataProtectionMigrationsAsync(
         this AdminDataProtectionDbContext database,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         await database.GetService<IHistoryRepository>().CreateIfNotExistsAsync(cancellationToken);
         await database.Database.MigrateAsync(cancellationToken);

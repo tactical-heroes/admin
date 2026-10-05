@@ -8,4 +8,4 @@ builder.Services.AddAdminDataProtectionPersistence(builder.Configuration);
 using var host = builder.Build();
 await using var scope = host.Services.CreateAsyncScope();
 var database = scope.ServiceProvider.GetRequiredService<AdminDataProtectionDbContext>();
-await database.ApplyAdminDataProtectionMigrationsAsync();
+await database.ApplyAdminDataProtectionMigrationsAsync(CancellationToken.None);
