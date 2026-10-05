@@ -130,34 +130,10 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
     наследуют `MudPagedListComponentBase` и связывают `EntityList` с данными,
     загрузкой, обновлением и пагинацией базы.
 
-### Ссылки на связанные сущности
-
-`ListPages_Should_LinkRelatedEntityNames_When_RelatedIdentifiersAreAvailable`
-из `ListEntityLinkConventionTests` проверяет страницы пагинируемых списков
-`*ListPage.razor` в `src/**/Pages`. Модель строки определяется из
-`MudPagedListComponentBase<TItem>` или его варианта с фильтром.
-
-Связь распознаётся по паре публичных свойств модели: `<Relation>Id` типа `Guid`
-и `<Relation>Name` типа `string`, например `FactionId` и `FactionName`.
-Если имя отображается в `PropertyColumn` или `TemplateColumn` внутри
-`EntityList`, конвенция требует:
-
-- `EntityLink` в той же колонке;
-- привязку `Text` к имени связи из текущей строки;
-- вызов построителя маршрута в `Href` с соответствующим ID из той же строки.
-
-```razor
-<EntityLink Href="@CompendiumRoutes.Faction(context.Item.FactionId)"
-            Text="@context.Item.FactionName" />
-```
-
-Обычный текст, `MudLink`, строковые литералы, ID самой строки и ссылка в другой
-колонке не удовлетворяют правилу. Проверка игнорирует Razor/HTML-комментарии,
-учитывает `CellTemplate Context` и разные формы лямбды в `Property`.
-
-Собственное `Name`, поля без соответствующего `Guid` ID и неотображаемые связи
-не требуют ссылки. Карточки, формы, отдельные виджеты и другие формы связей,
-включая `Guid?` ID, эта конвенция не охватывает.
+21. `ListPages_Should_LinkRelatedEntityNames_When_RelatedIdentifiersAreAvailable` —
+    отображаемые имена связей с парой `<Relation>Id: Guid` и `<Relation>Name: string`
+    выводятся через `EntityLink` в той же колонке; `Text` привязан к имени,
+    а `Href` передаёт соответствующий ID текущей строки в построитель маршрута.
 
 ## Страницы создания и редактирования
 
@@ -165,90 +141,90 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
 в `src/**/Pages`. Проверки разметки закрепляют прямую композицию общих
 компонентов и привязки к базе; поведение проверяется компонентными тестами.
 
-21. `FormPages_Should_InheritOperationBases_When_AdminFormsAreScanned` — create
+22. `FormPages_Should_InheritOperationBases_When_AdminFormsAreScanned` — create
     наследует `MudCreateFormComponentBase`, update/edit — `MudUpdateFormComponentBase`.
 
-22. `FormPages_Should_UseSharedComposition_When_AdminFormsAreScanned` — страница
+23. `FormPages_Should_UseSharedComposition_When_AdminFormsAreScanned` — страница
     содержит ровно один `MudForm`, использует `PageHeader`, `PageBackButton`,
     `EditSection` и `EditFormActions`; возврат и отмена ведут на один маршрут.
 
-23. `FormPages_Should_BindValidationAndSubmission_When_AdminFormsAreScanned` —
+24. `FormPages_Should_BindValidationAndSubmission_When_AdminFormsAreScanned` —
     модель, валидация и отправка связаны с базой; действия учитывают `IsSaving`,
     маршрут отмены и режим создания или редактирования.
 
-24. `UpdatePages_Should_BindLoadableContent_When_AdminFormsAreScanned` — форма
+25. `UpdatePages_Should_BindLoadableContent_When_AdminFormsAreScanned` — форма
     находится внутри `LoadableContent`, связанного с `IsLoading`, `@LoadError`
     и `ReloadAsync`.
 
 ## Конфигурационные options
 
-25. `ConfigurationOptions_Should_HaveValidators_When_OptionsAreScanned` — каждый
+26. `ConfigurationOptions_Should_HaveValidators_When_OptionsAreScanned` — каждый
     конфигурационный options-класс является `sealed`, находится в отдельной
     подпапке `Options/<name>`, совпадает с именем файла и имеет рядом валидатор
     `<OptionsType>Validator`, реализующий `IValidateOptions<T>`.
 
-26. `ConfigurationOptions_Should_ValidateOnStart_When_RegistrationsAreScanned` —
+27. `ConfigurationOptions_Should_ValidateOnStart_When_RegistrationsAreScanned` —
     валидатор каждого options-класса зарегистрирован в DI, а сами настройки
     проверяются через `ValidateOnStart`.
 
 ## Модели
 
-27. `ModelSources_Should_UsePropertyBasedClasses_When_ModelFoldersAreScanned` —
+28. `ModelSources_Should_UsePropertyBasedClasses_When_ModelFoldersAreScanned` —
     production-исходники в подпапках `Model` не объявляют `record` или primary
     constructors. Формы, фильтры и read-модели используют единые parameterless
     классы с публичными свойствами.
 
-28. `ModelSources_Should_HaveAdjacentValidators_When_ModelTypesAreScanned` —
+29. `ModelSources_Should_HaveAdjacentValidators_When_ModelTypesAreScanned` —
     каждый тип `*Model` в production-подпапке `Model` имеет рядом валидатор
     `<ModelType>Validator`, наследующий `MudFormValidator<ModelType>`.
 
 ## Перечисления
 
-29. `EnumerationMembers_Should_HaveExplicitNumericValues_When_SourceIsScanned`
+30. `EnumerationMembers_Should_HaveExplicitNumericValues_When_SourceIsScanned`
     — каждый элемент production-enum имеет явно заданное целочисленное значение,
     чтобы добавление и перестановка элементов не меняли существующие значения.
 
-30. `EnumerationMembers_Should_HaveEnglishDisplayNames_When_SourceIsScanned`
+31. `EnumerationMembers_Should_HaveEnglishDisplayNames_When_SourceIsScanned`
     — каждый элемент production-enum имеет непустой английский
     `[Display(Name = "...")]`, пригодный для единообразного отображения в UI.
 
 ## Зеркальные компонентные тесты
 
-31. `Components_Should_HaveMirroredTests_When_ProductionComponentsAreDiscovered`
+32. `Components_Should_HaveMirroredTests_When_ProductionComponentsAreDiscovered`
     — каждый компонент и базовый класс имеет зеркальный `<TypeName>Tests.cs`
     с исполняемыми `Fact`/`Theory`. Тесты с `Skip`, `Explicit`, `SkipWhen` или
     `SkipUnless` не засчитываются в покрытие. Теории с `SkipTestWithoutData = true`
     также не засчитываются: при пустом наборе данных они могут быть пропущены.
 
-32. `ComponentTests_Should_CoverDeclaredMethods_When_ComponentsHaveBehavior`
+33. `ComponentTests_Should_CoverDeclaredMethods_When_ComponentsHaveBehavior`
     — собственные методы и перегрузки сопоставлены тестам по префиксу
     `MethodName_Should_`; унаследованные методы проверяются у объявляющей их базы.
 
 ## Имена и структура тестов
 
-33. `TestMethods_Should_FollowNamingConvention_When_ATestIsDeclared` — полное
+34. `TestMethods_Should_FollowNamingConvention_When_ATestIsDeclared` — полное
     имя каждого теста соответствует `MethodName_Should_Behavior_When_Condition`.
 
-34. `FactsAndTheories_Should_DeclareDisplayName_When_ATestIsDeclared` — каждый
+35. `FactsAndTheories_Should_DeclareDisplayName_When_ATestIsDeclared` — каждый
     `Fact`/`Theory` имеет непустой строковый литерал `DisplayName`.
 
-35. `DisplayNames_Should_DescribeTestCondition_When_ATestIsDeclared` — английский
+36. `DisplayNames_Should_DescribeTestCondition_When_ATestIsDeclared` — английский
     `DisplayName` имеет вид `… should … when …` и условие из части `_When_` имени.
 
-36. `TestMethods_Should_FollowArrangeActAssert_When_ATestIsDeclared` — минимум
+37. `TestMethods_Should_FollowArrangeActAssert_When_ATestIsDeclared` — минимум
     две секции, разделённые пустой строкой; последняя содержит вызовы проверок
     xUnit, Shouldly или bUnit, разрешённые через Roslyn. Объявления лямбд и
     локальных функций не считаются проверками; поддерживаются inline callbacks
     настоящего bUnit `WaitForAssertion`.
 
-37. `TestNamespaces_Should_MatchProjectFolders_When_TestSourcesAreScanned` —
+38. `TestNamespaces_Should_MatchProjectFolders_When_TestSourcesAreScanned` —
     namespace типов соответствует папке относительно проекта и его корневому
     namespace. Типы в глобальном namespace запрещены; файлы только с `using`
     не требуют namespace.
 
 ## Сортировка списков
 
-38. `ListPages_Should_BindSorting_When_AdminListsAreScanned` — на каждой
+39. `ListPages_Should_BindSorting_When_AdminListsAreScanned` — на каждой
     странице `*ListPage.razor` компонент `EntityList` обязан получать
     `Sorting="AppliedSorting"` и `OnSortingChanged="ChangeSorting"` из базового
     компонента. Отсутствие любой привязки или подмена её другим состоянием либо
