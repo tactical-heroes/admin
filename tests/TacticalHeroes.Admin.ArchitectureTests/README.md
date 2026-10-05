@@ -130,6 +130,35 @@ TacticalHeroes.Admin           -> Client, Modules/*, Shared
     наследуют `MudPagedListComponentBase` и связывают `EntityList` с данными,
     загрузкой, обновлением и пагинацией базы.
 
+### Ссылки на связанные сущности
+
+`ListPages_Should_LinkRelatedEntityNames_When_RelatedIdentifiersAreAvailable`
+из `ListEntityLinkConventionTests` проверяет страницы пагинируемых списков
+`*ListPage.razor` в `src/**/Pages`. Модель строки определяется из
+`MudPagedListComponentBase<TItem>` или его варианта с фильтром.
+
+Связь распознаётся по паре публичных свойств модели: `<Relation>Id` типа `Guid`
+и `<Relation>Name` типа `string`, например `FactionId` и `FactionName`.
+Если имя отображается в `PropertyColumn` или `TemplateColumn` внутри
+`EntityList`, конвенция требует:
+
+- `EntityLink` в той же колонке;
+- привязку `Text` к имени связи из текущей строки;
+- вызов построителя маршрута в `Href` с соответствующим ID из той же строки.
+
+```razor
+<EntityLink Href="@CompendiumRoutes.Faction(context.Item.FactionId)"
+            Text="@context.Item.FactionName" />
+```
+
+Обычный текст, `MudLink`, строковые литералы, ID самой строки и ссылка в другой
+колонке не удовлетворяют правилу. Проверка игнорирует Razor/HTML-комментарии,
+учитывает `CellTemplate Context` и разные формы лямбды в `Property`.
+
+Собственное `Name`, поля без соответствующего `Guid` ID и неотображаемые связи
+не требуют ссылки. Карточки, формы, отдельные виджеты и другие формы связей,
+включая `Guid?` ID, эта конвенция не охватывает.
+
 ## Страницы создания и редактирования
 
 Проверяются все `Create*Page.razor`, `Update*Page.razor` и `Edit*Page.razor`
