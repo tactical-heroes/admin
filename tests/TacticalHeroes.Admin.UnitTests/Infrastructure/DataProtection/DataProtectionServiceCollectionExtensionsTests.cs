@@ -1,3 +1,5 @@
+using System.Text;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,13 +10,25 @@ namespace TacticalHeroes.Admin.UnitTests.Infrastructure.DataProtection;
 
 public sealed class DataProtectionServiceCollectionExtensionsTests
 {
-    [Fact(DisplayName = "CreateDbContext should configure PostgreSQL when connection is not opened")]
-    public void CreateDbContext_Should_ConfigurePostgreSql_When_ConnectionIsNotOpened()
+    [Fact(DisplayName = "AddAdminDataProtectionPersistence should configure PostgreSQL when connection is loaded from json")]
+    public void AddAdminDataProtectionPersistence_Should_ConfigurePostgreSql_When_ConnectionIsLoadedFromJson()
     {
-        var factory = new AdminDataProtectionDbContextFactory();
+        using var json = new MemoryStream(Encoding.UTF8.GetBytes("""
+            {
+              "ConnectionStrings": {
+                "PostgreSqlConnectionString": "Host=localhost;Port=5432;Database=tactical-heroes;Username=postgres"
+              }
+            }
+            """));
+        var configuration = new ConfigurationBuilder().AddJsonStream(json).Build();
+        using var services = new ServiceCollection()
+            .AddAdminDataProtectionPersistence(configuration)
+            .BuildServiceProvider();
+        using var scope = services.CreateScope();
 
-        using var database = factory.CreateDbContext([]);
+        var database = scope.ServiceProvider.GetRequiredService<AdminDataProtectionDbContext>();
 
+        database.Database.GetConnectionString().ShouldBe(configuration.GetConnectionString("PostgreSqlConnectionString"));
         database.Database.ProviderName.ShouldBe("Npgsql.EntityFrameworkCore.PostgreSQL");
         database.DataProtectionKeys.EntityType.GetTableName().ShouldBe("data_protection_keys");
         database.DataProtectionKeys.EntityType.GetSchema().ShouldBe("admin");
