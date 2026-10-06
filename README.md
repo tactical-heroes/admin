@@ -73,13 +73,9 @@ The application discriminator is `TacticalHeroes.Admin`; environment isolation
 comes from separate databases. Key XML is sensitive and is not encrypted at rest
 by this configuration, so database and backup access must be restricted.
 
-Migrations are generated explicitly, reviewed, and committed:
-
-```bash
-dotnet tool restore
-dotnet ef migrations add <MigrationName> --project src/TacticalHeroes.Admin \
-  --context AdminDataProtectionDbContext --output-dir Infrastructure/DataProtection/Migrations
-```
+Generate migrations with the core migrator described below, then review and
+commit the generated files before publishing a new image. It uses EF design-time
+services directly and does not require the `dotnet-ef` CLI tool.
 
 The `TacticalHeroes.Admin.Ef.Migrator` uses `PANiXiDA.Core.Ef.Migrator` and
 `host.RunMigrationsAsync<AdminDataProtectionDbContext>()`, matching the API's core
