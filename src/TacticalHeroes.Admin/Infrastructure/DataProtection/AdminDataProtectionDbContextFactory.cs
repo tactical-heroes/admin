@@ -7,10 +7,10 @@ public sealed class AdminDataProtectionDbContextFactory : IDesignTimeDbContextFa
 {
     public AdminDataProtectionDbContext CreateDbContext(string[] args)
     {
-        string connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DataProtection")
-            ?? "Host=localhost;Database=tactical_heroes_dev;Username=postgres";
+        string connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__PostgreSqlConnectionString")
+            ?? "Host=localhost;Port=5432;Database=tactical-heroes;Username=postgres";
         var options = new DbContextOptionsBuilder<AdminDataProtectionDbContext>();
-        DataProtectionServiceCollectionExtensions.ConfigureDatabase(options, connectionString);
+        options.UseNpgsql(connectionString);
         return new AdminDataProtectionDbContext(options.Options);
     }
 }

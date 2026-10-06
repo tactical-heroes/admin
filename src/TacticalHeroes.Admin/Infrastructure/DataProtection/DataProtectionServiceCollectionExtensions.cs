@@ -26,19 +26,13 @@ public static class DataProtectionServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        string? connectionString = configuration.GetConnectionString("DataProtection");
+        string? connectionString = configuration.GetConnectionString("PostgreSqlConnectionString");
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            throw new InvalidOperationException("ConnectionStrings:DataProtection is required for PostgreSQL key storage.");
+            throw new InvalidOperationException("ConnectionStrings:PostgreSqlConnectionString is required for PostgreSQL key storage.");
         }
 
         return services.AddDbContext<AdminDataProtectionDbContext>(options =>
-            ConfigureDatabase(options, connectionString));
-    }
-
-    internal static void ConfigureDatabase(DbContextOptionsBuilder options, string connectionString)
-    {
-        options.UseNpgsql(connectionString, postgres =>
-            postgres.MigrationsHistoryTable("__ef_migrations_history", AdminDataProtectionDbContext.Schema));
+            options.UseNpgsql(connectionString));
     }
 }

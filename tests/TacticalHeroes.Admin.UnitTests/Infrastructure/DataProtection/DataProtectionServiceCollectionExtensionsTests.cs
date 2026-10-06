@@ -41,11 +41,11 @@ public sealed class DataProtectionServiceCollectionExtensionsTests
         var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
         {
             ["DataProtection:Enabled"] = "true",
-            ["ConnectionStrings:DataProtection"] = connectionString
+            ["ConnectionStrings:PostgreSqlConnectionString"] = connectionString
         }).Build();
 
         var exception = Should.Throw<InvalidOperationException>(() => services.AddAdminDataProtection(configuration));
 
-        exception.Message.ShouldBe("ConnectionStrings:DataProtection is required for PostgreSQL key storage.");
+        exception.Message.ShouldBe("ConnectionStrings:PostgreSqlConnectionString is required for PostgreSQL key storage.");
     }
 }

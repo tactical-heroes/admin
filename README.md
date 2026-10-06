@@ -56,7 +56,7 @@ dotnet run --project src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj --laun
 ### Data Protection keys
 
 The server host stores ASP.NET Core Data Protection keys in PostgreSQL when
-`DataProtection:Enabled` is true. `ConnectionStrings:DataProtection` is required in
+`DataProtection:Enabled` is true. `ConnectionStrings:PostgreSqlConnectionString` is required in
 that mode and must come from secrets. Browser/client projects have no database
 dependency. Local development keeps the framework defaults unless enabled explicitly.
 
@@ -81,21 +81,25 @@ dotnet ef migrations add <MigrationName> --project src/TacticalHeroes.Admin \
   --context AdminDataProtectionDbContext --output-dir Infrastructure/DataProtection/Migrations
 ```
 
-The `TacticalHeroes.Admin.EfMigrator` uses `PANiXiDA.Core.Ef.Migrator` and
+The `TacticalHeroes.Admin.Ef.Migrator` uses `PANiXiDA.Core.Ef.Migrator` and
 `host.RunMigrationsAsync<AdminDataProtectionDbContext>()`, matching the API's core
-migrator integration. Its settings select `GenerateMigrations=false` and
-`ApplyMigrations=true`: the image applies committed migrations once per Argo CD
-sync before the Deployment, using the existing migration Job in the shared chart.
-The history table is initialized before the core call to avoid a missing-history
-Error on the first run against an empty database. CI publishes the migrator before
-the application image; Kargo promotes both to the same build tag.
+migrator integration. `appsettings.Migrator.json` contains the context's project
+path and migration directory, the local `PostgreSqlConnectionString`, and
+`GenerateMigrations=true` / `ApplyMigrations=true`, matching the backend API.
+The distinct settings filename avoids collisions with the referenced web host's
+`appsettings.json` during publishing. The context configures its own history
+schema; the core library generates migrations when the model changes and applies
+migrations before the Deployment through the shared chart's migration Job.
+CI publishes the migrator before the application image; Kargo promotes both to
+the same build tag.
 
 For a manual local migration, supply the connection string through
-`ConnectionStrings__DataProtection`, then run:
+`ConnectionStrings__PostgreSqlConnectionString`, then run:
 
 ```bash
-cd tools/TacticalHeroes.Admin.EfMigrator
-dotnet run
+dotnet build tools/TacticalHeroes.Admin.Ef.Migrator
+cd tools/TacticalHeroes.Admin.Ef.Migrator/bin/Debug/net10.0
+dotnet TacticalHeroes.Admin.Ef.Migrator.dll
 ```
 
 The first switch from container-local keys to the new database key ring/application

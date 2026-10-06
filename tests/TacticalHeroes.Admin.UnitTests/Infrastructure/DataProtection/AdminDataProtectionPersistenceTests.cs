@@ -4,8 +4,6 @@ using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -163,7 +161,7 @@ public sealed class AdminDataProtectionPersistenceTests : IAsyncLifetime
         var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
         {
             ["DataProtection:Enabled"] = "true",
-            ["ConnectionStrings:DataProtection"] = connectionString
+            ["ConnectionStrings:PostgreSqlConnectionString"] = connectionString
         }).Build();
         return new ServiceCollection().AddLogging().AddAntiforgery().AddAdminDataProtection(configuration).BuildServiceProvider();
     }
@@ -176,19 +174,14 @@ public sealed class AdminDataProtectionPersistenceTests : IAsyncLifetime
                 configuration.Sources.Clear();
                 configuration.AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    ["GenerateMigrations"] = "false",
+                    ["GenerateMigrations"] = "true",
                     ["ApplyMigrations"] = "true",
-                    ["ConnectionStrings:DataProtection"] = connectionString
+                    ["ConnectionStrings:PostgreSqlConnectionString"] = connectionString
                 });
             })
             .ConfigureServices((context, services) =>
                 services.AddAdminDataProtectionPersistence(context.Configuration))
             .Build();
-        await using (var scope = host.Services.CreateAsyncScope())
-        {
-            var database = scope.ServiceProvider.GetRequiredService<AdminDataProtectionDbContext>();
-            await database.GetService<IHistoryRepository>().CreateIfNotExistsAsync(TestContext.Current.CancellationToken);
-        }
         await host.RunMigrationsAsync<AdminDataProtectionDbContext>();
     }
 }
