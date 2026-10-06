@@ -1,5 +1,7 @@
 Keep scope narrow. Run full solution checks for shared API contracts, build files, CI, or cross-project changes.
 
+Use WOFF2 for web fonts.
+
 The admin is one Blazor Web App composed from module Razor Class Libraries:
 
 - `TacticalHeroes.Admin` owns the ASP.NET Core host, BFF concerns, and deployment.
