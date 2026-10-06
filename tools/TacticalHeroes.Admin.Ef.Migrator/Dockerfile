@@ -29,7 +29,10 @@ RUN dotnet build "./TacticalHeroes.Admin.Ef.Migrator.csproj" -c $BUILD_CONFIGURA
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./TacticalHeroes.Admin.Ef.Migrator.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./TacticalHeroes.Admin.Ef.Migrator.csproj" \
+    -c $BUILD_CONFIGURATION \
+    -o /app/publish \
+    /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
