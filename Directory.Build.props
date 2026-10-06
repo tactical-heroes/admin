@@ -18,4 +18,8 @@
         <NoWarn>$(NoWarn);NU1507</NoWarn>
         <NoWarn>$(NoWarn);CS1591</NoWarn>
     </PropertyGroup>
+    <ItemGroup>
+        <StaticWebAssetContentTypeMapping Include="image/avif" Pattern="*.avif"
+                                          Cache="max-age=3600, must-revalidate" Priority="1" />
+    </ItemGroup>
 </Project>

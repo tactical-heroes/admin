@@ -18,6 +18,6 @@ public sealed class AdminSidebarTests : ClientComponentTestContext
 
         open.ShouldBeFalse();
         component.FindComponent<NavMenu>().ShouldNotBeNull();
-        component.Find("img").GetAttribute("alt").ShouldNotBeNullOrWhiteSpace();
+        component.Find("[role='img']").GetAttribute("aria-label").ShouldNotBeNullOrWhiteSpace();
     }
 }

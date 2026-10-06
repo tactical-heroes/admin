@@ -17,8 +17,6 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="TacticalHeroes.Admin.UnitTests" />
-    <StaticWebAssetContentTypeMapping Include="image/avif" Pattern="*.avif"
-                                      Cache="max-age=3600, must-revalidate" Priority="1" />
   </ItemGroup>
 
 </Project>

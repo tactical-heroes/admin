@@ -120,7 +120,10 @@
     width: clamp(92px, 11vw, 126px);
     height: clamp(92px, 11vw, 126px);
     flex-shrink: 0;
-    background: url("/auth/tactical-heroes-emblem-desktop.webp") center / contain no-repeat;
+    background: url("/_content/TacticalHeroes.Admin.Modules.Identity/images/tactical-heroes-emblem/desktop.webp") center / contain no-repeat;
+    background-image: image-set(
+        url("/_content/TacticalHeroes.Admin.Modules.Identity/images/tactical-heroes-emblem/desktop.avif") type("image/avif"),
+        url("/_content/TacticalHeroes.Admin.Modules.Identity/images/tactical-heroes-emblem/desktop.webp") type("image/webp"));
     filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.72));
 }
 
@@ -142,7 +145,10 @@
     width: 84%;
     height: 36px;
     margin: 0.6rem auto 0.35rem;
-    background: url("/auth/title-separator-desktop.webp") center / 100% auto no-repeat;
+    background: url("/_content/TacticalHeroes.Admin.Modules.Identity/images/title-separator/desktop.webp") center / 100% auto no-repeat;
+    background-image: image-set(
+        url("/_content/TacticalHeroes.Admin.Modules.Identity/images/title-separator/desktop.avif") type("image/avif"),
+        url("/_content/TacticalHeroes.Admin.Modules.Identity/images/title-separator/desktop.webp") type("image/webp"));
     opacity: 0.88;
 }
 
@@ -220,7 +226,10 @@
     display: flex;
     min-height: 58px;
     align-items: center;
-    background: rgba(7, 8, 8, 0.86) url("/auth/text-field-frame-desktop.webp") center / 100% 100% no-repeat;
+    background: rgba(7, 8, 8, 0.86) url("/_content/TacticalHeroes.Admin.Modules.Identity/images/text-field-frame/desktop.webp") center / 100% 100% no-repeat;
+    background-image: image-set(
+        url("/_content/TacticalHeroes.Admin.Modules.Identity/images/text-field-frame/desktop.avif") type("image/avif"),
+        url("/_content/TacticalHeroes.Admin.Modules.Identity/images/text-field-frame/desktop.webp") type("image/webp"));
     transition:
         filter 150ms ease,
         transform 150ms ease;
@@ -370,7 +379,10 @@
     border: 0;
     border-radius: 0;
     outline: none;
-    background: #090908 url("/auth/primary-command-frame-desktop.webp") center / 100% 100% no-repeat;
+    background: #090908 url("/_content/TacticalHeroes.Admin.Modules.Identity/images/primary-command-frame/desktop.webp") center / 100% 100% no-repeat;
+    background-image: image-set(
+        url("/_content/TacticalHeroes.Admin.Modules.Identity/images/primary-command-frame/desktop.avif") type("image/avif"),
+        url("/_content/TacticalHeroes.Admin.Modules.Identity/images/primary-command-frame/desktop.webp") type("image/webp"));
     box-shadow: none;
     color: #f0dcae;
     cursor: pointer;
@@ -500,7 +512,10 @@
     .auth-brand-emblem {
         width: 82px;
         height: 82px;
-        background-image: url("/auth/tactical-heroes-emblem-mobile.webp");
+        background-image: url("/_content/TacticalHeroes.Admin.Modules.Identity/images/tactical-heroes-emblem/mobile.webp");
+        background-image: image-set(
+            url("/_content/TacticalHeroes.Admin.Modules.Identity/images/tactical-heroes-emblem/mobile.avif") type("image/avif"),
+            url("/_content/TacticalHeroes.Admin.Modules.Identity/images/tactical-heroes-emblem/mobile.webp") type("image/webp"));
     }
 
     .auth-brand-title {
@@ -514,11 +529,17 @@
 
 @media (max-width: 520px) {
     .auth-title-separator {
-        background-image: url("/auth/title-separator-mobile.webp");
+        background-image: url("/_content/TacticalHeroes.Admin.Modules.Identity/images/title-separator/mobile.webp");
+        background-image: image-set(
+            url("/_content/TacticalHeroes.Admin.Modules.Identity/images/title-separator/mobile.avif") type("image/avif"),
+            url("/_content/TacticalHeroes.Admin.Modules.Identity/images/title-separator/mobile.webp") type("image/webp"));
     }
 
     .auth-content ::deep .auth-input-shell {
-        background-image: url("/auth/text-field-frame-mobile.webp");
+        background-image: url("/_content/TacticalHeroes.Admin.Modules.Identity/images/text-field-frame/mobile.webp");
+        background-image: image-set(
+            url("/_content/TacticalHeroes.Admin.Modules.Identity/images/text-field-frame/mobile.avif") type("image/avif"),
+            url("/_content/TacticalHeroes.Admin.Modules.Identity/images/text-field-frame/mobile.webp") type("image/webp"));
     }
 
     .auth-brand {
@@ -541,7 +562,10 @@
     .auth-content ::deep .auth-command {
         min-height: 58px;
         padding-inline: 1.25rem;
-        background-image: url("/auth/primary-command-frame-mobile.webp");
+        background-image: url("/_content/TacticalHeroes.Admin.Modules.Identity/images/primary-command-frame/mobile.webp");
+        background-image: image-set(
+            url("/_content/TacticalHeroes.Admin.Modules.Identity/images/primary-command-frame/mobile.avif") type("image/avif"),
+            url("/_content/TacticalHeroes.Admin.Modules.Identity/images/primary-command-frame/mobile.webp") type("image/webp"));
         font-size: 1.2rem;
     }
 }
