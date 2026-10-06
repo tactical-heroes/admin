@@ -16,6 +16,7 @@ namespace TacticalHeroes.Admin.Infrastructure.DataProtection.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("admin")
                 .HasAnnotation("ProductVersion", "10.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -38,7 +39,8 @@ namespace TacticalHeroes.Admin.Infrastructure.DataProtection.Migrations
                         .HasColumnType("text")
                         .HasColumnName("xml");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_data_protection_keys");
 
                     b.ToTable("data_protection_keys", "admin");
                 });

@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 
 using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,7 @@ using TacticalHeroes.Admin.Infrastructure.DataProtection;
 
 using Testcontainers.PostgreSql;
 
-namespace TacticalHeroes.Admin.UnitTests.Infrastructure.DataProtection;
+namespace TacticalHeroes.Admin.IntegrationTests.Infrastructure.DataProtection;
 
 public sealed class AdminDataProtectionPersistenceTests : IAsyncLifetime
 {
@@ -103,23 +104,28 @@ public sealed class AdminDataProtectionPersistenceTests : IAsyncLifetime
     {
         AntiforgeryTokenSet tokens;
         string cookieName;
-        await using (var original = CreateServices(_database.GetConnectionString()))
+        string? applicationDiscriminator;
+        await using (var original = CreateApplication(_database.GetConnectionString()))
         {
             await MigrateAsync(_database.GetConnectionString());
-            var context = new DefaultHttpContext { RequestServices = original };
-            tokens = original.GetRequiredService<IAntiforgery>().GetTokens(context);
-            cookieName = original.GetRequiredService<IOptions<AntiforgeryOptions>>().Value.Cookie.Name!;
+            var context = new DefaultHttpContext { RequestServices = original.Services };
+            tokens = original.Services.GetRequiredService<IAntiforgery>().GetTokens(context);
+            cookieName = original.Services.GetRequiredService<IOptions<AntiforgeryOptions>>().Value.Cookie.Name!;
+            applicationDiscriminator = original.Services.GetRequiredService<IOptions<DataProtectionOptions>>().Value.ApplicationDiscriminator;
+            applicationDiscriminator.ShouldNotBeNullOrWhiteSpace();
         }
 
-        await using var replacement = CreateServices(_database.GetConnectionString());
-        var request = new DefaultHttpContext { RequestServices = replacement };
+        await using var replacement = CreateApplication(_database.GetConnectionString());
+        var request = new DefaultHttpContext { RequestServices = replacement.Services };
         request.Request.Method = HttpMethods.Post;
         request.Request.Headers.Cookie = $"{cookieName}={tokens.CookieToken}";
         request.Request.Headers["RequestVerificationToken"] = tokens.RequestToken;
 
-        var exception = await Record.ExceptionAsync(() => replacement.GetRequiredService<IAntiforgery>().ValidateRequestAsync(request));
+        var exception = await Record.ExceptionAsync(() => replacement.Services.GetRequiredService<IAntiforgery>().ValidateRequestAsync(request));
 
         exception.ShouldBeNull();
+        replacement.Services.GetRequiredService<IOptions<DataProtectionOptions>>().Value.ApplicationDiscriminator
+            .ShouldBe(applicationDiscriminator);
     }
 
     [Fact(DisplayName = "RunMigrationsAsync should preserve API data and history when database is shared with api")]
@@ -156,11 +162,26 @@ public sealed class AdminDataProtectionPersistenceTests : IAsyncLifetime
         (await database.DataProtectionKeys.CountAsync(TestContext.Current.CancellationToken)).ShouldBeGreaterThan(0);
     }
 
+    private static WebApplication CreateApplication(string connectionString)
+    {
+        var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+        {
+            ContentRootPath = AppContext.BaseDirectory,
+            ApplicationName = typeof(AdminDataProtectionDbContext).Assembly.GetName().Name,
+            EnvironmentName = Environments.Production
+        });
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["ConnectionStrings:PostgreSqlConnectionString"] = connectionString
+        });
+        builder.Services.AddAntiforgery().AddAdminDataProtection(builder.Configuration);
+        return builder.Build();
+    }
+
     private static ServiceProvider CreateServices(string connectionString)
     {
         var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
         {
-            ["DataProtection:Enabled"] = "true",
             ["ConnectionStrings:PostgreSqlConnectionString"] = connectionString
         }).Build();
         return new ServiceCollection().AddLogging().AddAntiforgery().AddAdminDataProtection(configuration).BuildServiceProvider();

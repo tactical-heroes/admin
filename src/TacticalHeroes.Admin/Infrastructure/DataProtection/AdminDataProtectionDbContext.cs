@@ -13,6 +13,7 @@ public sealed class AdminDataProtectionDbContext(DbContextOptions<AdminDataProte
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
+        optionsBuilder.UseSnakeCaseNamingConvention();
         optionsBuilder.UseNpgsql(postgres =>
             postgres.MigrationsHistoryTable("__ef_migrations_history", Schema));
     }
@@ -21,12 +22,6 @@ public sealed class AdminDataProtectionDbContext(DbContextOptions<AdminDataProte
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<DataProtectionKey>(entity =>
-        {
-            entity.ToTable("data_protection_keys", Schema);
-            entity.Property(key => key.Id).HasColumnName("id");
-            entity.Property(key => key.FriendlyName).HasColumnName("friendly_name");
-            entity.Property(key => key.Xml).HasColumnName("xml");
-        });
+        modelBuilder.HasDefaultSchema(Schema);
     }
 }

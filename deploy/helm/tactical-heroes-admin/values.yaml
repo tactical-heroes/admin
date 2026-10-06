@@ -30,7 +30,6 @@ env:
   values:
     ASPNETCORE_HTTP_PORTS: "8080"
     ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
-    DataProtection__Enabled: "true"
 
 externalSecrets:
   enabled: true

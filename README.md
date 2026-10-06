@@ -55,10 +55,11 @@ dotnet run --project src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj --laun
 
 ### Data Protection keys
 
-The server host stores ASP.NET Core Data Protection keys in PostgreSQL when
-`DataProtection:Enabled` is true. `ConnectionStrings:PostgreSqlConnectionString` is required in
-that mode and must come from secrets. Browser/client projects have no database
-dependency. Local development keeps the framework defaults unless enabled explicitly.
+The server host always stores ASP.NET Core Data Protection keys in PostgreSQL.
+`ConnectionStrings:PostgreSqlConnectionString` has a local default in the host's
+`appsettings.json`; deployed environments override it through secrets. Browser/client
+projects have no database dependency. Local development requires PostgreSQL and
+the Admin migrations, just like the backend API.
 
 Admin shares the API databases `tactical_heroes_dev` and `tactical_heroes_prod`
 and their existing connection credentials. The `core-platform` managed-PostgreSQL
@@ -69,8 +70,9 @@ disk, or change to the shared `ci-cd` application chart is required.
 
 The EF context owns only `admin.data_protection_keys` and
 `admin.__ef_migrations_history`. API schemas and migration history remain separate.
-The application discriminator is `TacticalHeroes.Admin`; environment isolation
-comes from separate databases. Key XML is sensitive and is not encrypted at rest
+The application discriminator uses ASP.NET Core's default content-root isolation;
+all deployed Admin containers use `/app`. Environment isolation comes from separate
+databases. Key XML is sensitive and is not encrypted at rest
 by this configuration, so database and backup access must be restricted.
 
 Generate migrations with the core migrator described below, then review and
@@ -106,11 +108,15 @@ discriminator may require signing in and reloading open forms once. Subsequent p
 replacements reuse the saved keys. Do not delete old keys while their cookies or
 tokens are still in use.
 
-With Docker running, the host unit tests exercise real PostgreSQL migrations,
+With Docker running, `TacticalHeroes.Admin.IntegrationTests` exercises real PostgreSQL migrations,
 preservation of API data and migration history in the shared database, key
 persistence across recreated application service providers, and environment
 isolation. After deployment, check that an open form and session survive a pod
 replacement and that there are no new missing-key errors. Never log key XML or cookies.
+
+```bash
+dotnet test --project tests/TacticalHeroes.Admin.IntegrationTests --configuration Release
+```
 
 ### Application composition
 

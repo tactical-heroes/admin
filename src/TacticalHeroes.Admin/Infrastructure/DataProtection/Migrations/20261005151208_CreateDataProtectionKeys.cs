@@ -27,7 +27,7 @@ public partial class CreateDataProtectionKeys : Migration
             schema: "admin",
             constraints: table =>
             {
-                table.PrimaryKey("PK_data_protection_keys", x => x.id);
+                table.PrimaryKey("pk_data_protection_keys", x => x.id);
             });
     }
 

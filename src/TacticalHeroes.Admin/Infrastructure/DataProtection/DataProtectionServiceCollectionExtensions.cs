@@ -9,14 +9,8 @@ public static class DataProtectionServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        if (!configuration.GetValue<bool>("DataProtection:Enabled"))
-        {
-            return services;
-        }
-
         services.AddAdminDataProtectionPersistence(configuration);
         services.AddDataProtection()
-            .SetApplicationName("TacticalHeroes.Admin")
             .PersistKeysToDbContext<AdminDataProtectionDbContext>();
 
         return services;
