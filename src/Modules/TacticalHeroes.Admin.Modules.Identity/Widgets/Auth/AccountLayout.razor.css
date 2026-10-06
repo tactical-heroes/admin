@@ -3,7 +3,19 @@
     min-height: 100dvh;
     isolation: isolate;
     overflow: hidden;
-    background: #080705 url("/auth/realm-battlefield.webp") center / cover no-repeat fixed;
+    background: #080705 url("/auth/realm-battlefield-desktop.webp") center / cover no-repeat fixed;
+    background-image: image-set(
+        url("/auth/realm-battlefield-desktop.avif") type("image/avif"),
+        url("/auth/realm-battlefield-desktop.webp") type("image/webp"));
+}
+
+@media (max-width: 900px) and (orientation: portrait) {
+    .account-layout {
+        background-image: url("/auth/realm-battlefield-mobile.webp");
+        background-image: image-set(
+            url("/auth/realm-battlefield-mobile.avif") type("image/avif"),
+            url("/auth/realm-battlefield-mobile.webp") type("image/webp"));
+    }
 }
 
 .account-layout::after {
