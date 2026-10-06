@@ -55,47 +55,14 @@ dotnet run --project src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj --laun
 
 ### Data Protection keys
 
-The server host always stores ASP.NET Core Data Protection keys in PostgreSQL.
-`ConnectionStrings:PostgreSqlConnectionString` has a local default in the host's
-`appsettings.json`; deployed environments override it through secrets. Browser/client
-projects have no database dependency. Local development requires PostgreSQL and
-the Admin migrations, just like the backend API.
+The server stores Data Protection keys in `admin.data_protection_keys` in the
+existing API database, with migration history in `admin.__ef_migrations_history`.
+Set `ConnectionStrings:PostgreSqlConnectionString` in configuration or override
+the local default through `ConnectionStrings__PostgreSqlConnectionString`.
+Development and production use separate databases.
 
-Admin shares the API databases `tactical_heroes_dev` and `tactical_heroes_prod`
-and their existing connection credentials. The `core-platform` managed-PostgreSQL
-reconciliation copies each API TLS connection string into Admin's OpenBao secret
-under `applications/tactical-heroes-admin/development` and `production`. Sync
-these secrets before deploying the admin values. No additional database, user,
-disk, or change to the shared `ci-cd` application chart is required.
-
-The EF context owns only `admin.data_protection_keys` and
-`admin.__ef_migrations_history`. API schemas and migration history remain separate.
-The application discriminator uses ASP.NET Core's default content-root isolation;
-all deployed Admin containers use `/app`. Environment isolation comes from separate
-databases. Key XML is sensitive and is not encrypted at rest
-by this configuration, so database and backup access must be restricted.
-
-Generate migrations with the core migrator described below, then review and
-commit the generated files before publishing a new image. It uses EF design-time
-services directly and does not require the `dotnet-ef` CLI tool.
-
-The `TacticalHeroes.Admin.Ef.Migrator` uses `PANiXiDA.Core.Ef.Migrator` and
-`host.RunMigrationsAsync<AdminDataProtectionDbContext>()`, matching the API's core
-migrator integration. `appsettings.Migrator.json` contains the context's project
-path and migration directory, the local `PostgreSqlConnectionString`, and
-`GenerateMigrations=true` / `ApplyMigrations=true`, matching the backend API.
-The distinct settings filename avoids collisions with the referenced web host's
-`appsettings.json` during publishing. The context configures its own history
-schema; the core library generates migrations when the model changes and applies
-migrations before the Deployment through the shared chart's migration Job.
-CI publishes the migrator before the application image; Kargo promotes both to
-the same build tag.
-
-On an empty database, Npgsql logs a failed history-table query before EF creates
-the table and applies the migration successfully. Subsequent runs are idempotent.
-
-For a manual local migration, supply the connection string through
-`ConnectionStrings__PostgreSqlConnectionString`, then run:
+Local development requires PostgreSQL and the Admin migrations. The core migrator
+generates and applies migrations using `appsettings.Migrator.json`:
 
 ```bash
 dotnet build tools/TacticalHeroes.Admin.Ef.Migrator
@@ -103,20 +70,9 @@ cd tools/TacticalHeroes.Admin.Ef.Migrator/bin/Debug/net10.0
 dotnet TacticalHeroes.Admin.Ef.Migrator.dll
 ```
 
-The first switch from container-local keys to the new database key ring/application
-discriminator may require signing in and reloading open forms once. Subsequent pod
-replacements reuse the saved keys. Do not delete old keys while their cookies or
-tokens are still in use.
-
-With Docker running, `TacticalHeroes.Admin.IntegrationTests` exercises real PostgreSQL migrations,
-preservation of API data and migration history in the shared database, key
-persistence across recreated application service providers, and environment
-isolation. After deployment, check that an open form and session survive a pod
-replacement and that there are no new missing-key errors. Never log key XML or cookies.
-
-```bash
-dotnet test --project tests/TacticalHeroes.Admin.IntegrationTests --configuration Release
-```
+Review and commit generated migrations. Deployment runs the migration Job before
+the application. The first switch to database keys may require signing in again;
+subsequent pod replacements reuse the saved keys.
 
 ### Application composition
 
