@@ -81,16 +81,21 @@ dotnet ef migrations add <MigrationName> --project src/TacticalHeroes.Admin \
   --context AdminDataProtectionDbContext --output-dir Infrastructure/DataProtection/Migrations
 ```
 
-The `TacticalHeroes.Admin.EfMigrator` image applies committed migrations once per
-Argo CD sync before the Deployment, using the existing migration Job in the shared
-chart. It never generates migrations at runtime. CI publishes the migrator before
+The `TacticalHeroes.Admin.EfMigrator` uses `PANiXiDA.Core.Ef.Migrator` and
+`host.RunMigrationsAsync<AdminDataProtectionDbContext>()`, matching the API's core
+migrator integration. Its settings select `GenerateMigrations=false` and
+`ApplyMigrations=true`: the image applies committed migrations once per Argo CD
+sync before the Deployment, using the existing migration Job in the shared chart.
+The history table is initialized before the core call to avoid a missing-history
+Error on the first run against an empty database. CI publishes the migrator before
 the application image; Kargo promotes both to the same build tag.
 
 For a manual local migration, supply the connection string through
 `ConnectionStrings__DataProtection`, then run:
 
 ```bash
-dotnet run --project tools/TacticalHeroes.Admin.EfMigrator
+cd tools/TacticalHeroes.Admin.EfMigrator
+dotnet run
 ```
 
 The first switch from container-local keys to the new database key ring/application

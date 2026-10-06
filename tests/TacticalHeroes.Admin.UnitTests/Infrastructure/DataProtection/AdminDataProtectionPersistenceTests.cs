@@ -4,11 +4,16 @@ using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 using Npgsql;
+
+using PANiXiDA.Core.Ef.Migrator;
 
 using TacticalHeroes.Admin.Infrastructure.DataProtection;
 
@@ -28,15 +33,15 @@ public sealed class AdminDataProtectionPersistenceTests : IAsyncLifetime
 
     public ValueTask DisposeAsync() => _database.DisposeAsync();
 
-    [Fact(DisplayName = "ApplyAdminDataProtectionMigrationsAsync should preserve the schema when migration is applied twice")]
-    public async Task ApplyAdminDataProtectionMigrationsAsync_Should_PreserveSchema_When_MigrationIsAppliedTwice()
+    [Fact(DisplayName = "RunMigrationsAsync should preserve the schema when migration is applied twice")]
+    public async Task RunMigrationsAsync_Should_PreserveSchema_When_MigrationIsAppliedTwice()
     {
         await using var services = CreateServices(_database.GetConnectionString());
         await using var scope = services.CreateAsyncScope();
         var database = scope.ServiceProvider.GetRequiredService<AdminDataProtectionDbContext>();
 
-        await database.ApplyAdminDataProtectionMigrationsAsync(TestContext.Current.CancellationToken);
-        await database.ApplyAdminDataProtectionMigrationsAsync(TestContext.Current.CancellationToken);
+        await MigrateAsync(_database.GetConnectionString());
+        await MigrateAsync(_database.GetConnectionString());
 
         (await database.Database.GetAppliedMigrationsAsync(TestContext.Current.CancellationToken)).ShouldHaveSingleItem();
         database.Database.HasPendingModelChanges().ShouldBeFalse();
@@ -52,7 +57,7 @@ public sealed class AdminDataProtectionPersistenceTests : IAsyncLifetime
         {
             await using var scope = original.CreateAsyncScope();
             var database = scope.ServiceProvider.GetRequiredService<AdminDataProtectionDbContext>();
-            await database.ApplyAdminDataProtectionMigrationsAsync(TestContext.Current.CancellationToken);
+            await MigrateAsync(_database.GetConnectionString());
             var protector = original.GetRequiredService<IDataProtectionProvider>().CreateProtector("antiforgery-test");
             protectedValue = protector.Protect("synthetic-cookie");
             keyCount = await database.DataProtectionKeys.CountAsync(TestContext.Current.CancellationToken);
@@ -83,8 +88,8 @@ public sealed class AdminDataProtectionPersistenceTests : IAsyncLifetime
         }.ConnectionString;
         await using var development = CreateServices(_database.GetConnectionString());
         await using var production = CreateServices(productionConnection);
-        await MigrateAsync(development);
-        await MigrateAsync(production);
+        await MigrateAsync(_database.GetConnectionString());
+        await MigrateAsync(productionConnection);
         var developmentProtector = development.GetRequiredService<IDataProtectionProvider>().CreateProtector("same-purpose");
         var productionProtector = production.GetRequiredService<IDataProtectionProvider>().CreateProtector("same-purpose");
         string developmentValue = developmentProtector.Protect("development-cookie");
@@ -102,7 +107,7 @@ public sealed class AdminDataProtectionPersistenceTests : IAsyncLifetime
         string cookieName;
         await using (var original = CreateServices(_database.GetConnectionString()))
         {
-            await MigrateAsync(original);
+            await MigrateAsync(_database.GetConnectionString());
             var context = new DefaultHttpContext { RequestServices = original };
             tokens = original.GetRequiredService<IAntiforgery>().GetTokens(context);
             cookieName = original.GetRequiredService<IOptions<AntiforgeryOptions>>().Value.Cookie.Name!;
@@ -119,8 +124,8 @@ public sealed class AdminDataProtectionPersistenceTests : IAsyncLifetime
         exception.ShouldBeNull();
     }
 
-    [Fact(DisplayName = "ApplyAdminDataProtectionMigrationsAsync should preserve API data and history when database is shared with api")]
-    public async Task ApplyAdminDataProtectionMigrationsAsync_Should_PreserveApiDataAndHistory_When_DatabaseIsSharedWithApi()
+    [Fact(DisplayName = "RunMigrationsAsync should preserve API data and history when database is shared with api")]
+    public async Task RunMigrationsAsync_Should_PreserveApiDataAndHistory_When_DatabaseIsSharedWithApi()
     {
         await using var connection = new NpgsqlConnection(_database.GetConnectionString());
         await connection.OpenAsync(TestContext.Current.CancellationToken);
@@ -137,8 +142,8 @@ public sealed class AdminDataProtectionPersistenceTests : IAsyncLifetime
         await seed.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
         await using var services = CreateServices(_database.GetConnectionString());
 
-        await MigrateAsync(services);
-        await MigrateAsync(services);
+        await MigrateAsync(_database.GetConnectionString());
+        await MigrateAsync(_database.GetConnectionString());
         var protector = services.GetRequiredService<IDataProtectionProvider>().CreateProtector("admin-cookie");
         string protectedValue = protector.Protect("synthetic-admin-cookie");
 
@@ -163,10 +168,27 @@ public sealed class AdminDataProtectionPersistenceTests : IAsyncLifetime
         return new ServiceCollection().AddLogging().AddAntiforgery().AddAdminDataProtection(configuration).BuildServiceProvider();
     }
 
-    private static async Task MigrateAsync(ServiceProvider services)
+    private static async Task MigrateAsync(string connectionString)
     {
-        await using var scope = services.CreateAsyncScope();
-        var database = scope.ServiceProvider.GetRequiredService<AdminDataProtectionDbContext>();
-        await database.ApplyAdminDataProtectionMigrationsAsync(TestContext.Current.CancellationToken);
+        using var host = Host.CreateDefaultBuilder([])
+            .ConfigureAppConfiguration((_, configuration) =>
+            {
+                configuration.Sources.Clear();
+                configuration.AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["GenerateMigrations"] = "false",
+                    ["ApplyMigrations"] = "true",
+                    ["ConnectionStrings:DataProtection"] = connectionString
+                });
+            })
+            .ConfigureServices((context, services) =>
+                services.AddAdminDataProtectionPersistence(context.Configuration))
+            .Build();
+        await using (var scope = host.Services.CreateAsyncScope())
+        {
+            var database = scope.ServiceProvider.GetRequiredService<AdminDataProtectionDbContext>();
+            await database.GetService<IHistoryRepository>().CreateIfNotExistsAsync(TestContext.Current.CancellationToken);
+        }
+        await host.RunMigrationsAsync<AdminDataProtectionDbContext>();
     }
 }

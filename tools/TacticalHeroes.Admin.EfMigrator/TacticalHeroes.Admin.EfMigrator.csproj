@@ -4,6 +4,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="PANiXiDA.Core.Ef.Migrator" />
     <ProjectReference Include="../../src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.Migrator.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
