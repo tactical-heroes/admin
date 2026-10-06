@@ -3,7 +3,7 @@
     min-height: 100dvh;
     isolation: isolate;
     overflow: hidden;
-    background: #080705 url("/auth/realm-battlefield.png") center / cover no-repeat fixed;
+    background: #080705 url("/auth/realm-battlefield.webp") center / cover no-repeat fixed;
 }
 
 .account-layout::after {

@@ -141,7 +141,7 @@
     width: 84%;
     height: 36px;
     margin: 0.6rem auto 0.35rem;
-    background: url("/auth/title-separator.png") center / 100% auto no-repeat;
+    background: url("/auth/title-separator.webp") center / 100% auto no-repeat;
     opacity: 0.88;
 }
 
@@ -219,7 +219,7 @@
     display: flex;
     min-height: 58px;
     align-items: center;
-    background: rgba(7, 8, 8, 0.86) url("/auth/text-field-frame.png") center / 100% 100% no-repeat;
+    background: rgba(7, 8, 8, 0.86) url("/auth/text-field-frame.webp") center / 100% 100% no-repeat;
     transition:
         filter 150ms ease,
         transform 150ms ease;
@@ -369,7 +369,7 @@
     border: 0;
     border-radius: 0;
     outline: none;
-    background: #090908 url("/auth/primary-command-frame.png") center / 100% 100% no-repeat;
+    background: #090908 url("/auth/primary-command-frame.webp") center / 100% 100% no-repeat;
     box-shadow: none;
     color: #f0dcae;
     cursor: pointer;
