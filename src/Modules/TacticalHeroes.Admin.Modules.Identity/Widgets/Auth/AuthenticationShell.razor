@@ -5,12 +5,7 @@
     <span class="auth-shell-corner auth-shell-corner-bottom-left" aria-hidden="true"></span>
 
     <header class="auth-brand">
-        <picture>
-            <source media="(max-width: 900px)" srcset="auth/tactical-heroes-emblem-mobile.webp" />
-            <img class="auth-brand-emblem"
-                 src="auth/tactical-heroes-emblem-desktop.webp"
-                 alt="" />
-        </picture>
+        <span class="auth-brand-emblem" aria-hidden="true"></span>
         <div class="auth-brand-title" aria-label="@(Branding.GameName)">
             @foreach (string word in Branding.GameName.Split(' '))
             {
