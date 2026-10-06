@@ -1,9 +1,61 @@
+@font-face {
+    font-family: "TH Cinzel";
+    src: url("/_content/TacticalHeroes.Admin.Modules.Identity/fonts/cinzel-regular.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "TH Cinzel";
+    src: url("/_content/TacticalHeroes.Admin.Modules.Identity/fonts/cinzel-bold.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: "TH Cormorant";
+    src: url("/_content/TacticalHeroes.Admin.Modules.Identity/fonts/cormorant-garamond-medium.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 500;
+}
+
+@font-face {
+    font-family: "TH Cormorant";
+    src: url("/_content/TacticalHeroes.Admin.Modules.Identity/fonts/cormorant-garamond-semibold.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 600;
+}
+
+@font-face {
+    font-family: "TH Inter";
+    src: url("/_content/TacticalHeroes.Admin.Modules.Identity/fonts/inter-medium.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 500;
+}
+
 .account-layout {
     position: relative;
     min-height: 100dvh;
     isolation: isolate;
     overflow: hidden;
-    background: #080705 url("/auth/realm-battlefield.png") center / cover no-repeat fixed;
+    background: #080705 url("/_content/TacticalHeroes.Admin.Modules.Identity/images/realm-battlefield/desktop.webp") center / cover no-repeat fixed;
+    background-image: image-set(
+        url("/_content/TacticalHeroes.Admin.Modules.Identity/images/realm-battlefield/desktop.avif") type("image/avif"),
+        url("/_content/TacticalHeroes.Admin.Modules.Identity/images/realm-battlefield/desktop.webp") type("image/webp"));
+}
+
+@media (max-width: 900px) and (orientation: portrait) {
+    .account-layout {
+        background-image: url("/_content/TacticalHeroes.Admin.Modules.Identity/images/realm-battlefield/mobile.webp");
+        background-image: image-set(
+            url("/_content/TacticalHeroes.Admin.Modules.Identity/images/realm-battlefield/mobile.avif") type("image/avif"),
+            url("/_content/TacticalHeroes.Admin.Modules.Identity/images/realm-battlefield/mobile.webp") type("image/webp"));
+    }
 }
 
 .account-layout::after {
