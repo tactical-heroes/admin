@@ -74,10 +74,10 @@ jobs:
     needs: [ format, tests, sonar, helm, resolve-env ]
     uses: PANiXiDA-Infrastructure/ci-cd/.github/workflows/docker-build.yml@main
     with:
-      service-folder: tools/TacticalHeroes.Admin.EfMigrator
+      service-folder: ${{ vars.MIGRATOR_FOLDER }}
       image: |
-        ${{ vars.REGISTRY_IMAGE_PREFIX }}/admin-ef-migrator:${{ github.run_number }}
-        ${{ vars.REGISTRY_IMAGE_PREFIX }}/admin-ef-migrator:${{ needs.resolve-env.outputs.environment }}-${{ github.run_number }}
+        ${{ vars.REGISTRY_IMAGE_PREFIX }}/${{ vars.MIGRATOR_NAME }}:${{ github.run_number }}
+        ${{ vars.REGISTRY_IMAGE_PREFIX }}/${{ vars.MIGRATOR_NAME }}:${{ needs.resolve-env.outputs.environment }}-${{ github.run_number }}
     secrets:
       registry-user: ${{ secrets.REGISTRY_USER }}
       registry-token: ${{ secrets.REGISTRY_TOKEN }}
