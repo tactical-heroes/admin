@@ -60,14 +60,15 @@ The server host stores ASP.NET Core Data Protection keys in PostgreSQL when
 that mode and must come from secrets. Browser/client projects have no database
 dependency. Local development keeps the framework defaults unless enabled explicitly.
 
-The `core-platform` managed-PostgreSQL reconciliation provisions the separate
-`tactical_heroes_admin_dev` and `tactical_heroes_admin_prod` databases and users in
-the existing cluster, then writes their TLS connection strings to OpenBao under
-`applications/tactical-heroes-admin/development` and `production`. Deploy that
-infrastructure prerequisite before deploying the admin values. No extra disks or
-changes to the shared `ci-cd` application chart are required.
+Admin shares the API databases `tactical_heroes_dev` and `tactical_heroes_prod`
+and their existing connection credentials. The `core-platform` managed-PostgreSQL
+reconciliation copies each API TLS connection string into Admin's OpenBao secret
+under `applications/tactical-heroes-admin/development` and `production`. Sync
+these secrets before deploying the admin values. No additional database, user,
+disk, or change to the shared `ci-cd` application chart is required.
 
-The EF context owns only `admin.data_protection_keys` and its migration history.
+The EF context owns only `admin.data_protection_keys` and
+`admin.__ef_migrations_history`. API schemas and migration history remain separate.
 The application discriminator is `TacticalHeroes.Admin`; environment isolation
 comes from separate databases. Key XML is sensitive and is not encrypted at rest
 by this configuration, so database and backup access must be restricted.
@@ -98,7 +99,8 @@ replacements reuse the saved keys. Do not delete old keys while their cookies or
 tokens are still in use.
 
 With Docker running, the host unit tests exercise real PostgreSQL migrations,
-key persistence across recreated application service providers, and environment
+preservation of API data and migration history in the shared database, key
+persistence across recreated application service providers, and environment
 isolation. After deployment, check that an open form and session survive a pod
 replacement and that there are no new missing-key errors. Never log key XML or cookies.
 

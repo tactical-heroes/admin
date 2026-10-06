@@ -19,7 +19,7 @@ namespace TacticalHeroes.Admin.UnitTests.Infrastructure.DataProtection;
 public sealed class AdminDataProtectionPersistenceTests : IAsyncLifetime
 {
     private readonly PostgreSqlContainer _database = new PostgreSqlBuilder("postgres:18-alpine")
-        .WithDatabase("admin_keys")
+        .WithDatabase("tactical_heroes_dev")
         .WithUsername("admin")
         .WithPassword("synthetic-test-password")
         .Build();
@@ -75,11 +75,11 @@ public sealed class AdminDataProtectionPersistenceTests : IAsyncLifetime
     {
         await using var connection = new NpgsqlConnection(_database.GetConnectionString());
         await connection.OpenAsync(TestContext.Current.CancellationToken);
-        await using var command = new NpgsqlCommand("CREATE DATABASE production_keys", connection);
+        await using var command = new NpgsqlCommand("CREATE DATABASE tactical_heroes_prod", connection);
         await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
         string productionConnection = new NpgsqlConnectionStringBuilder(_database.GetConnectionString())
         {
-            Database = "production_keys"
+            Database = "tactical_heroes_prod"
         }.ConnectionString;
         await using var development = CreateServices(_database.GetConnectionString());
         await using var production = CreateServices(productionConnection);
@@ -117,6 +117,40 @@ public sealed class AdminDataProtectionPersistenceTests : IAsyncLifetime
         var exception = await Record.ExceptionAsync(() => replacement.GetRequiredService<IAntiforgery>().ValidateRequestAsync(request));
 
         exception.ShouldBeNull();
+    }
+
+    [Fact(DisplayName = "ApplyAdminDataProtectionMigrationsAsync should preserve API data and history when database is shared with api")]
+    public async Task ApplyAdminDataProtectionMigrationsAsync_Should_PreserveApiDataAndHistory_When_DatabaseIsSharedWithApi()
+    {
+        await using var connection = new NpgsqlConnection(_database.GetConnectionString());
+        await connection.OpenAsync(TestContext.Current.CancellationToken);
+        await using var seed = new NpgsqlCommand("""
+            CREATE SCHEMA identity;
+            CREATE TABLE identity.__ef_migrations_history (
+                "MigrationId" text PRIMARY KEY,
+                "ProductVersion" text NOT NULL
+            );
+            INSERT INTO identity.__ef_migrations_history VALUES ('existing-api-migration', '10.0.12');
+            CREATE TABLE identity.data_protection_keys (id integer PRIMARY KEY, xml text);
+            INSERT INTO identity.data_protection_keys VALUES (1, 'synthetic-api-key');
+            """, connection);
+        await seed.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+        await using var services = CreateServices(_database.GetConnectionString());
+
+        await MigrateAsync(services);
+        await MigrateAsync(services);
+        var protector = services.GetRequiredService<IDataProtectionProvider>().CreateProtector("admin-cookie");
+        string protectedValue = protector.Protect("synthetic-admin-cookie");
+
+        protector.Unprotect(protectedValue).ShouldBe("synthetic-admin-cookie");
+        await using var apiKey = new NpgsqlCommand("SELECT xml FROM identity.data_protection_keys WHERE id = 1", connection);
+        (await apiKey.ExecuteScalarAsync(TestContext.Current.CancellationToken)).ShouldBe("synthetic-api-key");
+        await using var apiHistory = new NpgsqlCommand("SELECT \"MigrationId\" FROM identity.__ef_migrations_history", connection);
+        (await apiHistory.ExecuteScalarAsync(TestContext.Current.CancellationToken)).ShouldBe("existing-api-migration");
+        await using var scope = services.CreateAsyncScope();
+        var database = scope.ServiceProvider.GetRequiredService<AdminDataProtectionDbContext>();
+        (await database.Database.GetAppliedMigrationsAsync(TestContext.Current.CancellationToken)).ShouldHaveSingleItem();
+        (await database.DataProtectionKeys.CountAsync(TestContext.Current.CancellationToken)).ShouldBeGreaterThan(0);
     }
 
     private static ServiceProvider CreateServices(string connectionString)
