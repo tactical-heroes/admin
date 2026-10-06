@@ -93,6 +93,9 @@ migrations before the Deployment through the shared chart's migration Job.
 CI publishes the migrator before the application image; Kargo promotes both to
 the same build tag.
 
+On an empty database, Npgsql logs a failed history-table query before EF creates
+the table and applies the migration successfully. Subsequent runs are idempotent.
+
 For a manual local migration, supply the connection string through
 `ConnectionStrings__PostgreSqlConnectionString`, then run:
 
