@@ -6,6 +6,8 @@ env:
     Authentication__OpenIdConnect__Authority: https://dev.api.tactical-heroes.panixida.ru
 
 externalSecrets:
+  app:
+    remoteKey: applications/tactical-heroes-admin/development
   openbao:
     role: tactical-heroes-admin-development
 

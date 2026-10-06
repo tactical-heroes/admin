@@ -26,7 +26,7 @@ service:
   containerPort: 8080
 
 env:
-  secretName: ""
+  secretName: tactical-heroes-admin-app
   values:
     ASPNETCORE_HTTP_PORTS: "8080"
     ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
@@ -48,7 +48,9 @@ externalSecrets:
     authMountPath: kubernetes
     role: tactical-heroes-admin-development
   app:
-    enabled: false
+    enabled: true
+    targetName: tactical-heroes-admin-app
+    extractAll: true
   registry:
     enabled: true
     targetName: tactical-heroes-admin-registry
@@ -58,7 +60,10 @@ externalSecrets:
     passwordProperty: REGISTRY_TOKEN
 
 migrations:
-  enabled: false
+  enabled: true
+  image:
+    repository: ghcr.io/panixida/tactical-heroes/admin-ef-migrator
+    tag: "0"
 
 gateway:
   enabled: true

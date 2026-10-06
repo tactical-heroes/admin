@@ -53,6 +53,29 @@ dotnet run --project src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj --laun
 
 ## Initialization Notes
 
+### Data Protection keys
+
+The server stores Data Protection keys in `admin.data_protection_keys` in the
+existing API database, with migration history in `admin.__ef_migrations_history`.
+Set `ConnectionStrings:PostgreSqlConnectionString` in configuration or override
+the local default through `ConnectionStrings__PostgreSqlConnectionString`.
+Development and production use separate databases.
+
+Local development requires PostgreSQL and the Admin migrations. The core migrator
+generates and applies migrations using `appsettings.Migrator.json`:
+
+```bash
+dotnet build tools/TacticalHeroes.Admin.Ef.Migrator
+cd tools/TacticalHeroes.Admin.Ef.Migrator/bin/Debug/net10.0
+dotnet TacticalHeroes.Admin.Ef.Migrator.dll
+```
+
+Review and commit generated migrations. Deployment runs the migration Job before
+the application. The first switch to database keys may require signing in again;
+subsequent pod replacements reuse the saved keys.
+
+### Application composition
+
 The ASP.NET Core host renders one application on the server, serves the
 WebAssembly client, and proxies browser API requests through YARP. UI modules
 are Razor Class Libraries registered explicitly by the client shell; they are

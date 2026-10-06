@@ -1,2 +1,6 @@
 image:
   tag: development-247
+
+migrations:
+  image:
+    tag: development-247

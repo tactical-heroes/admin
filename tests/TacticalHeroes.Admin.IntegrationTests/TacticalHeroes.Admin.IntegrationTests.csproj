@@ -2,19 +2,21 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
+
     <ItemGroup>
-        <PackageReference Include="bunit" />
         <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
         <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
         <PackageReference Include="Shouldly" />
+        <PackageReference Include="PANiXiDA.Core.Ef.Migrator" />
+        <PackageReference Include="Testcontainers.PostgreSql" />
         <PackageReference Include="xunit.v3" />
     </ItemGroup>
+
     <ItemGroup>
-        <ProjectReference Include="..\..\src\TacticalHeroes.Admin.Client\TacticalHeroes.Admin.Client.csproj" />
-        <ProjectReference Include="..\..\src\Modules\TacticalHeroes.Admin.Modules.Identity\TacticalHeroes.Admin.Modules.Identity.csproj" />
+        <ProjectReference Include="../../src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj" />
     </ItemGroup>
+
     <ItemGroup>
-        <Using Include="Bunit" />
         <Using Include="Shouldly" />
         <Using Include="Xunit" />
     </ItemGroup>
