@@ -15,9 +15,13 @@
     display: block;
     width: 48px;
     height: 48px;
+    flex-shrink: 0;
     border-radius: 11px;
+    background: url("/images/logo/default.webp") center / cover no-repeat;
+    background-image: image-set(
+        url("/images/logo/default.avif") type("image/avif"),
+        url("/images/logo/default.webp") type("image/webp"));
     box-shadow: 0 8px 24px rgba(217, 79, 61, 0.28);
-    object-fit: cover;
 }
 
 .brand ::deep .mud-typography-subtitle1 {

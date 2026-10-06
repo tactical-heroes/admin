@@ -2,6 +2,14 @@ Keep scope narrow. Run full solution checks for shared API contracts, build file
 
 Use WOFF2 for web fonts.
 
+Optimize raster images before shipping:
+
+- Resize images for their rendered dimensions and intended device pixel ratio. Provide mobile and desktop variants when display size or composition differs; do not serve full-resolution source artwork unnecessarily.
+- Prefer AVIF with a WebP fallback, selected through native CSS `image-set()` for decorative backgrounds or `<picture>` for content images. Compare file sizes and visual quality first; keep WebP as the primary format if AVIF offers no benefit. Quality numbers are not equivalent across codecs.
+- Use lossy compression when it preserves acceptable visual quality at the target display sizes. Check text, thin edges, dark gradients and transparency; use higher quality or lossless encoding where artifacts remain visible. Encode each format from the original source, not from an already lossy export.
+- Keep images in the `wwwroot/images/<asset>/` of the project that owns their UI, with `desktop` and `mobile` filenames where needed. Module assets belong in that module; application-shell assets such as the sidebar logo belong in `TacticalHeroes.Admin.Client`. Use the host's `wwwroot` only for host-owned assets.
+- Record before/after byte sizes in the PR. Verify the published page loads only the selected size and format, preserves accessibility, and serves correct MIME types and cache headers. Check the whole page payload, including fonts and framework downloads, rather than image sizes alone.
+
 The admin is one Blazor Web App composed from module Razor Class Libraries:
 
 - `TacticalHeroes.Admin` owns the ASP.NET Core host, BFF concerns, and deployment.
