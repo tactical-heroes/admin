@@ -40,11 +40,12 @@ else
 
 app.UseStatusCodePagesWithReExecute(AdminRoutes.NotFound, createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 
-app.MapStaticAssets();
+app.MapStaticAssets().ShortCircuit();
 app.MapHealthChecks("/health");
 app.MapReverseProxy()
     .WithMetadata(new SkipStatusCodePagesAttribute());
