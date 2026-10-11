@@ -23,6 +23,8 @@ internal static class ProxyServiceCollectionExtensions
             .AddReverseProxy()
             .LoadFromConfig(configuration.GetRequiredSection(ReverseProxySectionName))
             .AddConfigFilter<TacticalHeroesApiProxyConfigFilter>()
+            // The host has no tracing provider; do not inject an unsampled parent into API requests.
+            .ConfigureHttpClient((_, handler) => handler.ActivityHeadersPropagator = null)
             .AddTransforms(context =>
             {
                 if (context.Route.Metadata is null ||

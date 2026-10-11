@@ -102,3 +102,13 @@ Razor markup, component code, and isolated styles are kept in `.razor`,
 `.razor.cs`, and `.razor.css` files respectively. Architecture tests enforce
 the allowed FSD folders, dependency direction, module isolation, typed route
 state, and Razor file conventions.
+
+### Proxy trace context
+
+The admin host does not export distributed traces. YARP therefore passes incoming
+trace headers through unchanged instead of generating an unsampled parent span.
+Requests without trace context let the API start and sample its own trace, so
+Grafana's log-to-trace links work for requests made through the admin. An explicit
+upstream sampling decision is preserved. If tracing is added to the admin host,
+configure ASP.NET Core, HTTP client, and YARP instrumentation together before
+enabling the proxy's activity propagation.
