@@ -23,6 +23,7 @@ internal static class ProxyServiceCollectionExtensions
             .AddReverseProxy()
             .LoadFromConfig(configuration.GetRequiredSection(ReverseProxySectionName))
             .AddConfigFilter<TacticalHeroesApiProxyConfigFilter>()
+            .ConfigureHttpClient((_, handler) => handler.ActivityHeadersPropagator = null)
             .AddTransforms(context =>
             {
                 if (context.Route.Metadata is null ||
