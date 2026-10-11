@@ -41,7 +41,6 @@ public sealed class ProxyTraceContextTests
         proxy.Urls.Add("http://127.0.0.1:0");
         proxy.Use(async (_, next) =>
         {
-            // Reproduce the uninstrumented host activity that YARP would propagate.
             using var activity = new Activity("Admin proxy request").Start();
             await next();
         });
