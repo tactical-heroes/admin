@@ -11,7 +11,7 @@ namespace TacticalHeroes.Admin.UnitTests.Infrastructure.Proxy;
 
 public sealed class ProxyTraceContextTests
 {
-    [Theory(DisplayName = "Proxy should preserve incoming trace context without injecting an unsampled parent")]
+    [Theory(DisplayName = "Proxy should preserve trace context when host tracing is not configured")]
     [InlineData(null, null)]
     [InlineData("00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01", "vendor=sampled")]
     [InlineData("00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-00", "vendor=unsampled")]
