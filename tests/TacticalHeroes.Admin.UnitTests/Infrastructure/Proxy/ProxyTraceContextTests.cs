@@ -24,7 +24,7 @@ public sealed class ProxyTraceContextTests
         await using var backend = backendBuilder.Build();
         backend.Urls.Add("http://127.0.0.1:0");
         backend.MapGet("/probe", (HttpContext context) => Results.Text(
-            $"{context.Request.Headers["traceparent"]}|{context.Request.Headers["tracestate"]}"));
+            $"{context.Request.Headers.TraceParent}|{context.Request.Headers.TraceState}"));
         await backend.StartAsync(cancellationToken);
 
         var proxyBuilder = WebApplication.CreateSlimBuilder();
