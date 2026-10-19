@@ -1,0 +1,29 @@
+using Riok.Mapperly.Abstractions;
+
+using TacticalHeroes.Admin.Api.Generated.Models;
+using TacticalHeroes.Admin.Api.Mapping;
+using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Model;
+
+namespace TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Api;
+
+[Mapper]
+[UseStaticMapper(typeof(RequiredValueMapper))]
+internal static partial class ClaimCatalogMapper
+{
+    [MapperIgnoreSource(nameof(GetPermissionsResponse.AdditionalData))]
+    [MapProperty(nameof(GetPermissionsResponse.Items), nameof(ClaimCatalog.Items), SuppressNullMismatchDiagnostic = true)]
+    public static partial ClaimCatalog ToPermissions(GetPermissionsResponse response);
+
+    [MapperIgnoreSource(nameof(GetSectionsResponse.AdditionalData))]
+    [MapProperty(nameof(GetSectionsResponse.Items), nameof(ClaimCatalog.Items), SuppressNullMismatchDiagnostic = true)]
+    public static partial ClaimCatalog ToSections(GetSectionsResponse response);
+
+    [MapperIgnoreSource(nameof(PermissionResponse.AdditionalData))]
+    [MapperIgnoreSource(nameof(PermissionResponse.SectionCode))]
+    [MapperIgnoreSource(nameof(PermissionResponse.ResourceCode))]
+    private static partial ClaimOption ToPermission(PermissionResponse response);
+
+    [MapperIgnoreSource(nameof(SectionResponse.AdditionalData))]
+    [MapperIgnoreTarget(nameof(ClaimOption.ResourceDisplayName))]
+    private static partial ClaimOption ToSection(SectionResponse response);
+}

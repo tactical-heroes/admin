@@ -33,6 +33,10 @@
                               Error="@Errors.HasError(nameof(UpdateRoleFormModel.Name))"
                               ErrorText="@Errors.GetError(nameof(UpdateRoleFormModel.Name))"
                               MaxLength="128" />
+                <MudSwitch T="bool"
+                           @bind-Value="Model.IsDefault"
+                           Color="Color.Primary"
+                           Label="Назначать при регистрации" />
             </EditSection>
 
             <EditSection Title="Доступ">

@@ -2202,6 +2202,54 @@
           }
         }
       }
+    },
+    "/api/v1/claims/permissions": {
+      "get": {
+        "tags": [
+          "Claims"
+        ],
+        "summary": "Get available permissions",
+        "operationId": "GetPermissions",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPermissionsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/v1/claims/sections": {
+      "get": {
+        "tags": [
+          "Claims"
+        ],
+        "summary": "Get available sections",
+        "operationId": "GetSections",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSectionsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2255,7 +2303,8 @@
       "CreateRoleRequest": {
         "required": [
           "name",
-          "claims"
+          "claims",
+          "isDefault"
         ],
         "type": "object",
         "properties": {
@@ -2267,6 +2316,9 @@
             "items": {
               "$ref": "#/components/schemas/Claim"
             }
+          },
+          "isDefault": {
+            "type": "boolean"
           }
         }
       },
@@ -2289,7 +2341,8 @@
           "password",
           "isConfirmed",
           "claims",
-          "status"
+          "status",
+          "roleIds"
         ],
         "type": "object",
         "properties": {
@@ -2315,6 +2368,13 @@
             "maxLength": 50,
             "minLength": 0,
             "type": "string"
+          },
+          "roleIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         }
       },
@@ -2499,7 +2559,8 @@
         "required": [
           "id",
           "name",
-          "claims"
+          "claims",
+          "isDefault"
         ],
         "type": "object",
         "properties": {
@@ -2515,6 +2576,9 @@
             "items": {
               "$ref": "#/components/schemas/Claim"
             }
+          },
+          "isDefault": {
+            "type": "boolean"
           }
         }
       },
@@ -2526,7 +2590,8 @@
           "isConfirmed",
           "status",
           "statusDisplayName",
-          "claims"
+          "claims",
+          "roleIds"
         ],
         "type": "object",
         "properties": {
@@ -2553,6 +2618,13 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Claim"
+            }
+          },
+          "roleIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         }
@@ -3209,7 +3281,8 @@
       "RoleListItemResponse": {
         "required": [
           "id",
-          "name"
+          "name",
+          "isDefault"
         ],
         "type": "object",
         "properties": {
@@ -3219,13 +3292,17 @@
           },
           "name": {
             "type": "string"
+          },
+          "isDefault": {
+            "type": "boolean"
           }
         }
       },
       "UpdateRoleRequest": {
         "required": [
           "name",
-          "claims"
+          "claims",
+          "isDefault"
         ],
         "type": "object",
         "properties": {
@@ -3237,6 +3314,9 @@
             "items": {
               "$ref": "#/components/schemas/Claim"
             }
+          },
+          "isDefault": {
+            "type": "boolean"
           }
         }
       },
@@ -3246,7 +3326,8 @@
           "userName",
           "isConfirmed",
           "claims",
-          "status"
+          "status",
+          "roleIds"
         ],
         "type": "object",
         "properties": {
@@ -3269,6 +3350,13 @@
             "maxLength": 50,
             "minLength": 0,
             "type": "string"
+          },
+          "roleIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         }
       },
@@ -4018,6 +4106,84 @@
             "format": "uuid"
           },
           "name": {
+            "type": "string"
+          }
+        }
+      },
+      "GetPermissionsResponse": {
+        "required": [
+          "type",
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PermissionResponse"
+            }
+          }
+        }
+      },
+      "GetSectionsResponse": {
+        "required": [
+          "type",
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SectionResponse"
+            }
+          }
+        }
+      },
+      "PermissionResponse": {
+        "required": [
+          "code",
+          "displayName",
+          "sectionCode",
+          "resourceCode",
+          "resourceDisplayName"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "sectionCode": {
+            "type": "string"
+          },
+          "resourceCode": {
+            "type": "string"
+          },
+          "resourceDisplayName": {
+            "type": "string"
+          }
+        }
+      },
+      "SectionResponse": {
+        "required": [
+          "code",
+          "displayName"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "displayName": {
             "type": "string"
           }
         }

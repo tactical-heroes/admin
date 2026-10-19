@@ -4,5 +4,7 @@ public sealed class RoleListItem
 {
     public Guid Id { get; set; }
 
+    public bool IsDefault { get; set; }
+
     public string Name { get; set; } = string.Empty;
 }

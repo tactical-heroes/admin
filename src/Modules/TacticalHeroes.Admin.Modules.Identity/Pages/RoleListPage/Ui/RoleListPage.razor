@@ -42,6 +42,11 @@
                 </MudText>
             </CellTemplate>
         </PropertyColumn>
+        <TemplateColumn T="RoleListItem" Title="По умолчанию" Sortable="false">
+            <CellTemplate>
+                @(context.Item.IsDefault ? "Да" : "Нет")
+            </CellTemplate>
+        </TemplateColumn>
         <TemplateColumn T="RoleListItem" Title="Действия" Sortable="false" HeaderClass="actions-column" CellClass="actions-column">
             <CellTemplate>
                 <EntityRowActions>

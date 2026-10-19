@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 using MudBlazor;
 
+using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Api;
+using TacticalHeroes.Admin.Modules.Identity.Entities.Roles.Api;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Api;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Model;
 using TacticalHeroes.Admin.Modules.Identity.Pages.ConfirmEmailPage.Api;
@@ -42,6 +44,8 @@ public static class IdentityAdminModule
         this IServiceCollection services)
     {
         services.AddScoped<IEnumerationProvider<UserStatus>, UserStatusApi>();
+        services.AddScoped<ClaimCatalogApi>();
+        services.AddScoped<RoleOptionsApi>();
         services.AddScoped<RoleListApi>();
         services.AddScoped<CreateRoleApi>();
         services.AddScoped<UpdateRoleApi>();

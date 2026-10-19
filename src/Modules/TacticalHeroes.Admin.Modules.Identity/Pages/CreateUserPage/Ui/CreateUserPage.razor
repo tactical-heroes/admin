@@ -4,6 +4,7 @@
 @attribute [StreamRendering]
 
 @using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Ui
+@using TacticalHeroes.Admin.Modules.Identity.Entities.Roles.Ui
 @using TacticalHeroes.Admin.Modules.Identity.Entities.Users.Model
 @using TacticalHeroes.Admin.Modules.Identity.Pages.CreateUserPage.Model
 
@@ -73,7 +74,12 @@
         </EditSection>
 
         <EditSection Title="Доступ">
-            <ClaimsEditor Claims="Model.Claims" />
+            <MudStack Spacing="3">
+                <RoleSelect RoleIds="Model.RoleIds"
+                            Error="@Errors.HasError(nameof(CreateUserFormModel.RoleIds))"
+                            ErrorText="@Errors.GetError(nameof(CreateUserFormModel.RoleIds))" />
+                <ClaimsEditor Claims="Model.Claims" />
+            </MudStack>
         </EditSection>
 
         <EditFormActions CancelHref="@IdentityRoutes.Users"

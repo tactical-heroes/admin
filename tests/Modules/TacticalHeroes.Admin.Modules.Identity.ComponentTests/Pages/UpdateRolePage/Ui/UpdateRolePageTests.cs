@@ -1,13 +1,16 @@
 using System.Net;
 using System.Text;
+using System.Text.Json;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 
+using MudBlazor;
 using MudBlazor.Services;
 
 using TacticalHeroes.Admin.Api.DependencyInjection;
+using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Ui;
 using TacticalHeroes.Admin.Shared.Ui.Forms;
 using TacticalHeroes.Admin.Shared.Ui.Layout;
 
@@ -61,8 +64,35 @@ public sealed class UpdateRolePageTests : BunitContext
         component.WaitForAssertion(() =>
         {
             _handler.PutCount.ShouldBe(1);
+            using var body = JsonDocument.Parse(_handler.RequestBody!);
+            body.RootElement.GetProperty("isDefault").GetBoolean().ShouldBeTrue();
+            body.RootElement.GetProperty("claims")[0].GetProperty("value").GetString().ShouldBe("retained");
             Services.GetRequiredService<NavigationManager>().Uri
                 .ShouldEndWith(IdentityRoutes.Roles);
+        });
+    }
+
+    [Fact(DisplayName = "Submit should send section claim and default flag when role access is edited")]
+    public async Task Submit_Should_SendSectionClaimAndDefaultFlag_When_RoleAccessIsEdited()
+    {
+        var component = Render<UpdateRolePageComponent>(parameters => parameters.Add(page => page.Id, _roleId));
+        await component.InvokeAsync(() => component.FindComponent<MudSwitch<bool>>().Instance.ValueChanged.InvokeAsync(false));
+        var claims = component.FindComponent<ClaimsEditor>();
+        claims.Find(".claim-remove button").Click();
+        claims.FindAll("button").Single(button => button.TextContent.Trim() == "Раздел").Click();
+        await component.InvokeAsync(() => claims.FindComponent<MudSelect<string>>().Instance.ValueChanged.InvokeAsync("identity"));
+
+        component.Find(".submit-action").Click();
+
+        component.WaitForAssertion(() =>
+        {
+            _handler.PutCount.ShouldBe(1);
+            using var body = JsonDocument.Parse(_handler.RequestBody!);
+            body.RootElement.GetProperty("isDefault").GetBoolean().ShouldBeFalse();
+            var sentClaims = body.RootElement.GetProperty("claims");
+            sentClaims.GetArrayLength().ShouldBe(1);
+            sentClaims[0].GetProperty("type").GetString().ShouldBe("section");
+            sentClaims[0].GetProperty("value").GetString().ShouldBe("identity");
         });
     }
 
@@ -84,33 +114,42 @@ public sealed class UpdateRolePageTests : BunitContext
 
     private sealed class UpdateRoleHandler(Guid roleId) : HttpMessageHandler
     {
+        public string? RequestBody { get; private set; }
+
         public int PutCount { get; private set; }
 
-        protected override Task<HttpResponseMessage> SendAsync(
+        protected override async Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
+            if (IdentityCatalogResponses.Create(request) is { } response)
+            {
+                return response;
+            }
+
             if (request.Method == HttpMethod.Get)
             {
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(
                         $$"""
                         {
                           "id": "{{roleId:D}}",
                           "name": "Administrators",
-                          "claims": []
+                          "isDefault": true,
+                          "claims": [{"type":"custom","value":"retained"}]
                         }
                         """,
                         Encoding.UTF8,
                         "application/json"),
-                });
+                };
             }
 
             request.Method.ShouldBe(HttpMethod.Put);
+            RequestBody = await request.Content!.ReadAsStringAsync(cancellationToken);
             PutCount++;
 
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NoContent));
+            return new HttpResponseMessage(HttpStatusCode.NoContent);
         }
     }
 }

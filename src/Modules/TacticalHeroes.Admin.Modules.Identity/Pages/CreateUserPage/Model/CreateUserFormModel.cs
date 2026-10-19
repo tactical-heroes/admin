@@ -14,5 +14,7 @@ public sealed class CreateUserFormModel
 
     public string Status { get; set; } = string.Empty;
 
+    public List<Guid> RoleIds { get; set; } = [];
+
     public List<ClaimValue> Claims { get; set; } = [];
 }

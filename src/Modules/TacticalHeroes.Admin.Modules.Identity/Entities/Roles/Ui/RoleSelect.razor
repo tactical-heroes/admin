@@ -1,0 +1,30 @@
+@inherits CancelableComponentBase
+
+<LoadableContent Loading="IsLoading"
+                 LoadError="@LoadError"
+                 OnRetry="LoadAsync"
+                 LoadingHeight="56px">
+    <ChildContent>
+        <MudSelect T="Guid"
+                   Label="Роли пользователя"
+                   Variant="Variant.Outlined"
+                   MultiSelection="true"
+                   ToStringFunc="GetRoleName"
+                   SelectedValues="RoleIds"
+                   SelectedValuesChanged="UpdateRoles"
+                   Error="Error"
+                   ErrorText="@ErrorText"
+                   HelperText="Можно назначить несколько ролей или оставить пользователя без ролей.">
+            @foreach (var role in Items ?? [])
+            {
+                <MudSelectItem T="Guid" Value="role.Id">
+                    @GetRoleName(role.Id)
+                </MudSelectItem>
+            }
+            @foreach (var id in RoleIds.Where(id => Items?.All(role => role.Id != id) != false))
+            {
+                <MudSelectItem T="Guid" Value="id">Недоступная роль (@id)</MudSelectItem>
+            }
+        </MudSelect>
+    </ChildContent>
+</LoadableContent>

@@ -28,6 +28,10 @@
                       Error="@Errors.HasError(nameof(CreateRoleFormModel.Name))"
                       ErrorText="@Errors.GetError(nameof(CreateRoleFormModel.Name))"
                       MaxLength="128" />
+        <MudSwitch T="bool"
+                   @bind-Value="Model.IsDefault"
+                   Color="Color.Primary"
+                   Label="Назначать при регистрации" />
     </EditSection>
 
     <EditSection Title="Доступ">

@@ -1,69 +1,116 @@
-<MudStack Spacing="2">
-    <MudStack Row="true"
-              AlignItems="AlignItems.Center"
-              Justify="Justify.SpaceBetween">
-        <div>
-            <MudText Typo="Typo.subtitle1">Атрибуты доступа</MudText>
-            <MudText Typo="Typo.caption"
-                     Color="Color.Secondary">
-                Пары типа и значения, назначенные сущности
-            </MudText>
-        </div>
-        <MudButton Variant="Variant.Text"
-                   Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.Add"
-                   OnClick="AddClaim">
-            Добавить
-        </MudButton>
-    </MudStack>
+@inherits CancelableComponentBase
 
-    @if (Claims.Count == 0)
-    {
-        <div class="empty-claims">
-            <MudIcon Icon="@Icons.Material.Outlined.KeyOff"
-                     Size="Size.Large"
-                     Color="Color.Secondary" />
-            <MudText Typo="Typo.body2"
-                     Color="Color.Secondary">
-                Атрибуты пока не добавлены
-            </MudText>
-        </div>
-    }
-    else
-    {
-        @foreach (var claim in Claims)
-        {
-            <MudGrid @key="claim"
-                     Spacing="2"
-                     Class="claim-row">
-                <MudItem xs="12" md="5">
-                    <MudTextField T="string"
-                                  @bind-Value="claim.Type"
-                                  Label="Тип"
-                                  Variant="Variant.Outlined"
-                                  Margin="Margin.Dense"
-                                  Validation="@Validator.For(
-                                                  claim,
-                                                  static claim => claim.Type)" />
-                </MudItem>
-                <MudItem xs="12" md="6">
-                    <MudTextField T="string"
-                                  @bind-Value="claim.Value"
-                                  Label="Значение"
-                                  Variant="Variant.Outlined"
-                                  Margin="Margin.Dense"
-                                  Validation="@Validator.For(
-                                                  claim,
-                                                  static claim => claim.Value)" />
-                </MudItem>
-                <MudItem xs="12" md="1"
-                         Class="claim-remove">
-                    <MudIconButton Icon="@Icons.Material.Outlined.Delete"
-                                   Color="Color.Error"
-                                   OnClick="@(() => RemoveClaim(claim))"
-                                   aria-label="Удалить атрибут" />
-                </MudItem>
-            </MudGrid>
-        }
-    }
-</MudStack>
+<LoadableContent Loading="IsLoading"
+                 LoadError="@LoadError"
+                 OnRetry="LoadAsync"
+                 LoadingHeight="112px">
+    <ChildContent>
+        <MudStack Spacing="2">
+            <div>
+                <MudText Typo="Typo.subtitle1">Атрибуты доступа</MudText>
+                <MudText Typo="Typo.caption"
+                         Color="Color.Secondary">
+                    Разделы определяют видимость интерфейса, разрешения — доступ к операциям
+                </MudText>
+            </div>
+            <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="1">
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="@(() => AddClaim(Permissions!.Type))">
+                    Разрешение
+                </MudButton>
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="@(() => AddClaim(Sections!.Type))">
+                    Раздел
+                </MudButton>
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="@(() => AddClaim(string.Empty))">
+                    Другой атрибут
+                </MudButton>
+            </MudStack>
+
+            @if (Claims.Count == 0)
+            {
+                <div class="empty-claims">
+                    <MudIcon Icon="@Icons.Material.Outlined.KeyOff"
+                             Size="Size.Large"
+                             Color="Color.Secondary" />
+                    <MudText Typo="Typo.body2"
+                             Color="Color.Secondary">
+                        Атрибуты пока не добавлены
+                    </MudText>
+                </div>
+            }
+            else
+            {
+                @foreach (var claim in Claims)
+                {
+                    <MudGrid @key="claim"
+                             Spacing="2"
+                             Class="claim-row">
+                        <MudItem xs="12" md="5">
+                            <MudTextField T="string"
+                                          Value="claim.Type"
+                                          ValueChanged="@(type => ChangeType(claim, type))"
+                                          Label="Тип"
+                                          Variant="Variant.Outlined"
+                                          Margin="Margin.Dense"
+                                          Validation="@Validator.For(
+                                                          claim,
+                                                          static claim => claim.Type)" />
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            @if (GetCatalog(claim.Type) is { } catalog)
+                            {
+                                <MudSelect T="string"
+                                           @bind-Value="claim.Value"
+                                           ToStringFunc="@(value => GetClaimName(catalog, value))"
+                                           Label="Значение"
+                                           Variant="Variant.Outlined"
+                                           Margin="Margin.Dense"
+                                           Required="true"
+                                           RequiredError="Выберите значение атрибута">
+                                    @foreach (var option in catalog.Items)
+                                    {
+                                        <MudSelectItem T="string" Value="@option.Code">
+                                            @GetClaimName(catalog, option.Code)
+                                        </MudSelectItem>
+                                    }
+                                    @if (!string.IsNullOrEmpty(claim.Value) && catalog.Items.All(option => option.Code != claim.Value))
+                                    {
+                                        <MudSelectItem T="string" Value="@claim.Value" Disabled="true">
+                                            @claim.Value (нет в каталоге)
+                                        </MudSelectItem>
+                                    }
+                                </MudSelect>
+                            }
+                            else
+                            {
+                                <MudTextField T="string"
+                                              @bind-Value="claim.Value"
+                                              Label="Значение"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"
+                                              Validation="@Validator.For(
+                                                              claim,
+                                                              static claim => claim.Value)" />
+                            }
+                        </MudItem>
+                        <MudItem xs="12" md="1"
+                                 Class="claim-remove">
+                            <MudIconButton Icon="@Icons.Material.Outlined.Delete"
+                                           Color="Color.Error"
+                                           OnClick="@(() => RemoveClaim(claim))"
+                                           aria-label="Удалить атрибут" />
+                        </MudItem>
+                    </MudGrid>
+                }
+            }
+        </MudStack>
+    </ChildContent>
+</LoadableContent>

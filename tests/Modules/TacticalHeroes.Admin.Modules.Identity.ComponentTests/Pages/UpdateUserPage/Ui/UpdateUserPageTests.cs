@@ -1,13 +1,17 @@
 using System.Net;
 using System.Text;
+using System.Text.Json;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 
+using MudBlazor;
 using MudBlazor.Services;
 
 using TacticalHeroes.Admin.Api.DependencyInjection;
+using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Ui;
+using TacticalHeroes.Admin.Modules.Identity.Entities.Roles.Ui;
 using TacticalHeroes.Admin.Shared.Ui.Forms;
 using TacticalHeroes.Admin.Shared.Ui.Layout;
 
@@ -61,8 +65,41 @@ public sealed class UpdateUserPageTests : BunitContext
         component.WaitForAssertion(() =>
         {
             _handler.PutCount.ShouldBe(1);
+            using var body = JsonDocument.Parse(_handler.RequestBody!);
+            body.RootElement.GetProperty("roleIds").EnumerateArray().Select(value => value.GetGuid())
+                .ShouldBe([IdentityCatalogResponses.RoleId]);
+            body.RootElement.GetProperty("claims")[0].GetProperty("value").GetString().ShouldBe("retained");
             Services.GetRequiredService<NavigationManager>().Uri
                 .ShouldEndWith(IdentityRoutes.Users);
+        });
+    }
+
+    [Theory(DisplayName = "Submit should send selected roles and catalog claims when access is edited")]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Submit_Should_SendSelectedRolesAndCatalogClaims_When_AccessIsEdited(bool keepRole)
+    {
+        var component = Render<UpdateUserPageComponent>(parameters => parameters.Add(page => page.Id, _userId));
+        Guid[] roles = keepRole ? [IdentityCatalogResponses.RoleId] : [];
+        await component.InvokeAsync(() => component.FindComponent<RoleSelect>().FindComponent<MudSelect<Guid>>()
+            .Instance.SelectedValuesChanged.InvokeAsync(roles));
+        var claims = component.FindComponent<ClaimsEditor>();
+        claims.FindAll("button").Single(button => button.TextContent.Trim() == "Разрешение").Click();
+        await component.InvokeAsync(() => claims.FindComponent<MudSelect<string>>()
+            .Instance.ValueChanged.InvokeAsync("identity.users.read"));
+
+        component.Find(".submit-action").Click();
+
+        component.WaitForAssertion(() =>
+        {
+            _handler.PutCount.ShouldBe(1);
+            using var body = JsonDocument.Parse(_handler.RequestBody!);
+            body.RootElement.GetProperty("roleIds").EnumerateArray().Select(value => value.GetGuid()).ShouldBe(roles);
+            var sentClaims = body.RootElement.GetProperty("claims");
+            sentClaims.GetArrayLength().ShouldBe(2);
+            sentClaims[0].GetProperty("value").GetString().ShouldBe("retained");
+            sentClaims[1].GetProperty("type").GetString().ShouldBe("permission");
+            sentClaims[1].GetProperty("value").GetString().ShouldBe("identity.users.read");
         });
     }
 
@@ -84,16 +121,23 @@ public sealed class UpdateUserPageTests : BunitContext
 
     private sealed class UpdateUserHandler(Guid userId) : HttpMessageHandler
     {
+        public string? RequestBody { get; private set; }
+
         public int PutCount { get; private set; }
 
-        protected override Task<HttpResponseMessage> SendAsync(
+        protected override async Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
+            if (IdentityCatalogResponses.Create(request) is { } response)
+            {
+                return response;
+            }
+
             if (request.Method == HttpMethod.Get &&
                 request.RequestUri!.AbsolutePath.EndsWith("/statuses", StringComparison.Ordinal))
             {
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(
                         """
@@ -107,12 +151,12 @@ public sealed class UpdateUserPageTests : BunitContext
                         """,
                         Encoding.UTF8,
                         "application/json"),
-                });
+                };
             }
 
             if (request.Method == HttpMethod.Get)
             {
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(
                         $$"""
@@ -123,18 +167,20 @@ public sealed class UpdateUserPageTests : BunitContext
                           "isConfirmed": true,
                           "status": "active",
                           "statusDisplayName": "Active",
-                          "claims": []
+                          "claims": [{"type":"custom","value":"retained"}],
+                          "roleIds": ["{{IdentityCatalogResponses.RoleId:D}}"]
                         }
                         """,
                         Encoding.UTF8,
                         "application/json"),
-                });
+                };
             }
 
             request.Method.ShouldBe(HttpMethod.Put);
+            RequestBody = await request.Content!.ReadAsStringAsync(cancellationToken);
             PutCount++;
 
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NoContent));
+            return new HttpResponseMessage(HttpStatusCode.NoContent);
         }
     }
 }

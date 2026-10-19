@@ -1,13 +1,16 @@
 using System.Net;
 using System.Text;
+using System.Text.Json;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 
+using MudBlazor;
 using MudBlazor.Services;
 
 using TacticalHeroes.Admin.Api.DependencyInjection;
+using TacticalHeroes.Admin.Modules.Identity.Entities.Roles.Ui;
 using TacticalHeroes.Admin.Shared.Ui.Forms;
 using TacticalHeroes.Admin.Shared.Ui.Layout;
 
@@ -50,20 +53,27 @@ public sealed class CreateUserPageTests : BunitContext
         });
     }
 
-    [Fact(DisplayName = "Submit should navigate to update page when user is valid")]
-    public void Submit_Should_NavigateToUpdatePage_When_UserIsValid()
+    [Theory(DisplayName = "Submit should send selected roles and navigate when user is valid")]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Submit_Should_SendSelectedRolesAndNavigate_When_UserIsValid(bool assignRole)
     {
         var component = Render<CreateUserPageComponent>();
         IReadOnlyList<AngleSharp.Dom.IElement> inputs = component.WaitForElements("input");
         inputs[0].Change("admin@example.test");
         inputs[1].Change("admin");
         inputs[2].Change("StrongPassword1!");
+        Guid[] roles = assignRole ? [IdentityCatalogResponses.RoleId] : [];
+        await component.InvokeAsync(() => component.FindComponent<RoleSelect>().FindComponent<MudSelect<Guid>>()
+            .Instance.SelectedValuesChanged.InvokeAsync(roles));
 
         component.Find(".submit-action").Click();
 
         component.WaitForAssertion(() =>
         {
             _handler.PostCount.ShouldBe(1);
+            using var body = JsonDocument.Parse(_handler.RequestBody!);
+            body.RootElement.GetProperty("roleIds").EnumerateArray().Select(value => value.GetGuid()).ShouldBe(roles);
             Services.GetRequiredService<NavigationManager>().Uri
                 .ShouldEndWith(IdentityRoutes.User(_createdId));
         });
@@ -86,15 +96,22 @@ public sealed class CreateUserPageTests : BunitContext
 
     private sealed class CreateUserHandler(Guid createdId) : HttpMessageHandler
     {
+        public string? RequestBody { get; private set; }
+
         public int PostCount { get; private set; }
 
-        protected override Task<HttpResponseMessage> SendAsync(
+        protected override async Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
+            if (IdentityCatalogResponses.Create(request) is { } response)
+            {
+                return response;
+            }
+
             if (request.Method == HttpMethod.Get)
             {
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(
                         """
@@ -108,19 +125,20 @@ public sealed class CreateUserPageTests : BunitContext
                         """,
                         Encoding.UTF8,
                         "application/json"),
-                });
+                };
             }
 
             request.Method.ShouldBe(HttpMethod.Post);
+            RequestBody = await request.Content!.ReadAsStringAsync(cancellationToken);
             PostCount++;
 
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.Created)
+            return new HttpResponseMessage(HttpStatusCode.Created)
             {
                 Content = new StringContent(
                     $$"""{"id":"{{createdId:D}}"}""",
                     Encoding.UTF8,
                     "application/json"),
-            });
+            };
         }
     }
 }

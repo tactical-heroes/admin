@@ -85,6 +85,14 @@ raw internal route strings. Kiota client code is generated from
 `openapi/tactical-heroes.json` into the API project's intermediate output during
 the build and is not committed to the repository.
 
+User create/update forms send the complete `roleIds` selection; an empty array
+removes all role assignments. Role forms preserve and edit `isDefault`, which
+controls assignment during registration. Both forms load permission and section
+claims from `/api/v1/claims/permissions` and `/api/v1/claims/sections`, using the
+returned claim type and item code. Other claim types remain editable as text.
+Catalog failures offer retry and preserve existing assignments. These forms
+require the corresponding Identity API contracts from API `development`.
+
 The client shell and module RCLs follow Feature-Sliced Design. Each `Pages` slice
 owns its route, form models, validators, and API adapters. Create and update flows
 use separate page slices; reusable domain controls belong in `Entities`.
