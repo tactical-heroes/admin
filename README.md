@@ -34,7 +34,8 @@ Run tests:
 dotnet test TacticalHeroes.Admin.slnx --configuration Release
 ```
 
-Run the admin application:
+Before the first run, apply the [Admin database migrations](#data-protection-keys)
+to the existing local PostgreSQL database. Then run the admin application:
 
 ```bash
 dotnet run --project src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj --launch-profile https
@@ -61,7 +62,12 @@ Set `ConnectionStrings:PostgreSqlConnectionString` in configuration or override
 the local default through `ConnectionStrings__PostgreSqlConnectionString`.
 Development and production use separate databases.
 
-Local development requires PostgreSQL and the Admin migrations. The core migrator
+Local development uses the existing `tactical-heroes` database on
+`localhost:5432` as `postgres`. The host's `appsettings.Development.json` and the
+migrator's `appsettings.Migrator.json` include the local development password.
+Override the connection string if your local credentials differ.
+
+Apply the Admin migrations before starting the application. The core migrator
 generates and applies migrations using `appsettings.Migrator.json`:
 
 ```bash
