@@ -41,6 +41,13 @@ to the existing local PostgreSQL database. Then run the admin application:
 dotnet run --project src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj --launch-profile https
 ```
 
+The local host uses the development API by default. Open
+`https://localhost:5173`; the login page stays on this origin while the BFF
+proxies authentication to the API. The OIDC proxy route rewrites the API's
+absolute `/login` redirect to the local login page and preserves its query.
+The API client must allow `https://localhost:5173/oauth/callback` and
+`https://localhost:5173/oauth/logout-callback`.
+
 ## Repository Layout
 
 - `src/TacticalHeroes.Admin/` - ASP.NET Core host and same-origin YARP gateway.
