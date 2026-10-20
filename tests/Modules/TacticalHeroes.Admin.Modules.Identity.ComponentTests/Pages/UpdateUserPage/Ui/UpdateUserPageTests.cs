@@ -60,7 +60,8 @@ public sealed class UpdateUserPageTests : BunitContext
     {
         var component = Render<UpdateUserPageComponent>(parameters => parameters
             .Add(page => page.Id, _userId));
-        component.WaitForElement(".submit-action").Click();
+        component.WaitForElement(".claim-remove button").Click();
+        component.Find(".submit-action").Click();
 
         component.WaitForAssertion(() =>
         {
@@ -68,7 +69,7 @@ public sealed class UpdateUserPageTests : BunitContext
             using var body = JsonDocument.Parse(_handler.RequestBody!);
             body.RootElement.GetProperty("roleIds").EnumerateArray().Select(value => value.GetGuid())
                 .ShouldBe([IdentityCatalogResponses.RoleId]);
-            body.RootElement.GetProperty("claims")[0].GetProperty("value").GetString().ShouldBe("retained");
+            body.RootElement.GetProperty("claims").GetArrayLength().ShouldBe(0);
             Services.GetRequiredService<NavigationManager>().Uri
                 .ShouldEndWith(IdentityRoutes.Users);
         });
@@ -84,6 +85,7 @@ public sealed class UpdateUserPageTests : BunitContext
         await component.InvokeAsync(() => component.FindComponent<RoleSelect>().FindComponent<MudSelect<Guid>>()
             .Instance.SelectedValuesChanged.InvokeAsync(roles));
         var claims = component.FindComponent<ClaimsEditor>();
+        claims.Find(".claim-remove button").Click();
         await component.InvokeAsync(() => claims.FindComponents<MudCheckBox<bool?>>()
             .Single(box => box.Instance.UserAttributes?["aria-label"]?.ToString() == "Пользователи: Просмотр")
             .Instance.ValueChanged.InvokeAsync(true));
@@ -96,10 +98,9 @@ public sealed class UpdateUserPageTests : BunitContext
             using var body = JsonDocument.Parse(_handler.RequestBody!);
             body.RootElement.GetProperty("roleIds").EnumerateArray().Select(value => value.GetGuid()).ShouldBe(roles);
             var sentClaims = body.RootElement.GetProperty("claims");
-            sentClaims.GetArrayLength().ShouldBe(2);
-            sentClaims[0].GetProperty("value").GetString().ShouldBe("retained");
-            sentClaims[1].GetProperty("type").GetString().ShouldBe("permission");
-            sentClaims[1].GetProperty("value").GetString().ShouldBe("identity.users.read");
+            sentClaims.GetArrayLength().ShouldBe(1);
+            sentClaims[0].GetProperty("type").GetString().ShouldBe("permission");
+            sentClaims[0].GetProperty("value").GetString().ShouldBe("identity.users.read");
         });
     }
 

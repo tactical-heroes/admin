@@ -59,14 +59,15 @@ public sealed class UpdateRolePageTests : BunitContext
     {
         var component = Render<UpdateRolePageComponent>(parameters => parameters
             .Add(page => page.Id, _roleId));
-        component.WaitForElement(".submit-action").Click();
+        component.WaitForElement(".claim-remove button").Click();
+        component.Find(".submit-action").Click();
 
         component.WaitForAssertion(() =>
         {
             _handler.PutCount.ShouldBe(1);
             using var body = JsonDocument.Parse(_handler.RequestBody!);
             body.RootElement.GetProperty("isDefault").GetBoolean().ShouldBeTrue();
-            body.RootElement.GetProperty("claims")[0].GetProperty("value").GetString().ShouldBe("retained");
+            body.RootElement.GetProperty("claims").GetArrayLength().ShouldBe(0);
             Services.GetRequiredService<NavigationManager>().Uri
                 .ShouldEndWith(IdentityRoutes.Roles);
         });

@@ -10,6 +10,7 @@ using MudBlazor;
 using MudBlazor.Services;
 
 using TacticalHeroes.Admin.Api.DependencyInjection;
+using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Ui;
 using TacticalHeroes.Admin.Shared.Ui.Forms;
 using TacticalHeroes.Admin.Shared.Ui.Layout;
 
@@ -73,13 +74,10 @@ public sealed class CreateRolePageTests : BunitContext
     {
         var component = Render<CreateRolePageComponent>();
         component.Find("input").Change("Administrators");
-        component.FindAll("button")
-            .Single(button => button.TextContent.Contains("Добавить атрибут", StringComparison.Ordinal))
-            .Click();
-
-        var inputs = component.FindAll(".claim-row input");
-        inputs[0].Change("custom");
-        inputs[1].Change("read");
+        component.WaitForElement(".permission-table");
+        await component.InvokeAsync(() => component.FindComponent<ClaimsEditor>().FindComponents<MudCheckBox<bool?>>()
+            .Single(box => box.Instance.UserAttributes?["aria-label"]?.ToString() == "Пользователи: Просмотр")
+            .Instance.ValueChanged.InvokeAsync(true));
         await component.InvokeAsync(() => component.FindComponent<MudSwitch<bool>>().Instance.ValueChanged.InvokeAsync(true));
 
         component.Find(".submit-action").Click();
@@ -89,8 +87,8 @@ public sealed class CreateRolePageTests : BunitContext
             _handler.PostCount.ShouldBe(1);
             using var body = JsonDocument.Parse(_handler.RequestBody!);
             body.RootElement.GetProperty("isDefault").GetBoolean().ShouldBeTrue();
-            body.RootElement.GetProperty("claims")[0].GetProperty("type").GetString().ShouldBe("custom");
-            body.RootElement.GetProperty("claims")[0].GetProperty("value").GetString().ShouldBe("read");
+            body.RootElement.GetProperty("claims")[0].GetProperty("type").GetString().ShouldBe("permission");
+            body.RootElement.GetProperty("claims")[0].GetProperty("value").GetString().ShouldBe("identity.users.read");
         });
     }
 
@@ -105,25 +103,6 @@ public sealed class CreateRolePageTests : BunitContext
         {
             _handler.PostCount.ShouldBe(0);
             component.Markup.ShouldContain("Укажите название роли");
-        });
-    }
-
-    [Fact(DisplayName = "Submit should display validation errors when claim is empty")]
-    public void Submit_Should_DisplayValidationErrors_When_ClaimIsEmpty()
-    {
-        var component = Render<CreateRolePageComponent>();
-        component.Find("input").Change("Administrators");
-        component.FindAll("button")
-            .Single(button => button.TextContent.Contains("Добавить атрибут", StringComparison.Ordinal))
-            .Click();
-
-        component.Find(".submit-action").Click();
-
-        component.WaitForAssertion(() =>
-        {
-            _handler.PostCount.ShouldBe(0);
-            component.Markup.ShouldContain("Укажите тип атрибута");
-            component.Markup.ShouldContain("Укажите значение атрибута");
         });
     }
 

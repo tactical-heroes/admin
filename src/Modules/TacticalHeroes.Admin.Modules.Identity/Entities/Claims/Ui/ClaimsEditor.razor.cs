@@ -16,8 +16,6 @@ public partial class ClaimsEditor(ClaimCatalogApi api) : CancelableComponentBase
         ("delete", "Удаление")
     ];
 
-    private ClaimValueValidator Validator { get; } = new();
-
     [Parameter, EditorRequired]
     public IList<ClaimValue> Claims { get; set; } = [];
 
@@ -96,14 +94,6 @@ public partial class ClaimsEditor(ClaimCatalogApi api) : CancelableComponentBase
 
     private static IEnumerable<ClaimOption> ForAction(IEnumerable<ClaimOption> permissions, string action) =>
         permissions.Where(option => option.Code.EndsWith($".{action}", StringComparison.Ordinal));
-
-    private static void ChangeType(ClaimValue claim, string? type)
-    {
-        claim.Type = type ?? string.Empty;
-        claim.Value = string.Empty;
-    }
-
-    private void AddClaim() => Claims.Add(new ClaimValue());
 
     private void RemoveClaim(ClaimValue claim) => Claims.Remove(claim);
 }

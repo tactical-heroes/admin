@@ -107,8 +107,9 @@ public sealed class ClaimsEditorTests : IdentityCatalogTestContext
         await component.InvokeAsync(() => component.FindComponent<MudExpansionPanel>().Instance.ExpandAsync());
 
         component.FindAll(".claim-row").Count.ShouldBe(2);
-        component.Markup.ShouldContain("Разрешение отсутствует в каталоге");
-        component.FindAll("button[aria-label='Удалить атрибут']")[0].Click();
+        component.FindAll(".claim-row input").ShouldBeEmpty();
+        component.Markup.ShouldContain("Удалите их перед сохранением");
+        component.FindAll("button[aria-label='Удалить назначение']")[0].Click();
         claims.ShouldHaveSingleItem().Value.ShouldBe("retired.permission");
     }
 
@@ -137,36 +138,23 @@ public sealed class ClaimsEditorTests : IdentityCatalogTestContext
         CheckBox(component, "Пользователи: все действия").Instance.GetState(box => box.Value).ShouldBe(expected);
     }
 
-    [Fact(DisplayName = "AddClaim should append empty custom input when the add button is clicked")]
-    public async Task AddClaim_Should_AppendEmptyCustomInput_When_TheAddButtonIsClicked()
+    [Fact(DisplayName = "Render should expose only permission matrix when claims belong to catalog")]
+    public void Render_Should_ExposeOnlyPermissionMatrix_When_ClaimsBelongToCatalog()
     {
-        IList<ClaimValue> claims = [];
+        IList<ClaimValue> claims = [new() { Type = "permission", Value = "identity.users.read" }];
+
         var component = RenderMatrix(claims);
-        await component.InvokeAsync(() => component.FindComponent<MudExpansionPanel>().Instance.ExpandAsync());
 
-        component.FindAll("button").Single(button => button.TextContent.Contains("Добавить атрибут")).Click();
-
-        claims.ShouldHaveSingleItem().Type.ShouldBeEmpty();
-        component.FindAll(".claim-row").Count.ShouldBe(1);
+        component.FindAll(".permission-table").ShouldNotBeEmpty();
+        component.FindComponents<MudExpansionPanel>().ShouldBeEmpty();
+        component.Markup.ShouldNotContain("Добавить атрибут");
     }
 
-    [Fact(DisplayName = "ChangeType should clear the previous value when claim type changes")]
-    public async Task ChangeType_Should_ClearThePreviousValue_When_ClaimTypeChanges()
-    {
-        IList<ClaimValue> claims = [new ClaimValue { Type = "custom", Value = "old" }];
-        var component = RenderMatrix(claims);
-        await component.InvokeAsync(() => component.FindComponent<MudExpansionPanel>().Instance.ExpandAsync());
-
-        component.Find(".claim-row input").Change("another");
-
-        claims[0].Type.ShouldBe("another");
-        claims[0].Value.ShouldBeEmpty();
-    }
-
-    [Theory(DisplayName = "Validate should reject sections when claim type is retired")]
+    [Theory(DisplayName = "Validate should reject unsupported claims when claim type is not permission")]
     [InlineData("section")]
     [InlineData(" SECTION ")]
-    public void Validate_Should_RejectSection_When_ClaimTypeIsRetired(string type)
+    [InlineData("custom")]
+    public void Validate_Should_RejectUnsupportedClaim_When_TypeIsNotPermission(string type)
     {
         var result = new ClaimValueValidator().Validate(new ClaimValue { Type = type, Value = "identity" });
 

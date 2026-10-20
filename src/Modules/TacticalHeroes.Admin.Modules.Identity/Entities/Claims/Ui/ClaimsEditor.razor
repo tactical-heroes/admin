@@ -85,44 +85,29 @@
             Доступные пункты меню определяются разрешениями на просмотр.
         </MudText>
 
-        <MudExpansionPanels Elevation="0" Class="mt-4">
-            <MudExpansionPanel Text="@($"Дополнительные атрибуты ({AdditionalClaims.Count()})")">
-                @foreach (var claim in AdditionalClaims.ToArray())
-                {
-                    <MudGrid @key="claim" Spacing="2" Class="claim-row">
-                        <MudItem xs="12" md="5">
-                            <MudTextField T="string"
-                                          Value="claim.Type"
-                                          ValueChanged="@(type => ChangeType(claim, type))"
-                                          Label="Тип"
-                                          Variant="Variant.Outlined"
-                                          Margin="Margin.Dense"
-                                          Validation="@Validator.For(claim, static item => item.Type)" />
-                        </MudItem>
-                        <MudItem xs="12" md="6">
-                            <MudTextField T="string"
-                                          @bind-Value="claim.Value"
-                                          Label="Значение"
-                                          Variant="Variant.Outlined"
-                                          Margin="Margin.Dense"
-                                          HelperText="@(IsPermission(claim) ? "Разрешение отсутствует в каталоге" : null)"
-                                          Validation="@Validator.For(claim, static item => item.Value)" />
-                        </MudItem>
-                        <MudItem xs="12" md="1" Class="claim-remove">
-                            <MudIconButton Icon="@Icons.Material.Outlined.Delete"
-                                           Color="Color.Error"
-                                           OnClick="@(() => RemoveClaim(claim))"
-                                           aria-label="Удалить атрибут" />
-                        </MudItem>
-                    </MudGrid>
-                }
-                <MudButton Variant="Variant.Text"
-                           Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.Add"
-                           OnClick="AddClaim">
-                    Добавить атрибут
-                </MudButton>
-            </MudExpansionPanel>
-        </MudExpansionPanels>
+        @if (AdditionalClaims.Any())
+        {
+            <MudExpansionPanels Elevation="0" Class="mt-4">
+                <MudExpansionPanel Text="@($"Назначения вне каталога ({AdditionalClaims.Count()})")">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                        Эти назначения больше не поддерживаются. Удалите их перед сохранением.
+                    </MudText>
+                    @foreach (var claim in AdditionalClaims.ToArray())
+                    {
+                        <MudGrid @key="claim" Spacing="2" Class="claim-row">
+                            <MudItem xs="10" Class="d-flex align-center">
+                                <MudText>@($"{claim.Type}: {claim.Value}")</MudText>
+                            </MudItem>
+                            <MudItem xs="2" Class="claim-remove">
+                                <MudIconButton Icon="@Icons.Material.Outlined.Delete"
+                                               Color="Color.Error"
+                                               OnClick="@(() => RemoveClaim(claim))"
+                                               aria-label="Удалить назначение" />
+                            </MudItem>
+                        </MudGrid>
+                    }
+                </MudExpansionPanel>
+            </MudExpansionPanels>
+        }
     </ChildContent>
 </LoadableContent>
