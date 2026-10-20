@@ -59,7 +59,7 @@ public sealed class UpdateRolePageTests : BunitContext
     {
         var component = Render<UpdateRolePageComponent>(parameters => parameters
             .Add(page => page.Id, _roleId));
-        component.WaitForElement(".claim-remove button").Click();
+        component.WaitForElement(".permission-table");
         component.Find(".submit-action").Click();
 
         component.WaitForAssertion(() =>
@@ -79,7 +79,6 @@ public sealed class UpdateRolePageTests : BunitContext
         var component = Render<UpdateRolePageComponent>(parameters => parameters.Add(page => page.Id, _roleId));
         await component.InvokeAsync(() => component.FindComponent<MudSwitch<bool>>().Instance.ValueChanged.InvokeAsync(false));
         var claims = component.FindComponent<ClaimsEditor>();
-        claims.Find(".claim-remove button").Click();
         await component.InvokeAsync(() => claims.FindComponents<MudCheckBox<bool?>>()
             .Single(box => box.Instance.UserAttributes?["aria-label"]?.ToString() == "Пользователи: Просмотр")
             .Instance.ValueChanged.InvokeAsync(true));
@@ -139,7 +138,7 @@ public sealed class UpdateRolePageTests : BunitContext
                           "id": "{{roleId:D}}",
                           "name": "Administrators",
                           "isDefault": true,
-                          "claims": [{"type":"custom","value":"retained"}]
+                          "claims": []
                         }
                         """,
                         Encoding.UTF8,

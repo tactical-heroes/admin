@@ -29,8 +29,8 @@ public sealed class ClaimsEditorTests : IdentityCatalogTestContext
         IList<ClaimValue> claims =
         [
             new() { Type = "permission", Value = "identity.users.read" },
-            new() { Type = "custom", Value = "kept" },
-            new() { Type = "permission", Value = "retired.permission" }
+            new() { Type = "permission", Value = "identity.roles.read" },
+            new() { Type = "permission", Value = "compendium.factions.read" }
         ];
         var component = RenderMatrix(claims);
         var row = CheckBox(component, "Пользователи: все действия");
@@ -44,7 +44,7 @@ public sealed class ClaimsEditorTests : IdentityCatalogTestContext
         claims.Count(claim => claim.Value == "identity.users.update").ShouldBe(1);
         await component.InvokeAsync(() => CheckBox(component, "Пользователи: все действия")
             .Instance.ValueChanged.InvokeAsync(false));
-        claims.Select(claim => claim.Value).ShouldBe(["kept", "retired.permission"]);
+        claims.Select(claim => claim.Value).ShouldBe(["identity.roles.read", "compendium.factions.read"]);
     }
 
     [Fact(DisplayName = "ForAction should respect module when column is selected")]
@@ -93,24 +93,6 @@ public sealed class ClaimsEditorTests : IdentityCatalogTestContext
 
         component.WaitForElement(".permission-table");
         claims.ShouldHaveSingleItem().Value.ShouldBe("identity.users.read");
-    }
-
-    [Fact(DisplayName = "RemoveClaim should preserve additional claims when catalog does not contain them")]
-    public async Task RemoveClaim_Should_PreserveAdditionalClaims_When_CatalogDoesNotContainThem()
-    {
-        IList<ClaimValue> claims =
-        [
-            new() { Type = "custom", Value = "kept" },
-            new() { Type = "permission", Value = "retired.permission" }
-        ];
-        var component = RenderMatrix(claims);
-        await component.InvokeAsync(() => component.FindComponent<MudExpansionPanel>().Instance.ExpandAsync());
-
-        component.FindAll(".claim-row").Count.ShouldBe(2);
-        component.FindAll(".claim-row input").ShouldBeEmpty();
-        component.Markup.ShouldContain("Удалите их перед сохранением");
-        component.FindAll("button[aria-label='Удалить назначение']")[0].Click();
-        claims.ShouldHaveSingleItem().Value.ShouldBe("retired.permission");
     }
 
     [Theory(DisplayName = "IsPermission should normalize known claim types when claims are classified")]

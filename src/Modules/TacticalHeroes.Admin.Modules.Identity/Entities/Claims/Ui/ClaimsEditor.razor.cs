@@ -30,11 +30,6 @@ public partial class ClaimsEditor(ClaimCatalogApi api) : CancelableComponentBase
     private IEnumerable<IGrouping<string, ClaimOption>> Modules =>
         Permissions?.Items.GroupBy(option => option.ModuleCode) ?? [];
 
-    private IEnumerable<ClaimValue> AdditionalClaims => Claims.Where(claim =>
-        !IsPermission(claim) || Permissions?.Items.All(option =>
-            option.Code != claim.Value || !Actions.Any(action =>
-                option.Code.EndsWith($".{action.Code}", StringComparison.Ordinal))) != false);
-
     private int SelectedCount => Permissions?.Items.Count(option => IsSelected(option.Code)) ?? 0;
 
     protected override Task OnInitializedAsync() =>
@@ -94,6 +89,4 @@ public partial class ClaimsEditor(ClaimCatalogApi api) : CancelableComponentBase
 
     private static IEnumerable<ClaimOption> ForAction(IEnumerable<ClaimOption> permissions, string action) =>
         permissions.Where(option => option.Code.EndsWith($".{action}", StringComparison.Ordinal));
-
-    private void RemoveClaim(ClaimValue claim) => Claims.Remove(claim);
 }

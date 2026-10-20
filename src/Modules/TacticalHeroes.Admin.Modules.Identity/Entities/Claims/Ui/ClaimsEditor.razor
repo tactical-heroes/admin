@@ -84,30 +84,5 @@
         <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-2">
             Доступные пункты меню определяются разрешениями на просмотр.
         </MudText>
-
-        @if (AdditionalClaims.Any())
-        {
-            <MudExpansionPanels Elevation="0" Class="mt-4">
-                <MudExpansionPanel Text="@($"Назначения вне каталога ({AdditionalClaims.Count()})")">
-                    <MudText Typo="Typo.caption" Color="Color.Secondary">
-                        Эти назначения больше не поддерживаются. Удалите их перед сохранением.
-                    </MudText>
-                    @foreach (var claim in AdditionalClaims.ToArray())
-                    {
-                        <MudGrid @key="claim" Spacing="2" Class="claim-row">
-                            <MudItem xs="10" Class="d-flex align-center">
-                                <MudText>@($"{claim.Type}: {claim.Value}")</MudText>
-                            </MudItem>
-                            <MudItem xs="2" Class="claim-remove">
-                                <MudIconButton Icon="@Icons.Material.Outlined.Delete"
-                                               Color="Color.Error"
-                                               OnClick="@(() => RemoveClaim(claim))"
-                                               aria-label="Удалить назначение" />
-                            </MudItem>
-                        </MudGrid>
-                    }
-                </MudExpansionPanel>
-            </MudExpansionPanels>
-        }
     </ChildContent>
 </LoadableContent>
