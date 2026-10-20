@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using System.Text.Json;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
@@ -8,6 +9,7 @@ using MudBlazor;
 using MudBlazor.Services;
 
 using TacticalHeroes.Admin.Api.DependencyInjection;
+using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Model;
 
 namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests;
 
@@ -35,6 +37,8 @@ public abstract class IdentityCatalogTestContext : BunitContext
 
         public bool MultipleRolePages { get; set; }
 
+        public ClaimCatalog? Permissions { get; set; }
+
         public List<Uri> Requests { get; } = [];
 
         protected override Task<HttpResponseMessage> SendAsync(
@@ -60,6 +64,15 @@ public abstract class IdentityCatalogTestContext : BunitContext
                         {"items":[{"id":"{{id}}","name":"Role {{(secondPage ? 2 : 1)}}","isDefault":false}],
                          "pageNumber":{{(secondPage ? 2 : 1)}},"pageSize":100,"totalPages":2,"totalCount":101}
                         """, Encoding.UTF8, "application/json"),
+                });
+            }
+
+            if (Permissions is not null && request.RequestUri!.AbsolutePath == "/api/v1/claims/permissions")
+            {
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(
+                        JsonSerializer.Serialize(Permissions, JsonSerializerOptions.Web), Encoding.UTF8, "application/json")
                 });
             }
 

@@ -100,11 +100,21 @@ the build and is not committed to the repository.
 
 User create/update forms send the complete `roleIds` selection; an empty array
 removes all role assignments. Role forms preserve and edit `isDefault`, which
-controls assignment during registration. Both forms load permission and section
-claims from `/api/v1/claims/permissions` and `/api/v1/claims/sections`, using the
-returned claim type and item code. Other claim types remain editable as text.
-Catalog failures offer retry and preserve existing assignments. These forms
-require the corresponding Identity API contracts from API `development`.
+controls assignment during registration. Both forms edit a permission matrix from
+`/api/v1/claims/permissions`, grouped by `moduleCode`/`moduleDisplayName` and resource.
+Rows, action columns and whole modules support bulk selection. Other claim types
+remain editable as text; retired `section` claims are rejected. Catalog failures
+offer retry and preserve existing assignments.
+
+Menu items require the resource's `read` permission; empty module groups are hidden.
+Pages and buttons require their corresponding permissions, and editing also
+requires `read` to load the existing entity. Effective permissions combine direct
+user claims with role claims. Direct user assignments add access; removing one
+does not revoke access inherited from a role. The API enforces permissions itself.
+
+Deploy the matching API with `RemoveSectionClaims` before this frontend. The old
+sections catalog is no longer used. Sign in again after upgrading so the ID token
+and Blazor authentication state contain the current permissions.
 
 The client shell and module RCLs follow Feature-Sliced Design. Each `Pages` slice
 owns its route, form models, validators, and API adapters. Create and update flows

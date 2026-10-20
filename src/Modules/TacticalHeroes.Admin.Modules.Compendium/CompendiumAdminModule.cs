@@ -14,6 +14,7 @@ using TacticalHeroes.Admin.Modules.Compendium.Pages.UnitListPage.Api;
 using TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateFactionPage.Api;
 using TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateHeroPage.Api;
 using TacticalHeroes.Admin.Modules.Compendium.Pages.UpdateUnitPage.Api;
+using TacticalHeroes.Admin.Shared.Authorization;
 
 namespace TacticalHeroes.Admin.Modules.Compendium;
 
@@ -24,26 +25,30 @@ public static class CompendiumAdminModule
     public static IReadOnlyList<AdminNavigationGroup> NavigationGroups { get; } =
     [
         new(
-            "Справочник",
+            "Справочники",
             [
                 new(
                     "Фракции",
                     CompendiumRoutes.Factions,
-                    Icons.Material.Filled.Flag),
+                    Icons.Material.Filled.Flag,
+                    CompendiumPermissions.Factions.Read),
                 new(
                     "Герои",
                     CompendiumRoutes.Heroes,
-                    Icons.Material.Filled.Person),
+                    Icons.Material.Filled.Person,
+                    CompendiumPermissions.Heroes.Read),
                 new(
                     "Юниты",
                     CompendiumRoutes.Units,
-                    Icons.Material.Filled.Groups),
+                    Icons.Material.Filled.Groups,
+                    CompendiumPermissions.Units.Read),
             ]),
     ];
 
     public static IServiceCollection AddCompendiumAdminModule(
         this IServiceCollection services)
     {
+        services.AddPermissionPolicies(CompendiumPermissions.All);
         services.AddScoped<FactionListApi>();
         services.AddScoped<CreateFactionApi>();
         services.AddScoped<UpdateFactionApi>();

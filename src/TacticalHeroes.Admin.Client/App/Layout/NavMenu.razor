@@ -1,29 +1,33 @@
-<nav class="nav-shell" aria-label="Основная навигация">
-<MudNavMenu>
-    <MudNavLink Href="@AdminRoutes.Home"
-                Match="NavLinkMatch.All"
-                Icon="@Icons.Material.Filled.SpaceDashboard">
-        Главная
-    </MudNavLink>
+<AuthorizeView Context="navigationAuthentication">
+    <Authorized>
+        <nav class="nav-shell" aria-label="Основная навигация">
+            <MudNavMenu>
+                <MudNavLink Href="@AdminRoutes.Home"
+                            Match="NavLinkMatch.All"
+                            Icon="@Icons.Material.Filled.SpaceDashboard">
+                    Главная
+                </MudNavLink>
 
-    @foreach (var group in AdminModules.NavigationGroups)
-    {
-        <details class="nav-module" open="@IsCurrentGroup(group)">
-            <summary class="nav-module-header">
-                <span>@group.Title</span>
-                <span class="nav-module-chevron" aria-hidden="true"></span>
-            </summary>
-            <div class="nav-module-items">
-                @foreach (var item in group.Items)
+                @foreach (var group in VisibleGroups(navigationAuthentication.User))
                 {
-                    <MudNavLink Href="@item.Href"
-                                Match="NavLinkMatch.Prefix"
-                                Icon="@item.Icon">
-                        @item.Label
-                    </MudNavLink>
+                    <details class="nav-module" open="@IsCurrentGroup(group)">
+                        <summary class="nav-module-header">
+                            <span>@group.Title</span>
+                            <span class="nav-module-chevron" aria-hidden="true"></span>
+                        </summary>
+                        <div class="nav-module-items">
+                            @foreach (var item in group.Items)
+                            {
+                                <MudNavLink Href="@item.Href"
+                                            Match="NavLinkMatch.Prefix"
+                                            Icon="@item.Icon">
+                                    @item.Label
+                                </MudNavLink>
+                            }
+                        </div>
+                    </details>
                 }
-            </div>
-        </details>
-    }
-</MudNavMenu>
-</nav>
+            </MudNavMenu>
+        </nav>
+    </Authorized>
+</AuthorizeView>

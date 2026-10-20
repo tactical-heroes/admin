@@ -13,12 +13,4 @@ public sealed class ClaimCatalogApi(TacticalHeroesApiClient client)
 
         return result.Map(ClaimCatalogMapper.ToPermissions);
     }
-
-    public async Task<Result<ClaimCatalog>> GetSectionsAsync(CancellationToken cancellationToken)
-    {
-        var result = await client.Api.V1.Claims.Sections.GetAsync(cancellationToken: cancellationToken)
-            .ToApiResultAsync(cancellationToken);
-
-        return result.Map(ClaimCatalogMapper.ToSections);
-    }
 }

@@ -1,6 +1,6 @@
 @inherits MudPagedListComponentBase<UserListItem, UserListFilter>
 @attribute [Route(IdentityRoutes.Users)]
-@attribute [Authorize]
+@attribute [Authorize(Policy = IdentityPermissions.Users.Read)]
 @attribute [StreamRendering]
 
 @using TacticalHeroes.Admin.Modules.Identity.Pages.UserListPage.Model
@@ -10,12 +10,14 @@
 <PageHeader Title="Пользователи"
             Subtitle="@($"Управление аккаунтами {Branding.GameName}")">
     <Actions>
-        <MudButton Href="@IdentityRoutes.CreateUser"
-                   Variant="Variant.Filled"
-                   Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.Add">
-            Добавить пользователя
-        </MudButton>
+        <PermissionView Permissions="[IdentityPermissions.Users.Create]">
+            <MudButton Href="@IdentityRoutes.CreateUser"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add">
+                Добавить пользователя
+            </MudButton>
+        </PermissionView>
     </Actions>
 </PageHeader>
 
@@ -82,21 +84,25 @@
         <TemplateColumn T="UserListItem" Title="Действия" Sortable="false" HeaderClass="actions-column" CellClass="actions-column">
             <CellTemplate>
                 <EntityRowActions>
-                    <MudIconButton Icon="@Icons.Material.Outlined.Edit"
-                                   Href="@IdentityRoutes.User(context.Item.Id)"
-                                   Color="Color.Primary"
-                                   Size="Size.Small"
-                                   Disabled="IsLoading"
-                                   aria-label="Редактировать пользователя" />
-                    <EntityDeleteButton TKey="Guid"
-                                        EntityId="context.Item.Id"
-                                        EntityType="пользователя"
-                                        EntityName="@context.Item.UserName"
-                                        DeleteLabel="Удалить пользователя"
-                                        SuccessMessage="Пользователь удалён"
-                                        DeleteAsync="DeleteUserAsync"
-                                        OnDeleted="OnItemRemovedAsync"
-                                        Disabled="IsLoading" />
+                    <PermissionView Permissions="[IdentityPermissions.Users.Read, IdentityPermissions.Users.Update]">
+                        <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                                       Href="@IdentityRoutes.User(context.Item.Id)"
+                                       Color="Color.Primary"
+                                       Size="Size.Small"
+                                       Disabled="IsLoading"
+                                       aria-label="Редактировать пользователя" />
+                    </PermissionView>
+                    <PermissionView Permissions="[IdentityPermissions.Users.Delete]">
+                        <EntityDeleteButton TKey="Guid"
+                                            EntityId="context.Item.Id"
+                                            EntityType="пользователя"
+                                            EntityName="@context.Item.UserName"
+                                            DeleteLabel="Удалить пользователя"
+                                            SuccessMessage="Пользователь удалён"
+                                            DeleteAsync="DeleteUserAsync"
+                                            OnDeleted="OnItemRemovedAsync"
+                                            Disabled="IsLoading" />
+                    </PermissionView>
                 </EntityRowActions>
             </CellTemplate>
         </TemplateColumn>

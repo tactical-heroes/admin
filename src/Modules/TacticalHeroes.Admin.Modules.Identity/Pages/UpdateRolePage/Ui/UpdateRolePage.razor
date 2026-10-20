@@ -1,6 +1,7 @@
 @inherits MudUpdateFormComponentBase<UpdateRoleFormModel, UpdateRoleFormModelValidator>
 @attribute [Route(IdentityRoutes.RoleTemplate)]
-@attribute [Authorize]
+@attribute [Authorize(Policy = IdentityPermissions.Roles.Update)]
+@attribute [Authorize(Policy = IdentityPermissions.Roles.Read)]
 @attribute [StreamRendering]
 
 @using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Ui

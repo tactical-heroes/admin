@@ -1,6 +1,6 @@
 @inherits MudCreateFormComponentBase<CreateUserFormModel, CreateUserFormModelValidator>
 @attribute [Route(IdentityRoutes.CreateUser)]
-@attribute [Authorize]
+@attribute [Authorize(Policy = IdentityPermissions.Users.Create)]
 @attribute [StreamRendering]
 
 @using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Ui
@@ -78,7 +78,11 @@
                 <RoleSelect RoleIds="Model.RoleIds"
                             Error="@Errors.HasError(nameof(CreateUserFormModel.RoleIds))"
                             ErrorText="@Errors.GetError(nameof(CreateUserFormModel.RoleIds))" />
-                <ClaimsEditor Claims="Model.Claims" />
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            Личные разрешения дополняют права назначенных ролей.
+                            Снятие отметки здесь не отменяет право, полученное через роль.
+                        </MudText>
+                        <ClaimsEditor Claims="Model.Claims" />
             </MudStack>
         </EditSection>
 

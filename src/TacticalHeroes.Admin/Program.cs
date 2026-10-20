@@ -22,7 +22,7 @@ builder.Services.AddAdminDataProtection(builder.Configuration);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents()
-    .AddAuthenticationStateSerialization();
+    .AddAuthenticationStateSerialization(options => options.SerializeAllClaims = true);
 builder.Services.AddTacticalHeroesProxy(builder.Configuration);
 builder.Services.AddHealthChecks();
 

@@ -1,6 +1,7 @@
 @inherits MudUpdateFormComponentBase<UpdateUnitFormModel, UpdateUnitFormModelValidator>
 @attribute [Route(CompendiumRoutes.UnitTemplate)]
-@attribute [Authorize]
+@attribute [Authorize(Policy = CompendiumPermissions.Units.Update)]
+@attribute [Authorize(Policy = CompendiumPermissions.Units.Read)]
 @attribute [StreamRendering]
 
 @using TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Ui

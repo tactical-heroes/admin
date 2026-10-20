@@ -84,9 +84,9 @@ public sealed class UpdateUserPageTests : BunitContext
         await component.InvokeAsync(() => component.FindComponent<RoleSelect>().FindComponent<MudSelect<Guid>>()
             .Instance.SelectedValuesChanged.InvokeAsync(roles));
         var claims = component.FindComponent<ClaimsEditor>();
-        claims.FindAll("button").Single(button => button.TextContent.Trim() == "Разрешение").Click();
-        await component.InvokeAsync(() => claims.FindComponent<MudSelect<string>>()
-            .Instance.ValueChanged.InvokeAsync("identity.users.read"));
+        await component.InvokeAsync(() => claims.FindComponents<MudCheckBox<bool?>>()
+            .Single(box => box.Instance.UserAttributes?["aria-label"]?.ToString() == "Пользователи: Просмотр")
+            .Instance.ValueChanged.InvokeAsync(true));
 
         component.Find(".submit-action").Click();
 

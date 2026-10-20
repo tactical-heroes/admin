@@ -5,54 +5,91 @@
                  OnRetry="LoadAsync"
                  LoadingHeight="112px">
     <ChildContent>
-        <MudStack Spacing="2">
-            <div>
-                <MudText Typo="Typo.subtitle1">Атрибуты доступа</MudText>
-                <MudText Typo="Typo.caption"
-                         Color="Color.Secondary">
-                    Разделы определяют видимость интерфейса, разрешения — доступ к операциям
-                </MudText>
-            </div>
-            <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="1">
-                <MudButton Variant="Variant.Outlined"
-                           Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.Add"
-                           OnClick="@(() => AddClaim(Permissions!.Type))">
-                    Разрешение
-                </MudButton>
-                <MudButton Variant="Variant.Outlined"
-                           Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.Add"
-                           OnClick="@(() => AddClaim(Sections!.Type))">
-                    Раздел
-                </MudButton>
-                <MudButton Variant="Variant.Text"
-                           Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.Add"
-                           OnClick="@(() => AddClaim(string.Empty))">
-                    Другой атрибут
-                </MudButton>
-            </MudStack>
-
-            @if (Claims.Count == 0)
+        <div class="permission-heading">
+            <MudText Typo="Typo.subtitle1">Разрешения</MudText>
+            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                Выбрано @SelectedCount из @Permissions!.Items.Count
+            </MudText>
+        </div>
+        <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true">
+            @foreach (var module in Modules)
             {
-                <div class="empty-claims">
-                    <MudIcon Icon="@Icons.Material.Outlined.KeyOff"
-                             Size="Size.Large"
-                             Color="Color.Secondary" />
-                    <MudText Typo="Typo.body2"
-                             Color="Color.Secondary">
-                        Атрибуты пока не добавлены
-                    </MudText>
-                </div>
+                <MudTabPanel Text="@module.First().ModuleDisplayName" @key="module.Key">
+                    <div class="permission-table-scroll">
+                        <table class="permission-table" aria-label="@($"Права: {module.First().ModuleDisplayName}")">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Объект</th>
+                                    @foreach (var action in Actions)
+                                    {
+                                        var options = ForAction(module, action.Code).ToArray();
+                                        <th scope="col">
+                                            <span>@action.Name</span>
+                                            <MudCheckBox T="bool?"
+                                                         Value="@GetSelection(options)"
+                                                         ValueChanged="@(value => SetPermissions(options, value))"
+                                                         Disabled="@(options.Length == 0)"
+                                                         Color="Color.Primary"
+                                                         aria-label="@($"{module.First().ModuleDisplayName}: {action.Name} — все объекты")" />
+                                        </th>
+                                    }
+                                    <th scope="col">
+                                        <span>Все</span>
+                                        <MudCheckBox T="bool?"
+                                                     Value="@GetSelection(module)"
+                                                     ValueChanged="@(value => SetPermissions(module, value))"
+                                                     Color="Color.Primary"
+                                                     aria-label="@($"{module.First().ModuleDisplayName}: все разрешения")" />
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var resource in module.GroupBy(option => option.ResourceCode))
+                                {
+                                    <tr @key="resource.Key">
+                                        <th scope="row">@resource.First().ResourceDisplayName</th>
+                                        @foreach (var action in Actions)
+                                        {
+                                            var options = ForAction(resource, action.Code).ToArray();
+                                            <td>
+                                                @if (options.Length > 0)
+                                                {
+                                                    <MudCheckBox T="bool?"
+                                                                 Value="@GetSelection(options)"
+                                                                 ValueChanged="@(value => SetPermissions(options, value))"
+                                                                 Color="Color.Primary"
+                                                                 aria-label="@($"{resource.First().ResourceDisplayName}: {action.Name}")" />
+                                                }
+                                                else
+                                                {
+                                                    <span aria-label="Действие не предусмотрено">—</span>
+                                                }
+                                            </td>
+                                        }
+                                        <td>
+                                            <MudCheckBox T="bool?"
+                                                         Value="@GetSelection(resource)"
+                                                         ValueChanged="@(value => SetPermissions(resource, value))"
+                                                         Color="Color.Primary"
+                                                         aria-label="@($"{resource.First().ResourceDisplayName}: все действия")" />
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </MudTabPanel>
             }
-            else
-            {
-                @foreach (var claim in Claims)
+        </MudTabs>
+        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-2">
+            Доступные пункты меню определяются разрешениями на просмотр.
+        </MudText>
+
+        <MudExpansionPanels Elevation="0" Class="mt-4">
+            <MudExpansionPanel Text="@($"Дополнительные атрибуты ({AdditionalClaims.Count()})")">
+                @foreach (var claim in AdditionalClaims.ToArray())
                 {
-                    <MudGrid @key="claim"
-                             Spacing="2"
-                             Class="claim-row">
+                    <MudGrid @key="claim" Spacing="2" Class="claim-row">
                         <MudItem xs="12" md="5">
                             <MudTextField T="string"
                                           Value="claim.Type"
@@ -60,49 +97,18 @@
                                           Label="Тип"
                                           Variant="Variant.Outlined"
                                           Margin="Margin.Dense"
-                                          Validation="@Validator.For(
-                                                          claim,
-                                                          static claim => claim.Type)" />
+                                          Validation="@Validator.For(claim, static item => item.Type)" />
                         </MudItem>
                         <MudItem xs="12" md="6">
-                            @if (GetCatalog(claim.Type) is { } catalog)
-                            {
-                                <MudSelect T="string"
-                                           @bind-Value="claim.Value"
-                                           ToStringFunc="@(value => GetClaimName(catalog, value))"
-                                           Label="Значение"
-                                           Variant="Variant.Outlined"
-                                           Margin="Margin.Dense"
-                                           Required="true"
-                                           RequiredError="Выберите значение атрибута">
-                                    @foreach (var option in catalog.Items)
-                                    {
-                                        <MudSelectItem T="string" Value="@option.Code">
-                                            @GetClaimName(catalog, option.Code)
-                                        </MudSelectItem>
-                                    }
-                                    @if (!string.IsNullOrEmpty(claim.Value) && catalog.Items.All(option => option.Code != claim.Value))
-                                    {
-                                        <MudSelectItem T="string" Value="@claim.Value" Disabled="true">
-                                            @claim.Value (нет в каталоге)
-                                        </MudSelectItem>
-                                    }
-                                </MudSelect>
-                            }
-                            else
-                            {
-                                <MudTextField T="string"
-                                              @bind-Value="claim.Value"
-                                              Label="Значение"
-                                              Variant="Variant.Outlined"
-                                              Margin="Margin.Dense"
-                                              Validation="@Validator.For(
-                                                              claim,
-                                                              static claim => claim.Value)" />
-                            }
+                            <MudTextField T="string"
+                                          @bind-Value="claim.Value"
+                                          Label="Значение"
+                                          Variant="Variant.Outlined"
+                                          Margin="Margin.Dense"
+                                          HelperText="@(IsPermission(claim) ? "Разрешение отсутствует в каталоге" : null)"
+                                          Validation="@Validator.For(claim, static item => item.Value)" />
                         </MudItem>
-                        <MudItem xs="12" md="1"
-                                 Class="claim-remove">
+                        <MudItem xs="12" md="1" Class="claim-remove">
                             <MudIconButton Icon="@Icons.Material.Outlined.Delete"
                                            Color="Color.Error"
                                            OnClick="@(() => RemoveClaim(claim))"
@@ -110,7 +116,13 @@
                         </MudItem>
                     </MudGrid>
                 }
-            }
-        </MudStack>
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="AddClaim">
+                    Добавить атрибут
+                </MudButton>
+            </MudExpansionPanel>
+        </MudExpansionPanels>
     </ChildContent>
 </LoadableContent>

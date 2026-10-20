@@ -1,4 +1,5 @@
 using MudBlazor;
+using MudBlazor.Extensions;
 
 using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Model;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Ui;
@@ -7,38 +8,79 @@ namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Entities.Claims.U
 
 public sealed class ClaimsEditorTests : IdentityCatalogTestContext
 {
-    [Fact(DisplayName = "OnInitializedAsync should load catalogs when editor is rendered")]
-    public void OnInitializedAsync_Should_LoadCatalogs_When_EditorIsRendered()
+    [Fact(DisplayName = "OnInitializedAsync should load permissions when editor is rendered")]
+    public void OnInitializedAsync_Should_LoadPermissions_When_EditorIsRendered()
     {
         var component = Render<ClaimsEditor>(parameters => parameters.Add(editor => editor.Claims, []));
 
         component.WaitForAssertion(() =>
         {
-            component.Instance.Permissions!.Items.ShouldHaveSingleItem().ResourceDisplayName.ShouldBe("Пользователи");
-            component.Instance.Sections!.Items.ShouldHaveSingleItem().DisplayName.ShouldBe("Управление доступом");
-            Handler.Requests.Count.ShouldBe(2);
+            component.Instance.Permissions!.Items.ShouldHaveSingleItem().ModuleCode.ShouldBe("identity");
+            Handler.Requests.ShouldHaveSingleItem().AbsolutePath.ShouldBe("/api/v1/claims/permissions");
+            component.Markup.ShouldContain("Управление доступом");
+            component.Markup.ShouldContain("Пользователи");
+            component.Markup.ShouldNotContain("Показывать в меню");
         });
     }
 
-    [Theory(DisplayName = "AddClaim should use selected catalog type when add action is clicked")]
-    [InlineData("Разрешение", "permission")]
-    [InlineData("Раздел", "section")]
-    [InlineData("Другой атрибут", "")]
-    public void AddClaim_Should_UseSelectedCatalogType_When_AddActionIsClicked(string buttonText, string type)
+    [Fact(DisplayName = "SetPermissions should toggle resource when row is selected")]
+    public async Task SetPermissions_Should_ToggleResource_When_RowIsSelected()
     {
-        IList<ClaimValue> claims = [];
-        var component = Render<ClaimsEditor>(parameters => parameters
-            .Add(editor => editor.Claims, claims));
+        IList<ClaimValue> claims =
+        [
+            new() { Type = "permission", Value = "identity.users.read" },
+            new() { Type = "custom", Value = "kept" },
+            new() { Type = "permission", Value = "retired.permission" }
+        ];
+        var component = RenderMatrix(claims);
+        var row = CheckBox(component, "Пользователи: все действия");
+        row.Instance.GetState(box => box.Value).ShouldBeNull();
 
-        component.FindAll("button").Single(button => button.TextContent.Trim() == buttonText).Click();
+        await component.InvokeAsync(() => row.Instance.ValueChanged.InvokeAsync(true));
+        await component.InvokeAsync(() => CheckBox(component, "Пользователи: все действия")
+            .Instance.ValueChanged.InvokeAsync(true));
 
-        claims.ShouldHaveSingleItem().Type.ShouldBe(type);
-        component.FindAll(".claim-row").Count.ShouldBe(1);
-        component.FindAll(".empty-claims").ShouldBeEmpty();
+        claims.Count(claim => claim.Value == "identity.users.read").ShouldBe(1);
+        claims.Count(claim => claim.Value == "identity.users.update").ShouldBe(1);
+        await component.InvokeAsync(() => CheckBox(component, "Пользователи: все действия")
+            .Instance.ValueChanged.InvokeAsync(false));
+        claims.Select(claim => claim.Value).ShouldBe(["kept", "retired.permission"]);
     }
 
-    [Fact(DisplayName = "LoadAsync should retain claims and retry when catalogs fail")]
-    public void LoadAsync_Should_RetainClaimsAndRetry_When_CatalogsFail()
+    [Fact(DisplayName = "ForAction should respect module when column is selected")]
+    public async Task ForAction_Should_RespectModule_When_ColumnIsSelected()
+    {
+        IList<ClaimValue> claims = [new() { Type = "permission", Value = "compendium.factions.read" }];
+        var component = RenderMatrix(claims);
+
+        await component.InvokeAsync(() => CheckBox(component, "Управление доступом: Просмотр — все объекты")
+            .Instance.ValueChanged.InvokeAsync(true));
+
+        claims.Select(claim => claim.Value).ShouldBe(
+            ["compendium.factions.read", "identity.users.read", "identity.roles.read"], ignoreOrder: true);
+        CheckBox(component, "Управление доступом: Создание — все объекты").Instance.Disabled.ShouldBeTrue();
+        component.FindAll("span[aria-label='Действие не предусмотрено']").ShouldNotBeEmpty();
+    }
+
+    [Fact(DisplayName = "IsSelected should preserve other module when tab changes")]
+    public async Task IsSelected_Should_PreserveOtherModule_When_TabChanges()
+    {
+        IList<ClaimValue> claims = [];
+        var component = RenderMatrix(claims);
+        await component.InvokeAsync(() => CheckBox(component, "Управление доступом: все разрешения")
+            .Instance.ValueChanged.InvokeAsync(true));
+
+        await component.InvokeAsync(() => component.FindComponent<MudTabs>().Instance.ActivatePanelAsync(1));
+        await component.InvokeAsync(() => CheckBox(component, "Фракции: Просмотр")
+            .Instance.ValueChanged.InvokeAsync(true));
+
+        claims.Count.ShouldBe(4);
+        claims.ShouldContain(claim => claim.Value == "identity.users.update");
+        claims.ShouldContain(claim => claim.Value == "compendium.factions.read");
+    }
+
+    [Fact(DisplayName = "LoadAsync should retain claims when catalog fails")]
+    public void LoadAsync_Should_RetainClaims_When_CatalogFails()
     {
         Handler.Fail = true;
         IList<ClaimValue> claims = [new() { Type = "permission", Value = "identity.users.read" }];
@@ -49,79 +91,119 @@ public sealed class ClaimsEditorTests : IdentityCatalogTestContext
 
         component.Find("button").Click();
 
-        component.WaitForAssertion(() => component.FindAll(".claim-row").Count.ShouldBe(1));
+        component.WaitForElement(".permission-table");
         claims.ShouldHaveSingleItem().Value.ShouldBe("identity.users.read");
     }
 
-    [Theory(DisplayName = "GetCatalog should select known values when claim type matches catalog")]
-    [InlineData("permission", "identity.users.read")]
-    [InlineData(" PERMISSION ", "identity.users.read")]
-    [InlineData("section", "identity")]
-    public async Task GetCatalog_Should_SelectKnownValues_When_ClaimTypeMatchesCatalog(string type, string value)
-    {
-        IList<ClaimValue> claims = [new() { Type = type }];
-        var component = Render<ClaimsEditor>(parameters => parameters.Add(editor => editor.Claims, claims));
-        var select = component.FindComponent<MudSelect<string>>();
-
-        await component.InvokeAsync(() => select.Instance.ValueChanged.InvokeAsync(value));
-
-        claims.ShouldHaveSingleItem().Value.ShouldBe(value);
-    }
-
-    [Fact(DisplayName = "GetCatalog should preserve unknown values when catalog changes")]
-    public void GetCatalog_Should_PreserveUnknownValues_When_CatalogChanges()
-    {
-        IList<ClaimValue> claims = [new() { Type = "permission", Value = "retired.permission" }];
-        var component = Render<ClaimsEditor>(parameters => parameters.Add(editor => editor.Claims, claims));
-
-        component.FindComponents<MudSelectItem<string>>()
-            .Single(item => item.Instance.Value == "retired.permission").Instance.Disabled.ShouldBeTrue();
-        claims.ShouldHaveSingleItem().Value.ShouldBe("retired.permission");
-    }
-
-    [Theory(DisplayName = "GetClaimName should display catalog label when value is selected")]
-    [InlineData("identity.users.read", "Пользователи: Просмотр пользователей")]
-    [InlineData("retired.permission", "retired.permission (нет в каталоге)")]
-    [InlineData("", "")]
-    public void GetClaimName_Should_DisplayCatalogLabel_When_ValueIsSelected(string value, string label)
-    {
-        IList<ClaimValue> claims = [new() { Type = "permission", Value = value }];
-        var component = Render<ClaimsEditor>(parameters => parameters.Add(editor => editor.Claims, claims));
-
-        component.FindComponent<MudSelect<string>>().Find("input").GetAttribute("value").ShouldBe(label);
-    }
-
-    [Fact(DisplayName = "ChangeType should clear previous value when claim type changes")]
-    public void ChangeType_Should_ClearPreviousValue_When_ClaimTypeChanges()
-    {
-        IList<ClaimValue> claims = [new() { Type = "custom", Value = "old-value" }];
-        var component = Render<ClaimsEditor>(parameters => parameters.Add(editor => editor.Claims, claims));
-
-        component.Find(".claim-row input").Change("section");
-
-        claims.ShouldHaveSingleItem().Type.ShouldBe("section");
-        claims[0].Value.ShouldBeEmpty();
-        component.FindComponent<MudSelect<string>>().ShouldNotBeNull();
-    }
-
-    [Fact(DisplayName = "RemoveClaim should remove claim and render empty state when claim exists")]
-    public void RemoveClaim_Should_RemoveClaimAndRenderEmptyState_When_ClaimExists()
+    [Fact(DisplayName = "RemoveClaim should preserve additional claims when catalog does not contain them")]
+    public async Task RemoveClaim_Should_PreserveAdditionalClaims_When_CatalogDoesNotContainThem()
     {
         IList<ClaimValue> claims =
         [
-            new()
-            {
-                Type = "role",
-                Value = "admin"
-            }
+            new() { Type = "custom", Value = "kept" },
+            new() { Type = "permission", Value = "retired.permission" }
         ];
-        var component = Render<ClaimsEditor>(parameters => parameters
-            .Add(editor => editor.Claims, claims));
+        var component = RenderMatrix(claims);
+        await component.InvokeAsync(() => component.FindComponent<MudExpansionPanel>().Instance.ExpandAsync());
 
-        component.Find(".claim-remove button").Click();
-
-        claims.ShouldBeEmpty();
-        component.FindAll(".claim-row").ShouldBeEmpty();
-        component.Find(".empty-claims").ShouldNotBeNull();
+        component.FindAll(".claim-row").Count.ShouldBe(2);
+        component.Markup.ShouldContain("Разрешение отсутствует в каталоге");
+        component.FindAll("button[aria-label='Удалить атрибут']")[0].Click();
+        claims.ShouldHaveSingleItem().Value.ShouldBe("retired.permission");
     }
+
+    [Theory(DisplayName = "IsPermission should normalize known claim types when claims are classified")]
+    [InlineData("permission", true)]
+    [InlineData(" PERMISSION ", true)]
+    [InlineData("custom", false)]
+    public void IsPermission_Should_NormalizeKnownClaimTypes_When_ClaimsAreClassified(string type, bool selected)
+    {
+        var component = RenderMatrix([new ClaimValue { Type = type, Value = "identity.users.read" }]);
+
+        CheckBox(component, "Пользователи: Просмотр").Instance.GetState(box => box.Value).ShouldBe(selected);
+    }
+
+    [Theory(DisplayName = "GetSelection should reflect partial selection when row permissions differ")]
+    [InlineData(0, false)]
+    [InlineData(1, null)]
+    [InlineData(2, true)]
+    public void GetSelection_Should_ReflectPartialSelection_When_RowPermissionsDiffer(int count, bool? expected)
+    {
+        IList<ClaimValue> claims = new[] { "identity.users.read", "identity.users.update" }
+            .Take(count).Select(value => new ClaimValue { Type = "permission", Value = value }).ToList();
+
+        var component = RenderMatrix(claims);
+
+        CheckBox(component, "Пользователи: все действия").Instance.GetState(box => box.Value).ShouldBe(expected);
+    }
+
+    [Fact(DisplayName = "AddClaim should append empty custom input when the add button is clicked")]
+    public async Task AddClaim_Should_AppendEmptyCustomInput_When_TheAddButtonIsClicked()
+    {
+        IList<ClaimValue> claims = [];
+        var component = RenderMatrix(claims);
+        await component.InvokeAsync(() => component.FindComponent<MudExpansionPanel>().Instance.ExpandAsync());
+
+        component.FindAll("button").Single(button => button.TextContent.Contains("Добавить атрибут")).Click();
+
+        claims.ShouldHaveSingleItem().Type.ShouldBeEmpty();
+        component.FindAll(".claim-row").Count.ShouldBe(1);
+    }
+
+    [Fact(DisplayName = "ChangeType should clear the previous value when claim type changes")]
+    public async Task ChangeType_Should_ClearThePreviousValue_When_ClaimTypeChanges()
+    {
+        IList<ClaimValue> claims = [new ClaimValue { Type = "custom", Value = "old" }];
+        var component = RenderMatrix(claims);
+        await component.InvokeAsync(() => component.FindComponent<MudExpansionPanel>().Instance.ExpandAsync());
+
+        component.Find(".claim-row input").Change("another");
+
+        claims[0].Type.ShouldBe("another");
+        claims[0].Value.ShouldBeEmpty();
+    }
+
+    [Theory(DisplayName = "Validate should reject sections when claim type is retired")]
+    [InlineData("section")]
+    [InlineData(" SECTION ")]
+    public void Validate_Should_RejectSection_When_ClaimTypeIsRetired(string type)
+    {
+        var result = new ClaimValueValidator().Validate(new ClaimValue { Type = type, Value = "identity" });
+
+        result.IsValid.ShouldBeFalse();
+    }
+
+    private IRenderedComponent<ClaimsEditor> RenderMatrix(IList<ClaimValue> claims)
+    {
+        Handler.Permissions = new ClaimCatalog
+        {
+            Type = "permission",
+            Items =
+                [
+                    Option("identity", "Управление доступом", "users", "Пользователи", "read"),
+                    Option("identity", "Управление доступом", "users", "Пользователи", "update"),
+                    Option("identity", "Управление доступом", "roles", "Роли", "read"),
+                    Option("compendium", "Справочники", "factions", "Фракции", "read")
+                ]
+        };
+        var component = Render<ClaimsEditor>(parameters => parameters.Add(editor => editor.Claims, claims));
+        component.WaitForAssertion(() => component.Instance.Permissions.ShouldNotBeNull());
+        return component;
+    }
+
+    private static ClaimOption Option(string module, string moduleName, string resource, string name, string action) =>
+        new()
+        {
+            Code = $"{module}.{resource}.{action}",
+            DisplayName = action,
+            ModuleCode = module,
+            ModuleDisplayName = moduleName,
+            ResourceCode = resource,
+            ResourceDisplayName = name
+        };
+
+    private static IRenderedComponent<MudCheckBox<bool?>> CheckBox(
+        IRenderedComponent<ClaimsEditor> component, string label) =>
+        component.FindComponents<MudCheckBox<bool?>>()
+            .Single(checkbox => checkbox.Instance.UserAttributes?["aria-label"]?.ToString() == label);
 }

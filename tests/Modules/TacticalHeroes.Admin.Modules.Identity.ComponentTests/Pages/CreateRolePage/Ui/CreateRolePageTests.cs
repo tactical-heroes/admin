@@ -74,7 +74,7 @@ public sealed class CreateRolePageTests : BunitContext
         var component = Render<CreateRolePageComponent>();
         component.Find("input").Change("Administrators");
         component.FindAll("button")
-            .Single(button => button.TextContent.Contains("Другой атрибут", StringComparison.Ordinal))
+            .Single(button => button.TextContent.Contains("Добавить атрибут", StringComparison.Ordinal))
             .Click();
 
         var inputs = component.FindAll(".claim-row input");
@@ -114,7 +114,7 @@ public sealed class CreateRolePageTests : BunitContext
         var component = Render<CreateRolePageComponent>();
         component.Find("input").Change("Administrators");
         component.FindAll("button")
-            .Single(button => button.TextContent.Contains("Другой атрибут", StringComparison.Ordinal))
+            .Single(button => button.TextContent.Contains("Добавить атрибут", StringComparison.Ordinal))
             .Click();
 
         component.Find(".submit-action").Click();

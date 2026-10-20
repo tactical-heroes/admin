@@ -47,6 +47,7 @@ public sealed partial class FeatureSlicedConventionTests
                 static fileName =>
                     fileName == "_Imports.razor" ||
                     fileName.EndsWith("AdminModule.cs", StringComparison.Ordinal) ||
+                    fileName.EndsWith("Permissions.cs", StringComparison.Ordinal) ||
                     fileName.EndsWith("Routes.cs", StringComparison.Ordinal),
                 violations);
         }

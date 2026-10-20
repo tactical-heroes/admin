@@ -72,15 +72,16 @@ public sealed class UpdateRolePageTests : BunitContext
         });
     }
 
-    [Fact(DisplayName = "Submit should send section claim and default flag when role access is edited")]
-    public async Task Submit_Should_SendSectionClaimAndDefaultFlag_When_RoleAccessIsEdited()
+    [Fact(DisplayName = "Submit should send permission and default flag when role access is edited")]
+    public async Task Submit_Should_SendPermissionAndDefaultFlag_When_RoleAccessIsEdited()
     {
         var component = Render<UpdateRolePageComponent>(parameters => parameters.Add(page => page.Id, _roleId));
         await component.InvokeAsync(() => component.FindComponent<MudSwitch<bool>>().Instance.ValueChanged.InvokeAsync(false));
         var claims = component.FindComponent<ClaimsEditor>();
         claims.Find(".claim-remove button").Click();
-        claims.FindAll("button").Single(button => button.TextContent.Trim() == "Раздел").Click();
-        await component.InvokeAsync(() => claims.FindComponent<MudSelect<string>>().Instance.ValueChanged.InvokeAsync("identity"));
+        await component.InvokeAsync(() => claims.FindComponents<MudCheckBox<bool?>>()
+            .Single(box => box.Instance.UserAttributes?["aria-label"]?.ToString() == "Пользователи: Просмотр")
+            .Instance.ValueChanged.InvokeAsync(true));
 
         component.Find(".submit-action").Click();
 
@@ -91,8 +92,8 @@ public sealed class UpdateRolePageTests : BunitContext
             body.RootElement.GetProperty("isDefault").GetBoolean().ShouldBeFalse();
             var sentClaims = body.RootElement.GetProperty("claims");
             sentClaims.GetArrayLength().ShouldBe(1);
-            sentClaims[0].GetProperty("type").GetString().ShouldBe("section");
-            sentClaims[0].GetProperty("value").GetString().ShouldBe("identity");
+            sentClaims[0].GetProperty("type").GetString().ShouldBe("permission");
+            sentClaims[0].GetProperty("value").GetString().ShouldBe("identity.users.read");
         });
     }
 

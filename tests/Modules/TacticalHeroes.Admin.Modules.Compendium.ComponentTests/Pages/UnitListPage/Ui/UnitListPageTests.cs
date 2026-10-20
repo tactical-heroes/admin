@@ -24,6 +24,10 @@ public sealed class UnitListPageTests : BunitContext
     public UnitListPageTests()
     {
         Services.AddMudServices();
+        var authorization = AddAuthorization();
+        authorization.SetAuthorized("Administrator");
+        authorization.SetClaims([.. CompendiumPermissions.All.Select(permission =>
+            new System.Security.Claims.Claim("permission", permission))]);
         Services.AddTacticalHeroesApiClient(
             static _ => new Uri("https://api.example.test"),
             static _ => TimeSpan.FromSeconds(30));

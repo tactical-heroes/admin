@@ -1,6 +1,6 @@
 @inherits MudPagedListComponentBase<FactionListItem>
 @attribute [Route(CompendiumRoutes.Factions)]
-@attribute [Authorize]
+@attribute [Authorize(Policy = CompendiumPermissions.Factions.Read)]
 @attribute [StreamRendering]
 
 @using TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Model
@@ -10,12 +10,14 @@
 <PageHeader Title="Фракции"
             Subtitle="Управление игровыми фракциями">
     <Actions>
-        <MudButton Href="@CompendiumRoutes.CreateFaction"
-                   Variant="Variant.Filled"
-                   Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.Add">
-            Добавить фракцию
-        </MudButton>
+        <PermissionView Permissions="[CompendiumPermissions.Factions.Create]">
+            <MudButton Href="@CompendiumRoutes.CreateFaction"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add">
+                Добавить фракцию
+            </MudButton>
+        </PermissionView>
     </Actions>
 </PageHeader>
 
@@ -52,21 +54,25 @@
         <TemplateColumn T="FactionListItem" Title="Действия" Sortable="false" HeaderClass="actions-column" CellClass="actions-column">
             <CellTemplate>
                 <EntityRowActions>
-                    <MudIconButton Icon="@Icons.Material.Outlined.Edit"
-                                   Href="@CompendiumRoutes.Faction(context.Item.Id)"
-                                   Color="Color.Primary"
-                                   Size="Size.Small"
-                                   Disabled="IsLoading"
-                                   aria-label="Редактировать фракцию" />
-                    <EntityDeleteButton TKey="Guid"
-                                        EntityId="context.Item.Id"
-                                        EntityType="фракцию"
-                                        EntityName="@context.Item.Name"
-                                        DeleteLabel="Удалить фракцию"
-                                        SuccessMessage="Фракция удалена"
-                                        DeleteAsync="DeleteFactionAsync"
-                                        OnDeleted="OnItemRemovedAsync"
-                                        Disabled="IsLoading" />
+                    <PermissionView Permissions="[CompendiumPermissions.Factions.Read, CompendiumPermissions.Factions.Update]">
+                        <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                                       Href="@CompendiumRoutes.Faction(context.Item.Id)"
+                                       Color="Color.Primary"
+                                       Size="Size.Small"
+                                       Disabled="IsLoading"
+                                       aria-label="Редактировать фракцию" />
+                    </PermissionView>
+                    <PermissionView Permissions="[CompendiumPermissions.Factions.Delete]">
+                        <EntityDeleteButton TKey="Guid"
+                                            EntityId="context.Item.Id"
+                                            EntityType="фракцию"
+                                            EntityName="@context.Item.Name"
+                                            DeleteLabel="Удалить фракцию"
+                                            SuccessMessage="Фракция удалена"
+                                            DeleteAsync="DeleteFactionAsync"
+                                            OnDeleted="OnItemRemovedAsync"
+                                            Disabled="IsLoading" />
+                    </PermissionView>
                 </EntityRowActions>
             </CellTemplate>
         </TemplateColumn>

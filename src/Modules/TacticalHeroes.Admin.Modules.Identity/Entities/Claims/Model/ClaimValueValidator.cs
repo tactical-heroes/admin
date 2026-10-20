@@ -8,7 +8,9 @@ public sealed class ClaimValueValidator : MudFormValidator<ClaimValue>
     {
         RuleFor(claim => claim.Type)
             .NotEmpty()
-            .WithMessage("Укажите тип атрибута");
+            .WithMessage("Укажите тип атрибута")
+            .Must(type => !string.Equals(type?.Trim(), "section", StringComparison.OrdinalIgnoreCase))
+            .WithMessage("Клеймы разделов больше не поддерживаются");
 
         RuleFor(claim => claim.Value)
             .NotEmpty()

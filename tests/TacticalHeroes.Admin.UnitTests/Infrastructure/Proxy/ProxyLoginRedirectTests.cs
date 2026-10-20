@@ -28,7 +28,7 @@ public sealed class ProxyLoginRedirectTests
         result.Location.ShouldBe($"{pathBase}/login{query}");
     }
 
-    [Theory(DisplayName = "Proxy should preserve response when redirect is unrelated to the login page")]
+    [Theory(DisplayName = "Proxy should preserve response when redirect is unrelated to login page")]
     [InlineData("https://localhost:5173/oauth/callback?code=code&state=state", HttpStatusCode.Redirect)]
     [InlineData("https://dev.example.test/oauth/logout-callback", HttpStatusCode.Redirect)]
     [InlineData("https://external.example.test/other", HttpStatusCode.Redirect)]

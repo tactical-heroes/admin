@@ -1,20 +1,69 @@
-.empty-claims {
+.permission-heading {
     display: flex;
-    min-height: 112px;
-    flex-direction: column;
     align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.permission-table-scroll {
+    overflow-x: auto;
+}
+
+.permission-table {
+    width: 100%;
+    min-width: 580px;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.permission-table th,
+.permission-table td {
+    padding: 4px 8px;
+    text-align: center;
+    border-bottom: 1px solid var(--mud-palette-divider);
+}
+
+.permission-table th {
+    font-weight: 500;
+}
+
+.permission-table thead {
+    background: var(--mud-palette-background-grey);
+}
+
+.permission-table thead th span {
+    display: block;
+    padding-top: 8px;
+    font-size: 0.8rem;
+}
+
+.permission-table th:first-child {
+    width: 25%;
+    padding-left: 16px;
+    text-align: left;
+}
+
+.permission-table th:last-child,
+.permission-table td:last-child {
+    border-left: 1px solid var(--mud-palette-divider);
+}
+
+.permission-table tbody tr:hover {
+    background: var(--mud-palette-action-default-hover);
+}
+
+.permission-table ::deep .mud-checkbox {
+    margin: 0;
     justify-content: center;
-    gap: 0.5rem;
-    border: 1px dashed #d7dde6;
-    border-radius: 10px;
-    background: #fafbfc;
 }
 
 .claim-row {
-    align-items: center;
+    margin-bottom: 8px;
 }
 
 .claim-remove {
     display: flex;
+    align-items: center;
     justify-content: flex-end;
 }

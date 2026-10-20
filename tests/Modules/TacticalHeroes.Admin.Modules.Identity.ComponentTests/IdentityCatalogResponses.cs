@@ -19,11 +19,8 @@ internal static class IdentityCatalogResponses
             "/api/v1/claims/permissions" => """
                 {"type":"permission","items":[
                   {"code":"identity.users.read","displayName":"Просмотр пользователей",
-                   "sectionCode":"identity","resourceCode":"users","resourceDisplayName":"Пользователи"}
+                   "moduleCode":"identity","moduleDisplayName":"Управление доступом","resourceCode":"users","resourceDisplayName":"Пользователи"}
                 ]}
-                """,
-            "/api/v1/claims/sections" => """
-                {"type":"section","items":[{"code":"identity","displayName":"Управление доступом"}]}
                 """,
             "/api/v1/roles" => $$"""
                 {"items":[{"id":"{{RoleId:D}}","name":"Moderator","isDefault":false}],

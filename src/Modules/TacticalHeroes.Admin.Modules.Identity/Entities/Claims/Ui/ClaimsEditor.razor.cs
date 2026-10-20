@@ -8,6 +8,14 @@ namespace TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Ui;
 
 public partial class ClaimsEditor(ClaimCatalogApi api) : CancelableComponentBase
 {
+    private static readonly (string Code, string Name)[] Actions =
+    [
+        ("read", "Просмотр"),
+        ("create", "Создание"),
+        ("update", "Изменение"),
+        ("delete", "Удаление")
+    ];
+
     private ClaimValueValidator Validator { get; } = new();
 
     [Parameter, EditorRequired]
@@ -17,17 +25,22 @@ public partial class ClaimsEditor(ClaimCatalogApi api) : CancelableComponentBase
     public ClaimCatalog? Permissions { get; set; }
 
     [PersistentState(AllowUpdates = true)]
-    public ClaimCatalog? Sections { get; set; }
-
-    [PersistentState(AllowUpdates = true)]
     public string? LoadError { get; set; }
 
     private bool IsLoading { get; set; }
 
-    protected override Task OnInitializedAsync()
-    {
-        return Permissions is null || Sections is null ? LoadAsync() : Task.CompletedTask;
-    }
+    private IEnumerable<IGrouping<string, ClaimOption>> Modules =>
+        Permissions?.Items.GroupBy(option => option.ModuleCode) ?? [];
+
+    private IEnumerable<ClaimValue> AdditionalClaims => Claims.Where(claim =>
+        !IsPermission(claim) || Permissions?.Items.All(option =>
+            option.Code != claim.Value || !Actions.Any(action =>
+                option.Code.EndsWith($".{action.Code}", StringComparison.Ordinal))) != false);
+
+    private int SelectedCount => Permissions?.Items.Count(option => IsSelected(option.Code)) ?? 0;
+
+    protected override Task OnInitializedAsync() =>
+        Permissions is null ? LoadAsync() : Task.CompletedTask;
 
     private async Task LoadAsync()
     {
@@ -36,21 +49,14 @@ public partial class ClaimsEditor(ClaimCatalogApi api) : CancelableComponentBase
 
         try
         {
-            Task<Result<ClaimCatalog>> permissionsTask = api.GetPermissionsAsync(LifetimeToken);
-            Task<Result<ClaimCatalog>> sectionsTask = api.GetSectionsAsync(LifetimeToken);
-            await Task.WhenAll(permissionsTask, sectionsTask);
-
-            Result<ClaimCatalog> permissions = await permissionsTask;
-            Result<ClaimCatalog> sections = await sectionsTask;
-            if (permissions.IsFailure || sections.IsFailure)
+            var result = await api.GetPermissionsAsync(LifetimeToken);
+            if (result.IsFailure)
             {
-                LoadError = ApiErrorMessage.FromErrors(
-                    permissions.IsFailure ? permissions.Errors : sections.Errors);
+                LoadError = ApiErrorMessage.FromErrors(result.Errors);
                 return;
             }
 
-            Permissions = permissions.Value;
-            Sections = sections.Value;
+            Permissions = result.Value;
         }
         finally
         {
@@ -58,11 +64,38 @@ public partial class ClaimsEditor(ClaimCatalogApi api) : CancelableComponentBase
         }
     }
 
-    private ClaimCatalog? GetCatalog(string type)
+    private bool IsPermission(ClaimValue claim) =>
+        string.Equals(claim.Type.Trim(), Permissions?.Type, StringComparison.OrdinalIgnoreCase);
+
+    private bool IsSelected(string code) =>
+        Claims.Any(claim => IsPermission(claim) && claim.Value == code);
+
+    private bool? GetSelection(IEnumerable<ClaimOption> permissions)
     {
-        return new[] { Permissions, Sections }.FirstOrDefault(catalog =>
-            catalog is not null && string.Equals(catalog.Type, type.Trim(), StringComparison.OrdinalIgnoreCase));
+        var values = permissions.Select(option => IsSelected(option.Code)).ToArray();
+        return values.Length > 0 && values.All(value => value)
+            ? true
+            : values.Any(value => value) ? null : false;
     }
+
+    private void SetPermissions(IEnumerable<ClaimOption> permissions, bool? selected)
+    {
+        foreach (var option in permissions)
+        {
+            foreach (var existing in Claims.Where(claim => IsPermission(claim) && claim.Value == option.Code).ToArray())
+            {
+                Claims.Remove(existing);
+            }
+
+            if (selected == true)
+            {
+                Claims.Add(new ClaimValue { Type = Permissions!.Type, Value = option.Code });
+            }
+        }
+    }
+
+    private static IEnumerable<ClaimOption> ForAction(IEnumerable<ClaimOption> permissions, string action) =>
+        permissions.Where(option => option.Code.EndsWith($".{action}", StringComparison.Ordinal));
 
     private static void ChangeType(ClaimValue claim, string? type)
     {
@@ -70,28 +103,7 @@ public partial class ClaimsEditor(ClaimCatalogApi api) : CancelableComponentBase
         claim.Value = string.Empty;
     }
 
-    private static string GetClaimName(ClaimCatalog catalog, string? code)
-    {
-        if (string.IsNullOrEmpty(code))
-        {
-            return string.Empty;
-        }
+    private void AddClaim() => Claims.Add(new ClaimValue());
 
-        ClaimOption? option = catalog.Items.FirstOrDefault(option => option.Code == code);
-        return option is null
-            ? $"{code} (нет в каталоге)"
-            : option.ResourceDisplayName is null
-                ? option.DisplayName
-                : $"{option.ResourceDisplayName}: {option.DisplayName}";
-    }
-
-    private void AddClaim(string type)
-    {
-        Claims.Add(new ClaimValue { Type = type });
-    }
-
-    private void RemoveClaim(ClaimValue claim)
-    {
-        Claims.Remove(claim);
-    }
+    private void RemoveClaim(ClaimValue claim) => Claims.Remove(claim);
 }
