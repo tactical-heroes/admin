@@ -150,7 +150,7 @@ public sealed class ClaimsEditorTests : IdentityCatalogTestContext
         component.Markup.ShouldNotContain("Добавить атрибут");
     }
 
-    [Theory(DisplayName = "Validate should reject unsupported claims when claim type is not permission")]
+    [Theory(DisplayName = "Validate should reject unsupported claims when type is not permission")]
     [InlineData("section")]
     [InlineData(" SECTION ")]
     [InlineData("custom")]
