@@ -232,7 +232,7 @@ public abstract partial class AsyncSelectOption<TId, TOption>(
 
     private async Task RemoveValueAsync(MudChip<TId> chip)
     {
-        Values = Values.Where(id => !EqualityComparer<TId>.Default.Equals(id, chip.Value)).ToList();
+        Values = [.. Values.Where(id => !EqualityComparer<TId>.Default.Equals(id, chip.Value))];
         SelectedItems.RemoveAll(option => EqualityComparer<TId>.Default.Equals(option.Id, chip.Value));
         await ValuesChanged.InvokeAsync(Values);
     }
@@ -257,7 +257,7 @@ public abstract partial class AsyncSelectOption<TId, TOption>(
 
             return Result.Success<IReadOnlyList<TOption>>(search is null
                 ? catalog
-                : catalog.Where(option => option.Name.Contains(search, StringComparison.OrdinalIgnoreCase)).ToArray());
+                : [.. catalog.Where(option => option.Name.Contains(search, StringComparison.OrdinalIgnoreCase))]);
         };
     }
 }
