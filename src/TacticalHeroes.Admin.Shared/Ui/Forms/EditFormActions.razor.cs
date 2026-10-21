@@ -22,8 +22,8 @@ public partial class EditFormActions
     public bool Busy { get; set; }
 
     [Parameter]
-    public RenderFragment? ChildContent { get; set; }
+    public string? Permission { get; set; }
 
-    [Parameter]
+    [Parameter, EditorRequired]
     public EventCallback OnSubmit { get; set; }
 }

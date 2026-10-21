@@ -172,15 +172,9 @@
             </EditSection>
 
             <EditFormActions CancelHref="@CompendiumRoutes.Units"
-                             Busy="IsSaving">
-                <PermissionView Permissions="[CompendiumPermissions.Units.Update]">
-                    <AsyncActionButton Class="submit-action"
-                                       Text="Сохранить"
-                                       Busy="IsSaving"
-                                       StartIcon="@Icons.Material.Filled.Save"
-                                       OnClick="SubmitAsync" />
-                </PermissionView>
-            </EditFormActions>
+                             Permission="@CompendiumPermissions.Units.Update"
+                             Busy="IsSaving"
+                             OnSubmit="SubmitAsync" />
         </MudForm>
     </ChildContent>
 </LoadableContent>

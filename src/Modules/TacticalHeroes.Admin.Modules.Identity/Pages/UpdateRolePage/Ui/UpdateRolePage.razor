@@ -46,15 +46,9 @@
             </PermissionView>
 
             <EditFormActions CancelHref="@IdentityRoutes.Roles"
-                             Busy="IsSaving">
-                <PermissionView Permissions="[IdentityPermissions.Roles.Update]">
-                    <AsyncActionButton Class="submit-action"
-                                       Text="Сохранить"
-                                       Busy="IsSaving"
-                                       StartIcon="@Icons.Material.Filled.Save"
-                                       OnClick="SubmitAsync" />
-                </PermissionView>
-            </EditFormActions>
+                             Permission="@IdentityPermissions.Roles.Update"
+                             Busy="IsSaving"
+                             OnSubmit="SubmitAsync" />
         </MudForm>
     </ChildContent>
 </LoadableContent>
