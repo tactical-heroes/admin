@@ -2,6 +2,25 @@ namespace TacticalHeroes.Admin.Api.Mapping;
 
 public static class RequiredValueMapper
 {
+    public static List<TTarget> ToRequiredList<TSource, TTarget>(
+        IReadOnlyCollection<TSource>? values,
+        Func<TSource, TTarget> map)
+    {
+        ArgumentNullException.ThrowIfNull(values);
+        ArgumentNullException.ThrowIfNull(map);
+
+        var result = new List<TTarget>(values.Count);
+        foreach (var value in values)
+        {
+            ArgumentNullException.ThrowIfNull(value);
+            var mappedValue = map(value);
+            ArgumentNullException.ThrowIfNull(mappedValue);
+            result.Add(mappedValue);
+        }
+
+        return result;
+    }
+
     public static string ToRequiredString(string? value)
     {
         ArgumentNullException.ThrowIfNull(value);

@@ -17,7 +17,10 @@ internal static partial class UnitListMapper
     [MapProperty(
         nameof(PaginationResultOfUnitListItemResponse.Items),
         nameof(PaginationResult<UnitListItem>.Items),
-        SuppressNullMismatchDiagnostic = true)]
+        Use = nameof(ToItems))]
     public static partial PaginationResult<UnitListItem> ToPage(
         PaginationResultOfUnitListItemResponse response);
+
+    private static IReadOnlyList<UnitListItem> ToItems(List<UnitListItemResponse>? items) =>
+        RequiredValueMapper.ToRequiredList(items, ToListItem);
 }

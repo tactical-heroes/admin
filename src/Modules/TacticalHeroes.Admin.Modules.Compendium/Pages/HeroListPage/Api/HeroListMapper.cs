@@ -17,7 +17,10 @@ internal static partial class HeroListMapper
     [MapProperty(
         nameof(PaginationResultOfHeroListItemResponse.Items),
         nameof(PaginationResult<HeroListItem>.Items),
-        SuppressNullMismatchDiagnostic = true)]
+        Use = nameof(ToItems))]
     public static partial PaginationResult<HeroListItem> ToPage(
         PaginationResultOfHeroListItemResponse response);
+
+    private static IReadOnlyList<HeroListItem> ToItems(List<HeroListItemResponse>? items) =>
+        RequiredValueMapper.ToRequiredList(items, ToListItem);
 }

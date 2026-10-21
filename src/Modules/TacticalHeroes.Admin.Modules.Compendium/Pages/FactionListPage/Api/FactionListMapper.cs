@@ -17,7 +17,10 @@ internal static partial class FactionListMapper
     [MapProperty(
         nameof(PaginationResultOfFactionListItemResponse.Items),
         nameof(PaginationResult<FactionListItem>.Items),
-        SuppressNullMismatchDiagnostic = true)]
+        Use = nameof(ToItems))]
     public static partial PaginationResult<FactionListItem> ToPage(
         PaginationResultOfFactionListItemResponse response);
+
+    private static IReadOnlyList<FactionListItem> ToItems(List<FactionListItemResponse>? items) =>
+        RequiredValueMapper.ToRequiredList(items, ToListItem);
 }

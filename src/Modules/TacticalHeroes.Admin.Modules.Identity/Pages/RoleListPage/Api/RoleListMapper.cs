@@ -17,7 +17,10 @@ internal static partial class RoleListMapper
     [MapProperty(
         nameof(PaginationResultOfRoleListItemResponse.Items),
         nameof(PaginationResult<RoleListItem>.Items),
-        SuppressNullMismatchDiagnostic = true)]
+        Use = nameof(ToItems))]
     public static partial PaginationResult<RoleListItem> ToPage(
         PaginationResultOfRoleListItemResponse response);
+
+    private static IReadOnlyList<RoleListItem> ToItems(List<RoleListItemResponse>? items) =>
+        RequiredValueMapper.ToRequiredList(items, ToListItem);
 }

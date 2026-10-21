@@ -14,10 +14,12 @@ internal static partial class ClaimMapper
     [MapperIgnoreSource(nameof(ApiClaim.AdditionalData))]
     public static partial ClaimValue ToValue(ApiClaim claim);
 
-    public static partial List<ClaimValue> ToValues(List<ApiClaim>? claims);
+    public static List<ClaimValue> ToValues(List<ApiClaim>? claims) =>
+        RequiredValueMapper.ToRequiredList(claims, ToValue);
 
     [MapperIgnoreTarget(nameof(ApiClaim.AdditionalData))]
     public static partial ApiClaim ToApi(ClaimValue claim);
 
-    public static partial List<ApiClaim> ToApiValues(List<ClaimValue> claims);
+    public static List<ApiClaim> ToApiValues(List<ClaimValue>? claims) =>
+        RequiredValueMapper.ToRequiredList(claims, ToApi);
 }
