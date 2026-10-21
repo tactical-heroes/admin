@@ -66,9 +66,8 @@ public sealed class CreateUserPageTests : BunitContext
         Guid[] roles = assignRole ? [IdentityCatalogResponses.RoleId] : [];
         if (assignRole)
         {
-            var autocomplete = component.FindComponent<RoleSelect>().FindComponent<MudAutocomplete<Guid>>();
-            await component.InvokeAsync(() => autocomplete.Instance.OpenMenuAsync());
-            await component.InvokeAsync(() => autocomplete.Instance.ValueChanged.InvokeAsync(IdentityCatalogResponses.RoleId));
+            await component.InvokeAsync(() => component.FindComponent<RoleSelect>().FindComponent<MudSelect<Guid>>()
+                .Instance.SelectedValuesChanged.InvokeAsync(roles));
         }
 
         component.Find(".submit-action").Click();

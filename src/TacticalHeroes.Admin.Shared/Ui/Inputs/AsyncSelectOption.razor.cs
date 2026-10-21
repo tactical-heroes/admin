@@ -17,13 +17,14 @@ public abstract partial class AsyncSelectOption<TId, TOption>(
 {
     private MudAutocomplete<TId>? _autocomplete;
     private long _loadVersion;
-    private readonly HashSet<TId> _loadedValues = [];
 
     protected AsyncSelectOption(
         Func<CancellationToken, Task<Result<IReadOnlyList<TOption>>>> loadAllAsync,
         string label,
-        string emptyText) : this(CreateLocalSearch(loadAllAsync), label, emptyText)
+        string emptyText,
+        string? helperText = null) : this(CreateLocalSearch(loadAllAsync), label, emptyText)
     {
+        HelperText = helperText;
     }
 
     private string Label { get; } = label;
@@ -70,13 +71,14 @@ public abstract partial class AsyncSelectOption<TId, TOption>(
     [Parameter]
     public string? ErrorText { get; set; }
 
+    [Parameter]
+    public string? HelperText { get; set; }
+
     [PersistentState(AllowUpdates = true)]
     public TOption? SelectedOption { get; set; }
 
     [PersistentState(AllowUpdates = true)]
-    public List<TOption>? SelectedOptions { get; set; }
-
-    private List<TOption> SelectedItems => SelectedOptions ??= [];
+    public List<TOption>? Items { get; set; }
 
     private IReadOnlyList<TOption> Options { get; set; } = [];
 
@@ -94,9 +96,7 @@ public abstract partial class AsyncSelectOption<TId, TOption>(
     {
         if (MultiSelection)
         {
-            _loadedValues.IntersectWith(Values);
-            SelectedItems.RemoveAll(option => !Values.Contains(option.Id));
-            if (Values.Any(id => !_loadedValues.Contains(id) && SelectedItems.All(option => !EqualityComparer<TId>.Default.Equals(option.Id, id))))
+            if (Items is null && !IsLoading && LoadError is null)
             {
                 await LoadAsync();
             }
@@ -117,7 +117,6 @@ public abstract partial class AsyncSelectOption<TId, TOption>(
         var value = Value;
         long loadVersion = ++_loadVersion;
         LoadedValue = value;
-        _loadedValues.UnionWith(Values);
         IsLoading = true;
         LoadError = null;
 
@@ -135,13 +134,13 @@ public abstract partial class AsyncSelectOption<TId, TOption>(
                 return;
             }
 
-            Options = result.Value;
             if (MultiSelection)
             {
-                RememberSelectedOptions();
+                Items = [.. result.Value];
             }
             else
             {
+                Options = result.Value;
                 SelectedOption = Options.FirstOrDefault(option => EqualityComparer<TId>.Default.Equals(option.Id, value));
             }
         }
@@ -172,36 +171,12 @@ public abstract partial class AsyncSelectOption<TId, TOption>(
         source.Token.ThrowIfCancellationRequested();
         SearchError = result.IsFailure ? ApiErrorMessage.FromErrors(result.Errors) : null;
         Options = result.IsSuccess ? result.Value : [];
-        if (MultiSelection)
-        {
-            RememberSelectedOptions();
-        }
-
         await InvokeAsync(StateHasChanged);
-        return Options.Select(option => option.Id).Where(id => !MultiSelection || !Values.Contains(id));
+        return Options.Select(option => option.Id);
     }
 
     private async Task SetValueAsync(TId id)
     {
-        if (MultiSelection)
-        {
-            var option = Options.FirstOrDefault(option => EqualityComparer<TId>.Default.Equals(option.Id, id));
-            if (option is null || Values.Contains(id))
-            {
-                return;
-            }
-
-            Values = [.. Values, id];
-            RememberSelectedOptions();
-            await ValuesChanged.InvokeAsync(Values);
-            if (_autocomplete is not null)
-            {
-                await _autocomplete.ClearAsync();
-            }
-
-            return;
-        }
-
         Value = id;
         SelectedOption = Options.FirstOrDefault(option => EqualityComparer<TId>.Default.Equals(option.Id, id))
             ?? (SelectedOption is not null && EqualityComparer<TId>.Default.Equals(SelectedOption.Id, id) ? SelectedOption : null);
@@ -212,28 +187,21 @@ public abstract partial class AsyncSelectOption<TId, TOption>(
     {
         var option = SelectedOption is not null && EqualityComparer<TId>.Default.Equals(SelectedOption.Id, id)
             ? SelectedOption
-            : SelectedItems.FirstOrDefault(option => EqualityComparer<TId>.Default.Equals(option.Id, id))
-                ?? Options.FirstOrDefault(option => EqualityComparer<TId>.Default.Equals(option.Id, id));
+            : Options.FirstOrDefault(option => EqualityComparer<TId>.Default.Equals(option.Id, id));
         return option is null ? string.Empty : GetOptionName(option);
     }
 
     protected virtual string GetOptionName(TOption option) => option.Name;
 
-    private string GetSelectedName(TId id) => string.IsNullOrEmpty(GetName(id)) ? $"Недоступный вариант ({id})" : GetName(id);
-
-    private void RememberSelectedOptions()
+    private string GetSelectedName(TId id)
     {
-        foreach (var option in Options.Where(option => Values.Contains(option.Id)))
-        {
-            SelectedItems.RemoveAll(selected => EqualityComparer<TId>.Default.Equals(selected.Id, option.Id));
-            SelectedItems.Add(option);
-        }
+        var option = Items?.FirstOrDefault(option => EqualityComparer<TId>.Default.Equals(option.Id, id));
+        return option is null ? $"Недоступный вариант ({id})" : GetOptionName(option);
     }
 
-    private async Task RemoveValueAsync(MudChip<TId> chip)
+    private async Task SetValuesAsync(IEnumerable<TId>? values)
     {
-        Values = [.. Values.Where(id => !EqualityComparer<TId>.Default.Equals(id, chip.Value))];
-        SelectedItems.RemoveAll(option => EqualityComparer<TId>.Default.Equals(option.Id, chip.Value));
+        Values = values is null ? [] : [.. values.Distinct()];
         await ValuesChanged.InvokeAsync(Values);
     }
 

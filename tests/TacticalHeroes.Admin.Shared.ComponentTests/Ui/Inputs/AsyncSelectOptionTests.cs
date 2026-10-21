@@ -365,62 +365,69 @@ public sealed class AsyncSelectOptionTests : BunitContext
         component.FindComponent<MudAutocomplete<int>>().Find("input").GetAttribute("value").ShouldBe("Selected option");
     }
 
-    [Fact(DisplayName = "RememberSelectedOptions should preserve previous selections when another option is selected")]
-    public async Task RememberSelectedOptions_Should_PreservePreviousSelections_When_AnotherOptionIsSelected()
+    [Fact(DisplayName = "SetValuesAsync should preserve other selections when an option is toggled")]
+    public async Task SetValuesAsync_Should_PreserveOtherSelections_When_AnOptionIsToggled()
     {
         List<int> values = [1];
         var component = Render<TestSelect>(parameters => parameters
             .Add(select => select.MultiSelection, true)
             .Add(select => select.Values, values)
             .Add(select => select.ValuesChanged, selected => values = selected));
-        await component.InvokeAsync(() => component.FindComponent<MudAutocomplete<int>>().Instance.OpenMenuAsync());
-        Popovers.FindAll(".mud-list-item").ShouldNotContain(item => item.TextContent.Trim() == "First option");
+        var select = component.FindComponent<MudSelect<int>>();
+        await component.InvokeAsync(() => select.Instance.OpenMenu());
 
         await Popovers.FindAll(".mud-list-item").Single(item => item.TextContent.Trim() == "Selected option")
             .ClickAsync(new MouseEventArgs());
 
         values.ShouldBe([1, OptionId]);
-        component.FindComponents<MudChip<int>>().Select(chip => chip.Instance.Value).ShouldBe([1, OptionId]);
-        component.Find("input").GetAttribute("value").ShouldBeNullOrEmpty();
-        await component.InvokeAsync(() => component.FindComponent<MudAutocomplete<int>>().Instance.OpenMenuAsync());
-        Popovers.FindAll(".mud-list-item").ShouldBeEmpty();
+        component.Find("input").GetAttribute("value").ShouldBe("First option, Selected option");
+        await Popovers.FindAll(".mud-list-item").Single(item => item.TextContent.Trim() == "First option")
+            .ClickAsync(new MouseEventArgs());
+        values.ShouldBe([OptionId]);
+        component.Find("input").GetAttribute("value").ShouldBe("Selected option");
+        component.FindComponents<MudAutocomplete<int>>().ShouldBeEmpty();
+        component.FindComponents<MudChip<int>>().ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "GetSelectedName should preserve selected labels when search fails or has different results")]
-    public async Task GetSelectedName_Should_PreserveSelectedLabels_When_SearchFailsOrHasDifferentResults()
+    [Fact(DisplayName = "GetSelectedName should retain missing selections when catalog does not contain an identifier")]
+    public async Task GetSelectedName_Should_RetainMissingSelections_When_CatalogDoesNotContainAnIdentifier()
     {
+        const int missingId = 3;
+        List<int> values = [OptionId, missingId];
         var component = Render<TestSelect>(parameters => parameters
             .Add(select => select.MultiSelection, true)
-            .Add(select => select.Values, [OptionId]));
-        var autocomplete = component.FindComponent<MudAutocomplete<int>>();
+            .Add(select => select.Values, values)
+            .Add(select => select.ValuesChanged, selected => values = selected));
+        component.Find("input").GetAttribute("value").ShouldBe("Selected option, Недоступный вариант (3)");
+        await component.InvokeAsync(() => component.FindComponent<MudSelect<int>>().Instance.OpenMenu());
 
-        await component.InvokeAsync(() => autocomplete.Instance.SearchFunc!("First", Xunit.TestContext.Current.CancellationToken)!);
-        component.FindComponent<MudChip<int>>().Markup.ShouldContain("Selected option");
-        _source.Fail = true;
-        await component.InvokeAsync(() => autocomplete.Instance.SearchFunc!("Selected", Xunit.TestContext.Current.CancellationToken)!);
+        await Popovers.FindAll(".mud-list-item").Single(item => item.TextContent.Trim() == "Недоступный вариант (3)")
+            .ClickAsync(new MouseEventArgs());
 
-        component.Markup.ShouldContain("Options unavailable.");
-        component.FindComponent<MudChip<int>>().Markup.ShouldContain("Selected option");
-        component.Instance.Values.ShouldBe([OptionId]);
+        values.ShouldBe([OptionId]);
+        component.Find("input").GetAttribute("value").ShouldBe("Selected option");
+        _source.Requests.ShouldBe([null]);
     }
 
     [Fact(DisplayName = "LoadAsync should keep current selections when values change during loading")]
     public async Task LoadAsync_Should_KeepCurrentSelections_When_ValuesChangeDuringLoading()
     {
         _source.Pending = new TaskCompletionSource<Result<IReadOnlyList<SelectOption<int>>>>(TaskCreationOptions.RunContinuationsAsynchronously);
-        var component = Render<TestSelect>(parameters => parameters.Add(select => select.MultiSelection, true));
-        Task loading = component.InvokeAsync(() => component.Instance.SetParametersAsync(
-            ParameterView.FromDictionary(new Dictionary<string, object?> { ["Values"] = new List<int> { OptionId } })));
+        var component = Render<TestSelect>(parameters => parameters
+            .Add(select => select.MultiSelection, true)
+            .Add(select => select.Values, [OptionId]));
         await component.WaitForAssertionAsync(() => _source.Requests.Count.ShouldBe(1));
+
         await component.InvokeAsync(() => component.Instance.SetParametersAsync(
             ParameterView.FromDictionary(new Dictionary<string, object?> { ["Values"] = new List<int>() })));
-
         _source.Pending.SetResult(Result.Success<IReadOnlyList<SelectOption<int>>>([new() { Id = OptionId, Name = "Old" }]));
-        await loading;
 
-        component.Instance.Values.ShouldBeEmpty();
-        component.Instance.SelectedOptions!.ShouldBeEmpty();
-        component.FindComponents<MudChip<int>>().ShouldBeEmpty();
+        await component.WaitForAssertionAsync(() =>
+        {
+            component.Instance.Values.ShouldBeEmpty();
+            component.Find("input").GetAttribute("value").ShouldBeNullOrEmpty();
+        });
+        _source.Requests.ShouldBe([null]);
     }
 
     [Theory(DisplayName = "GetOptionName should format selected labels when display names are customized")]
@@ -433,45 +440,35 @@ public sealed class AsyncSelectOptionTests : BunitContext
             .Add(select => select.Value, OptionId)
             .Add(select => select.Values, [OptionId]));
 
-        if (multiSelection)
-        {
-            component.FindComponent<MudChip<int>>().Markup.ShouldContain("Name: Selected option");
-        }
-        else
-        {
-            component.Find("input").GetAttribute("value").ShouldBe("Name: Selected option");
-        }
+        component.Find("input").GetAttribute("value").ShouldBe("Name: Selected option");
     }
 
-    [Fact(DisplayName = "RemoveValueAsync should retain other selections when a chip is removed")]
-    public async Task RemoveValueAsync_Should_RetainOtherSelections_When_AChipIsRemoved()
+    [Fact(DisplayName = "SetValuesAsync should clear selection when all options are deselected")]
+    public async Task SetValuesAsync_Should_ClearSelection_When_AllOptionsAreDeselected()
     {
         List<int> values = [1, OptionId];
         var component = Render<TestSelect>(parameters => parameters
             .Add(select => select.MultiSelection, true)
             .Add(select => select.Values, values)
             .Add(select => select.ValuesChanged, selected => values = selected));
-        var chip = component.FindComponents<MudChip<int>>().Single(chip => chip.Instance.Value == 1);
 
-        await chip.Find(".mud-chip-close-button").ClickAsync(new MouseEventArgs());
+        await component.InvokeAsync(() => component.FindComponent<MudSelect<int>>().Instance.ClearAsync());
 
-        values.ShouldBe([OptionId]);
-        component.FindComponents<MudChip<int>>().ShouldHaveSingleItem().Markup.ShouldContain("Selected option");
+        values.ShouldBeEmpty();
+        component.Find("input").GetAttribute("value").ShouldBeNullOrEmpty();
     }
 
     [Fact(DisplayName = "CreateLocalSearch should cache catalog per component when options are searched")]
     public async Task CreateLocalSearch_Should_CacheCatalogPerComponent_When_OptionsAreSearched()
     {
-        var component = Render<LocalSelect>(parameters => parameters
-            .Add(select => select.MultiSelection, true)
-            .Add(select => select.Values, [OptionId]));
+        var component = Render<LocalSelect>(parameters => parameters.Add(select => select.Value, OptionId));
         var autocomplete = component.FindComponent<MudAutocomplete<int>>();
 
         var firstOptions = await component.InvokeAsync(() => autocomplete.Instance.SearchFunc!("First", Xunit.TestContext.Current.CancellationToken)!);
         var selectedOptions = await component.InvokeAsync(() => autocomplete.Instance.SearchFunc!("Selected", Xunit.TestContext.Current.CancellationToken)!);
 
         firstOptions.ShouldBe([1]);
-        selectedOptions.ShouldBeEmpty();
+        selectedOptions.ShouldBe([OptionId]);
         _source.Requests.ShouldBe([null]);
         Render<LocalSelect>(parameters => parameters.Add(select => select.Value, 1));
         _source.Requests.ShouldBe([null, null]);

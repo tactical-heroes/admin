@@ -9,8 +9,8 @@ namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Entities.Roles.Ui
 
 public sealed class RoleSelectTests : IdentityCatalogTestContext
 {
-    [Fact(DisplayName = "SearchAsync should reuse complete catalog when roles are searched")]
-    public async Task SearchAsync_Should_ReuseCompleteCatalog_When_RolesAreSearched()
+    [Fact(DisplayName = "OnParametersSetAsync should load complete catalog when many roles exist")]
+    public void OnParametersSetAsync_Should_LoadCompleteCatalog_When_ManyRolesExist()
     {
         Handler.Roles = [.. Enumerable.Range(0, 101).Select(index => new RoleOption
         {
@@ -21,12 +21,9 @@ public sealed class RoleSelectTests : IdentityCatalogTestContext
         var component = Render<RoleSelect>(parameters => parameters
             .Add(select => select.MultiSelection, true)
             .Add(select => select.Values, [lastRole.Id]));
-        var autocomplete = component.FindComponent<MudAutocomplete<Guid>>();
 
-        var options = await component.InvokeAsync(() => autocomplete.Instance.SearchFunc!("Role 000", Xunit.TestContext.Current.CancellationToken)!);
-
-        options.ShouldBe([Handler.Roles[0].Id]);
-        component.FindComponent<MudChip<Guid>>().Markup.ShouldContain(lastRole.Name);
+        component.FindComponents<MudSelectItem<Guid>>().Count.ShouldBe(101);
+        component.Find("input").GetAttribute("value").ShouldBe(lastRole.Name);
         var request = Handler.Requests.ShouldHaveSingleItem();
         request.AbsolutePath.ShouldBe("/api/v1/roles/select-options");
         request.Query.ShouldBeEmpty();
@@ -41,8 +38,7 @@ public sealed class RoleSelectTests : IdentityCatalogTestContext
             .Add(select => select.MultiSelection, true)
             .Add(select => select.Values, [IdentityCatalogResponses.RoleId]));
 
-        component.FindComponent<MudChip<Guid>>().Markup.ShouldContain("Player (по умолчанию)");
-        component.Find("input").GetAttribute("value").ShouldBeNullOrEmpty();
+        component.Find("input").GetAttribute("value").ShouldBe("Player (по умолчанию)");
     }
 
     [Fact(DisplayName = "LoadAsync should retain selected roles and retry when catalog fails")]
@@ -59,35 +55,34 @@ public sealed class RoleSelectTests : IdentityCatalogTestContext
 
         component.Find("button").Click();
 
-        component.WaitForAssertion(() => component.FindComponent<MudChip<Guid>>().Markup.ShouldContain("Moderator"));
+        component.WaitForAssertion(() => component.Find("input").GetAttribute("value").ShouldBe("Moderator"));
         roles.ShouldBe([IdentityCatalogResponses.RoleId]);
         Handler.Requests.Count.ShouldBe(2);
     }
 
-    [Fact(DisplayName = "Render should add and remove chips when roles are selected")]
-    public async Task Render_Should_AddAndRemoveChips_When_RolesAreSelected()
+    [Fact(DisplayName = "Render should select and deselect roles when options are toggled")]
+    public async Task Render_Should_SelectAndDeselectRoles_When_OptionsAreToggled()
     {
         List<Guid> roles = [];
         var component = Render<RoleSelect>(parameters => parameters
             .Add(select => select.MultiSelection, true)
             .Add(select => select.Values, roles)
             .Add(select => select.ValuesChanged, values => roles = values));
-        await component.InvokeAsync(() => component.FindComponent<MudAutocomplete<Guid>>().Instance.OpenMenuAsync());
+        await component.InvokeAsync(() => component.FindComponent<MudSelect<Guid>>().Instance.OpenMenu());
 
         await Popovers.FindAll(".mud-list-item").Single(item => item.TextContent.Trim() == "Moderator")
             .ClickAsync(new MouseEventArgs());
 
         roles.ShouldBe([IdentityCatalogResponses.RoleId]);
-        component.Find("input").GetAttribute("value").ShouldBeNullOrEmpty();
-        var chip = component.FindComponent<MudChip<Guid>>();
-        chip.Markup.ShouldContain("Moderator");
-        await chip.Find(".mud-chip-close-button").ClickAsync(new MouseEventArgs());
+        component.Find("input").GetAttribute("value").ShouldBe("Moderator");
+        await Popovers.FindAll(".mud-list-item").Single(item => item.TextContent.Trim() == "Moderator")
+            .ClickAsync(new MouseEventArgs());
         roles.ShouldBeEmpty();
         component.FindComponents<MudChip<Guid>>().ShouldBeEmpty();
     }
 
-    [Fact(DisplayName = "Render should retain removable missing role when selected role is absent from catalog")]
-    public async Task Render_Should_RetainRemovableMissingRole_When_SelectedRoleIsAbsentFromCatalog()
+    [Fact(DisplayName = "Render should retain deselectable missing role when selected role is absent from catalog")]
+    public async Task Render_Should_RetainDeselectableMissingRole_When_SelectedRoleIsAbsentFromCatalog()
     {
         Guid missingId = Guid.Parse("2994d18b-f957-4a09-a366-ac1606c31018");
         List<Guid> roles = [missingId];
@@ -95,12 +90,12 @@ public sealed class RoleSelectTests : IdentityCatalogTestContext
             .Add(select => select.MultiSelection, true)
             .Add(select => select.Values, roles)
             .Add(select => select.ValuesChanged, values => roles = values));
-        var chip = component.FindComponent<MudChip<Guid>>();
-        chip.Instance.Value.ShouldBe(missingId);
-        chip.Markup.ShouldContain("Недоступный вариант");
+        component.Find("input").GetAttribute("value")!.ShouldContain("Недоступный вариант");
         roles.ShouldBe([missingId]);
+        await component.InvokeAsync(() => component.FindComponent<MudSelect<Guid>>().Instance.OpenMenu());
 
-        await chip.Find(".mud-chip-close-button").ClickAsync(new MouseEventArgs());
+        await Popovers.FindAll(".mud-list-item").Single(item => item.TextContent.Contains("Недоступный вариант", StringComparison.Ordinal))
+            .ClickAsync(new MouseEventArgs());
 
         roles.ShouldBeEmpty();
     }

@@ -40,7 +40,9 @@ public sealed class AsyncEnumerationSelectTests : BunitContext
     public void OnInitializedAsync_Should_LoadItems_When_ComponentIsRendered()
     {
         var component = Render<AsyncEnumerationSelect<TestEnumeration>>(
-            parameters => parameters.Add(select => select.Label, "Статус"));
+            parameters => parameters
+                .Add(select => select.Label, "Статус")
+                .Add(select => select.Value, "blocked"));
 
         component.WaitForAssertion(() =>
         {
@@ -48,7 +50,8 @@ public sealed class AsyncEnumerationSelectTests : BunitContext
             component.FindComponents<MudSelectItem<string>>()
                 .Select(item => item.Instance.Value)
                 .ShouldBe(["active", "blocked"]);
-            component.Instance.Value.ShouldBeNull();
+            component.Instance.Value.ShouldBe("blocked");
+            component.Find("input").GetAttribute("value").ShouldBe("Blocked");
         });
     }
 

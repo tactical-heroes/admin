@@ -13,6 +13,7 @@ using TacticalHeroes.Admin.Api.DependencyInjection;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Ui;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Roles.Ui;
 using TacticalHeroes.Admin.Shared.Ui.Forms;
+using TacticalHeroes.Admin.Shared.Ui.Inputs;
 using TacticalHeroes.Admin.Shared.Ui.Layout;
 
 using UpdateUserPageComponent =
@@ -74,6 +75,15 @@ public sealed class UpdateUserPageTests : BunitContext
         });
     }
 
+    [Fact(DisplayName = "Render should display selected status when user details are loaded")]
+    public void Render_Should_DisplaySelectedStatus_When_UserDetailsAreLoaded()
+    {
+        var component = Render<UpdateUserPageComponent>(parameters => parameters.Add(page => page.Id, _userId));
+
+        component.WaitForAssertion(() => component.FindComponent<EnumerationSelect>()
+            .Find("input").GetAttribute("value").ShouldBe("Active"));
+    }
+
     [Fact(DisplayName = "Submit should navigate to list when user is valid")]
     public void Submit_Should_NavigateToList_When_UserIsValid()
     {
@@ -103,8 +113,8 @@ public sealed class UpdateUserPageTests : BunitContext
         Guid[] roles = keepRole ? [IdentityCatalogResponses.RoleId] : [];
         if (!keepRole)
         {
-            var chip = component.FindComponent<RoleSelect>().FindComponent<MudChip<Guid>>();
-            await component.InvokeAsync(() => chip.Instance.OnClose.InvokeAsync(chip.Instance));
+            await component.InvokeAsync(() => component.FindComponent<RoleSelect>().FindComponent<MudSelect<Guid>>()
+                .Instance.SelectedValuesChanged.InvokeAsync(roles));
         }
         var claims = component.FindComponent<ClaimsEditor>();
         await component.InvokeAsync(() => claims.FindComponents<MudCheckBox<bool?>>()

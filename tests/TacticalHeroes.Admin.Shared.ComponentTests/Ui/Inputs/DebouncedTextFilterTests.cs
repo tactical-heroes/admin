@@ -30,6 +30,18 @@ public sealed class DebouncedTextFilterTests : BunitContext
         applyCount.ShouldBe(2);
     }
 
+    [Fact(DisplayName = "Render should display assigned text when filter has a value")]
+    public void Render_Should_DisplayAssignedText_When_FilterHasAValue()
+    {
+        var component = Render<DebouncedTextFilter>(parameters => parameters
+            .Add(filter => filter.Label, "Search")
+            .Add(filter => filter.Value, "dragon"));
+
+        component.Find("input").GetAttribute("value").ShouldBe("dragon");
+        component.Render(parameters => parameters.Add(filter => filter.Value, "knight"));
+        component.Find("input").GetAttribute("value").ShouldBe("knight");
+    }
+
     private IRenderedComponent<DebouncedTextFilter> RenderFilter(Action onFilterChanged)
     {
         return Render<DebouncedTextFilter>(parameters => parameters
