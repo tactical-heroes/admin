@@ -65,8 +65,11 @@ public partial class RoleSelect(RoleOptionsApi api) : CancelableComponentBase
     private string GetRoleName(Guid id)
     {
         RoleOption? role = Items?.FirstOrDefault(role => role.Id == id);
-        return role is null
-            ? $"Недоступная роль ({id})"
-            : role.Name + (role.IsDefault ? " (по умолчанию)" : string.Empty);
+        if (role is null)
+        {
+            return $"Недоступная роль ({id})";
+        }
+
+        return role.IsDefault ? $"{role.Name} (по умолчанию)" : role.Name;
     }
 }

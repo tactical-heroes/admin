@@ -66,23 +66,26 @@ public partial class ClaimsEditor(ClaimCatalogApi api) : CancelableComponentBase
     private bool? GetSelection(IEnumerable<ClaimOption> permissions)
     {
         var values = permissions.Select(option => IsSelected(option.Code)).ToArray();
-        return values.Length > 0 && values.All(value => value)
-            ? true
-            : values.Any(value => value) ? null : false;
+        if (values.Length > 0 && values.All(value => value))
+        {
+            return true;
+        }
+
+        return values.Any(value => value) ? null : false;
     }
 
     private void SetPermissions(IEnumerable<ClaimOption> permissions, bool? selected)
     {
-        foreach (var option in permissions)
+        foreach (string code in permissions.Select(option => option.Code))
         {
-            foreach (var existing in Claims.Where(claim => IsPermission(claim) && claim.Value == option.Code).ToArray())
+            foreach (var existing in Claims.Where(claim => IsPermission(claim) && claim.Value == code).ToArray())
             {
                 Claims.Remove(existing);
             }
 
             if (selected == true)
             {
-                Claims.Add(new ClaimValue { Type = Permissions!.Type, Value = option.Code });
+                Claims.Add(new ClaimValue { Type = Permissions!.Type, Value = code });
             }
         }
     }

@@ -15,10 +15,10 @@
                    Error="Error"
                    ErrorText="@ErrorText"
                    HelperText="Можно назначить несколько ролей или оставить пользователя без ролей.">
-            @foreach (var role in Items ?? [])
+            @foreach (var id in (Items ?? []).Select(role => role.Id))
             {
-                <MudSelectItem T="Guid" Value="role.Id">
-                    @GetRoleName(role.Id)
+                <MudSelectItem T="Guid" Value="id">
+                    @GetRoleName(id)
                 </MudSelectItem>
             }
             @foreach (var id in RoleIds.Where(id => Items?.All(role => role.Id != id) != false))

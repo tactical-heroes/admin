@@ -8,6 +8,8 @@ namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Entities.Claims.U
 
 public sealed class ClaimsEditorTests : IdentityCatalogTestContext
 {
+    private static readonly string[] UserPermissions = ["identity.users.read", "identity.users.update"];
+
     [Fact(DisplayName = "OnInitializedAsync should load permissions when editor is rendered")]
     public void OnInitializedAsync_Should_LoadPermissions_When_EditorIsRendered()
     {
@@ -112,8 +114,10 @@ public sealed class ClaimsEditorTests : IdentityCatalogTestContext
     [InlineData(2, true)]
     public void GetSelection_Should_ReflectPartialSelection_When_RowPermissionsDiffer(int count, bool? expected)
     {
-        IList<ClaimValue> claims = new[] { "identity.users.read", "identity.users.update" }
-            .Take(count).Select(value => new ClaimValue { Type = "permission", Value = value }).ToList();
+        IList<ClaimValue> claims =
+        [
+            .. UserPermissions.Take(count).Select(value => new ClaimValue { Type = "permission", Value = value })
+        ];
 
         var component = RenderMatrix(claims);
 

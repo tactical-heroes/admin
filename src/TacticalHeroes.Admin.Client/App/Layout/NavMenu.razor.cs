@@ -13,7 +13,7 @@ public partial class NavMenu(NavigationManager navigation)
         AdminModules.NavigationGroups
             .Select(group => group with
             {
-                Items = group.Items.Where(item => PermissionAccess.HasPermission(user, item.Permission)).ToArray()
+                Items = [.. group.Items.Where(item => PermissionAccess.HasPermission(user, item.Permission))]
             })
             .Where(group => group.Items.Count > 0);
 

@@ -22,10 +22,11 @@ public sealed class ProxyLoginRedirectTests
         const string query = "?returnUrl=https%3A%2F%2Flocalhost%3A5173%2Fconnect%2Fauthorize%3Fclient_id%3Dweb%26request_uri%3Durn%253Arequest%253Aa%252Fb&prompt=login";
         string location = $"{providerScheme}://dev.example.test/login{query}";
 
-        var result = await SendProxyRequestAsync(location, HttpStatusCode.Redirect, "true", pathBase);
+        var (actualStatusCode, actualLocation) = await SendProxyRequestAsync(
+            location, HttpStatusCode.Redirect, "true", pathBase);
 
-        result.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        result.Location.ShouldBe($"{pathBase}/login{query}");
+        actualStatusCode.ShouldBe(HttpStatusCode.Redirect);
+        actualLocation.ShouldBe($"{pathBase}/login{query}");
     }
 
     [Theory(DisplayName = "Proxy should preserve response when redirect is unrelated to login page")]
@@ -41,10 +42,10 @@ public sealed class ProxyLoginRedirectTests
         string? location,
         HttpStatusCode statusCode)
     {
-        var result = await SendProxyRequestAsync(location, statusCode, "true", "");
+        var (actualStatusCode, actualLocation) = await SendProxyRequestAsync(location, statusCode, "true", "");
 
-        result.StatusCode.ShouldBe(statusCode);
-        result.Location.ShouldBe(location);
+        actualStatusCode.ShouldBe(statusCode);
+        actualLocation.ShouldBe(location);
     }
 
     [Theory(DisplayName = "Proxy should preserve login redirect when route does not enable rewriting")]
@@ -54,10 +55,11 @@ public sealed class ProxyLoginRedirectTests
     {
         const string location = "https://dev.example.test/login?returnUrl=%2Fconnect%2Fauthorize";
 
-        var result = await SendProxyRequestAsync(location, HttpStatusCode.Redirect, metadata, "");
+        var (actualStatusCode, actualLocation) = await SendProxyRequestAsync(
+            location, HttpStatusCode.Redirect, metadata, "");
 
-        result.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        result.Location.ShouldBe(location);
+        actualStatusCode.ShouldBe(HttpStatusCode.Redirect);
+        actualLocation.ShouldBe(location);
     }
 
     private static async Task<(HttpStatusCode StatusCode, string? Location)> SendProxyRequestAsync(
