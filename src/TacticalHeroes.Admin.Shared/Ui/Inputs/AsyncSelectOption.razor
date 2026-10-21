@@ -9,9 +9,9 @@
     <ChildContent>
         <MudAutocomplete @ref="_autocomplete"
                          T="TId"
-                         Value="Value"
+                         Value="@(MultiSelection ? default! : Value)"
                          ValueChanged="SetValueAsync"
-                         For="For"
+                         For="@(MultiSelection ? null : For)"
                          Label="@Label"
                          Variant="Variant.Outlined"
                          ToStringFunc="GetName"
@@ -39,6 +39,18 @@
                 }
             </NoItemsTemplate>
         </MudAutocomplete>
+        @if (MultiSelection)
+        {
+            <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="1" Class="mt-2">
+                @foreach (var id in Values.Distinct())
+                {
+                    <MudChip @key="id" T="TId" Value="id" OnClose="RemoveValueAsync"
+                             Color="Color.Primary" Variant="Variant.Outlined">
+                        @GetSelectedName(id)
+                    </MudChip>
+                }
+            </MudStack>
+        }
         @if (SearchError is not null)
         {
             <MudAlert Severity="Severity.Error" Class="mt-2">@SearchError</MudAlert>

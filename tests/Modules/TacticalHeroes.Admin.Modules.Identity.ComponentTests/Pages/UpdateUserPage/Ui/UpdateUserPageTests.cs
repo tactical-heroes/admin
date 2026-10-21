@@ -101,8 +101,11 @@ public sealed class UpdateUserPageTests : BunitContext
     {
         var component = Render<UpdateUserPageComponent>(parameters => parameters.Add(page => page.Id, _userId));
         Guid[] roles = keepRole ? [IdentityCatalogResponses.RoleId] : [];
-        await component.InvokeAsync(() => component.FindComponent<RoleSelect>().FindComponent<MudSelect<Guid>>()
-            .Instance.SelectedValuesChanged.InvokeAsync(roles));
+        if (!keepRole)
+        {
+            var chip = component.FindComponent<RoleSelect>().FindComponent<MudChip<Guid>>();
+            await component.InvokeAsync(() => chip.Instance.OnClose.InvokeAsync(chip.Instance));
+        }
         var claims = component.FindComponent<ClaimsEditor>();
         await component.InvokeAsync(() => claims.FindComponents<MudCheckBox<bool?>>()
             .Single(box => box.Instance.UserAttributes?["aria-label"]?.ToString() == "Пользователи: Просмотр")

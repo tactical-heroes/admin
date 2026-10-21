@@ -75,7 +75,7 @@
 
         <EditSection Title="Доступ">
             <MudStack Spacing="3">
-                <RoleSelect RoleIds="Model.RoleIds"
+                <RoleSelect MultiSelection="true" @bind-Values="Model.RoleIds"
                             Error="@Errors.HasError(nameof(CreateUserFormModel.RoleIds))"
                             ErrorText="@Errors.GetError(nameof(CreateUserFormModel.RoleIds))" />
                 <MudText Typo="Typo.caption" Color="Color.Secondary">

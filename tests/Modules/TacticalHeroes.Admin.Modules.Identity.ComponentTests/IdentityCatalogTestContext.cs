@@ -18,6 +18,8 @@ public abstract class IdentityCatalogTestContext : BunitContext
 {
     protected CatalogHandler Handler { get; } = new();
 
+    protected IRenderedComponent<MudPopoverProvider> Popovers { get; }
+
     protected IdentityCatalogTestContext()
     {
         Services.AddMudServices();
@@ -29,7 +31,7 @@ public abstract class IdentityCatalogTestContext : BunitContext
                 builder => builder.PrimaryHandler = Handler));
         Services.AddIdentityAdminModule();
         JSInterop.Mode = JSRuntimeMode.Loose;
-        Render<MudPopoverProvider>();
+        Popovers = Render<MudPopoverProvider>();
     }
 
     protected sealed class CatalogHandler : HttpMessageHandler

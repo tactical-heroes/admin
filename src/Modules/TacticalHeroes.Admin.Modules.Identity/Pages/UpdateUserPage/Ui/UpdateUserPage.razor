@@ -69,7 +69,7 @@
                 <PermissionView Permissions="[Permissions.Users.Update]">
                     <EditSection Title="Доступ">
                         <MudStack Spacing="3">
-                            <RoleSelect RoleIds="Model.RoleIds"
+                            <RoleSelect MultiSelection="true" @bind-Values="Model.RoleIds"
                                         Error="@Errors.HasError(nameof(UpdateUserFormModel.RoleIds))"
                                         ErrorText="@Errors.GetError(nameof(UpdateUserFormModel.RoleIds))" />
                             <MudText Typo="Typo.caption" Color="Color.Secondary">
