@@ -75,6 +75,29 @@ public sealed class FormPageConventionTests
         BindsFormState(broken, isCreate: true).ShouldBeFalse();
     }
 
+    [Theory(DisplayName = "Form bindings should reject disconnected custom submission when markup is inspected")]
+    [InlineData("<AsyncActionButton Busy=\"IsSaving\"", "<AsyncActionButton Busy=\"false\"")]
+    [InlineData("OnClick=\"SubmitAsync\"", "OnClick=\"OtherSubmitAsync\"")]
+    [InlineData("<AsyncActionButton Busy=\"IsSaving\" OnClick=\"SubmitAsync\" />", "")]
+    public void FormBindings_Should_RejectDisconnectedCustomSubmission_When_MarkupIsInspected(
+        string original,
+        string replacement)
+    {
+        const string markup = """
+            <MudForm @ref="Form" Model="Model" Validation="@Validator.ValidateValue" @bind-IsValid="IsValid">
+                <EditFormActions CancelHref="@ExampleRoutes.Examples" Busy="IsSaving">
+                    <PermissionView Permissions="[ExamplePermissions.Update]">
+                        <AsyncActionButton Busy="IsSaving" OnClick="SubmitAsync" />
+                    </PermissionView>
+                </EditFormActions>
+            </MudForm>
+            """;
+        string broken = markup.Replace(original, replacement, StringComparison.Ordinal);
+
+        BindsFormState(markup, isCreate: false).ShouldBeTrue();
+        BindsFormState(broken, isCreate: false).ShouldBeFalse();
+    }
+
     [Theory(DisplayName = "Update bindings should reject disconnected loading when markup is inspected")]
     [InlineData("Loading=\"IsLoading\"", "Loading=\"false\"")]
     [InlineData("LoadError=\"@LoadError\"", "LoadError=\"LoadError\"")]
@@ -175,10 +198,23 @@ public sealed class FormPageConventionTests
             PageConventionSource.Binds(form, "Validation", "Validator.ValidateValue") &&
             PageConventionSource.Binds(form, "@bind-IsValid", "IsValid") &&
             PageConventionSource.Binds(actions, "Busy", "IsSaving") &&
-            PageConventionSource.Binds(actions, "OnSubmit", "SubmitAsync") &&
+            BindsSubmission(actions) &&
             PageConventionSource.Attribute(actions, "CancelHref") is { Length: > 1 } cancelHref && cancelHref.StartsWith('@') &&
             (PageConventionSource.Binds(actions, "IsNew", isCreate ? "true" : "false") ||
              (!isCreate && PageConventionSource.Attribute(actions, "IsNew") is null));
+    }
+
+    private static bool BindsSubmission(Match actions)
+    {
+        string content = actions.Groups["content"].Value;
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            return PageConventionSource.Binds(actions, "OnSubmit", "SubmitAsync");
+        }
+
+        Match button = PageConventionSource.Element(content, "AsyncActionButton");
+        return PageConventionSource.Binds(button, "Busy", "IsSaving") &&
+            PageConventionSource.Binds(button, "OnClick", "SubmitAsync");
     }
 
     private static bool BindsLoadState(string markup)

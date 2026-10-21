@@ -1,5 +1,3 @@
-using System.Security.Claims;
-
 using MudBlazor.Services;
 
 namespace TacticalHeroes.Admin.Shared.ComponentTests.Ui.Forms;
@@ -12,32 +10,22 @@ public sealed class EditFormActionsTests : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
-    [Theory(DisplayName = "Render should require update permission for saving when submit permission is configured")]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void Render_Should_RequireUpdatePermissionForSaving_When_SubmitPermissionIsConfigured(bool canUpdate)
+    [Fact(DisplayName = "Render should show custom action and cancel when child content is provided")]
+    public void Render_Should_ShowCustomActionAndCancel_When_ChildContentIsProvided()
     {
-        var authorization = AddAuthorization();
-        authorization.SetAuthorized("User");
-        authorization.SetClaims(new Claim("permission", canUpdate ? "items.update" : "items.read"));
         int submissions = 0;
 
         var component = Render<EditFormActions>(parameters => parameters
             .Add(actions => actions.CancelHref, "/items")
-            .Add(actions => actions.SubmitPermission, "items.update")
-            .Add(actions => actions.OnSubmit, () => submissions++));
+            .AddChildContent<AsyncActionButton>(button => button
+                .Add(action => action.Class, "custom-action")
+                .Add(action => action.Text, "Применить")
+                .Add(action => action.OnClick, () => submissions++)));
 
         component.Find("a").GetAttribute("href").ShouldBe("/items");
-        if (canUpdate)
-        {
-            component.Find(".submit-action").Click();
-            submissions.ShouldBe(1);
-        }
-        else
-        {
-            component.FindAll(".submit-action").ShouldBeEmpty();
-            submissions.ShouldBe(0);
-        }
+        component.FindAll(".submit-action").ShouldBeEmpty();
+        component.Find(".custom-action").Click();
+        submissions.ShouldBe(1);
     }
 
     [Theory(DisplayName = "Render should show expected action when mode is provided")]
