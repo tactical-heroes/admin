@@ -20,6 +20,6 @@ internal static partial class ClaimCatalogMapper
     [MapperIgnoreSource(nameof(PermissionResponse.AdditionalData))]
     private static partial ClaimOption ToPermission(PermissionResponse response);
 
-    private static IReadOnlyList<ClaimOption> ToItems(List<PermissionResponse>? items) =>
+    public static IReadOnlyList<ClaimOption> ToItems(List<PermissionResponse>? items) =>
         RequiredValueMapper.ToRequiredList(items, ToPermission);
 }

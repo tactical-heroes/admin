@@ -21,6 +21,6 @@ internal static partial class UnitListMapper
     public static partial PaginationResult<UnitListItem> ToPage(
         PaginationResultOfUnitListItemResponse response);
 
-    private static IReadOnlyList<UnitListItem> ToItems(List<UnitListItemResponse>? items) =>
+    public static IReadOnlyList<UnitListItem> ToItems(List<UnitListItemResponse>? items) =>
         RequiredValueMapper.ToRequiredList(items, ToListItem);
 }

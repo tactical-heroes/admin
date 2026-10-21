@@ -21,6 +21,6 @@ internal static partial class HeroListMapper
     public static partial PaginationResult<HeroListItem> ToPage(
         PaginationResultOfHeroListItemResponse response);
 
-    private static IReadOnlyList<HeroListItem> ToItems(List<HeroListItemResponse>? items) =>
+    public static IReadOnlyList<HeroListItem> ToItems(List<HeroListItemResponse>? items) =>
         RequiredValueMapper.ToRequiredList(items, ToListItem);
 }

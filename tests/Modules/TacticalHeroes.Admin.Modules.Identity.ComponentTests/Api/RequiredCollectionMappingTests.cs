@@ -4,6 +4,8 @@ using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 
+using PANiXiDA.Core.ResultPattern;
+
 using TacticalHeroes.Admin.Api.DependencyInjection;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Api;
 using TacticalHeroes.Admin.Modules.Identity.Pages.CreateRolePage.Api;
@@ -69,9 +71,9 @@ public sealed class RequiredCollectionMappingTests : IDisposable
     [InlineData("update-role-claims")]
     public async Task SaveAsync_Should_RejectModelBeforeSending_When_RequiredCollectionIsNull(string mapping)
     {
-        Func<Task> save = () => SaveAsync(mapping);
+        Task Save() => SaveAsync(mapping);
 
-        await Should.ThrowAsync<ArgumentNullException>(save);
+        await Should.ThrowAsync<ArgumentNullException>(Save);
         _handler.RequestCount.ShouldBe(0);
     }
 
@@ -91,7 +93,7 @@ public sealed class RequiredCollectionMappingTests : IDisposable
         };
     }
 
-    private Task SaveAsync(string mapping)
+    private Task<Result<Guid>> SaveAsync(string mapping)
     {
         var token = Xunit.TestContext.Current.CancellationToken;
         return mapping switch

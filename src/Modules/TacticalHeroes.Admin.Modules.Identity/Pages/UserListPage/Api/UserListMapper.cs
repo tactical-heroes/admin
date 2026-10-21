@@ -21,6 +21,6 @@ internal static partial class UserListMapper
     public static partial PaginationResult<UserListItem> ToPage(
         PaginationResultOfUserListItemResponse response);
 
-    private static IReadOnlyList<UserListItem> ToItems(List<UserListItemResponse>? items) =>
+    public static IReadOnlyList<UserListItem> ToItems(List<UserListItemResponse>? items) =>
         RequiredValueMapper.ToRequiredList(items, ToListItem);
 }

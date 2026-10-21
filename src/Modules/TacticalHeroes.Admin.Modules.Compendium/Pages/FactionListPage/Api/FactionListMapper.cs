@@ -21,6 +21,6 @@ internal static partial class FactionListMapper
     public static partial PaginationResult<FactionListItem> ToPage(
         PaginationResultOfFactionListItemResponse response);
 
-    private static IReadOnlyList<FactionListItem> ToItems(List<FactionListItemResponse>? items) =>
+    public static IReadOnlyList<FactionListItem> ToItems(List<FactionListItemResponse>? items) =>
         RequiredValueMapper.ToRequiredList(items, ToListItem);
 }
