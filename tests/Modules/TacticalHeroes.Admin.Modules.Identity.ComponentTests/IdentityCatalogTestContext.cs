@@ -10,6 +10,7 @@ using MudBlazor.Services;
 
 using TacticalHeroes.Admin.Api.DependencyInjection;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Model;
+using TacticalHeroes.Admin.Modules.Identity.Entities.Roles.Model;
 
 namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests;
 
@@ -35,7 +36,7 @@ public abstract class IdentityCatalogTestContext : BunitContext
     {
         public bool Fail { get; set; }
 
-        public bool MultipleRolePages { get; set; }
+        public IReadOnlyList<RoleOption>? Roles { get; set; }
 
         public ClaimCatalog? Permissions { get; set; }
 
@@ -54,16 +55,12 @@ public abstract class IdentityCatalogTestContext : BunitContext
                 });
             }
 
-            if (MultipleRolePages && request.RequestUri!.AbsolutePath == "/api/v1/roles")
+            if (Roles is not null && request.RequestUri!.AbsolutePath == "/api/v1/roles/select-options")
             {
-                bool secondPage = request.RequestUri.Query.Contains("pageNumber=2", StringComparison.Ordinal);
-                string id = secondPage ? "b4e775b5-ff1e-4fe5-ad27-b0f09d7b83f1" : IdentityCatalogResponses.RoleId.ToString();
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent($$"""
-                        {"items":[{"id":"{{id}}","name":"Role {{(secondPage ? 2 : 1)}}","isDefault":false}],
-                         "pageNumber":{{(secondPage ? 2 : 1)}},"pageSize":100,"totalPages":2,"totalCount":101}
-                        """, Encoding.UTF8, "application/json"),
+                    Content = new StringContent(
+                        JsonSerializer.Serialize(Roles, JsonSerializerOptions.Web), Encoding.UTF8, "application/json")
                 });
             }
 

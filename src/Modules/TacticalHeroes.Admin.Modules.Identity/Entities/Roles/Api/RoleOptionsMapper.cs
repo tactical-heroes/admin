@@ -10,13 +10,8 @@ namespace TacticalHeroes.Admin.Modules.Identity.Entities.Roles.Api;
 [UseStaticMapper(typeof(RequiredValueMapper))]
 internal static partial class RoleOptionsMapper
 {
-    [MapperIgnoreSource(nameof(RoleListItemResponse.AdditionalData))]
-    private static partial RoleOption ToOption(RoleListItemResponse response);
+    public static partial IReadOnlyList<RoleOption> ToOptions(List<RoleSelectOptionResponse> response);
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(
-        nameof(PaginationResultOfRoleListItemResponse.Items),
-        nameof(PaginationResult<RoleOption>.Items),
-        SuppressNullMismatchDiagnostic = true)]
-    public static partial PaginationResult<RoleOption> ToPage(PaginationResultOfRoleListItemResponse response);
+    [MapperIgnoreSource(nameof(RoleSelectOptionResponse.AdditionalData))]
+    private static partial RoleOption ToOption(RoleSelectOptionResponse response);
 }

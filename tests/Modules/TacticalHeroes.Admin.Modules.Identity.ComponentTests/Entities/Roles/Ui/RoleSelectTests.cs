@@ -1,22 +1,39 @@
 using MudBlazor;
 using MudBlazor.Extensions;
 
+using TacticalHeroes.Admin.Modules.Identity.Entities.Roles.Model;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Roles.Ui;
 
 namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Entities.Roles.Ui;
 
 public sealed class RoleSelectTests : IdentityCatalogTestContext
 {
-    [Fact(DisplayName = "OnInitializedAsync should load all role pages when more than one page exists")]
-    public void OnInitializedAsync_Should_LoadAllRolePages_When_MoreThanOnePageExists()
+    [Fact(DisplayName = "OnInitializedAsync should load options in one request when more than one list page exists")]
+    public void OnInitializedAsync_Should_LoadOptionsInOneRequest_When_MoreThanOneListPageExists()
     {
-        Handler.MultipleRolePages = true;
+        Handler.Roles = [.. Enumerable.Range(0, 101).Select(index => new RoleOption
+        {
+            Id = Guid.CreateVersion7(),
+            Name = $"Role {index:D3}"
+        })];
 
         var component = Render<RoleSelect>(parameters => parameters.Add(select => select.RoleIds, []));
 
-        component.WaitForAssertion(() => component.Instance.Items!.Count.ShouldBe(2));
-        Handler.Requests.Count.ShouldBe(2);
-        Handler.Requests[1].Query.ShouldContain("pageNumber=2");
+        component.WaitForAssertion(() => component.Instance.Items!.Count.ShouldBe(101));
+        var request = Handler.Requests.ShouldHaveSingleItem();
+        request.AbsolutePath.ShouldBe("/api/v1/roles/select-options");
+        request.Query.ShouldBeEmpty();
+    }
+
+    [Fact(DisplayName = "GetRoleName should indicate default role when selected role is default")]
+    public void GetRoleName_Should_IndicateDefaultRole_When_SelectedRoleIsDefault()
+    {
+        Handler.Roles = [new RoleOption { Id = IdentityCatalogResponses.RoleId, Name = "Player", IsDefault = true }];
+
+        var component = Render<RoleSelect>(parameters => parameters
+            .Add(select => select.RoleIds, [IdentityCatalogResponses.RoleId]));
+
+        component.Find("input").GetAttribute("value").ShouldBe("Player (по умолчанию)");
     }
 
     [Fact(DisplayName = "LoadAsync should retain selected roles and retry when catalog fails")]

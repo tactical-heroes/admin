@@ -22,9 +22,8 @@ internal static class IdentityCatalogResponses
                    "moduleCode":"identity","moduleDisplayName":"Управление доступом","resourceCode":"users","resourceDisplayName":"Пользователи"}
                 ]}
                 """,
-            "/api/v1/roles" => $$"""
-                {"items":[{"id":"{{RoleId:D}}","name":"Moderator","isDefault":false}],
-                 "pageNumber":1,"pageSize":100,"totalCount":1,"totalPages":1}
+            "/api/v1/roles/select-options" => $$"""
+                [{"id":"{{RoleId:D}}","name":"Moderator","isDefault":false}]
                 """,
             _ => null,
         };
