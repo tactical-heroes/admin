@@ -2,28 +2,36 @@ namespace TacticalHeroes.Admin.Modules.Compendium;
 
 public static class CompendiumPermissions
 {
+    public const string Code = "compendium";
+
     public static class Factions
     {
-        public const string Read = "compendium.factions.read";
-        public const string Create = "compendium.factions.create";
-        public const string Update = "compendium.factions.update";
-        public const string Delete = "compendium.factions.delete";
+        public const string ResourceCode = "factions";
+
+        public const string Read = $"{Code}.{ResourceCode}.read";
+        public const string Create = $"{Code}.{ResourceCode}.create";
+        public const string Update = $"{Code}.{ResourceCode}.update";
+        public const string Delete = $"{Code}.{ResourceCode}.delete";
     }
 
     public static class Heroes
     {
-        public const string Read = "compendium.heroes.read";
-        public const string Create = "compendium.heroes.create";
-        public const string Update = "compendium.heroes.update";
-        public const string Delete = "compendium.heroes.delete";
+        public const string ResourceCode = "heroes";
+
+        public const string Read = $"{Code}.{ResourceCode}.read";
+        public const string Create = $"{Code}.{ResourceCode}.create";
+        public const string Update = $"{Code}.{ResourceCode}.update";
+        public const string Delete = $"{Code}.{ResourceCode}.delete";
     }
 
     public static class Units
     {
-        public const string Read = "compendium.units.read";
-        public const string Create = "compendium.units.create";
-        public const string Update = "compendium.units.update";
-        public const string Delete = "compendium.units.delete";
+        public const string ResourceCode = "units";
+
+        public const string Read = $"{Code}.{ResourceCode}.read";
+        public const string Create = $"{Code}.{ResourceCode}.create";
+        public const string Update = $"{Code}.{ResourceCode}.update";
+        public const string Delete = $"{Code}.{ResourceCode}.delete";
     }
 
     public static IReadOnlyList<string> All { get; } =

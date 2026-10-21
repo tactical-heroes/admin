@@ -2,20 +2,26 @@ namespace TacticalHeroes.Admin.Modules.Identity;
 
 public static class IdentityPermissions
 {
+    public const string Code = "identity";
+
     public static class Roles
     {
-        public const string Read = "identity.roles.read";
-        public const string Create = "identity.roles.create";
-        public const string Update = "identity.roles.update";
-        public const string Delete = "identity.roles.delete";
+        public const string ResourceCode = "roles";
+
+        public const string Read = $"{Code}.{ResourceCode}.read";
+        public const string Create = $"{Code}.{ResourceCode}.create";
+        public const string Update = $"{Code}.{ResourceCode}.update";
+        public const string Delete = $"{Code}.{ResourceCode}.delete";
     }
 
     public static class Users
     {
-        public const string Read = "identity.users.read";
-        public const string Create = "identity.users.create";
-        public const string Update = "identity.users.update";
-        public const string Delete = "identity.users.delete";
+        public const string ResourceCode = "users";
+
+        public const string Read = $"{Code}.{ResourceCode}.read";
+        public const string Create = $"{Code}.{ResourceCode}.create";
+        public const string Update = $"{Code}.{ResourceCode}.update";
+        public const string Delete = $"{Code}.{ResourceCode}.delete";
     }
 
     public static IReadOnlyList<string> All { get; } =
