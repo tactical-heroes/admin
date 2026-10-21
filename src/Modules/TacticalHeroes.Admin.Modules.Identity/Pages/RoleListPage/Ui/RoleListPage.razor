@@ -52,7 +52,7 @@
         <TemplateColumn T="RoleListItem" Title="Действия" Sortable="false" HeaderClass="actions-column" CellClass="actions-column">
             <CellTemplate>
                 <EntityRowActions>
-                    <PermissionView Permissions="[IdentityPermissions.Roles.Read, IdentityPermissions.Roles.Update]">
+                    <PermissionView Permissions="[IdentityPermissions.Roles.Read]">
                         <MudIconButton Icon="@Icons.Material.Outlined.Edit"
                                        Href="@IdentityRoutes.Role(context.Item.Id)"
                                        Color="Color.Primary"

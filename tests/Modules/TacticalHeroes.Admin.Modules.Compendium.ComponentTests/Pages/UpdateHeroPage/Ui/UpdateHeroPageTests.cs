@@ -13,6 +13,20 @@ namespace TacticalHeroes.Admin.Modules.Compendium.ComponentTests.Pages.UpdateHer
 
 public sealed class UpdateHeroPageTests : HeroFormTestContext
 {
+    [Fact(DisplayName = "Render should load hero without saving when only read permissions are granted")]
+    public void Render_Should_LoadHeroWithoutSaving_When_OnlyReadPermissionsAreGranted()
+    {
+        Authorization.SetClaims(
+            new System.Security.Claims.Claim("permission", CompendiumPermissions.Heroes.Read),
+            new System.Security.Claims.Claim("permission", CompendiumPermissions.Factions.Read));
+
+        var component = Render<UpdateHeroPageComponent>(parameters => parameters.Add(page => page.Id, HeroId));
+
+        component.WaitForElement("textarea").TextContent.ShouldBe("Leader of the alliance.");
+        component.FindAll(".submit-action").ShouldBeEmpty();
+        Handler.Saves.ShouldBe(0);
+    }
+
     [Fact(DisplayName = "Submit should preserve faction when current faction is absent from options")]
     public void Submit_Should_PreserveFaction_When_CurrentFactionIsAbsentFromOptions()
     {

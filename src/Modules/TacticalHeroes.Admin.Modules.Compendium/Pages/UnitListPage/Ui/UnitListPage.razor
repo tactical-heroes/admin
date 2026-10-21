@@ -53,7 +53,7 @@
         <TemplateColumn T="UnitListItem" Title="Действия" Sortable="false" HeaderClass="actions-column" CellClass="actions-column">
             <CellTemplate>
                 <EntityRowActions>
-                    <PermissionView Permissions="[CompendiumPermissions.Units.Read, CompendiumPermissions.Units.Update]">
+                    <PermissionView Permissions="[CompendiumPermissions.Units.Read]">
                         <MudIconButton Icon="@Icons.Material.Outlined.Edit"
                                        Href="@CompendiumRoutes.Unit(context.Item.Id)"
                                        Color="Color.Primary"

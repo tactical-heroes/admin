@@ -84,7 +84,7 @@
         <TemplateColumn T="UserListItem" Title="Действия" Sortable="false" HeaderClass="actions-column" CellClass="actions-column">
             <CellTemplate>
                 <EntityRowActions>
-                    <PermissionView Permissions="[IdentityPermissions.Users.Read, IdentityPermissions.Users.Update]">
+                    <PermissionView Permissions="[IdentityPermissions.Users.Read]">
                         <MudIconButton Icon="@Icons.Material.Outlined.Edit"
                                        Href="@IdentityRoutes.User(context.Item.Id)"
                                        Color="Color.Primary"

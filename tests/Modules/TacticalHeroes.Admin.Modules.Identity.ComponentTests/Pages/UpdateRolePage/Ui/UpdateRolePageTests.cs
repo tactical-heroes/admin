@@ -23,11 +23,16 @@ public sealed class UpdateRolePageTests : BunitContext
 {
     private readonly Guid _roleId = Guid.Parse("4a78777c-0bbe-43be-9976-99bcf2e17bf0");
     private readonly UpdateRoleHandler _handler;
+    private readonly Bunit.TestDoubles.BunitAuthorizationContext _authorization;
 
     public UpdateRolePageTests()
     {
         _handler = new UpdateRoleHandler(_roleId);
         Services.AddMudServices();
+        _authorization = AddAuthorization();
+        _authorization.SetAuthorized("Administrator");
+        _authorization.SetClaims([.. IdentityPermissions.All.Select(permission =>
+            new System.Security.Claims.Claim("permission", permission))]);
         Services.AddTacticalHeroesApiClient(
             static _ => new Uri("https://api.example.test"),
             static _ => TimeSpan.FromSeconds(30));
@@ -37,6 +42,19 @@ public sealed class UpdateRolePageTests : BunitContext
                 builder => builder.PrimaryHandler = _handler));
         Services.AddIdentityAdminModule();
         JSInterop.Mode = JSRuntimeMode.Loose;
+    }
+
+    [Fact(DisplayName = "Render should load role without saving when only read permission is granted")]
+    public void Render_Should_LoadRoleWithoutSaving_When_OnlyReadPermissionIsGranted()
+    {
+        _authorization.SetClaims(new System.Security.Claims.Claim("permission", IdentityPermissions.Roles.Read));
+
+        var component = Render<UpdateRolePageComponent>(parameters => parameters.Add(page => page.Id, _roleId));
+
+        component.WaitForElement("input").GetAttribute("value").ShouldBe("Administrators");
+        component.FindAll(".submit-action").ShouldBeEmpty();
+        component.FindComponents<ClaimsEditor>().ShouldBeEmpty();
+        _handler.PutCount.ShouldBe(0);
     }
 
     [Fact(DisplayName = "Render should link back and cancel to list when form is displayed")]

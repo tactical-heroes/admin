@@ -54,7 +54,7 @@
         <TemplateColumn T="FactionListItem" Title="Действия" Sortable="false" HeaderClass="actions-column" CellClass="actions-column">
             <CellTemplate>
                 <EntityRowActions>
-                    <PermissionView Permissions="[CompendiumPermissions.Factions.Read, CompendiumPermissions.Factions.Update]">
+                    <PermissionView Permissions="[CompendiumPermissions.Factions.Read]">
                         <MudIconButton Icon="@Icons.Material.Outlined.Edit"
                                        Href="@CompendiumRoutes.Faction(context.Item.Id)"
                                        Color="Color.Primary"

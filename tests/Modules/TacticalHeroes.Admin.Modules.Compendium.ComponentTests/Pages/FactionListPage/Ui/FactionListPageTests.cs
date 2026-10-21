@@ -48,7 +48,8 @@ public sealed class FactionListPageTests : BunitContext
 
         component.WaitForAssertion(() => component.Markup.ShouldContain("Northern Alliance"));
         component.FindAll($"a[href='{CompendiumRoutes.CreateFaction}']").ShouldBeEmpty();
-        component.FindAll("[aria-label='Редактировать фракцию']").ShouldBeEmpty();
+        component.Find("[aria-label='Редактировать фракцию']").GetAttribute("href")
+            .ShouldBe(CompendiumRoutes.Faction(EntityId));
         component.FindAll("[aria-label='Удалить фракцию']").ShouldBeEmpty();
     }
 

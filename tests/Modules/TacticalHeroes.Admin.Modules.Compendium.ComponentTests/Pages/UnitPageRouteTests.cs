@@ -12,7 +12,7 @@ public sealed class UnitPageRouteTests
     [Theory(DisplayName = "Pages should declare authorized routes when unit pages are inspected")]
     [InlineData(typeof(UnitListPageComponent), "/units", new[] { "compendium.units.read" })]
     [InlineData(typeof(CreateUnitPageComponent), "/units/new", new[] { "compendium.units.create" })]
-    [InlineData(typeof(UpdateUnitPageComponent), "/units/{Id:guid}", new[] { "compendium.units.update", "compendium.units.read" })]
+    [InlineData(typeof(UpdateUnitPageComponent), "/units/{Id:guid}", new[] { "compendium.units.read" })]
     public void Pages_Should_DeclareAuthorizedRoutes_When_UnitPagesAreInspected(Type page, string route, string[] permissions)
     {
         var routes = page.GetCustomAttributes(typeof(RouteAttribute), inherit: false).Cast<RouteAttribute>();

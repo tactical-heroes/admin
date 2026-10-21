@@ -12,7 +12,7 @@ public sealed class HeroPageRouteTests
     [Theory(DisplayName = "Pages should declare authorized routes when hero pages are inspected")]
     [InlineData(typeof(HeroListPageComponent), "/heroes", new[] { "compendium.heroes.read" })]
     [InlineData(typeof(CreateHeroPageComponent), "/heroes/new", new[] { "compendium.heroes.create" })]
-    [InlineData(typeof(UpdateHeroPageComponent), "/heroes/{Id:guid}", new[] { "compendium.heroes.update", "compendium.heroes.read" })]
+    [InlineData(typeof(UpdateHeroPageComponent), "/heroes/{Id:guid}", new[] { "compendium.heroes.read" })]
     public void Pages_Should_DeclareAuthorizedRoutes_When_HeroPagesAreInspected(Type page, string route, string[] permissions)
     {
         var routes = page.GetCustomAttributes(typeof(RouteAttribute), inherit: false).Cast<RouteAttribute>();

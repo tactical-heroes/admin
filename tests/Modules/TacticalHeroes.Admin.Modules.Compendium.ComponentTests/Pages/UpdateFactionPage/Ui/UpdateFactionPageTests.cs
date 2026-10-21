@@ -20,11 +20,16 @@ public sealed class UpdateFactionPageTests : BunitContext
 {
     private readonly Guid _factionId = Guid.Parse("f341ae7d-69c0-45c6-9a44-110f00127080");
     private readonly UpdateFactionHandler _handler;
+    private readonly Bunit.TestDoubles.BunitAuthorizationContext _authorization;
 
     public UpdateFactionPageTests()
     {
         _handler = new UpdateFactionHandler(_factionId);
         Services.AddMudServices();
+        _authorization = AddAuthorization();
+        _authorization.SetAuthorized("Administrator");
+        _authorization.SetClaims([.. CompendiumPermissions.All.Select(permission =>
+            new System.Security.Claims.Claim("permission", permission))]);
         Services.AddTacticalHeroesApiClient(
             static _ => new Uri("https://api.example.test"),
             static _ => TimeSpan.FromSeconds(30));
@@ -34,6 +39,18 @@ public sealed class UpdateFactionPageTests : BunitContext
                 builder => builder.PrimaryHandler = _handler));
         Services.AddCompendiumAdminModule();
         JSInterop.Mode = JSRuntimeMode.Loose;
+    }
+
+    [Fact(DisplayName = "Render should load faction without saving when only read permission is granted")]
+    public void Render_Should_LoadFactionWithoutSaving_When_OnlyReadPermissionIsGranted()
+    {
+        _authorization.SetClaims(new System.Security.Claims.Claim("permission", CompendiumPermissions.Factions.Read));
+
+        var component = Render<UpdateFactionPageComponent>(parameters => parameters.Add(page => page.Id, _factionId));
+
+        component.WaitForElement("input").GetAttribute("value").ShouldBe("Northern Alliance");
+        component.FindAll(".submit-action").ShouldBeEmpty();
+        _handler.PutCount.ShouldBe(0);
     }
 
     [Fact(DisplayName = "Render should link back and cancel to list when form is displayed")]

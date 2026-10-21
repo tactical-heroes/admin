@@ -106,8 +106,8 @@ Rows, action columns and whole modules support bulk selection. Only `permission`
 claims can be assigned. Catalog failures offer retry and preserve existing assignments.
 
 Menu items require the resource's `read` permission; empty module groups are hidden.
-Pages and buttons require their corresponding permissions, and editing also
-requires `read` to load the existing entity. Effective permissions combine direct
+Opening an existing record requires `read`; the save button requires `update`.
+Create and delete actions require their corresponding permissions. Effective permissions combine direct
 user claims with role claims. Direct user assignments add access; removing one
 does not revoke access inherited from a role. The API enforces permissions itself.
 
