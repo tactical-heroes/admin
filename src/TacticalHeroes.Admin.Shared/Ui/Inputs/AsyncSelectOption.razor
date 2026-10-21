@@ -9,7 +9,7 @@
     <ChildContent>
         <MudAutocomplete @ref="_autocomplete"
                          T="TId"
-                         Value="@(MultiSelection ? default! : Value)"
+                         Value="@(MultiSelection ? default : Value)"
                          ValueChanged="SetValueAsync"
                          For="@(MultiSelection ? null : For)"
                          Label="@Label"
