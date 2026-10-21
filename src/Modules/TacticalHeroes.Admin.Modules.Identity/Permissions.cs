@@ -1,6 +1,6 @@
 namespace TacticalHeroes.Admin.Modules.Identity;
 
-public static class IdentityPermissions
+public static class Permissions
 {
     public const string Code = "identity";
 

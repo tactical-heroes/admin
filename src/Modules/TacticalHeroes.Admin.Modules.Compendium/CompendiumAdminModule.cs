@@ -31,24 +31,24 @@ public static class CompendiumAdminModule
                     "Фракции",
                     CompendiumRoutes.Factions,
                     Icons.Material.Filled.Flag,
-                    CompendiumPermissions.Factions.Read),
+                    Permissions.Factions.Read),
                 new(
                     "Герои",
                     CompendiumRoutes.Heroes,
                     Icons.Material.Filled.Person,
-                    CompendiumPermissions.Heroes.Read),
+                    Permissions.Heroes.Read),
                 new(
                     "Юниты",
                     CompendiumRoutes.Units,
                     Icons.Material.Filled.Groups,
-                    CompendiumPermissions.Units.Read),
+                    Permissions.Units.Read),
             ]),
     ];
 
     public static IServiceCollection AddCompendiumAdminModule(
         this IServiceCollection services)
     {
-        services.AddPermissionPolicies(CompendiumPermissions.All);
+        services.AddPermissionPolicies(Permissions.All);
         services.AddScoped<FactionListApi>();
         services.AddScoped<CreateFactionApi>();
         services.AddScoped<UpdateFactionApi>();

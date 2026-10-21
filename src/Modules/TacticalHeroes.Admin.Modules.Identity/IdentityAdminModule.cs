@@ -34,19 +34,19 @@ public static class IdentityAdminModule
                     "Роли",
                     IdentityRoutes.Roles,
                     Icons.Material.Filled.Security,
-                    IdentityPermissions.Roles.Read),
+                    Permissions.Roles.Read),
                 new(
                     "Пользователи",
                     IdentityRoutes.Users,
                     Icons.Material.Filled.Group,
-                    IdentityPermissions.Users.Read),
+                    Permissions.Users.Read),
             ]),
     ];
 
     public static IServiceCollection AddIdentityAdminModule(
         this IServiceCollection services)
     {
-        services.AddPermissionPolicies(IdentityPermissions.All);
+        services.AddPermissionPolicies(Permissions.All);
         services.AddScoped<IEnumerationProvider<UserStatus>, UserStatusApi>();
         services.AddScoped<ClaimCatalogApi>();
         services.AddScoped<RoleOptionsApi>();

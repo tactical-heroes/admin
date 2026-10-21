@@ -26,7 +26,7 @@ public sealed class RoleListPageTests : BunitContext
         Services.AddMudServices();
         var authorization = AddAuthorization();
         authorization.SetAuthorized("Administrator");
-        authorization.SetClaims([.. IdentityPermissions.All.Select(permission =>
+        authorization.SetClaims([.. Permissions.All.Select(permission =>
             new System.Security.Claims.Claim("permission", permission))]);
         Services.AddTacticalHeroesApiClient(
             static _ => new Uri("https://api.example.test"),

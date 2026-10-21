@@ -17,8 +17,8 @@ public sealed class UpdateHeroPageTests : HeroFormTestContext
     public void Render_Should_LoadHeroWithoutSaving_When_OnlyReadPermissionsAreGranted()
     {
         Authorization.SetClaims(
-            new System.Security.Claims.Claim("permission", CompendiumPermissions.Heroes.Read),
-            new System.Security.Claims.Claim("permission", CompendiumPermissions.Factions.Read));
+            new System.Security.Claims.Claim("permission", Permissions.Heroes.Read),
+            new System.Security.Claims.Claim("permission", Permissions.Factions.Read));
 
         var component = Render<UpdateHeroPageComponent>(parameters => parameters.Add(page => page.Id, HeroId));
 

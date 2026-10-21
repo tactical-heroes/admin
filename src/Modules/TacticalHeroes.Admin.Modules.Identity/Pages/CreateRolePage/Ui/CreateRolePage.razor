@@ -1,6 +1,6 @@
 @inherits MudCreateFormComponentBase<CreateRoleFormModel, CreateRoleFormModelValidator>
 @attribute [Route(IdentityRoutes.CreateRole)]
-@attribute [Authorize(Policy = IdentityPermissions.Roles.Create)]
+@attribute [Authorize(Policy = Permissions.Roles.Create)]
 @attribute [StreamRendering]
 
 @using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Ui

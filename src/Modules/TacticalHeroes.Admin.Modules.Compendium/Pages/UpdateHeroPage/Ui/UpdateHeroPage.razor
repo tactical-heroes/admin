@@ -1,6 +1,6 @@
 @inherits MudUpdateFormComponentBase<UpdateHeroFormModel, UpdateHeroFormModelValidator>
 @attribute [Route(CompendiumRoutes.HeroTemplate)]
-@attribute [Authorize(Policy = CompendiumPermissions.Heroes.Read)]
+@attribute [Authorize(Policy = Permissions.Heroes.Read)]
 @attribute [StreamRendering]
 
 @using TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Ui
@@ -128,7 +128,7 @@
             </EditSection>
 
             <EditFormActions CancelHref="@CompendiumRoutes.Heroes"
-                             Permission="@CompendiumPermissions.Heroes.Update"
+                             Permission="@Permissions.Heroes.Update"
                              Busy="IsSaving"
                              OnSubmit="SubmitAsync" />
         </MudForm>

@@ -1,6 +1,6 @@
 @inherits MudPagedListComponentBase<UserListItem, UserListFilter>
 @attribute [Route(IdentityRoutes.Users)]
-@attribute [Authorize(Policy = IdentityPermissions.Users.Read)]
+@attribute [Authorize(Policy = Permissions.Users.Read)]
 @attribute [StreamRendering]
 
 @using TacticalHeroes.Admin.Modules.Identity.Pages.UserListPage.Model
@@ -10,7 +10,7 @@
 <PageHeader Title="Пользователи"
             Subtitle="@($"Управление аккаунтами {Branding.GameName}")">
     <Actions>
-        <PermissionView Permissions="[IdentityPermissions.Users.Create]">
+        <PermissionView Permissions="[Permissions.Users.Create]">
             <MudButton Href="@IdentityRoutes.CreateUser"
                        Variant="Variant.Filled"
                        Color="Color.Primary"
@@ -84,7 +84,7 @@
         <TemplateColumn T="UserListItem" Title="Действия" Sortable="false" HeaderClass="actions-column" CellClass="actions-column">
             <CellTemplate>
                 <EntityRowActions>
-                    <PermissionView Permissions="[IdentityPermissions.Users.Read]">
+                    <PermissionView Permissions="[Permissions.Users.Read]">
                         <MudIconButton Icon="@Icons.Material.Outlined.Edit"
                                        Href="@IdentityRoutes.User(context.Item.Id)"
                                        Color="Color.Primary"
@@ -92,7 +92,7 @@
                                        Disabled="IsLoading"
                                        aria-label="Редактировать пользователя" />
                     </PermissionView>
-                    <PermissionView Permissions="[IdentityPermissions.Users.Delete]">
+                    <PermissionView Permissions="[Permissions.Users.Delete]">
                         <EntityDeleteButton TKey="Guid"
                                             EntityId="context.Item.Id"
                                             EntityType="пользователя"

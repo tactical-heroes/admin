@@ -31,7 +31,7 @@ public sealed class UpdateRolePageTests : BunitContext
         Services.AddMudServices();
         _authorization = AddAuthorization();
         _authorization.SetAuthorized("Administrator");
-        _authorization.SetClaims([.. IdentityPermissions.All.Select(permission =>
+        _authorization.SetClaims([.. Permissions.All.Select(permission =>
             new System.Security.Claims.Claim("permission", permission))]);
         Services.AddTacticalHeroesApiClient(
             static _ => new Uri("https://api.example.test"),
@@ -47,7 +47,7 @@ public sealed class UpdateRolePageTests : BunitContext
     [Fact(DisplayName = "Render should load role without saving when only read permission is granted")]
     public void Render_Should_LoadRoleWithoutSaving_When_OnlyReadPermissionIsGranted()
     {
-        _authorization.SetClaims(new System.Security.Claims.Claim("permission", IdentityPermissions.Roles.Read));
+        _authorization.SetClaims(new System.Security.Claims.Claim("permission", Permissions.Roles.Read));
 
         var component = Render<UpdateRolePageComponent>(parameters => parameters.Add(page => page.Id, _roleId));
 

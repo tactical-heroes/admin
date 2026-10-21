@@ -1,6 +1,6 @@
 @inherits MudPagedListComponentBase<HeroListItem>
 @attribute [Route(CompendiumRoutes.Heroes)]
-@attribute [Authorize(Policy = CompendiumPermissions.Heroes.Read)]
+@attribute [Authorize(Policy = Permissions.Heroes.Read)]
 @attribute [StreamRendering]
 
 @using TacticalHeroes.Admin.Modules.Compendium.Pages.HeroListPage.Model
@@ -10,7 +10,7 @@
 <PageHeader Title="Герои"
             Subtitle="Управление игровыми героями и их фракциями">
     <Actions>
-        <PermissionView Permissions="[CompendiumPermissions.Heroes.Create]">
+        <PermissionView Permissions="[Permissions.Heroes.Create]">
             <MudButton Href="@CompendiumRoutes.CreateHero"
                        Variant="Variant.Filled"
                        Color="Color.Primary"
@@ -53,7 +53,7 @@
         <TemplateColumn T="HeroListItem" Title="Действия" Sortable="false" HeaderClass="actions-column" CellClass="actions-column">
             <CellTemplate>
                 <EntityRowActions>
-                    <PermissionView Permissions="[CompendiumPermissions.Heroes.Read]">
+                    <PermissionView Permissions="[Permissions.Heroes.Read]">
                         <MudIconButton Icon="@Icons.Material.Outlined.Edit"
                                        Href="@CompendiumRoutes.Hero(context.Item.Id)"
                                        Color="Color.Primary"
@@ -61,7 +61,7 @@
                                        Disabled="IsLoading"
                                        aria-label="Редактировать героя" />
                     </PermissionView>
-                    <PermissionView Permissions="[CompendiumPermissions.Heroes.Delete]">
+                    <PermissionView Permissions="[Permissions.Heroes.Delete]">
                         <EntityDeleteButton TKey="Guid"
                                             EntityId="context.Item.Id"
                                             EntityType="героя"

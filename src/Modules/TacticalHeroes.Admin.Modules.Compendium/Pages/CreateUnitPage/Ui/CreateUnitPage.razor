@@ -1,6 +1,6 @@
 @inherits MudCreateFormComponentBase<CreateUnitFormModel, CreateUnitFormModelValidator>
 @attribute [Route(CompendiumRoutes.CreateUnit)]
-@attribute [Authorize(Policy = CompendiumPermissions.Units.Create)]
+@attribute [Authorize(Policy = Permissions.Units.Create)]
 @attribute [StreamRendering]
 
 @using TacticalHeroes.Admin.Modules.Compendium.Entities.Factions.Ui

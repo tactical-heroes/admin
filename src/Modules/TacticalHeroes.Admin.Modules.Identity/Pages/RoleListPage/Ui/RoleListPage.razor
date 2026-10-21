@@ -1,6 +1,6 @@
 @inherits MudPagedListComponentBase<RoleListItem>
 @attribute [Route(IdentityRoutes.Roles)]
-@attribute [Authorize(Policy = IdentityPermissions.Roles.Read)]
+@attribute [Authorize(Policy = Permissions.Roles.Read)]
 @attribute [StreamRendering]
 
 @using TacticalHeroes.Admin.Modules.Identity.Pages.RoleListPage.Model
@@ -10,7 +10,7 @@
 <PageHeader Title="Роли"
             Subtitle="Управление ролями и наборами разрешений">
     <Actions>
-        <PermissionView Permissions="[IdentityPermissions.Roles.Create]">
+        <PermissionView Permissions="[Permissions.Roles.Create]">
             <MudButton Href="@IdentityRoutes.CreateRole"
                        Variant="Variant.Filled"
                        Color="Color.Primary"
@@ -52,7 +52,7 @@
         <TemplateColumn T="RoleListItem" Title="Действия" Sortable="false" HeaderClass="actions-column" CellClass="actions-column">
             <CellTemplate>
                 <EntityRowActions>
-                    <PermissionView Permissions="[IdentityPermissions.Roles.Read]">
+                    <PermissionView Permissions="[Permissions.Roles.Read]">
                         <MudIconButton Icon="@Icons.Material.Outlined.Edit"
                                        Href="@IdentityRoutes.Role(context.Item.Id)"
                                        Color="Color.Primary"
@@ -60,7 +60,7 @@
                                        Disabled="IsLoading"
                                        aria-label="Редактировать роль" />
                     </PermissionView>
-                    <PermissionView Permissions="[IdentityPermissions.Roles.Delete]">
+                    <PermissionView Permissions="[Permissions.Roles.Delete]">
                         <EntityDeleteButton TKey="Guid"
                                             EntityId="context.Item.Id"
                                             EntityType="роль"

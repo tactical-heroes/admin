@@ -1,6 +1,6 @@
 namespace TacticalHeroes.Admin.Modules.Compendium;
 
-public static class CompendiumPermissions
+public static class Permissions
 {
     public const string Code = "compendium";
 

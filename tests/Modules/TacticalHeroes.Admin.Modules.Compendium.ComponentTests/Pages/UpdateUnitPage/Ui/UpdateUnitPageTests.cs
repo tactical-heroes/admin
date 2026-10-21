@@ -19,8 +19,8 @@ public sealed class UpdateUnitPageTests : UnitFormTestContext
     public void Render_Should_LoadUnitWithoutSaving_When_OnlyReadPermissionsAreGranted()
     {
         Authorization.SetClaims(
-            new System.Security.Claims.Claim("permission", CompendiumPermissions.Units.Read),
-            new System.Security.Claims.Claim("permission", CompendiumPermissions.Factions.Read));
+            new System.Security.Claims.Claim("permission", Permissions.Units.Read),
+            new System.Security.Claims.Claim("permission", Permissions.Factions.Read));
 
         var component = Render<UpdateUnitPageComponent>(parameters => parameters.Add(page => page.Id, UnitId));
 

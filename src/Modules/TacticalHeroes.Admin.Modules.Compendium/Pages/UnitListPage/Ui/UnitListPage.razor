@@ -1,6 +1,6 @@
 @inherits MudPagedListComponentBase<UnitListItem>
 @attribute [Route(CompendiumRoutes.Units)]
-@attribute [Authorize(Policy = CompendiumPermissions.Units.Read)]
+@attribute [Authorize(Policy = Permissions.Units.Read)]
 @attribute [StreamRendering]
 
 @using TacticalHeroes.Admin.Modules.Compendium.Pages.UnitListPage.Model
@@ -10,7 +10,7 @@
 <PageHeader Title="Юниты"
             Subtitle="Управление игровыми юнитами и их фракциями">
     <Actions>
-        <PermissionView Permissions="[CompendiumPermissions.Units.Create]">
+        <PermissionView Permissions="[Permissions.Units.Create]">
             <MudButton Href="@CompendiumRoutes.CreateUnit"
                        Variant="Variant.Filled"
                        Color="Color.Primary"
@@ -53,7 +53,7 @@
         <TemplateColumn T="UnitListItem" Title="Действия" Sortable="false" HeaderClass="actions-column" CellClass="actions-column">
             <CellTemplate>
                 <EntityRowActions>
-                    <PermissionView Permissions="[CompendiumPermissions.Units.Read]">
+                    <PermissionView Permissions="[Permissions.Units.Read]">
                         <MudIconButton Icon="@Icons.Material.Outlined.Edit"
                                        Href="@CompendiumRoutes.Unit(context.Item.Id)"
                                        Color="Color.Primary"
@@ -61,7 +61,7 @@
                                        Disabled="IsLoading"
                                        aria-label="Редактировать юнита" />
                     </PermissionView>
-                    <PermissionView Permissions="[CompendiumPermissions.Units.Delete]">
+                    <PermissionView Permissions="[Permissions.Units.Delete]">
                         <EntityDeleteButton TKey="Guid"
                                             EntityId="context.Item.Id"
                                             EntityType="юнита"

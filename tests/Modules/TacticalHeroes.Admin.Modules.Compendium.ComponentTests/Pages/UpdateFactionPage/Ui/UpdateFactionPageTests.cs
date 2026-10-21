@@ -28,7 +28,7 @@ public sealed class UpdateFactionPageTests : BunitContext
         Services.AddMudServices();
         _authorization = AddAuthorization();
         _authorization.SetAuthorized("Administrator");
-        _authorization.SetClaims([.. CompendiumPermissions.All.Select(permission =>
+        _authorization.SetClaims([.. Permissions.All.Select(permission =>
             new System.Security.Claims.Claim("permission", permission))]);
         Services.AddTacticalHeroesApiClient(
             static _ => new Uri("https://api.example.test"),
@@ -44,7 +44,7 @@ public sealed class UpdateFactionPageTests : BunitContext
     [Fact(DisplayName = "Render should load faction without saving when only read permission is granted")]
     public void Render_Should_LoadFactionWithoutSaving_When_OnlyReadPermissionIsGranted()
     {
-        _authorization.SetClaims(new System.Security.Claims.Claim("permission", CompendiumPermissions.Factions.Read));
+        _authorization.SetClaims(new System.Security.Claims.Claim("permission", Permissions.Factions.Read));
 
         var component = Render<UpdateFactionPageComponent>(parameters => parameters.Add(page => page.Id, _factionId));
 

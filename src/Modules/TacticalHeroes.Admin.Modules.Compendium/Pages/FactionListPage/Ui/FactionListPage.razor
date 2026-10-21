@@ -1,6 +1,6 @@
 @inherits MudPagedListComponentBase<FactionListItem>
 @attribute [Route(CompendiumRoutes.Factions)]
-@attribute [Authorize(Policy = CompendiumPermissions.Factions.Read)]
+@attribute [Authorize(Policy = Permissions.Factions.Read)]
 @attribute [StreamRendering]
 
 @using TacticalHeroes.Admin.Modules.Compendium.Pages.FactionListPage.Model
@@ -10,7 +10,7 @@
 <PageHeader Title="Фракции"
             Subtitle="Управление игровыми фракциями">
     <Actions>
-        <PermissionView Permissions="[CompendiumPermissions.Factions.Create]">
+        <PermissionView Permissions="[Permissions.Factions.Create]">
             <MudButton Href="@CompendiumRoutes.CreateFaction"
                        Variant="Variant.Filled"
                        Color="Color.Primary"
@@ -54,7 +54,7 @@
         <TemplateColumn T="FactionListItem" Title="Действия" Sortable="false" HeaderClass="actions-column" CellClass="actions-column">
             <CellTemplate>
                 <EntityRowActions>
-                    <PermissionView Permissions="[CompendiumPermissions.Factions.Read]">
+                    <PermissionView Permissions="[Permissions.Factions.Read]">
                         <MudIconButton Icon="@Icons.Material.Outlined.Edit"
                                        Href="@CompendiumRoutes.Faction(context.Item.Id)"
                                        Color="Color.Primary"
@@ -62,7 +62,7 @@
                                        Disabled="IsLoading"
                                        aria-label="Редактировать фракцию" />
                     </PermissionView>
-                    <PermissionView Permissions="[CompendiumPermissions.Factions.Delete]">
+                    <PermissionView Permissions="[Permissions.Factions.Delete]">
                         <EntityDeleteButton TKey="Guid"
                                             EntityId="context.Item.Id"
                                             EntityType="фракцию"

@@ -31,7 +31,7 @@ public abstract class UnitFormTestContext : BunitContext
         Services.AddMudServices();
         Authorization = AddAuthorization();
         Authorization.SetAuthorized("Administrator");
-        Authorization.SetClaims([.. CompendiumPermissions.All.Select(permission =>
+        Authorization.SetClaims([.. Permissions.All.Select(permission =>
             new System.Security.Claims.Claim("permission", permission))]);
         Services.AddTacticalHeroesApiClient(
             static _ => new Uri("https://api.example.test"),

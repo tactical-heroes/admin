@@ -32,7 +32,7 @@ public sealed class UpdateUserPageTests : BunitContext
         Services.AddMudServices();
         _authorization = AddAuthorization();
         _authorization.SetAuthorized("Administrator");
-        _authorization.SetClaims([.. IdentityPermissions.All.Select(permission =>
+        _authorization.SetClaims([.. Permissions.All.Select(permission =>
             new System.Security.Claims.Claim("permission", permission))]);
         Services.AddTacticalHeroesApiClient(
             static _ => new Uri("https://api.example.test"),
@@ -48,7 +48,7 @@ public sealed class UpdateUserPageTests : BunitContext
     [Fact(DisplayName = "Render should load user without saving when only read permission is granted")]
     public void Render_Should_LoadUserWithoutSaving_When_OnlyReadPermissionIsGranted()
     {
-        _authorization.SetClaims(new System.Security.Claims.Claim("permission", IdentityPermissions.Users.Read));
+        _authorization.SetClaims(new System.Security.Claims.Claim("permission", Permissions.Users.Read));
 
         var component = Render<UpdateUserPageComponent>(parameters => parameters.Add(page => page.Id, _userId));
 
