@@ -96,6 +96,13 @@ permissions; the API enforces access independently. Apply the API's
 `RemoveNonPermissionClaims` migration (deletes non-permission claims) before
 deploying this frontend, then sign in again.
 
+After saving their own user, the administrator is redirected through
+`/authentication/refresh` to refresh the OIDC tokens and session cookie, then to
+the home page. This reloads permissions without another login when the API revokes
+old access tokens after a role assignment change. Other users' edits retain the
+usual navigation. Deploy with the API's role-assignment session invalidation change;
+the frontend adds no migrations or configuration settings.
+
 The client shell and module RCLs follow Feature-Sliced Design. Each `Pages` slice
 owns its route, form models, validators, and API adapters. Create and update flows
 use separate page slices; reusable domain controls belong in `Entities`.

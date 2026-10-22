@@ -28,24 +28,24 @@ internal sealed class CookieOidcRefresher(
 
     internal async Task ValidateOrRefreshCookieAsync(
         CookieValidatePrincipalContext context,
-        string oidcScheme)
+        string oidcScheme,
+        bool forceRefresh = false)
     {
-        var expiresAtText = context.Properties.GetTokenValue(ExpiresAtTokenName);
-        if (!DateTimeOffset.TryParseExact(
-                expiresAtText,
-                RoundtripDateTimeFormat,
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.None,
-                out var expiresAt))
-        {
-            return;
-        }
-
         var options = oidcOptionsMonitor.Get(oidcScheme);
         var now = options.TimeProvider!.GetUtcNow();
-        if (now + configuredOptions.Value.RefreshBeforeExpiration < expiresAt)
+        if (!forceRefresh)
         {
-            return;
+            var expiresAtText = context.Properties.GetTokenValue(ExpiresAtTokenName);
+            if (!DateTimeOffset.TryParseExact(
+                    expiresAtText,
+                    RoundtripDateTimeFormat,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out var expiresAt)
+                || now + configuredOptions.Value.RefreshBeforeExpiration < expiresAt)
+            {
+                return;
+            }
         }
 
         var configuration = await options.ConfigurationManager!.GetConfigurationAsync(

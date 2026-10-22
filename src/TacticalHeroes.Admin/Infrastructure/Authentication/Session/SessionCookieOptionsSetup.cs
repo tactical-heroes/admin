@@ -40,6 +40,7 @@ internal sealed class SessionCookieOptionsSetup(
         options.Events.OnValidatePrincipal = context =>
             refresher.ValidateOrRefreshCookieAsync(
                 context,
-                AuthenticationConstants.OpenIdConnectScheme);
+                AuthenticationConstants.OpenIdConnectScheme,
+                forceRefresh: context.Request.Path == IdentityRoutes.AuthenticationRefresh);
     }
 }
