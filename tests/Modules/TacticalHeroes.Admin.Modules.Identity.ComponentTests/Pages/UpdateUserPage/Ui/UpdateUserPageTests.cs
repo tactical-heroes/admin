@@ -56,7 +56,7 @@ public sealed class UpdateUserPageTests : BunitContext
         component.WaitForElement("input").GetAttribute("value").ShouldBe("admin@example.test");
         component.FindAll(".submit-action").ShouldBeEmpty();
         component.FindComponents<ClaimsEditor>().ShouldBeEmpty();
-        component.FindComponents<RoleSelect>().ShouldBeEmpty();
+        component.FindComponents<RoleMultiSelect>().ShouldBeEmpty();
         _handler.PutCount.ShouldBe(0);
     }
 
@@ -113,8 +113,8 @@ public sealed class UpdateUserPageTests : BunitContext
         Guid[] roles = keepRole ? [IdentityCatalogResponses.RoleId] : [];
         if (!keepRole)
         {
-            await component.InvokeAsync(() => component.FindComponent<RoleSelect>().FindComponent<MudSelect<Guid>>()
-                .Instance.SelectedValuesChanged.InvokeAsync(roles));
+            await component.InvokeAsync(() => component.FindComponent<RoleMultiSelect>()
+                .Instance.ValuesChanged.InvokeAsync([.. roles]));
         }
         var claims = component.FindComponent<ClaimsEditor>();
         await component.InvokeAsync(() => claims.FindComponents<MudCheckBox<bool?>>()

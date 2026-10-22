@@ -69,9 +69,9 @@
                 <PermissionView Permissions="[Permissions.Users.Update]">
                     <EditSection Title="Доступ">
                         <MudStack Spacing="3">
-                            <RoleSelect MultiSelection="true" @bind-Values="Model.RoleIds"
-                                        Error="@Errors.HasError(nameof(UpdateUserFormModel.RoleIds))"
-                                        ErrorText="@Errors.GetError(nameof(UpdateUserFormModel.RoleIds))" />
+                            <RoleMultiSelect @bind-Values="Model.RoleIds"
+                                             Error="@Errors.HasError(nameof(UpdateUserFormModel.RoleIds))"
+                                             ErrorText="@Errors.GetError(nameof(UpdateUserFormModel.RoleIds))" />
                             <MudText Typo="Typo.caption" Color="Color.Secondary">
                                 Личные разрешения дополняют права назначенных ролей.
                                 Снятие отметки здесь не отменяет право, полученное через роль.
