@@ -1,5 +1,7 @@
 using FluentValidation;
 
+using TacticalHeroes.Admin.Shared.Authorization;
+
 namespace TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Model;
 
 public sealed class ClaimValueValidator : MudFormValidator<ClaimValue>
@@ -10,7 +12,7 @@ public sealed class ClaimValueValidator : MudFormValidator<ClaimValue>
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithMessage("Укажите тип атрибута")
-            .Must(type => string.Equals(type?.Trim(), "permission", StringComparison.OrdinalIgnoreCase))
+            .Must(type => string.Equals(type?.Trim(), PermissionAccess.ClaimType, StringComparison.OrdinalIgnoreCase))
             .WithMessage("Можно назначать только разрешения");
 
         RuleFor(claim => claim.Value)
