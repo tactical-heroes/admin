@@ -34,19 +34,14 @@ Run tests:
 dotnet test TacticalHeroes.Admin.slnx --configuration Release
 ```
 
-Before the first run, apply the [Admin database migrations](#data-protection-keys)
-to the existing local PostgreSQL database. Then run the admin application:
+Apply the [Admin migrations](#data-protection-keys), then run the application:
 
 ```bash
 dotnet run --project src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj --launch-profile https
 ```
 
-The local host uses the development API by default. Open
-`https://localhost:5173`; the login page stays on this origin while the BFF
-proxies authentication to the API. The OIDC proxy route rewrites the API's
-absolute `/login` redirect to the local login page and preserves its query.
-The API client must allow `https://localhost:5173/oauth/callback` and
-`https://localhost:5173/oauth/logout-callback`.
+Local UI and login use `https://localhost:5173` with the dev API. Register
+this origin's `/oauth/callback` and `/oauth/logout-callback` in the API client.
 
 ## Repository Layout
 
@@ -69,12 +64,10 @@ Set `ConnectionStrings:PostgreSqlConnectionString` in configuration or override
 the local default through `ConnectionStrings__PostgreSqlConnectionString`.
 Development and production use separate databases.
 
-Local development uses the existing `tactical-heroes` database on
-`localhost:5432` as `postgres`. The host's `appsettings.Development.json` and the
-migrator's `appsettings.Migrator.json` include the local development password.
-Override the connection string if your local credentials differ.
+Local defaults target `tactical-heroes` on `localhost:5432`; override the
+connection string for other credentials.
 
-Apply the Admin migrations before starting the application. The core migrator
+Local development requires PostgreSQL and the Admin migrations. The core migrator
 generates and applies migrations using `appsettings.Migrator.json`:
 
 ```bash
@@ -98,22 +91,10 @@ raw internal route strings. Kiota client code is generated from
 `openapi/tactical-heroes.json` into the API project's intermediate output during
 the build and is not committed to the repository.
 
-User create/update forms send the complete `roleIds` selection; an empty array
-removes all role assignments. Role forms preserve and edit `isDefault`, which
-controls assignment during registration. Both forms edit a permission matrix from
-`/api/v1/claims/permissions`, grouped by `moduleCode`/`moduleDisplayName` and resource.
-Rows, action columns and whole modules support bulk selection. Only `permission`
-claims can be assigned. Catalog failures offer retry and preserve existing assignments.
-
-Menu items require the resource's `read` permission; empty module groups are hidden.
-Opening an existing record requires `read`; the save button requires `update`.
-Create and delete actions require their corresponding permissions. Effective permissions combine direct
-user claims with role claims. Direct user assignments add access; removing one
-does not revoke access inherited from a role. The API enforces permissions itself.
-
-Deploy the matching API with `RemoveNonPermissionClaims` before this frontend.
-This migration removes all user and role claims except `permission`. Sign in again so the ID token
-and Blazor authentication state contain the current permissions.
+Users support multiple roles and permission matrices. UI visibility follows
+permissions; the API enforces access independently. Apply the API's
+`RemoveNonPermissionClaims` migration (deletes non-permission claims) before
+deploying this frontend, then sign in again.
 
 The client shell and module RCLs follow Feature-Sliced Design. Each `Pages` slice
 owns its route, form models, validators, and API adapters. Create and update flows
