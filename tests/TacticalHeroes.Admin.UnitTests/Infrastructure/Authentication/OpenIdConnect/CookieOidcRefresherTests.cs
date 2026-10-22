@@ -14,8 +14,11 @@ using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
+using TacticalHeroes.Admin.Infrastructure.Authentication;
 using TacticalHeroes.Admin.Infrastructure.Authentication.OpenIdConnect;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Options.OpenIdConnect;
+using TacticalHeroes.Admin.Infrastructure.Authentication.Options.Session;
+using TacticalHeroes.Admin.Infrastructure.Authentication.Session;
 
 namespace TacticalHeroes.Admin.UnitTests.Infrastructure.Authentication.OpenIdConnect;
 
@@ -23,23 +26,57 @@ public sealed class CookieOidcRefresherTests
 {
     private const string SigningKeyText = "test-signing-key-for-session-refresh-32-bytes";
 
-    [Theory(DisplayName = "Cookie refresh should update tokens and permissions when refresh is forced")]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task ValidateOrRefreshCookieAsync_Should_UpdateSession_When_RefreshIsForced(bool force)
+    [Theory(DisplayName = "Cookie refresh should respect refresh trigger when session is validated")]
+    [InlineData(true, false)]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    public async Task ValidateOrRefreshCookieAsync_Should_RespectRefreshTrigger_When_SessionIsValidated(
+        bool force, bool expired)
     {
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SigningKeyText));
         var handler = new TokenEndpointHandler(signingKey, HttpStatusCode.OK);
         using var httpClient = new HttpClient(handler);
         var (refresher, context) = CreateRefresh(httpClient, signingKey);
+        if (expired)
+        {
+            context.Properties.UpdateTokenValue(
+                "expires_at", DateTimeOffset.UtcNow.AddMinutes(-1).ToString("O", CultureInfo.InvariantCulture));
+        }
+        var shouldRefresh = force || expired;
 
         await refresher.ValidateOrRefreshCookieAsync(context, "oidc", forceRefresh: force);
 
-        handler.Calls.ShouldBe(force ? 1 : 0);
-        context.ShouldRenew.ShouldBe(force);
-        context.Principal!.FindFirst("permission")!.Value.ShouldBe(force ? "new.permission" : "old.permission");
-        context.Properties.GetTokenValue("access_token").ShouldBe(force ? "new-access" : "old-access");
-        context.Properties.GetTokenValue("refresh_token").ShouldBe(force ? "new-refresh" : "old-refresh");
+        handler.Calls.ShouldBe(shouldRefresh ? 1 : 0);
+        context.ShouldRenew.ShouldBe(shouldRefresh);
+        context.Principal!.FindFirst("permission")!.Value.ShouldBe(shouldRefresh ? "new.permission" : "old.permission");
+        context.Properties.GetTokenValue("access_token").ShouldBe(shouldRefresh ? "new-access" : "old-access");
+        context.Properties.GetTokenValue("refresh_token").ShouldBe(shouldRefresh ? "new-refresh" : "old-refresh");
+    }
+
+    [Theory(DisplayName = "Cookie refresh should respect request path when session cookie is validated")]
+    [InlineData("/authentication/refresh", true)]
+    [InlineData("/", false)]
+    public async Task ValidateOrRefreshCookieAsync_Should_RespectRequestPath_When_SessionCookieIsValidated(
+        string path, bool shouldRefresh)
+    {
+        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SigningKeyText));
+        var handler = new TokenEndpointHandler(signingKey, HttpStatusCode.OK);
+        using var httpClient = new HttpClient(handler);
+        var (refresher, context) = CreateRefresh(httpClient, signingKey);
+        var sessionOptions = new AdminSessionOptions
+        {
+            CookieName = "test.session",
+            Lifetime = TimeSpan.FromHours(1)
+        };
+        var setup = new SessionCookieOptionsSetup(
+            Microsoft.Extensions.Options.Options.Create(sessionOptions), refresher);
+        setup.Configure(AuthenticationConstants.SessionScheme, context.Options);
+        context.HttpContext.Request.Path = path;
+
+        await context.Options.Events.OnValidatePrincipal(context);
+
+        handler.Calls.ShouldBe(shouldRefresh ? 1 : 0);
+        context.ShouldRenew.ShouldBe(shouldRefresh);
     }
 
     [Fact(DisplayName = "Cookie refresh should reject principal when refresh fails")]
