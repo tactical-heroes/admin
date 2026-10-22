@@ -6,7 +6,9 @@ using TacticalHeroes.Admin.Shared.Ui.Common;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Ui;
 
-public partial class ClaimsEditor(ClaimCatalogApi api) : CancelableComponentBase
+public partial class ClaimsEditor(
+    ClaimCatalogApi api,
+    IEnumerable<AdminNavigationGroup> navigationGroups) : CancelableComponentBase
 {
     private static readonly (string Code, string Name)[] Actions =
     [
@@ -28,12 +30,31 @@ public partial class ClaimsEditor(ClaimCatalogApi api) : CancelableComponentBase
     private bool IsLoading { get; set; }
 
     private IEnumerable<IGrouping<string, ClaimOption>> Modules =>
-        Permissions?.Items.GroupBy(option => option.ModuleCode) ?? [];
+        Permissions?.Items
+            .OrderBy(GetNavigationOrder)
+            .GroupBy(option => option.ModuleCode) ?? [];
 
     private int SelectedCount => Permissions?.Items.Count(option => IsSelected(option.Code)) ?? 0;
 
     protected override Task OnInitializedAsync() =>
         Permissions is null ? LoadAsync() : Task.CompletedTask;
+
+    private int GetNavigationOrder(ClaimOption option)
+    {
+        string prefix = $"{option.ModuleCode}.{option.ResourceCode}.";
+        int index = 0;
+        foreach (var item in navigationGroups.SelectMany(group => group.Items))
+        {
+            if (item.Permission.StartsWith(prefix, StringComparison.Ordinal))
+            {
+                return index;
+            }
+
+            index++;
+        }
+
+        return int.MaxValue;
+    }
 
     private async Task LoadAsync()
     {

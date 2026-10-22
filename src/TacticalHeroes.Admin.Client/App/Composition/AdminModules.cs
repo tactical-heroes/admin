@@ -22,6 +22,11 @@ public static class AdminModules
     internal static IServiceCollection AddAdminModules(
         this IServiceCollection services)
     {
+        foreach (var group in NavigationGroups)
+        {
+            services.AddSingleton(group);
+        }
+
         services.AddCompendiumAdminModule();
         services.AddIdentityAdminModule();
 

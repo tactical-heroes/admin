@@ -3,6 +3,7 @@ using MudBlazor.Extensions;
 
 using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Model;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Ui;
+using TacticalHeroes.Admin.Shared.Navigation;
 
 namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Entities.Claims.Ui;
 
@@ -23,6 +24,42 @@ public sealed class ClaimsEditorTests : IdentityCatalogTestContext
             component.Markup.ShouldContain("Пользователи");
             component.Markup.ShouldNotContain("Показывать в меню");
         });
+    }
+
+    [Fact(DisplayName = "GetNavigationOrder should follow navigation order when catalog order differs")]
+    public async Task GetNavigationOrder_Should_FollowNavigationOrder_When_CatalogOrderDiffers()
+    {
+        NavigationGroups.AddRange(
+        [
+            new("Справочники", [new("Фракции", "/factions", "", "compendium.factions.read")]),
+            new("Управление доступом",
+            [
+                new("Роли", "/roles", "", "identity.roles.read"),
+                new("Пользователи", "/users", "", "identity.users.read")
+            ])
+        ]);
+
+        var component = RenderMatrix([]);
+        await component.InvokeAsync(() => component.FindComponent<MudTabs>().Instance.ActivatePanelAsync(1));
+
+        component.FindComponents<MudTabPanel>().Select(panel => panel.Instance.Text)
+            .ShouldBe(["Справочники", "Управление доступом"]);
+        component.FindAll("tbody th[scope='row']").Select(cell => cell.TextContent)
+            .ShouldBe(["Роли", "Пользователи"]);
+    }
+
+    [Fact(DisplayName = "Modules should retain unknown modules when navigation has no matching item")]
+    public async Task Modules_Should_RetainUnknownModules_When_NavigationHasNoMatchingItem()
+    {
+        NavigationGroups.Add(new AdminNavigationGroup("Управление доступом",
+            [new("Пользователи", "/users", "", "identity.users.read")]));
+
+        var component = RenderMatrix([], Option("other", "Другой модуль", "items", "Другие объекты", "read"));
+        await component.InvokeAsync(() => component.FindComponent<MudTabs>().Instance.ActivatePanelAsync(2));
+
+        component.FindComponents<MudTabPanel>().Select(panel => panel.Instance.Text)
+            .ShouldBe(["Управление доступом", "Справочники", "Другой модуль"]);
+        component.FindAll("tbody th[scope='row']").Select(cell => cell.TextContent).ShouldBe(["Другие объекты"]);
     }
 
     [Fact(DisplayName = "SetPermissions should toggle resource when row is selected")]
@@ -147,7 +184,7 @@ public sealed class ClaimsEditorTests : IdentityCatalogTestContext
         result.IsValid.ShouldBeFalse();
     }
 
-    private IRenderedComponent<ClaimsEditor> RenderMatrix(IList<ClaimValue> claims)
+    private IRenderedComponent<ClaimsEditor> RenderMatrix(IList<ClaimValue> claims, params ClaimOption[] extraOptions)
     {
         Handler.Permissions = new ClaimCatalog
         {
@@ -157,7 +194,8 @@ public sealed class ClaimsEditorTests : IdentityCatalogTestContext
                     Option("identity", "Управление доступом", "users", "Пользователи", "read"),
                     Option("identity", "Управление доступом", "users", "Пользователи", "update"),
                     Option("identity", "Управление доступом", "roles", "Роли", "read"),
-                    Option("compendium", "Справочники", "factions", "Фракции", "read")
+                    Option("compendium", "Справочники", "factions", "Фракции", "read"),
+                    .. extraOptions
                 ]
         };
         var component = Render<ClaimsEditor>(parameters => parameters.Add(editor => editor.Claims, claims));

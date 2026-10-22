@@ -11,12 +11,15 @@ using MudBlazor.Services;
 using TacticalHeroes.Admin.Api.DependencyInjection;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Model;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Roles.Model;
+using TacticalHeroes.Admin.Shared.Navigation;
 
 namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests;
 
 public abstract class IdentityCatalogTestContext : BunitContext
 {
     protected CatalogHandler Handler { get; } = new();
+
+    protected List<AdminNavigationGroup> NavigationGroups { get; } = [];
 
     protected IRenderedComponent<MudPopoverProvider> Popovers { get; }
 
@@ -30,6 +33,7 @@ public abstract class IdentityCatalogTestContext : BunitContext
             options => options.HttpMessageHandlerBuilderActions.Add(
                 builder => builder.PrimaryHandler = Handler));
         Services.AddIdentityAdminModule();
+        Services.AddSingleton<IEnumerable<AdminNavigationGroup>>(NavigationGroups);
         JSInterop.Mode = JSRuntimeMode.Loose;
         Popovers = Render<MudPopoverProvider>();
     }
