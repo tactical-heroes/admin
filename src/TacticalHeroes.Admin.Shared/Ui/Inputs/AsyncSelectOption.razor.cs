@@ -92,6 +92,24 @@ public abstract partial class AsyncSelectOption<TId, TOption>(
 
     private bool IsSearchTooShort { get; set; }
 
+    private string MultiSelectDescriptionId { get; } = $"select-description-{Guid.NewGuid():N}";
+
+    private bool IsMultiSelectOpen { get; set; }
+
+    private bool ShowAllSelected { get; set; }
+
+    private List<TId> SelectedIds => [.. Values.Distinct()];
+
+    private List<TId> OptionIds => [.. (Items ?? []).Select(option => option.Id).Concat(Values).Distinct()];
+
+    private bool IsMissing(TId id) => Items?.All(option => !EqualityComparer<TId>.Default.Equals(option.Id, id)) != false;
+
+    private void ToggleSelected() => ShowAllSelected = !ShowAllSelected;
+
+    private Task RemoveValueAsync(TId id) => SetValuesAsync(Values.Where(value => !EqualityComparer<TId>.Default.Equals(value, id)));
+
+    private Task ToggleValueAsync(TId id) => Values.Contains(id) ? RemoveValueAsync(id) : SetValuesAsync(Values.Append(id));
+
     protected override async Task OnParametersSetAsync()
     {
         if (MultiSelection)

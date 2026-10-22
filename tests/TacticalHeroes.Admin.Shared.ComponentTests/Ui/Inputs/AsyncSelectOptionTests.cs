@@ -335,7 +335,7 @@ public sealed class AsyncSelectOptionTests : BunitContext
             .Single(button => button.Instance.Icon == Icons.Material.Filled.Clear)
             .Find("button").ClickAsync(new MouseEventArgs());
 
-        _source.Requests.ShouldBe([null, null]);
+        _source.Requests.ShouldBe([null, null, null]);
         selectedOptionId.ShouldBe(0);
         component.FindComponent<MudAutocomplete<int>>().Find("input").GetAttribute("value").ShouldBeEmpty();
         Popovers.Markup.ShouldContain("First option");
@@ -365,28 +365,28 @@ public sealed class AsyncSelectOptionTests : BunitContext
         component.FindComponent<MudAutocomplete<int>>().Find("input").GetAttribute("value").ShouldBe("Selected option");
     }
 
-    [Fact(DisplayName = "SetValuesAsync should preserve other selections when an option is toggled")]
-    public async Task SetValuesAsync_Should_PreserveOtherSelections_When_AnOptionIsToggled()
+    [Fact(DisplayName = "ToggleValueAsync should preserve other selections when an option is toggled")]
+    public async Task ToggleValueAsync_Should_PreserveOtherSelections_When_AnOptionIsToggled()
     {
         List<int> values = [1];
         var component = Render<TestSelect>(parameters => parameters
             .Add(select => select.MultiSelection, true)
             .Add(select => select.Values, values)
             .Add(select => select.ValuesChanged, selected => values = selected));
-        var select = component.FindComponent<MudSelect<int>>();
-        await component.InvokeAsync(() => select.Instance.OpenMenu());
+        await component.Find("fieldset").ClickAsync(new MouseEventArgs());
 
-        await Popovers.FindAll(".mud-list-item").Single(item => item.TextContent.Trim() == "Selected option")
+        await Popovers.FindAll("[role=menuitemcheckbox]").Single(item => item.TextContent.Trim() == "Selected option")
             .ClickAsync(new MouseEventArgs());
 
         values.ShouldBe([1, OptionId]);
-        component.Find("input").GetAttribute("value").ShouldBe("First option, Selected option");
-        await Popovers.FindAll(".mud-list-item").Single(item => item.TextContent.Trim() == "First option")
+        component.FindAll(".mud-chip-content").Select(chip => chip.TextContent.Trim()).ShouldBe(["First option", "Selected option"]);
+        await Popovers.FindAll("[role=menuitemcheckbox]").Single(item => item.TextContent.Trim() == "First option")
             .ClickAsync(new MouseEventArgs());
         values.ShouldBe([OptionId]);
-        component.Find("input").GetAttribute("value").ShouldBe("Selected option");
+        component.Find(".mud-chip-content").TextContent.Trim().ShouldBe("Selected option");
         component.FindComponents<MudAutocomplete<int>>().ShouldBeEmpty();
-        component.FindComponents<MudChip<int>>().ShouldBeEmpty();
+        component.FindComponents<MudChip<int>>().Count.ShouldBe(1);
+        component.Find(".mud-menu-activator").GetAttribute("aria-expanded").ShouldBe("true");
     }
 
     [Fact(DisplayName = "GetSelectedName should retain missing selections when catalog does not contain an identifier")]
@@ -398,14 +398,14 @@ public sealed class AsyncSelectOptionTests : BunitContext
             .Add(select => select.MultiSelection, true)
             .Add(select => select.Values, values)
             .Add(select => select.ValuesChanged, selected => values = selected));
-        component.Find("input").GetAttribute("value").ShouldBe("Selected option, Недоступный вариант (3)");
-        await component.InvokeAsync(() => component.FindComponent<MudSelect<int>>().Instance.OpenMenu());
+        component.FindAll(".mud-chip-content").Select(chip => chip.TextContent.Trim()).ShouldBe(["Selected option", "Недоступный вариант (3)"]);
+        await component.Find("fieldset").ClickAsync(new MouseEventArgs());
 
-        await Popovers.FindAll(".mud-list-item").Single(item => item.TextContent.Trim() == "Недоступный вариант (3)")
+        await Popovers.FindAll("[role=menuitemcheckbox]").Single(item => item.TextContent.Trim() == "Недоступный вариант (3)")
             .ClickAsync(new MouseEventArgs());
 
         values.ShouldBe([OptionId]);
-        component.Find("input").GetAttribute("value").ShouldBe("Selected option");
+        component.Find(".mud-chip-content").TextContent.Trim().ShouldBe("Selected option");
         _source.Requests.ShouldBe([null]);
     }
 
@@ -425,7 +425,8 @@ public sealed class AsyncSelectOptionTests : BunitContext
         await component.WaitForAssertionAsync(() =>
         {
             component.Instance.Values.ShouldBeEmpty();
-            component.Find("input").GetAttribute("value").ShouldBeNullOrEmpty();
+            component.FindComponents<MudChip<int>>().ShouldBeEmpty();
+            component.Find(".multi-select-placeholder").TextContent.ShouldBe("Выберите варианты");
         });
         _source.Requests.ShouldBe([null]);
     }
@@ -440,7 +441,14 @@ public sealed class AsyncSelectOptionTests : BunitContext
             .Add(select => select.Value, OptionId)
             .Add(select => select.Values, [OptionId]));
 
-        component.Find("input").GetAttribute("value").ShouldBe("Name: Selected option");
+        if (multiSelection)
+        {
+            component.Find(".mud-chip-content").TextContent.Trim().ShouldBe("Name: Selected option");
+        }
+        else
+        {
+            component.Find("input").GetAttribute("value").ShouldBe("Name: Selected option");
+        }
     }
 
     [Fact(DisplayName = "SetValuesAsync should clear selection when all options are deselected")]
@@ -452,10 +460,13 @@ public sealed class AsyncSelectOptionTests : BunitContext
             .Add(select => select.Values, values)
             .Add(select => select.ValuesChanged, selected => values = selected));
 
-        await component.InvokeAsync(() => component.FindComponent<MudSelect<int>>().Instance.ClearAsync());
+        foreach (var chip in component.FindComponents<MudChip<int>>())
+        {
+            await chip.Find("button").ClickAsync(new MouseEventArgs());
+        }
 
         values.ShouldBeEmpty();
-        component.Find("input").GetAttribute("value").ShouldBeNullOrEmpty();
+        component.FindComponents<MudChip<int>>().ShouldBeEmpty();
     }
 
     [Fact(DisplayName = "CreateLocalSearch should cache catalog per component when options are searched")]
@@ -472,6 +483,99 @@ public sealed class AsyncSelectOptionTests : BunitContext
         _source.Requests.ShouldBe([null]);
         Render<LocalSelect>(parameters => parameters.Add(select => select.Value, 1));
         _source.Requests.ShouldBe([null, null]);
+    }
+
+    [Fact(DisplayName = "ToggleSelected should expand selected chips without changing values when more than four options are selected")]
+    public async Task ToggleSelected_Should_ExpandSelectedChipsWithoutChangingValues_When_MoreThanFourOptionsAreSelected()
+    {
+        List<int> values = [1, 2, 3, 4, 5, 6, 7];
+        var component = Render<TestSelect>(parameters => parameters
+            .Add(select => select.MultiSelection, true)
+            .Add(select => select.Values, values));
+        component.FindComponents<MudChip<int>>().Count.ShouldBe(4);
+        component.Find(".multi-select-more").TextContent.Trim().ShouldBe("Ещё 3");
+
+        await component.Find(".multi-select-more").ClickAsync(new MouseEventArgs());
+
+        component.FindComponents<MudChip<int>>().Count.ShouldBe(7);
+        component.Find(".mud-menu-activator").GetAttribute("aria-expanded").ShouldBe("false");
+        component.Instance.Values.ShouldBe(values);
+        await component.Find(".multi-select-more").ClickAsync(new MouseEventArgs());
+        component.FindComponents<MudChip<int>>().Count.ShouldBe(4);
+    }
+
+    [Fact(DisplayName = "Render should show empty catalog text when no options are available")]
+    public async Task Render_Should_ShowEmptyCatalogText_When_NoOptionsAreAvailable()
+    {
+        _source.Empty = true;
+        var component = Render<TestSelect>(parameters => parameters.Add(select => select.MultiSelection, true));
+
+        await component.Find("fieldset").ClickAsync(new MouseEventArgs());
+
+        component.Find(".multi-select-placeholder").TextContent.ShouldBe("Выберите варианты");
+        Popovers.Markup.ShouldContain("Варианты не найдены.");
+        Popovers.FindAll("[role=menuitemcheckbox]").ShouldBeEmpty();
+    }
+
+    [Fact(DisplayName = "Render should describe validation errors when multi selection is invalid")]
+    public void Render_Should_DescribeValidationErrors_When_MultiSelectionIsInvalid()
+    {
+        var component = Render<TestSelect>(parameters => parameters
+            .Add(select => select.MultiSelection, true)
+            .Add(select => select.Values, [OptionId])
+            .Add(select => select.Error, true)
+            .Add(select => select.ErrorText, "Invalid selection."));
+
+        var field = component.Find("fieldset");
+
+        field.GetAttribute("aria-invalid").ShouldBe("true");
+        component.Find($"#{field.GetAttribute("aria-describedby")}").TextContent.ShouldContain("Invalid selection.");
+        component.Find("[role=alert]").TextContent.ShouldContain("Invalid selection.");
+        component.Instance.Values.ShouldBe([OptionId]);
+    }
+
+    [Fact(DisplayName = "RemoveValueAsync should remove missing chip without opening menu when its close action is used")]
+    public async Task RemoveValueAsync_Should_RemoveMissingChipWithoutOpeningMenu_When_ItsCloseActionIsUsed()
+    {
+        List<int> values = [OptionId, 3, 3];
+        var component = Render<TestSelect>(parameters => parameters
+            .Add(select => select.MultiSelection, true)
+            .Add(select => select.Values, values)
+            .Add(select => select.ValuesChanged, selected => values = selected));
+        var missing = component.FindComponents<MudChip<int>>().Single(chip => chip.Instance.Value == 3);
+        missing.Instance.Color.ShouldBe(Color.Warning);
+
+        await missing.Find(".mud-chip-close-button").ClickAsync(new MouseEventArgs());
+
+        values.ShouldBe([OptionId]);
+        component.Find(".mud-menu-activator").GetAttribute("aria-expanded").ShouldBe("false");
+        component.Markup.ShouldNotContain("Недоступные варианты сохранены");
+    }
+
+    [Fact(DisplayName = "IsMissing should highlight only unavailable values when selected identifiers are absent from catalog")]
+    public void IsMissing_Should_HighlightOnlyUnavailableValues_When_SelectedIdentifiersAreAbsentFromCatalog()
+    {
+        var component = Render<TestSelect>(parameters => parameters
+            .Add(select => select.MultiSelection, true)
+            .Add(select => select.Values, [OptionId, 3]));
+
+        var chips = component.FindComponents<MudChip<int>>();
+
+        chips.Single(chip => chip.Instance.Value == OptionId).Instance.Color.ShouldBe(Color.Default);
+        chips.Single(chip => chip.Instance.Value == 3).Instance.Color.ShouldBe(Color.Warning);
+        component.Markup.ShouldContain("Недоступные варианты сохранены");
+    }
+
+    [Fact(DisplayName = "Render should open and close menu when keyboard activation and escape are used")]
+    public async Task Render_Should_OpenAndCloseMenu_When_KeyboardActivationAndEscapeAreUsed()
+    {
+        var component = Render<TestSelect>(parameters => parameters.Add(select => select.MultiSelection, true));
+
+        await component.Find(".mud-menu-activator").KeyDownAsync(new KeyboardEventArgs { Key = "Enter" });
+
+        component.Find(".mud-menu-activator").GetAttribute("aria-expanded").ShouldBe("true");
+        await Popovers.Find(".mud-menu-list-wrapper").KeyDownAsync(new KeyboardEventArgs { Key = "Escape" });
+        component.Find(".mud-menu-activator").GetAttribute("aria-expanded").ShouldBe("false");
     }
 
     private sealed class FormattedSelect(TestOptionsSource source)

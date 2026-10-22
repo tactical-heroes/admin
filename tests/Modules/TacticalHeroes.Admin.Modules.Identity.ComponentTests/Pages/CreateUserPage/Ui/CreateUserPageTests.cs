@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 
-using MudBlazor;
 using MudBlazor.Services;
 
 using TacticalHeroes.Admin.Api.DependencyInjection;
@@ -66,8 +65,8 @@ public sealed class CreateUserPageTests : BunitContext
         Guid[] roles = assignRole ? [IdentityCatalogResponses.RoleId] : [];
         if (assignRole)
         {
-            await component.InvokeAsync(() => component.FindComponent<RoleSelect>().FindComponent<MudSelect<Guid>>()
-                .Instance.SelectedValuesChanged.InvokeAsync(roles));
+            await component.InvokeAsync(() => component.FindComponent<RoleSelect>()
+                .Instance.ValuesChanged.InvokeAsync([.. roles]));
         }
 
         component.Find(".submit-action").Click();
