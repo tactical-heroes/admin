@@ -11,10 +11,6 @@ namespace TacticalHeroes.Admin.Modules.Identity.Pages.CreateRolePage.Api;
 internal static partial class CreateRoleMapper
 {
     [MapperIgnoreTarget(nameof(CreateRoleRequest.AdditionalData))]
-    [MapProperty(
-        nameof(CreateRoleFormModel.Claims),
-        nameof(CreateRoleRequest.Claims),
-        Use = nameof(@ClaimMapper.ToApiValues))]
     public static partial CreateRoleRequest ToRequest(CreateRoleFormModel role);
 
     [MapperIgnore]

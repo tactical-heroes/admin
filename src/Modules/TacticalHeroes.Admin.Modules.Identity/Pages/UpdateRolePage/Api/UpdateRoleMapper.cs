@@ -17,13 +17,9 @@ internal static partial class UpdateRoleMapper
     [MapProperty(
         nameof(GetRoleDetailsResponse.Claims),
         nameof(UpdateRoleFormModel.Claims),
-        Use = nameof(@ClaimMapper.ToValues))]
+        SuppressNullMismatchDiagnostic = true)]
     public static partial UpdateRoleFormModel ToForm(GetRoleDetailsResponse response);
 
     [MapperIgnoreTarget(nameof(UpdateRoleRequest.AdditionalData))]
-    [MapProperty(
-        nameof(UpdateRoleFormModel.Claims),
-        nameof(UpdateRoleRequest.Claims),
-        Use = nameof(@ClaimMapper.ToApiValues))]
     public static partial UpdateRoleRequest ToRequest(UpdateRoleFormModel role);
 }

@@ -10,8 +10,7 @@ namespace TacticalHeroes.Admin.Modules.Identity.Entities.Roles.Api;
 [UseStaticMapper(typeof(RequiredValueMapper))]
 internal static partial class RoleOptionsMapper
 {
-    public static IReadOnlyList<RoleOption> ToOptions(List<RoleSelectOptionResponse>? response) =>
-        RequiredValueMapper.ToRequiredList(response, ToOption);
+    public static partial IReadOnlyList<RoleOption> ToOptions(List<RoleSelectOptionResponse> response);
 
     [MapperIgnoreSource(nameof(RoleSelectOptionResponse.AdditionalData))]
     private static partial RoleOption ToOption(RoleSelectOptionResponse response);

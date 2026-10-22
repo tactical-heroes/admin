@@ -14,6 +14,6 @@ internal static partial class UserStatusMapper
     [MapperIgnoreSource(nameof(UserStatusResponse.Id))]
     public static partial UserStatus ToValue(UserStatusResponse response);
 
-    public static IReadOnlyList<UserStatus> ToValues(IReadOnlyCollection<UserStatusResponse>? response) =>
-        RequiredValueMapper.ToRequiredList(response, ToValue);
+    public static partial IReadOnlyList<UserStatus> ToValues(
+        IReadOnlyCollection<UserStatusResponse> response);
 }
