@@ -24,6 +24,10 @@ public sealed class RoleListPageTests : BunitContext
     public RoleListPageTests()
     {
         Services.AddMudServices();
+        var authorization = AddAuthorization();
+        authorization.SetAuthorized("Administrator");
+        authorization.SetClaims([.. Permissions.All.Select(permission =>
+            new System.Security.Claims.Claim("permission", permission))]);
         Services.AddTacticalHeroesApiClient(
             static _ => new Uri("https://api.example.test"),
             static _ => TimeSpan.FromSeconds(30));
@@ -157,7 +161,7 @@ public sealed class RoleListPageTests : BunitContext
             var query = HttpUtility.ParseQueryString(request.RequestUri.Query);
             int page = int.Parse(query["pageNumber"]!);
             int size = int.Parse(query["pageSize"]!);
-            string items = Empty ? "[]" : $$"""[{"id":"{{EntityId}}","name":"Administrator"}]""";
+            string items = Empty ? "[]" : $$"""[{"id":"{{EntityId}}","name":"Administrator","isDefault":true}]""";
             string json = Fail
                 ? """{"status":400,"detail":"Load failed."}"""
                 : $$"""{"items":{{items}},"pageNumber":{{page}},"pageSize":{{size}},"totalCount":{{(Empty ? 0 : 1)}},"totalPages":{{(Empty ? 0 : 1)}}}""";

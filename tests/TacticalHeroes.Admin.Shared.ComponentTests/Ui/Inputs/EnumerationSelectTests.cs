@@ -32,6 +32,9 @@ public sealed class EnumerationSelectTests : BunitContext
 
         toString("Blocked").ShouldBe("Заблокирован");
         toString("Unknown").ShouldBe("Unknown");
+        component.Find("input").GetAttribute("value").ShouldBe("Заблокирован");
+        component.Render(parameters => parameters.Add(select => select.Value, "Active"));
+        component.Find("input").GetAttribute("value").ShouldBe("Активный");
         component.FindComponents<MudSelectItem<string>>()
             .Select(item => item.Instance.Value)
             .ShouldBe(["Active", "Blocked"]);

@@ -20,10 +20,15 @@ public sealed class FactionListPageTests : BunitContext
 {
     private static readonly Guid EntityId = Guid.Parse("f341ae7d-69c0-45c6-9a44-110f00127080");
     private readonly ListHandler _handler = new();
+    private readonly Bunit.TestDoubles.BunitAuthorizationContext _authorization;
 
     public FactionListPageTests()
     {
         Services.AddMudServices();
+        _authorization = AddAuthorization();
+        _authorization.SetAuthorized("Administrator");
+        _authorization.SetClaims([.. Permissions.All.Select(permission =>
+            new System.Security.Claims.Claim("permission", permission))]);
         Services.AddTacticalHeroesApiClient(
             static _ => new Uri("https://api.example.test"),
             static _ => TimeSpan.FromSeconds(30));
@@ -32,6 +37,20 @@ public sealed class FactionListPageTests : BunitContext
                 builder => builder.PrimaryHandler = _handler));
         Services.AddCompendiumAdminModule();
         JSInterop.Mode = JSRuntimeMode.Loose;
+    }
+
+    [Fact(DisplayName = "Render should hide write actions when only read permission is granted")]
+    public void Render_Should_HideWriteActions_When_OnlyReadPermissionIsGranted()
+    {
+        _authorization.SetClaims(new System.Security.Claims.Claim("permission", Permissions.Factions.Read));
+
+        var component = Render<FactionListPageComponent>();
+
+        component.WaitForAssertion(() => component.Markup.ShouldContain("Northern Alliance"));
+        component.FindAll($"a[href='{CompendiumRoutes.CreateFaction}']").ShouldBeEmpty();
+        component.Find("[aria-label='Редактировать фракцию']").GetAttribute("href")
+            .ShouldBe(CompendiumRoutes.Faction(EntityId));
+        component.FindAll("[aria-label='Удалить фракцию']").ShouldBeEmpty();
     }
 
     [Fact(DisplayName = "Render should show rows and actions when load succeeds")]

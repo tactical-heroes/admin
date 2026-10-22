@@ -15,6 +15,10 @@ internal static partial class UpdateUserMapper
     [MapperIgnoreSource(nameof(GetUserDetailsResponse.AdditionalData))]
     [MapperIgnoreSource(nameof(GetUserDetailsResponse.Id))]
     [MapperIgnoreSource(nameof(GetUserDetailsResponse.StatusDisplayName))]
+    [MapProperty(
+        nameof(GetUserDetailsResponse.RoleIds),
+        nameof(UpdateUserFormModel.RoleIds),
+        SuppressNullMismatchDiagnostic = true)]
     public static partial UpdateUserFormModel ToForm(GetUserDetailsResponse response);
 
     [MapperIgnoreTarget(nameof(UpdateUserRequest.AdditionalData))]

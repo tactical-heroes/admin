@@ -15,6 +15,20 @@ namespace TacticalHeroes.Admin.Modules.Compendium.ComponentTests.Pages.UpdateUni
 
 public sealed class UpdateUnitPageTests : UnitFormTestContext
 {
+    [Fact(DisplayName = "Render should load unit without saving when only read permissions are granted")]
+    public void Render_Should_LoadUnitWithoutSaving_When_OnlyReadPermissionsAreGranted()
+    {
+        Authorization.SetClaims(
+            new System.Security.Claims.Claim("permission", Permissions.Units.Read),
+            new System.Security.Claims.Claim("permission", Permissions.Factions.Read));
+
+        var component = Render<UpdateUnitPageComponent>(parameters => parameters.Add(page => page.Id, UnitId));
+
+        component.WaitForElement("textarea").TextContent.ShouldBe("Ranged unit of the alliance.");
+        component.FindAll(".submit-action").ShouldBeEmpty();
+        Handler.Saves.ShouldBe(0);
+    }
+
     [Theory(DisplayName = "Submit should send explicit null ranged fields when saving a melee unit")]
     [InlineData(false)]
     [InlineData(true)]

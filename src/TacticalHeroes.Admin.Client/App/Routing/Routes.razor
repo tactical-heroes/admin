@@ -5,7 +5,16 @@
         <AuthorizeRouteView RouteData="routeData"
                             DefaultLayout="typeof(MainLayout)">
             <NotAuthorized>
-                <RedirectToLogin />
+                @if (context.User.Identity?.IsAuthenticated == true)
+                {
+                    <MudAlert Severity="Severity.Warning" Class="ma-6">
+                        Недостаточно прав для доступа к этой странице.
+                    </MudAlert>
+                }
+                else
+                {
+                    <RedirectToLogin />
+                }
             </NotAuthorized>
         </AuthorizeRouteView>
         <FocusOnNavigate RouteData="routeData"

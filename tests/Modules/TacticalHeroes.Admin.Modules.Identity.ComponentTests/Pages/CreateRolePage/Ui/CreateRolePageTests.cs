@@ -1,13 +1,16 @@
 using System.Net;
 using System.Text;
+using System.Text.Json;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 
+using MudBlazor;
 using MudBlazor.Services;
 
 using TacticalHeroes.Admin.Api.DependencyInjection;
+using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Ui;
 using TacticalHeroes.Admin.Shared.Ui.Forms;
 using TacticalHeroes.Admin.Shared.Ui.Layout;
 
@@ -67,21 +70,26 @@ public sealed class CreateRolePageTests : BunitContext
     }
 
     [Fact(DisplayName = "Submit should create role when claim is valid")]
-    public void Submit_Should_CreateRole_When_ClaimIsValid()
+    public async Task Submit_Should_CreateRole_When_ClaimIsValid()
     {
         var component = Render<CreateRolePageComponent>();
         component.Find("input").Change("Administrators");
-        component.FindAll("button")
-            .Single(button => button.TextContent.Contains("Добавить", StringComparison.Ordinal))
-            .Click();
-
-        var inputs = component.FindAll("input");
-        inputs[1].Change("permission");
-        inputs[2].Change("read");
+        component.WaitForElement(".permission-table");
+        await component.InvokeAsync(() => component.FindComponent<ClaimsEditor>().FindComponents<MudCheckBox<bool?>>()
+            .Single(box => box.Instance.UserAttributes?["aria-label"]?.ToString() == "Пользователи: Просмотр")
+            .Instance.ValueChanged.InvokeAsync(true));
+        await component.InvokeAsync(() => component.FindComponent<MudSwitch<bool>>().Instance.ValueChanged.InvokeAsync(true));
 
         component.Find(".submit-action").Click();
 
-        component.WaitForAssertion(() => _handler.PostCount.ShouldBe(1));
+        component.WaitForAssertion(() =>
+        {
+            _handler.PostCount.ShouldBe(1);
+            using var body = JsonDocument.Parse(_handler.RequestBody!);
+            body.RootElement.GetProperty("isDefault").GetBoolean().ShouldBeTrue();
+            body.RootElement.GetProperty("claims")[0].GetProperty("type").GetString().ShouldBe("permission");
+            body.RootElement.GetProperty("claims")[0].GetProperty("value").GetString().ShouldBe("identity.users.read");
+        });
     }
 
     [Fact(DisplayName = "Submit should display validation error when role name is empty")]
@@ -98,43 +106,32 @@ public sealed class CreateRolePageTests : BunitContext
         });
     }
 
-    [Fact(DisplayName = "Submit should display validation errors when claim is empty")]
-    public void Submit_Should_DisplayValidationErrors_When_ClaimIsEmpty()
-    {
-        var component = Render<CreateRolePageComponent>();
-        component.Find("input").Change("Administrators");
-        component.FindAll("button")
-            .Single(button => button.TextContent.Contains("Добавить", StringComparison.Ordinal))
-            .Click();
-
-        component.Find(".submit-action").Click();
-
-        component.WaitForAssertion(() =>
-        {
-            _handler.PostCount.ShouldBe(0);
-            component.Markup.ShouldContain("Укажите тип атрибута");
-            component.Markup.ShouldContain("Укажите значение атрибута");
-        });
-    }
-
     private sealed class CreateRoleHandler(Guid createdId) : HttpMessageHandler
     {
+        public string? RequestBody { get; private set; }
+
         public int PostCount { get; private set; }
 
-        protected override Task<HttpResponseMessage> SendAsync(
+        protected override async Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
+            if (IdentityCatalogResponses.Create(request) is { } response)
+            {
+                return response;
+            }
+
             request.Method.ShouldBe(HttpMethod.Post);
+            RequestBody = await request.Content!.ReadAsStringAsync(cancellationToken);
             PostCount++;
 
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.Created)
+            return new HttpResponseMessage(HttpStatusCode.Created)
             {
                 Content = new StringContent(
                     $$"""{"id":"{{createdId:D}}"}""",
                     Encoding.UTF8,
                     "application/json"),
-            });
+            };
         }
     }
 }

@@ -21,6 +21,9 @@ public partial class EditFormActions
     [Parameter]
     public bool Busy { get; set; }
 
+    [Parameter]
+    public string? Permission { get; set; }
+
     [Parameter, EditorRequired]
     public EventCallback OnSubmit { get; set; }
 }

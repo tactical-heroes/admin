@@ -10,6 +10,21 @@ namespace TacticalHeroes.Admin.Client.ComponentTests.App.Routing;
 
 public sealed class RoutesTests : ClientComponentTestContext
 {
+    [Fact(DisplayName = "Render should deny access without redirecting when authenticated user lacks permission")]
+    public void Render_Should_DenyAccess_When_AuthenticatedUserLacksPermission()
+    {
+        var authorization = AddAuthorization();
+        authorization.SetAuthorized("Reader");
+        authorization.SetPolicies();
+        var navigation = Services.GetRequiredService<NavigationManager>();
+        navigation.NavigateTo(IdentityRoutes.Roles);
+
+        var component = Render<Routes>();
+
+        component.Markup.ShouldContain("Недостаточно прав");
+        navigation.Uri.ShouldEndWith(IdentityRoutes.Roles);
+    }
+
     [Fact(DisplayName = "Render should show home when user is authenticated")]
     public void Render_Should_ShowHome_When_UserIsAuthenticated()
     {

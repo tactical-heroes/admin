@@ -7,4 +7,5 @@ public sealed record AdminNavigationGroup(
 public sealed record AdminNavigationItem(
     string Label,
     string Href,
-    string Icon);
+    string Icon,
+    string Permission);

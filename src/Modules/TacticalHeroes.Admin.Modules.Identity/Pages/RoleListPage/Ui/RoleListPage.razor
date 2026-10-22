@@ -1,6 +1,6 @@
 @inherits MudPagedListComponentBase<RoleListItem>
 @attribute [Route(IdentityRoutes.Roles)]
-@attribute [Authorize]
+@attribute [Authorize(Policy = Permissions.Roles.Read)]
 @attribute [StreamRendering]
 
 @using TacticalHeroes.Admin.Modules.Identity.Pages.RoleListPage.Model
@@ -10,12 +10,14 @@
 <PageHeader Title="Роли"
             Subtitle="Управление ролями и наборами разрешений">
     <Actions>
-        <MudButton Href="@IdentityRoutes.CreateRole"
-                   Variant="Variant.Filled"
-                   Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.Add">
-            Добавить роль
-        </MudButton>
+        <PermissionView Permissions="[Permissions.Roles.Create]">
+            <MudButton Href="@IdentityRoutes.CreateRole"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add">
+                Добавить роль
+            </MudButton>
+        </PermissionView>
     </Actions>
 </PageHeader>
 
@@ -42,24 +44,33 @@
                 </MudText>
             </CellTemplate>
         </PropertyColumn>
+        <TemplateColumn T="RoleListItem" Title="По умолчанию" Sortable="false">
+            <CellTemplate>
+                @(context.Item.IsDefault ? "Да" : "Нет")
+            </CellTemplate>
+        </TemplateColumn>
         <TemplateColumn T="RoleListItem" Title="Действия" Sortable="false" HeaderClass="actions-column" CellClass="actions-column">
             <CellTemplate>
                 <EntityRowActions>
-                    <MudIconButton Icon="@Icons.Material.Outlined.Edit"
-                                   Href="@IdentityRoutes.Role(context.Item.Id)"
-                                   Color="Color.Primary"
-                                   Size="Size.Small"
-                                   Disabled="IsLoading"
-                                   aria-label="Редактировать роль" />
-                    <EntityDeleteButton TKey="Guid"
-                                        EntityId="context.Item.Id"
-                                        EntityType="роль"
-                                        EntityName="@context.Item.Name"
-                                        DeleteLabel="Удалить роль"
-                                        SuccessMessage="Роль удалена"
-                                        DeleteAsync="DeleteRoleAsync"
-                                        OnDeleted="OnItemRemovedAsync"
-                                        Disabled="IsLoading" />
+                    <PermissionView Permissions="[Permissions.Roles.Read]">
+                        <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                                       Href="@IdentityRoutes.Role(context.Item.Id)"
+                                       Color="Color.Primary"
+                                       Size="Size.Small"
+                                       Disabled="IsLoading"
+                                       aria-label="Редактировать роль" />
+                    </PermissionView>
+                    <PermissionView Permissions="[Permissions.Roles.Delete]">
+                        <EntityDeleteButton TKey="Guid"
+                                            EntityId="context.Item.Id"
+                                            EntityType="роль"
+                                            EntityName="@context.Item.Name"
+                                            DeleteLabel="Удалить роль"
+                                            SuccessMessage="Роль удалена"
+                                            DeleteAsync="DeleteRoleAsync"
+                                            OnDeleted="OnItemRemovedAsync"
+                                            Disabled="IsLoading" />
+                    </PermissionView>
                 </EntityRowActions>
             </CellTemplate>
         </TemplateColumn>

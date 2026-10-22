@@ -34,11 +34,14 @@ Run tests:
 dotnet test TacticalHeroes.Admin.slnx --configuration Release
 ```
 
-Run the admin application:
+Apply the [Admin migrations](#data-protection-keys), then run the application:
 
 ```bash
 dotnet run --project src/TacticalHeroes.Admin/TacticalHeroes.Admin.csproj --launch-profile https
 ```
+
+Local UI and login use `https://localhost:5173` with the dev API. Register
+this origin's `/oauth/callback` and `/oauth/logout-callback` in the API client.
 
 ## Repository Layout
 
@@ -60,6 +63,9 @@ existing API database, with migration history in `admin.__ef_migrations_history`
 Set `ConnectionStrings:PostgreSqlConnectionString` in configuration or override
 the local default through `ConnectionStrings__PostgreSqlConnectionString`.
 Development and production use separate databases.
+
+Local defaults target `tactical-heroes` on `localhost:5432`; override the
+connection string for other credentials.
 
 Local development requires PostgreSQL and the Admin migrations. The core migrator
 generates and applies migrations using `appsettings.Migrator.json`:
@@ -84,6 +90,11 @@ contracts with route templates and typed URL builders; components do not own
 raw internal route strings. Kiota client code is generated from
 `openapi/tactical-heroes.json` into the API project's intermediate output during
 the build and is not committed to the repository.
+
+Users support multiple roles and permission matrices. UI visibility follows
+permissions; the API enforces access independently. Apply the API's
+`RemoveNonPermissionClaims` migration (deletes non-permission claims) before
+deploying this frontend, then sign in again.
 
 The client shell and module RCLs follow Feature-Sliced Design. Each `Pages` slice
 owns its route, form models, validators, and API adapters. Create and update flows

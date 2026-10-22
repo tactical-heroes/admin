@@ -24,9 +24,15 @@ public abstract class UnitFormTestContext : BunitContext
 
     protected IRenderedComponent<MudPopoverProvider> Popovers { get; }
 
+    protected Bunit.TestDoubles.BunitAuthorizationContext Authorization { get; }
+
     protected UnitFormTestContext()
     {
         Services.AddMudServices();
+        Authorization = AddAuthorization();
+        Authorization.SetAuthorized("Administrator");
+        Authorization.SetClaims([.. Permissions.All.Select(permission =>
+            new System.Security.Claims.Claim("permission", permission))]);
         Services.AddTacticalHeroesApiClient(
             static _ => new Uri("https://api.example.test"),
             static _ => TimeSpan.FromSeconds(30));

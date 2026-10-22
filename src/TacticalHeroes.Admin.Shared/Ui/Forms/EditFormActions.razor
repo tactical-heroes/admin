@@ -4,9 +4,22 @@
                Disabled="Busy">
         Отмена
     </MudButton>
-    <AsyncActionButton Class="submit-action"
-                       Text="@ActionText"
-                       Busy="Busy"
-                       StartIcon="@ActionIcon"
-                       OnClick="OnSubmit" />
+    @if (Permission is null)
+    {
+        <AsyncActionButton Class="submit-action"
+                           Text="@ActionText"
+                           Busy="Busy"
+                           StartIcon="@ActionIcon"
+                           OnClick="OnSubmit" />
+    }
+    else
+    {
+        <PermissionView Permissions="[Permission]">
+            <AsyncActionButton Class="submit-action"
+                               Text="@ActionText"
+                               Busy="Busy"
+                               StartIcon="@ActionIcon"
+                               OnClick="OnSubmit" />
+        </PermissionView>
+    }
 </div>

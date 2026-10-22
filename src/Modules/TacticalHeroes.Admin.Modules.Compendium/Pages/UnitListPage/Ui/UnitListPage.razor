@@ -1,6 +1,6 @@
 @inherits MudPagedListComponentBase<UnitListItem>
 @attribute [Route(CompendiumRoutes.Units)]
-@attribute [Authorize]
+@attribute [Authorize(Policy = Permissions.Units.Read)]
 @attribute [StreamRendering]
 
 @using TacticalHeroes.Admin.Modules.Compendium.Pages.UnitListPage.Model
@@ -10,12 +10,14 @@
 <PageHeader Title="Юниты"
             Subtitle="Управление игровыми юнитами и их фракциями">
     <Actions>
-        <MudButton Href="@CompendiumRoutes.CreateUnit"
-                   Variant="Variant.Filled"
-                   Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.Add">
-            Добавить юнита
-        </MudButton>
+        <PermissionView Permissions="[Permissions.Units.Create]">
+            <MudButton Href="@CompendiumRoutes.CreateUnit"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add">
+                Добавить юнита
+            </MudButton>
+        </PermissionView>
     </Actions>
 </PageHeader>
 
@@ -51,21 +53,25 @@
         <TemplateColumn T="UnitListItem" Title="Действия" Sortable="false" HeaderClass="actions-column" CellClass="actions-column">
             <CellTemplate>
                 <EntityRowActions>
-                    <MudIconButton Icon="@Icons.Material.Outlined.Edit"
-                                   Href="@CompendiumRoutes.Unit(context.Item.Id)"
-                                   Color="Color.Primary"
-                                   Size="Size.Small"
-                                   Disabled="IsLoading"
-                                   aria-label="Редактировать юнита" />
-                    <EntityDeleteButton TKey="Guid"
-                                        EntityId="context.Item.Id"
-                                        EntityType="юнита"
-                                        EntityName="@context.Item.Name"
-                                        DeleteLabel="Удалить юнита"
-                                        SuccessMessage="Юнит удалён"
-                                        DeleteAsync="DeleteUnitAsync"
-                                        OnDeleted="OnItemRemovedAsync"
-                                        Disabled="IsLoading" />
+                    <PermissionView Permissions="[Permissions.Units.Read]">
+                        <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                                       Href="@CompendiumRoutes.Unit(context.Item.Id)"
+                                       Color="Color.Primary"
+                                       Size="Size.Small"
+                                       Disabled="IsLoading"
+                                       aria-label="Редактировать юнита" />
+                    </PermissionView>
+                    <PermissionView Permissions="[Permissions.Units.Delete]">
+                        <EntityDeleteButton TKey="Guid"
+                                            EntityId="context.Item.Id"
+                                            EntityType="юнита"
+                                            EntityName="@context.Item.Name"
+                                            DeleteLabel="Удалить юнита"
+                                            SuccessMessage="Юнит удалён"
+                                            DeleteAsync="DeleteUnitAsync"
+                                            OnDeleted="OnItemRemovedAsync"
+                                            Disabled="IsLoading" />
+                    </PermissionView>
                 </EntityRowActions>
             </CellTemplate>
         </TemplateColumn>

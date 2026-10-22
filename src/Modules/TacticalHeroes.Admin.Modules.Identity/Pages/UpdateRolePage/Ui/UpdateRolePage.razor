@@ -1,6 +1,6 @@
 @inherits MudUpdateFormComponentBase<UpdateRoleFormModel, UpdateRoleFormModelValidator>
 @attribute [Route(IdentityRoutes.RoleTemplate)]
-@attribute [Authorize]
+@attribute [Authorize(Policy = Permissions.Roles.Read)]
 @attribute [StreamRendering]
 
 @using TacticalHeroes.Admin.Modules.Identity.Entities.Claims.Ui
@@ -33,13 +33,20 @@
                               Error="@Errors.HasError(nameof(UpdateRoleFormModel.Name))"
                               ErrorText="@Errors.GetError(nameof(UpdateRoleFormModel.Name))"
                               MaxLength="128" />
+                <MudSwitch T="bool"
+                           @bind-Value="Model.IsDefault"
+                           Color="Color.Primary"
+                           Label="Назначать при регистрации" />
             </EditSection>
 
-            <EditSection Title="Доступ">
-                <ClaimsEditor Claims="Model.Claims" />
-            </EditSection>
+            <PermissionView Permissions="[Permissions.Roles.Update]">
+                <EditSection Title="Доступ">
+                    <ClaimsEditor Claims="Model.Claims" />
+                </EditSection>
+            </PermissionView>
 
             <EditFormActions CancelHref="@IdentityRoutes.Roles"
+                             Permission="@Permissions.Roles.Update"
                              Busy="IsSaving"
                              OnSubmit="SubmitAsync" />
         </MudForm>
