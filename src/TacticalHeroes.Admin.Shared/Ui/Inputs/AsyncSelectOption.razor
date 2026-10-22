@@ -7,125 +7,41 @@
                  OnRetry="LoadAsync"
                  LoadingHeight="56px">
     <ChildContent>
-        @if (MultiSelection)
+        <MudAutocomplete @ref="_autocomplete"
+                         T="TId"
+                         Value="@Value"
+                         ValueChanged="SetValueAsync"
+                         For="For"
+                         Label="@Label"
+                         Variant="Variant.Outlined"
+                         ToStringFunc="GetName"
+                         SearchFunc="SearchAsync"
+                         DebounceInterval="DebounceInterval"
+                         MinCharacters="0"
+                         HelperText="@(HelperText ?? $"Для поиска введите минимум {MinCharacters} символа")"
+                         MaxItems="MaxItems"
+                         MaxLength="MaxLength"
+                         Strict="false"
+                         Clearable="true"
+                         OnClearButtonClick="@(() => _autocomplete?.OpenMenuAsync() ?? Task.CompletedTask)"
+                         ResetValueOnEmptyText="true"
+                         ShowProgressIndicator="true"
+                         Error="Error"
+                         ErrorText="@ErrorText">
+            <NoItemsTemplate>
+                @if (SearchError is null && !IsSearchTooShort)
+                {
+                    <MudText Class="px-4 py-2">@EmptyText</MudText>
+                    @if (CreateHref is not null)
+                    {
+                        <MudLink Href="@CreateHref" Class="px-4">@CreateText</MudLink>
+                    }
+                }
+            </NoItemsTemplate>
+        </MudAutocomplete>
+        @if (SearchError is not null)
         {
-            <div class="multi-select-host">
-                <MudMenu FullWidth="true" RelativeWidth="DropdownWidth.Relative"
-                         PopoverClass="multi-select-popover" @bind-Open="IsMultiSelectOpen">
-                    <ActivatorContent Context="menu">
-                        <fieldset class="multi-select-field @(Error ? "multi-select-error" : null)"
-                                  aria-invalid="@Error.ToString().ToLowerInvariant()"
-                                  aria-describedby="@MultiSelectDescriptionId"
-                                  @onclick="menu.ToggleAsync">
-                            <legend>@Label</legend>
-                            <div class="multi-select-values" aria-live="polite">
-                                @if (SelectedIds.Count == 0)
-                                {
-                                    <span class="multi-select-placeholder">Выберите варианты</span>
-                                }
-                                @foreach (var id in SelectedIds.Take(ShowAllSelected ? SelectedIds.Count : 4))
-                                {
-                                    <span @key="id" class="multi-select-chip-host">
-                                        <MudChip T="TId" Value="id" Label="true"
-                                                 Color="@(IsMissing(id) ? Color.Warning : Color.Default)"
-                                                 Icon="@(IsMissing(id) ? Icons.Material.Outlined.WarningAmber : null)">
-                                            <span>@GetSelectedName(id)</span>
-                                            <span @onclick:stopPropagation @onkeydown:stopPropagation>
-                                                <MudIconButton Class="mud-chip-close-button" Size="Size.Small"
-                                                               Icon="@Icons.Material.Filled.Close"
-                                                               aria-label="@($"Снять: {GetSelectedName(id)}")"
-                                                               OnClick="@(() => RemoveValueAsync(id))" />
-                                            </span>
-                                        </MudChip>
-                                    </span>
-                                }
-                                @if (SelectedIds.Count > 4)
-                                {
-                                    <button type="button" class="multi-select-more"
-                                            @onclick="ToggleSelected" @onclick:stopPropagation @onkeydown:stopPropagation>
-                                        @(ShowAllSelected ? "Свернуть" : $"Ещё {SelectedIds.Count - 4}")
-                                    </button>
-                                }
-                            </div>
-                            <MudIcon Icon="@(IsMultiSelectOpen ? Icons.Material.Filled.ArrowDropUp : Icons.Material.Filled.ArrowDropDown)"
-                                     Class="multi-select-arrow" />
-                        </fieldset>
-                    </ActivatorContent>
-                    <ChildContent>
-                        <div class="multi-select-options">
-                            @if (OptionIds.Count == 0)
-                            {
-                                <MudText Class="px-4 py-2">@EmptyText</MudText>
-                            }
-                            @foreach (var id in OptionIds)
-                            {
-                                <MudMenuItem @key="id" AutoClose="false"
-                                             Icon="@(Values.Contains(id) ? Icons.Material.Filled.CheckBox : Icons.Material.Filled.CheckBoxOutlineBlank)"
-                                             IconColor="@(Values.Contains(id) ? Color.Primary : Color.Default)"
-                                             role="menuitemcheckbox" aria-checked="@Values.Contains(id).ToString().ToLowerInvariant()"
-                                             OnClick="@(() => ToggleValueAsync(id))">
-                                    <span class="multi-select-option-label">@GetSelectedName(id)</span>
-                                </MudMenuItem>
-                            }
-                        </div>
-                    </ChildContent>
-                </MudMenu>
-                <div id="@MultiSelectDescriptionId" class="multi-select-description">
-                    @if (Error && !string.IsNullOrWhiteSpace(ErrorText))
-                    {
-                        <MudText Typo="Typo.caption" Color="Color.Error" role="alert">@ErrorText</MudText>
-                    }
-                    else if (!string.IsNullOrWhiteSpace(HelperText))
-                    {
-                        <MudText Typo="Typo.caption">@HelperText</MudText>
-                    }
-                    @if (SelectedIds.Any(IsMissing))
-                    {
-                        <MudText Typo="Typo.caption" Color="Color.Warning">
-                            Недоступные варианты сохранены. Их можно снять вручную.
-                        </MudText>
-                    }
-                </div>
-            </div>
-        }
-        else
-        {
-            <MudAutocomplete @ref="_autocomplete"
-                             T="TId"
-                             Value="@Value"
-                             ValueChanged="SetValueAsync"
-                             For="For"
-                             Label="@Label"
-                             Variant="Variant.Outlined"
-                             ToStringFunc="GetName"
-                             SearchFunc="SearchAsync"
-                             DebounceInterval="DebounceInterval"
-                             MinCharacters="0"
-                             HelperText="@(HelperText ?? $"Для поиска введите минимум {MinCharacters} символа")"
-                             MaxItems="MaxItems"
-                             MaxLength="MaxLength"
-                             Strict="false"
-                             Clearable="true"
-                             OnClearButtonClick="@(() => _autocomplete?.OpenMenuAsync() ?? Task.CompletedTask)"
-                             ResetValueOnEmptyText="true"
-                             ShowProgressIndicator="true"
-                             Error="Error"
-                             ErrorText="@ErrorText">
-                <NoItemsTemplate>
-                    @if (SearchError is null && !IsSearchTooShort)
-                    {
-                        <MudText Class="px-4 py-2">@EmptyText</MudText>
-                        @if (CreateHref is not null)
-                        {
-                            <MudLink Href="@CreateHref" Class="px-4">@CreateText</MudLink>
-                        }
-                    }
-                </NoItemsTemplate>
-            </MudAutocomplete>
-            @if (SearchError is not null)
-            {
-                <MudAlert Severity="Severity.Error" Class="mt-2">@SearchError</MudAlert>
-            }
+            <MudAlert Severity="Severity.Error" Class="mt-2">@SearchError</MudAlert>
         }
     </ChildContent>
 </LoadableContent>

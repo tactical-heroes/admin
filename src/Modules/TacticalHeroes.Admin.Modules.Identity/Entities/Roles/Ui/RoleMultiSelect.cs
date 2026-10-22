@@ -4,8 +4,8 @@ using TacticalHeroes.Admin.Shared.Ui.Inputs;
 
 namespace TacticalHeroes.Admin.Modules.Identity.Entities.Roles.Ui;
 
-public sealed class RoleSelect(RoleOptionsApi api)
-    : AsyncSelectOption<Guid, RoleOption>(
+public sealed class RoleMultiSelect(RoleOptionsApi api)
+    : AsyncMultiSelectOption<Guid, RoleOption>(
         api.GetAllAsync,
         "Роли пользователя",
         "Роли не найдены.",

@@ -7,7 +7,7 @@ using TacticalHeroes.Admin.Modules.Identity.Entities.Roles.Ui;
 
 namespace TacticalHeroes.Admin.Modules.Identity.ComponentTests.Entities.Roles.Ui;
 
-public sealed class RoleSelectTests : IdentityCatalogTestContext
+public sealed class RoleMultiSelectTests : IdentityCatalogTestContext
 {
     [Fact(DisplayName = "OnParametersSetAsync should load complete catalog when many roles exist")]
     public async Task OnParametersSetAsync_Should_LoadCompleteCatalog_When_ManyRolesExist()
@@ -18,8 +18,7 @@ public sealed class RoleSelectTests : IdentityCatalogTestContext
             Name = $"Role {index:D3}"
         })];
         var lastRole = Handler.Roles[^1];
-        var component = Render<RoleSelect>(parameters => parameters
-            .Add(select => select.MultiSelection, true)
+        var component = Render<RoleMultiSelect>(parameters => parameters
             .Add(select => select.Values, [lastRole.Id]));
 
         await component.Find("fieldset").ClickAsync(new MouseEventArgs());
@@ -36,8 +35,7 @@ public sealed class RoleSelectTests : IdentityCatalogTestContext
     {
         Handler.Roles = [new RoleOption { Id = IdentityCatalogResponses.RoleId, Name = "Player", IsDefault = true }];
 
-        var component = Render<RoleSelect>(parameters => parameters
-            .Add(select => select.MultiSelection, true)
+        var component = Render<RoleMultiSelect>(parameters => parameters
             .Add(select => select.Values, [IdentityCatalogResponses.RoleId]));
 
         component.Find(".mud-chip-content").TextContent.Trim().ShouldBe("Player (по умолчанию)");
@@ -48,8 +46,7 @@ public sealed class RoleSelectTests : IdentityCatalogTestContext
     {
         Handler.Fail = true;
         List<Guid> roles = [IdentityCatalogResponses.RoleId];
-        var component = Render<RoleSelect>(parameters => parameters
-            .Add(select => select.MultiSelection, true)
+        var component = Render<RoleMultiSelect>(parameters => parameters
             .Add(select => select.Values, roles));
         component.WaitForElement(".mud-alert");
         roles.ShouldBe([IdentityCatalogResponses.RoleId]);
@@ -66,8 +63,7 @@ public sealed class RoleSelectTests : IdentityCatalogTestContext
     public async Task Render_Should_SelectAndDeselectRoles_When_OptionsAreToggled()
     {
         List<Guid> roles = [];
-        var component = Render<RoleSelect>(parameters => parameters
-            .Add(select => select.MultiSelection, true)
+        var component = Render<RoleMultiSelect>(parameters => parameters
             .Add(select => select.Values, roles)
             .Add(select => select.ValuesChanged, values => roles = values));
         await component.Find("fieldset").ClickAsync(new MouseEventArgs());
@@ -88,8 +84,7 @@ public sealed class RoleSelectTests : IdentityCatalogTestContext
     {
         Guid missingId = Guid.Parse("2994d18b-f957-4a09-a366-ac1606c31018");
         List<Guid> roles = [missingId];
-        var component = Render<RoleSelect>(parameters => parameters
-            .Add(select => select.MultiSelection, true)
+        var component = Render<RoleMultiSelect>(parameters => parameters
             .Add(select => select.Values, roles)
             .Add(select => select.ValuesChanged, values => roles = values));
         component.Find(".mud-chip-content").TextContent.ShouldContain("Недоступный вариант");

@@ -65,7 +65,7 @@ public sealed class CreateUserPageTests : BunitContext
         Guid[] roles = assignRole ? [IdentityCatalogResponses.RoleId] : [];
         if (assignRole)
         {
-            await component.InvokeAsync(() => component.FindComponent<RoleSelect>()
+            await component.InvokeAsync(() => component.FindComponent<RoleMultiSelect>()
                 .Instance.ValuesChanged.InvokeAsync([.. roles]));
         }
 
