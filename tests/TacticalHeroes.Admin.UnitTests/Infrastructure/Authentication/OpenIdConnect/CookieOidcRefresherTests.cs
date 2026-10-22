@@ -21,12 +21,14 @@ namespace TacticalHeroes.Admin.UnitTests.Infrastructure.Authentication.OpenIdCon
 
 public sealed class CookieOidcRefresherTests
 {
+    private const string SigningKeyText = "test-signing-key-for-session-refresh-32-bytes";
+
     [Theory(DisplayName = "Cookie refresh should update tokens and permissions when refresh is forced")]
     [InlineData(true)]
     [InlineData(false)]
     public async Task ValidateOrRefreshCookieAsync_Should_UpdateSession_When_RefreshIsForced(bool force)
     {
-        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("test-signing-key-for-session-refresh-32-bytes"));
+        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SigningKeyText));
         var handler = new TokenEndpointHandler(signingKey, HttpStatusCode.OK);
         using var httpClient = new HttpClient(handler);
         var (refresher, context) = CreateRefresh(httpClient, signingKey);
@@ -43,7 +45,7 @@ public sealed class CookieOidcRefresherTests
     [Fact(DisplayName = "Cookie refresh should reject principal when refresh fails")]
     public async Task ValidateOrRefreshCookieAsync_Should_RejectPrincipal_When_RefreshFails()
     {
-        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("test-signing-key-for-session-refresh-32-bytes"));
+        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SigningKeyText));
         using var httpClient = new HttpClient(new TokenEndpointHandler(signingKey, HttpStatusCode.BadRequest));
         var (refresher, context) = CreateRefresh(httpClient, signingKey);
 
@@ -53,20 +55,37 @@ public sealed class CookieOidcRefresherTests
         context.ShouldRenew.ShouldBeFalse();
     }
 
+    [Fact(DisplayName = "Cookie refresh should report configuration error when configuration manager is missing")]
+    public async Task ValidateOrRefreshCookieAsync_Should_ReportConfigurationError_When_ConfigurationManagerIsMissing()
+    {
+        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SigningKeyText));
+        var handler = new TokenEndpointHandler(signingKey, HttpStatusCode.OK);
+        using var httpClient = new HttpClient(handler);
+        var (refresher, context) = CreateRefresh(httpClient, signingKey, configureManager: false);
+
+        var exception = await Should.ThrowAsync<InvalidOperationException>(() =>
+            refresher.ValidateOrRefreshCookieAsync(context, "oidc", forceRefresh: true));
+
+        exception.Message.ShouldBe("The OIDC configuration manager is missing.");
+        handler.Calls.ShouldBe(0);
+    }
+
     private static (CookieOidcRefresher Refresher, CookieValidatePrincipalContext Context) CreateRefresh(
-        HttpClient httpClient, SecurityKey signingKey)
+        HttpClient httpClient, SecurityKey signingKey, bool configureManager = true)
     {
         var options = new OpenIdConnectOptions
         {
             ClientId = "admin",
             Backchannel = httpClient,
             TimeProvider = TimeProvider.System,
-            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(
-                new OpenIdConnectConfiguration
-                {
-                    Issuer = "https://identity.example.test",
-                    TokenEndpoint = "https://identity.example.test/connect/token"
-                }),
+            ConfigurationManager = configureManager
+                ? new StaticConfigurationManager<OpenIdConnectConfiguration>(
+                    new OpenIdConnectConfiguration
+                    {
+                        Issuer = "https://identity.example.test",
+                        TokenEndpoint = "https://identity.example.test/connect/token"
+                    })
+                : null,
             TokenValidationParameters = new TokenValidationParameters
             {
                 ValidAudience = "admin",
