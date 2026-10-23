@@ -1,0 +1,121 @@
+.multi-select-host ::deep .mud-menu {
+    width: 100%;
+}
+
+.multi-select-host ::deep .mud-menu-activator {
+    display: block;
+}
+
+.multi-select-field {
+    position: relative;
+    min-width: 0;
+    margin: 0;
+    padding: 4px 40px 12px 12px;
+    border: 1px solid var(--mud-palette-lines-inputs);
+    border-radius: var(--mud-default-borderradius);
+    cursor: pointer;
+}
+
+.multi-select-field legend {
+    padding: 0 4px;
+    color: var(--mud-palette-text-secondary);
+    font-size: 0.75rem;
+}
+
+.multi-select-host:focus-within .multi-select-field {
+    border-color: var(--mud-palette-primary);
+}
+
+.multi-select-field.multi-select-error {
+    border-color: var(--mud-palette-error);
+}
+
+.multi-select-values {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    min-height: 28px;
+}
+
+.multi-select-placeholder {
+    color: var(--mud-palette-text-secondary);
+}
+
+.multi-select-chip-host {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.multi-select-chip-host ::deep .mud-chip {
+    height: auto;
+    min-height: 32px;
+    max-width: 100%;
+    margin: 0;
+    padding-block: 4px;
+}
+
+.multi-select-chip-host ::deep .mud-chip-content {
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.multi-select-chip-host ::deep .mud-chip-content > span:first-child {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.multi-select-chip-host ::deep .mud-chip-content > span:last-child {
+    flex-shrink: 0;
+}
+
+.multi-select-more {
+    min-height: 32px;
+    padding: 4px 10px;
+    border: 0;
+    border-radius: var(--mud-default-borderradius);
+    background: var(--mud-palette-action-default-hover);
+    color: var(--mud-palette-primary);
+    font: inherit;
+    cursor: pointer;
+}
+
+.multi-select-field ::deep .multi-select-arrow {
+    position: absolute;
+    top: 6px;
+    right: 10px;
+    color: var(--mud-palette-text-secondary);
+}
+
+.multi-select-description {
+    margin: 4px 12px 0;
+    color: var(--mud-palette-text-secondary);
+}
+
+.multi-select-description ::deep .mud-typography {
+    display: block;
+}
+
+.multi-select-options {
+    max-height: min(300px, 45svh);
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-gutter: stable;
+}
+
+.multi-select-option-label {
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+    .multi-select-options {
+        max-height: min(240px, 40svh);
+    }
+
+    .multi-select-chip-host ::deep .mud-chip {
+        min-height: 40px;
+    }
+}

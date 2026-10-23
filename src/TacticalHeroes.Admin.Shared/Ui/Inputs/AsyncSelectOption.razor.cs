@@ -54,15 +54,6 @@ public abstract partial class AsyncSelectOption<TId, TOption>(
     public EventCallback<TId> ValueChanged { get; set; }
 
     [Parameter]
-    public bool MultiSelection { get; set; }
-
-    [Parameter]
-    public List<TId> Values { get; set; } = [];
-
-    [Parameter]
-    public EventCallback<List<TId>> ValuesChanged { get; set; }
-
-    [Parameter]
     public Expression<Func<TId>>? For { get; set; }
 
     [Parameter]
@@ -76,9 +67,6 @@ public abstract partial class AsyncSelectOption<TId, TOption>(
 
     [PersistentState(AllowUpdates = true)]
     public TOption? SelectedOption { get; set; }
-
-    [PersistentState(AllowUpdates = true)]
-    public List<TOption>? Items { get; set; }
 
     private IReadOnlyList<TOption> Options { get; set; } = [];
 
@@ -94,16 +82,6 @@ public abstract partial class AsyncSelectOption<TId, TOption>(
 
     protected override async Task OnParametersSetAsync()
     {
-        if (MultiSelection)
-        {
-            if (Items is null && !IsLoading && LoadError is null)
-            {
-                await LoadAsync();
-            }
-
-            return;
-        }
-
         if (!EqualityComparer<TId>.Default.Equals(Value, default) &&
             !EqualityComparer<TId>.Default.Equals(LoadedValue, Value) &&
             (SelectedOption is null || !EqualityComparer<TId>.Default.Equals(SelectedOption.Id, Value)))
@@ -123,7 +101,7 @@ public abstract partial class AsyncSelectOption<TId, TOption>(
         try
         {
             var result = await loadAsync(null, MaxItems, LifetimeToken);
-            if (loadVersion != _loadVersion || (!MultiSelection && !EqualityComparer<TId>.Default.Equals(Value, value)))
+            if (loadVersion != _loadVersion || !EqualityComparer<TId>.Default.Equals(Value, value))
             {
                 return;
             }
@@ -134,15 +112,8 @@ public abstract partial class AsyncSelectOption<TId, TOption>(
                 return;
             }
 
-            if (MultiSelection)
-            {
-                Items = [.. result.Value];
-            }
-            else
-            {
-                Options = result.Value;
-                SelectedOption = Options.FirstOrDefault(option => EqualityComparer<TId>.Default.Equals(option.Id, value));
-            }
+            Options = result.Value;
+            SelectedOption = Options.FirstOrDefault(option => EqualityComparer<TId>.Default.Equals(option.Id, value));
         }
         finally
         {
@@ -192,18 +163,6 @@ public abstract partial class AsyncSelectOption<TId, TOption>(
     }
 
     protected virtual string GetOptionName(TOption option) => option.Name;
-
-    private string GetSelectedName(TId id)
-    {
-        var option = Items?.FirstOrDefault(option => EqualityComparer<TId>.Default.Equals(option.Id, id));
-        return option is null ? $"Недоступный вариант ({id})" : GetOptionName(option);
-    }
-
-    private async Task SetValuesAsync(IEnumerable<TId>? values)
-    {
-        Values = values is null ? [] : [.. values.Distinct()];
-        await ValuesChanged.InvokeAsync(Values);
-    }
 
     private static Func<string?, int, CancellationToken, Task<Result<IReadOnlyList<TOption>>>> CreateLocalSearch(
         Func<CancellationToken, Task<Result<IReadOnlyList<TOption>>>> loadAllAsync)
