@@ -47,7 +47,8 @@ public sealed class ProxySessionRefreshTests
         backend.Urls.Add("http://127.0.0.1:0");
         backend.MapGet("/api/v1/probe", (HttpContext context) => Results.Text(
             context.Request.Headers.Authorization.ToString()));
-        backend.MapMethods("/api/v1/{**remainder}", ["GET", "POST"], () => Results.StatusCode(status));
+        backend.MapMethods("/api/v1/auth/change-password", ["GET", "POST"], () => Results.StatusCode(status));
+        backend.MapPost("/api/v1/users", () => Results.StatusCode(status));
         await backend.StartAsync(ct);
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("proxy-session-refresh-test-key-32-bytes"));
         using var tokenHandler = new TokenEndpointHandler(key, refreshFails);
