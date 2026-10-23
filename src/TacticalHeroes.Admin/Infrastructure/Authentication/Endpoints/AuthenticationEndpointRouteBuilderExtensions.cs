@@ -89,7 +89,8 @@ internal static class AuthenticationEndpointRouteBuilderExtensions
 
         endpoints.MapGet(
                 IdentityRoutes.AuthenticationRefresh,
-                () => TypedResults.LocalRedirect(AdminRoutes.Home))
+                (string? returnUrl) => TypedResults.LocalRedirect(
+                    returnUrl is not null && RedirectHttpResult.IsLocalUrl(returnUrl) ? returnUrl : AdminRoutes.Home))
             .RequireAuthorization();
 
         return endpoints;

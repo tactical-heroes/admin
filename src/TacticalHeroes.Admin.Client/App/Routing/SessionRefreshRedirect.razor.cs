@@ -9,7 +9,7 @@ namespace TacticalHeroes.Admin.Client.App.Routing;
 public sealed partial class SessionRefreshRedirect(SessionRefreshState refreshState, NavigationManager navigation)
     : IDisposable
 {
-    private bool _refreshStarted;
+    private string? _refreshUri;
 
     protected override void OnInitialized()
     {
@@ -38,8 +38,8 @@ public sealed partial class SessionRefreshRedirect(SessionRefreshState refreshSt
     private void HandleLocationChanging(LocationChangingContext context)
     {
         if (refreshState.IsRequired
-            && navigation.ToAbsoluteUri(context.TargetLocation)
-                != navigation.ToAbsoluteUri(IdentityRoutes.AuthenticationRefresh))
+            && (_refreshUri is null
+                || navigation.ToAbsoluteUri(context.TargetLocation) != navigation.ToAbsoluteUri(_refreshUri)))
         {
             context.PreventNavigation();
             RefreshSession();
@@ -48,12 +48,13 @@ public sealed partial class SessionRefreshRedirect(SessionRefreshState refreshSt
 
     private void RefreshSession()
     {
-        if (_refreshStarted)
+        if (_refreshUri is not null)
         {
             return;
         }
 
-        _refreshStarted = true;
-        navigation.NavigateTo(IdentityRoutes.AuthenticationRefresh, forceLoad: true, replace: true);
+        var currentUri = new Uri(navigation.Uri);
+        _refreshUri = IdentityRoutes.Refresh($"{currentUri.PathAndQuery}{currentUri.Fragment}");
+        navigation.NavigateTo(_refreshUri, forceLoad: true, replace: true);
     }
 }

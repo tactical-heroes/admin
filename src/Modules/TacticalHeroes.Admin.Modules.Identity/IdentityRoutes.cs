@@ -62,6 +62,11 @@ public static class IdentityRoutes
         return RouteUriBuilder.Build(AuthenticationChallenge, new { returnUrl });
     }
 
+    public static string Refresh(string returnUrl)
+    {
+        return RouteUriBuilder.Build(AuthenticationRefresh, new { returnUrl });
+    }
+
     public static string ConfirmEmailPage(Guid userId, string emailConfirmationToken)
     {
         return RouteUriBuilder.Build(

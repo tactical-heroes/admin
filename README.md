@@ -99,7 +99,9 @@ deploying this frontend, then sign in again.
 When a successful API response contains `X-Session-Refresh-Required: true`, the
 shared HTTP client signals the application shell to reload through
 `/authentication/refresh`. This refreshes OIDC tokens and the session cookie,
-then loads the home page with updated permissions. The same flow supports
+then returns to the current page, preserving its query string and fragment, with
+updated permissions. The refresh endpoint accepts only local return URLs and
+falls back to the home page for invalid or missing values. The same flow supports
 Interactive Server and WebAssembly without endpoint-specific checks in pages or
 the proxy. Deploy with the API's session-refresh response header change; the
 frontend adds no migrations or configuration settings. A rejected refresh ends

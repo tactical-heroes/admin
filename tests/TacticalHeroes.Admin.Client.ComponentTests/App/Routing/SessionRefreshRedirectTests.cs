@@ -11,9 +11,14 @@ namespace TacticalHeroes.Admin.Client.ComponentTests.App.Routing;
 
 public sealed class SessionRefreshRedirectTests : ClientComponentTestContext
 {
-    [Fact(DisplayName = "Render should refresh session when signal arrives")]
-    public async Task HandleRefreshRequested_Should_RefreshSession_When_SignalArrives()
+    [Theory(DisplayName = "Render should refresh session when signal arrives")]
+    [InlineData("/")]
+    [InlineData("/users/2f56eb88-8f57-47ef-884f-eae99d5f4ab8?tab=roles#permissions")]
+    [InlineData("/users?page=2&email=admin%40example.test#list")]
+    public async Task HandleRefreshRequested_Should_RefreshSession_When_SignalArrives(string currentPath)
     {
+        var navigation = (BunitNavigationManager)Services.GetRequiredService<NavigationManager>();
+        navigation.NavigateTo(currentPath);
         var component = Render<SessionRefreshRedirect>();
         var state = Services.GetRequiredService<SessionRefreshState>();
 
@@ -21,8 +26,9 @@ public sealed class SessionRefreshRedirectTests : ClientComponentTestContext
 
         component.WaitForAssertion(() =>
         {
-            var navigation = (BunitNavigationManager)Services.GetRequiredService<NavigationManager>();
-            navigation.Uri.ShouldEndWith(IdentityRoutes.AuthenticationRefresh);
+            var uri = new Uri(navigation.Uri);
+            uri.AbsolutePath.ShouldBe(IdentityRoutes.AuthenticationRefresh);
+            Uri.UnescapeDataString(uri.Query["?returnUrl=".Length..]).ShouldBe(currentPath);
             navigation.History.First().Options.ForceLoad.ShouldBeTrue();
         });
     }
@@ -34,15 +40,18 @@ public sealed class SessionRefreshRedirectTests : ClientComponentTestContext
 
         Render<SessionRefreshRedirect>();
 
-        Services.GetRequiredService<NavigationManager>().Uri.ShouldEndWith(IdentityRoutes.AuthenticationRefresh);
+        Services.GetRequiredService<NavigationManager>().Uri
+            .ShouldEndWith($"{IdentityRoutes.AuthenticationRefresh}?returnUrl=%2F");
     }
 
     [Fact(DisplayName = "NavigateTo should preserve refresh when save attempts normal navigation")]
     public async Task HandleLocationChanging_Should_PreserveRefresh_When_SaveAttemptsNormalNavigation()
     {
+        const string currentPath = "/users/2f56eb88-8f57-47ef-884f-eae99d5f4ab8?tab=roles#permissions";
+        var navigation = Services.GetRequiredService<NavigationManager>();
+        navigation.NavigateTo(currentPath);
         var component = Render<SessionRefreshRedirect>();
         var state = Services.GetRequiredService<SessionRefreshState>();
-        var navigation = Services.GetRequiredService<NavigationManager>();
 
         await component.InvokeAsync(() =>
         {
@@ -50,7 +59,12 @@ public sealed class SessionRefreshRedirectTests : ClientComponentTestContext
             navigation.NavigateTo(IdentityRoutes.Users);
         });
 
-        component.WaitForAssertion(() => navigation.Uri.ShouldEndWith(IdentityRoutes.AuthenticationRefresh));
+        component.WaitForAssertion(() =>
+        {
+            var uri = new Uri(navigation.Uri);
+            uri.AbsolutePath.ShouldBe(IdentityRoutes.AuthenticationRefresh);
+            Uri.UnescapeDataString(uri.Query["?returnUrl=".Length..]).ShouldBe(currentPath);
+        });
     }
 
     [Fact(DisplayName = "NavigateTo should keep normal navigation when refresh is not required")]
@@ -78,7 +92,7 @@ public sealed class SessionRefreshRedirectTests : ClientComponentTestContext
         });
 
         component.WaitForAssertion(() => navigation.History.ShouldHaveSingleItem()
-            .Uri.ShouldBe(IdentityRoutes.AuthenticationRefresh));
+            .Uri.ShouldBe($"{IdentityRoutes.AuthenticationRefresh}?returnUrl=%2F"));
     }
 
     [Fact(DisplayName = "Dispose should stop observing when component is disposed")]
