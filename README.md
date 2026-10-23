@@ -96,16 +96,9 @@ permissions; the API enforces access independently. Apply the API's
 `RemoveNonPermissionClaims` migration (deletes non-permission claims) before
 deploying this frontend, then sign in again.
 
-When a successful API response contains `X-Session-Refresh-Required: true`, the
-shared HTTP client signals the application shell to reload through
-`/authentication/refresh`. This refreshes OIDC tokens and the session cookie,
-then returns to the current page, preserving its query string and fragment, with
-updated permissions. The refresh endpoint accepts only local return URLs and
-falls back to the home page for invalid or missing values. The same flow supports
-Interactive Server and WebAssembly without endpoint-specific checks in pages or
-the proxy. Deploy with the API's session-refresh response header change; the
-frontend adds no migrations or configuration settings. A rejected refresh ends
-the unusable session.
+Successful API responses with `X-Session-Refresh-Required: true` trigger a session
+refresh and reload the current page, preserving its query string and fragment.
+Deploy the API's session-refresh header support before this frontend.
 
 The client shell and module RCLs follow Feature-Sliced Design. Each `Pages` slice
 owns its route, form models, validators, and API adapters. Create and update flows
