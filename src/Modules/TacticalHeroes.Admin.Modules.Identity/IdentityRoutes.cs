@@ -30,6 +30,8 @@ public static class IdentityRoutes
 
     public const string AuthenticationLogout = $"{Authentication}/logout";
 
+    public const string AuthenticationRefresh = $"{Authentication}/refresh";
+
     public static string Role(Guid id)
     {
         return $"{Roles}/{id:D}";
@@ -58,6 +60,11 @@ public static class IdentityRoutes
     public static string Challenge(string returnUrl = "/")
     {
         return RouteUriBuilder.Build(AuthenticationChallenge, new { returnUrl });
+    }
+
+    public static string Refresh(string returnUrl)
+    {
+        return RouteUriBuilder.Build(AuthenticationRefresh, new { returnUrl });
     }
 
     public static string ConfirmEmailPage(Guid userId, string emailConfirmationToken)

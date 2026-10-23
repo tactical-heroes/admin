@@ -1,8 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Http.Resilience;
+using Microsoft.Extensions.Options;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Http.HttpClientLibrary;
 
+using TacticalHeroes.Admin.Api.Authentication;
 using TacticalHeroes.Admin.Api.Generated;
 
 namespace TacticalHeroes.Admin.Api.DependencyInjection;
@@ -46,9 +49,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped(
             serviceProvider =>
             {
-                HttpClient httpClient = serviceProvider
-                    .GetRequiredService<IHttpClientFactory>()
-                    .CreateClient(ApiHttpClientName);
+                HttpClient httpClient = serviceProvider.GetRequiredKeyedService<HttpClient>(ApiHttpClientName);
                 IAuthenticationProvider authenticationProvider =
                     authenticationProviderFactory?.Invoke(serviceProvider) ??
                     new AnonymousAuthenticationProvider();
@@ -61,6 +62,25 @@ public static class ServiceCollectionExtensions
 
                 return new TacticalHeroesApiClient(requestAdapter);
             });
+
+        services.AddScoped<SessionRefreshState>();
+        services.AddKeyedScoped<HttpClient>(ApiHttpClientName, (serviceProvider, _) =>
+        {
+            var handler = new SessionRefreshHandler(serviceProvider.GetRequiredService<SessionRefreshState>())
+            {
+                InnerHandler = serviceProvider.GetRequiredService<IHttpMessageHandlerFactory>()
+                    .CreateHandler(ApiHttpClientName)
+            };
+            var client = new HttpClient(handler);
+            var options = serviceProvider.GetRequiredService<IOptionsMonitor<HttpClientFactoryOptions>>()
+                .Get(ApiHttpClientName);
+            foreach (var configure in options.HttpClientActions)
+            {
+                configure(client);
+            }
+
+            return client;
+        });
 
         return services;
     }

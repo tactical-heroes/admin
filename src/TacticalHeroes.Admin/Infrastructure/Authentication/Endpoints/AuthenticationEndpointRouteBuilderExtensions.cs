@@ -87,6 +87,12 @@ internal static class AuthenticationEndpointRouteBuilderExtensions
                     AuthenticationConstants.OpenIdConnectScheme,
                 ]));
 
+        endpoints.MapGet(
+                IdentityRoutes.AuthenticationRefresh,
+                (string? returnUrl) => TypedResults.LocalRedirect(
+                    returnUrl is not null && RedirectHttpResult.IsLocalUrl(returnUrl) ? returnUrl : AdminRoutes.Home))
+            .RequireAuthorization();
+
         return endpoints;
     }
 

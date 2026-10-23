@@ -96,6 +96,9 @@ permissions; the API enforces access independently. Apply the API's
 `RemoveNonPermissionClaims` migration (deletes non-permission claims) before
 deploying this frontend, then sign in again.
 
+Successful API responses with `X-Session-Refresh-Required: true` trigger a session
+refresh and reload the current page, preserving its query string and fragment.
+
 The client shell and module RCLs follow Feature-Sliced Design. Each `Pages` slice
 owns its route, form models, validators, and API adapters. Create and update flows
 use separate page slices; reusable domain controls belong in `Entities`.

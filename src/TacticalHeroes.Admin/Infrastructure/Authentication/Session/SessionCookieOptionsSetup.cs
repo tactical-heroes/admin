@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Options;
 
@@ -37,9 +38,16 @@ internal sealed class SessionCookieOptionsSetup(
         options.AccessDeniedPath = IdentityRoutes.Login;
         options.ExpireTimeSpan = settings.Lifetime;
         options.SlidingExpiration = true;
-        options.Events.OnValidatePrincipal = context =>
-            refresher.ValidateOrRefreshCookieAsync(
+        options.Events.OnValidatePrincipal = async context =>
+        {
+            await refresher.ValidateOrRefreshCookieAsync(
                 context,
-                AuthenticationConstants.OpenIdConnectScheme);
+                AuthenticationConstants.OpenIdConnectScheme,
+                forceRefresh: context.Request.Path == IdentityRoutes.AuthenticationRefresh);
+            if (context.Principal is null)
+            {
+                await context.HttpContext.SignOutAsync(AuthenticationConstants.SessionScheme);
+            }
+        };
     }
 }

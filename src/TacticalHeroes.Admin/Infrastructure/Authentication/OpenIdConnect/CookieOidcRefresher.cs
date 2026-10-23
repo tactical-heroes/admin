@@ -28,27 +28,29 @@ internal sealed class CookieOidcRefresher(
 
     internal async Task ValidateOrRefreshCookieAsync(
         CookieValidatePrincipalContext context,
-        string oidcScheme)
+        string oidcScheme,
+        bool forceRefresh = false)
     {
-        var expiresAtText = context.Properties.GetTokenValue(ExpiresAtTokenName);
-        if (!DateTimeOffset.TryParseExact(
-                expiresAtText,
-                RoundtripDateTimeFormat,
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.None,
-                out var expiresAt))
-        {
-            return;
-        }
-
         var options = oidcOptionsMonitor.Get(oidcScheme);
         var now = options.TimeProvider!.GetUtcNow();
-        if (now + configuredOptions.Value.RefreshBeforeExpiration < expiresAt)
+        if (!forceRefresh)
         {
-            return;
+            var expiresAtText = context.Properties.GetTokenValue(ExpiresAtTokenName);
+            if (!DateTimeOffset.TryParseExact(
+                    expiresAtText,
+                    RoundtripDateTimeFormat,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out var expiresAt)
+                || now + configuredOptions.Value.RefreshBeforeExpiration < expiresAt)
+            {
+                return;
+            }
         }
 
-        var configuration = await options.ConfigurationManager!.GetConfigurationAsync(
+        var configurationManager = options.ConfigurationManager ??
+            throw new InvalidOperationException("The OIDC configuration manager is missing.");
+        var configuration = await configurationManager.GetConfigurationAsync(
             context.HttpContext.RequestAborted);
         var tokenEndpoint = configuration.TokenEndpoint ??
             throw new InvalidOperationException("The OIDC token endpoint is missing.");
@@ -90,7 +92,7 @@ internal sealed class CookieOidcRefresher(
         var message = new OpenIdConnectMessage(responseJson);
         var validationParameters = options.TokenValidationParameters.Clone();
 
-        if (options.ConfigurationManager is BaseConfigurationManager baseConfigurationManager)
+        if (configurationManager is BaseConfigurationManager baseConfigurationManager)
         {
             validationParameters.ConfigurationManager = baseConfigurationManager;
         }
