@@ -7,7 +7,6 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 using TacticalHeroes.Admin.Infrastructure.Authentication;
 using TacticalHeroes.Admin.Infrastructure.Proxy.Configuration;
-using TacticalHeroes.Admin.Infrastructure.Proxy.Transforms;
 using TacticalHeroes.Admin.Modules.Identity;
 
 using Yarp.ReverseProxy.Transforms;
@@ -81,8 +80,6 @@ internal static class ProxyServiceCollectionExtensions
                                 accessToken);
                     }
                 });
-
-                context.ResponseTransforms.Add(new PasswordChangeSessionRefreshTransform());
             });
 
         return services;

@@ -52,22 +52,6 @@ public sealed class MudFormComponentBaseTests : BunitContext
         navigation.Uri.ShouldBe(fails ? originalUri : $"http://localhost/saved/{savedId}");
     }
 
-    [Theory(DisplayName = "Navigation callback should run only after successful save when save completes")]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task NavigateAfterSaveAsync_Should_RunOnlyAfterSuccessfulSave_When_SaveCompletes(bool fails)
-    {
-        var component = CreateComponent();
-        var id = Guid.NewGuid();
-        var result = fails
-            ? Result.Failure<Guid>(Error.Failure("Save failed."))
-            : Result.Success(id);
-
-        await component.SubmitAsync(_ => Task.FromResult(result));
-
-        component.NavigatedIds.ShouldBe(fails ? [] : [id]);
-    }
-
     private TestComponent CreateComponent()
     {
         return new TestComponent(
@@ -86,17 +70,9 @@ public sealed class MudFormComponentBaseTests : BunitContext
 
         public CancellationToken Token => LifetimeToken;
 
-        public List<Guid> NavigatedIds { get; } = [];
-
         public new Task SubmitAsync(Func<CancellationToken, Task<Result<Guid>>> saveAsync)
         {
             return base.SubmitAsync(saveAsync);
-        }
-
-        protected override Task NavigateAfterSaveAsync(Guid id)
-        {
-            NavigatedIds.Add(id);
-            return base.NavigateAfterSaveAsync(id);
         }
     }
 

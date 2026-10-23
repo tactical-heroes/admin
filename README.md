@@ -96,18 +96,14 @@ permissions; the API enforces access independently. Apply the API's
 `RemoveNonPermissionClaims` migration (deletes non-permission claims) before
 deploying this frontend, then sign in again.
 
-After saving their own user, the administrator is redirected through
-`/authentication/refresh` to refresh the OIDC tokens and session cookie, then to
-the home page. This reloads permissions without another login when the API revokes
-old access tokens after a role assignment change. Other users' edits retain the
-usual navigation. Deploy with the API's role-assignment session invalidation change;
-the frontend adds no migrations or configuration settings.
-
-After a successful `POST /api/v1/auth/change-password` through the authenticated
-BFF proxy, the server refreshes the current OIDC tokens and renews the session
-cookie before returning the API's 204 response. Subsequent requests use the new
-access token without another login. Failed password changes do not refresh the
-session; a rejected refresh clears the unusable session cookie.
+When a successful API response contains `X-Session-Refresh-Required: true`, the
+shared HTTP client signals the application shell to reload through
+`/authentication/refresh`. This refreshes OIDC tokens and the session cookie,
+then loads the home page with updated permissions. The same flow supports
+Interactive Server and WebAssembly without endpoint-specific checks in pages or
+the proxy. Deploy with the API's session-refresh response header change; the
+frontend adds no migrations or configuration settings. A rejected refresh ends
+the unusable session.
 
 The client shell and module RCLs follow Feature-Sliced Design. Each `Pages` slice
 owns its route, form models, validators, and API adapters. Create and update flows

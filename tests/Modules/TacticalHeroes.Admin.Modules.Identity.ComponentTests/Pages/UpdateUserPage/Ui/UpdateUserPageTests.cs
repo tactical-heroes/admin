@@ -135,27 +135,6 @@ public sealed class UpdateUserPageTests : BunitContext
         });
     }
 
-    [Fact(DisplayName = "Submit should reload refreshed session when current user is saved")]
-    public void NavigateAfterSaveAsync_Should_RefreshSession_When_CurrentUserIsSaved()
-    {
-        _authorization.SetClaims(
-            [.. Permissions.All.Select(permission => new System.Security.Claims.Claim("permission", permission)),
-             new System.Security.Claims.Claim("sub", _userId.ToString())]);
-        var component = Render<UpdateUserPageComponent>(parameters => parameters.Add(page => page.Id, _userId));
-        component.WaitForElement(".permission-table");
-
-        component.Find(".submit-action").Click();
-
-        component.WaitForAssertion(() =>
-        {
-            _handler.PutCount.ShouldBe(1);
-            Services.GetRequiredService<NavigationManager>().Uri.ShouldEndWith(IdentityRoutes.AuthenticationRefresh);
-            Services.GetRequiredService<NavigationManager>()
-                .ShouldBeOfType<Bunit.TestDoubles.BunitNavigationManager>()
-                .History.First().Options.ForceLoad.ShouldBeTrue();
-        });
-    }
-
     [Fact(DisplayName = "Submit should display validation error when email is empty")]
     public void Submit_Should_DisplayValidationError_When_EmailIsEmpty()
     {

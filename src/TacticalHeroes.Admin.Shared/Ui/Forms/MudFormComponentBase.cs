@@ -22,8 +22,6 @@ public abstract class MudFormComponentBase<TModel, TValidator>(
 
     protected FormErrorState<TModel> Errors { get; } = new();
 
-    protected NavigationManager Navigation { get; } = navigation;
-
     protected bool IsSaving => IsSubmitting;
 
     protected Task SubmitAsync(
@@ -31,12 +29,6 @@ public abstract class MudFormComponentBase<TModel, TValidator>(
     {
         return base.SubmitAsync(
             cancellationToken => SaveAsync(saveAsync, cancellationToken));
-    }
-
-    protected virtual Task NavigateAfterSaveAsync(Guid id)
-    {
-        Navigation.NavigateTo(successRoute(id));
-        return Task.CompletedTask;
     }
 
     private async Task SaveAsync(
@@ -54,6 +46,6 @@ public abstract class MudFormComponentBase<TModel, TValidator>(
         }
 
         snackbar.Add(successMessage, Severity.Success);
-        await NavigateAfterSaveAsync(result.Value);
+        navigation.NavigateTo(successRoute(result.Value));
     }
 }
