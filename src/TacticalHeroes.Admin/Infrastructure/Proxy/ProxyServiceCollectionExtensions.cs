@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 using TacticalHeroes.Admin.Infrastructure.Authentication;
+using TacticalHeroes.Admin.Infrastructure.Authentication.Session;
 using TacticalHeroes.Admin.Infrastructure.Proxy.Configuration;
 using TacticalHeroes.Admin.Modules.Identity;
 
@@ -80,8 +81,22 @@ internal static class ProxyServiceCollectionExtensions
                                 accessToken);
                     }
                 });
+
+                context.AddResponseTransform(RefreshSessionAfterPasswordChangeAsync);
             });
 
         return services;
+    }
+
+    private static async ValueTask RefreshSessionAfterPasswordChangeAsync(ResponseTransformContext context)
+    {
+        if (context.ProxyResponse?.StatusCode == HttpStatusCode.NoContent
+            && HttpMethods.IsPost(context.HttpContext.Request.Method)
+            && context.HttpContext.Request.Path == "/api/v1/auth/change-password")
+        {
+            await context.HttpContext.RequestServices
+                .GetRequiredService<SessionCookieRefresher>()
+                .RefreshAsync(context.HttpContext);
+        }
     }
 }

@@ -103,6 +103,12 @@ old access tokens after a role assignment change. Other users' edits retain the
 usual navigation. Deploy with the API's role-assignment session invalidation change;
 the frontend adds no migrations or configuration settings.
 
+After a successful `POST /api/v1/auth/change-password` through the authenticated
+BFF proxy, the server refreshes the current OIDC tokens and renews the session
+cookie before returning the API's 204 response. Subsequent requests use the new
+access token without another login. Failed password changes do not refresh the
+session; a rejected refresh clears the unusable session cookie.
+
 The client shell and module RCLs follow Feature-Sliced Design. Each `Pages` slice
 owns its route, form models, validators, and API adapters. Create and update flows
 use separate page slices; reusable domain controls belong in `Entities`.
