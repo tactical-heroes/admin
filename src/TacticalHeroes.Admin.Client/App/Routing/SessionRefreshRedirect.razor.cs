@@ -6,7 +6,8 @@ using TacticalHeroes.Admin.Modules.Identity;
 
 namespace TacticalHeroes.Admin.Client.App.Routing;
 
-public partial class SessionRefreshRedirect(SessionRefreshState refreshState, NavigationManager navigation) : IDisposable
+public sealed partial class SessionRefreshRedirect(SessionRefreshState refreshState, NavigationManager navigation)
+    : IDisposable
 {
     private bool _refreshStarted;
 
