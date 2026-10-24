@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 
 using TacticalHeroes.Admin.Infrastructure.Authentication.OpenIdConnect;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Options.Session;
+using TacticalHeroes.Admin.Infrastructure.Observability;
 using TacticalHeroes.Admin.Modules.Identity;
 
 namespace TacticalHeroes.Admin.Infrastructure.Authentication.Session;
@@ -38,8 +39,22 @@ internal sealed class SessionCookieOptionsSetup(
         options.AccessDeniedPath = IdentityRoutes.Login;
         options.ExpireTimeSpan = settings.Lifetime;
         options.SlidingExpiration = true;
+        options.Events.OnCheckSlidingExpiration = context =>
+        {
+            if (BrowserTelemetryEndpoints.IsTelemetryRequest(context.Request))
+            {
+                context.ShouldRenew = false;
+            }
+
+            return Task.CompletedTask;
+        };
         options.Events.OnValidatePrincipal = async context =>
         {
+            if (BrowserTelemetryEndpoints.IsTelemetryRequest(context.Request))
+            {
+                return;
+            }
+
             await refresher.ValidateOrRefreshCookieAsync(
                 context,
                 AuthenticationConstants.OpenIdConnectScheme,

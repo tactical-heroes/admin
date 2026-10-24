@@ -147,3 +147,40 @@ runtime memory, GC, JIT, and HTTP metrics. Blazor circuit and component metrics
 are exported separately and need matching Grafana queries/panels. Compare a
 warmed-up process with connected and disconnected circuits when investigating
 memory; process memory growth is not a per-user allocation measurement.
+
+### WebAssembly telemetry through the BFF
+
+The WASM client uses `PANiXiDA.Core.Observability.WebAssembly` 1.1.0. Its
+`IHttpClientFactory` API clients create browser spans and forward trace context
+to the BFF. Published client metrics and `ILogger` records use the same OTLP
+pipeline. The client package does not bring server Npgsql instrumentation into
+the WASM runtime.
+
+Browser exports use same-origin POST requests to `/telemetry/v1/logs`,
+`/telemetry/v1/metrics`, and `/telemetry/v1/traces`. The BFF accepts authenticated
+session cookies, protobuf bodies up to 64 KiB, and at most 120 requests per
+minute per user (or per IP for unauthenticated requests). It rejects cross-origin
+browser exports, unsupported encodings and other signal paths. Cookie expiry is
+still enforced, but telemetry requests do not renew the cookie or refresh OIDC
+tokens. Exports before sign-in or after session expiry receive 401 and are dropped.
+
+The BFF forwards only the payload to the internal Collector's frontend receiver
+on port 4319; it does not forward browser cookies, Authorization, or client-supplied
+metadata headers. The BFF sets `X-Frontend-Service` and `X-Frontend-Environment`.
+The Collector overwrites the incoming resource identity from these headers,
+keeping browser data separate from server telemetry in the common backends.
+`BrowserTelemetry:CollectorEndpoint` configures the internal receiver, and
+`BrowserTelemetry:ServiceName` identifies the frontend. Helm sets separate
+`tactical-heroes-admin-client-development` and `tactical-heroes-admin-client-production`
+service names.
+
+The browser queue is bounded and delivery is best effort. A missing Collector
+must not block UI requests; offline data and records pending when a tab closes
+can be lost. This integration collects .NET telemetry, not arbitrary JavaScript
+console events or Web Vitals.
+
+Release dependencies: merge server observability PR #65, publish the Core
+WebAssembly package 1.1.0, and deploy the core-platform frontend receiver before
+merging/deploying this client change. For local validation before publication,
+pack the Core browser project with `-p:PackageVersion=1.1.0`, restore the admin
+against that local feed, then run the normal Release solution build and tests.

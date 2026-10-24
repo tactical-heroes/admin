@@ -15,6 +15,7 @@ using TacticalHeroes.Admin.Modules.Identity;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddAdminObservability();
+builder.Services.AddBrowserTelemetry(builder.Configuration);
 
 builder.Services.AddTacticalHeroesAdminClient(
     builder.Configuration,
@@ -46,6 +47,7 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 app.UseAntiforgery();
 
 app.MapStaticAssets().ShortCircuit();
@@ -53,6 +55,7 @@ app.MapHealthChecks("/health");
 app.MapReverseProxy()
     .WithMetadata(new SkipStatusCodePagesAttribute());
 app.MapAdminAuthentication();
+app.MapBrowserTelemetry();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
