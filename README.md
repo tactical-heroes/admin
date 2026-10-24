@@ -34,14 +34,6 @@ Run tests:
 dotnet test TacticalHeroes.Admin.slnx --configuration Release
 ```
 
-Session-monitor JavaScript tests use the built-in Node.js 24 test runner:
-
-```bash
-node --experimental-vm-modules --test tests/TacticalHeroes.Admin.ComponentTests/JavaScript/SessionMonitor.test.mjs
-```
-
-CI merges their coverage with the .NET report before running SonarQube.
-
 Apply the [Admin migrations](#data-protection-keys), then run the application:
 
 ```bash
@@ -106,12 +98,8 @@ deploying this frontend, then sign in again.
 
 Successful API responses with `X-Session-Refresh-Required: true` trigger a session
 refresh and reload the current page, preserving its query string and fragment.
-Authenticated clients also refresh after API `401` responses. Visible browser tabs
-check the session every 30 seconds and when focus returns. Revoked sessions require
-sign-in again; temporary identity-provider or network failures do not sign users out.
-Tabs also reload when the session's effective permissions change, including when
-another tab has already refreshed the shared cookie. Token renewal alone does not
-reload tabs with unchanged permissions.
+Authenticated clients also refresh after API `401` responses. Permission changes
+made in another session are detected on the next API request; there is no background polling.
 
 The client shell and module RCLs follow Feature-Sliced Design. Each `Pages` slice
 owns its route, form models, validators, and API adapters. Create and update flows

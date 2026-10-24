@@ -12,7 +12,6 @@ public sealed class AppTests : BunitContext
     [Fact(DisplayName = "Render should compose document when application is rendered")]
     public void Render_Should_ComposeDocument_When_ApplicationIsRendered()
     {
-        this.AddAuthorization();
         ComponentFactories.AddStub<Routes>();
         ComponentFactories.AddStub<HeadOutlet>();
         ComponentFactories.AddStub<ResourcePreloader>();

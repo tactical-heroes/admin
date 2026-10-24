@@ -19,7 +19,6 @@ internal static class AuthenticationServiceCollectionExtensions
     {
         services.AddAdminAuthenticationOptions(configuration);
         services.AddSingleton<CookieOidcRefresher>();
-        services.AddSingleton<SessionValidator>();
         services.AddSingleton<OpenIdConnectEndpointResolver>();
 
         services
