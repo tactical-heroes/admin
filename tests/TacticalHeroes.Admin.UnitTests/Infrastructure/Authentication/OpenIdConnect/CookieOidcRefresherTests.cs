@@ -107,7 +107,7 @@ public sealed class CookieOidcRefresherTests
         handler.Calls.ShouldBe(0);
     }
 
-    [Theory(DisplayName = "ValidatePrincipal should check access token only when HTML page is requested")]
+    [Theory(DisplayName = "ValidatePrincipal should check access token only when html page is requested")]
     [InlineData("GET", "/", "text/html", true)]
     [InlineData("GET", "/heroes", "text/html,application/xhtml+xml", true)]
     [InlineData("GET", "/", "TEXT/HTML", true)]
