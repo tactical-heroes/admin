@@ -107,6 +107,82 @@ public sealed class CookieOidcRefresherTests
         handler.Calls.ShouldBe(0);
     }
 
+    [Theory(DisplayName = "ValidatePrincipal should check access token only when HTML page is requested")]
+    [InlineData("GET", "/", "text/html", true)]
+    [InlineData("GET", "/heroes", "text/html,application/xhtml+xml", true)]
+    [InlineData("GET", "/", "TEXT/HTML", true)]
+    [InlineData("GET", "/", "application/json", false)]
+    [InlineData("GET", "/", "*/*", false)]
+    [InlineData("POST", "/", "text/html", false)]
+    [InlineData("GET", "/api/v1/heroes", "text/html", false)]
+    [InlineData("GET", "/connect/authorize", "text/html", false)]
+    [InlineData("GET", "/authentication/challenge", "text/html", false)]
+    [InlineData("GET", "/error", "text/html", false)]
+    public async Task ValidatePrincipal_Should_CheckAccessTokenOnly_When_HtmlPageIsRequested(
+        string method, string path, string accept, bool validate)
+    {
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SigningKeyText));
+        using var handler = new TokenEndpointHandler(key, HttpStatusCode.OK);
+        using var client = new HttpClient(handler);
+        var (refresher, context) = CreateRefresh(client, key);
+        var setup = new SessionCookieOptionsSetup(
+            Microsoft.Extensions.Options.Options.Create(new AdminSessionOptions
+            {
+                CookieName = "test.session",
+                Lifetime = TimeSpan.FromHours(1)
+            }), refresher);
+        setup.Configure(AuthenticationConstants.SessionScheme, context.Options);
+        context.Request.Method = method;
+        context.Request.Path = path;
+        context.Request.Headers.Accept = accept;
+
+        await context.Options.Events.OnValidatePrincipal(context);
+
+        handler.ValidationCalls.ShouldBe(validate ? 1 : 0);
+        handler.Calls.ShouldBe(0);
+        context.ShouldRenew.ShouldBeFalse();
+        context.Principal!.FindFirst("permission")!.Value.ShouldBe("old.permission");
+    }
+
+    [Theory(DisplayName = "Page validation should refresh revoked access when page is loaded")]
+    [InlineData(200, 200, false, false)]
+    [InlineData(401, 200, true, false)]
+    [InlineData(401, 400, false, false)]
+    [InlineData(503, 200, false, true)]
+    [InlineData(401, 429, false, true)]
+    [InlineData(401, 503, false, true)]
+    public async Task ValidateOrRefreshCookieAsync_Should_RefreshRevokedAccess_When_PageIsLoaded(
+        int accessStatus, int refreshStatus, bool renewed, bool unavailable)
+    {
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SigningKeyText));
+        using var handler = new TokenEndpointHandler(key, (HttpStatusCode)refreshStatus, (HttpStatusCode)accessStatus);
+        using var client = new HttpClient(handler);
+        var (refresher, context) = CreateRefresh(client, key);
+
+        if (unavailable)
+        {
+            await Should.ThrowAsync<HttpRequestException>(() =>
+                refresher.ValidateOrRefreshCookieAsync(context, "oidc", validateAccessToken: true));
+        }
+        else
+        {
+            await refresher.ValidateOrRefreshCookieAsync(context, "oidc", validateAccessToken: true);
+        }
+
+        handler.ValidationCalls.ShouldBe(1);
+        handler.Calls.ShouldBe(accessStatus == 401 ? 1 : 0);
+        context.ShouldRenew.ShouldBe(renewed);
+        if (refreshStatus == 400)
+        {
+            context.Principal.ShouldBeNull();
+        }
+        else
+        {
+            context.Principal!.FindFirst("permission")!.Value.ShouldBe(renewed ? "new.permission" : "old.permission");
+            context.Properties.GetTokenValue("access_token").ShouldBe(renewed ? "new-access" : "old-access");
+        }
+    }
+
     private static (CookieOidcRefresher Refresher, CookieValidatePrincipalContext Context) CreateRefresh(
         HttpClient httpClient, SecurityKey signingKey, bool configureManager = true)
     {
@@ -120,6 +196,7 @@ public sealed class CookieOidcRefresherTests
                     new OpenIdConnectConfiguration
                     {
                         Issuer = "https://identity.example.test",
+                        UserInfoEndpoint = "https://identity.example.test/connect/userinfo",
                         TokenEndpoint = "https://identity.example.test/connect/token"
                     })
                 : null,
@@ -160,12 +237,21 @@ public sealed class CookieOidcRefresherTests
         public IDisposable? OnChange(Action<OpenIdConnectOptions, string?> listener) => null;
     }
 
-    private sealed class TokenEndpointHandler(SecurityKey key, HttpStatusCode status) : HttpMessageHandler
+    private sealed class TokenEndpointHandler(
+        SecurityKey key, HttpStatusCode status, HttpStatusCode accessStatus = HttpStatusCode.OK) : HttpMessageHandler
     {
         internal int Calls { get; private set; }
+        internal int ValidationCalls { get; private set; }
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            if (request.RequestUri!.AbsolutePath == "/connect/userinfo")
+            {
+                ValidationCalls++;
+                request.Headers.Authorization!.ToString().ShouldBe("Bearer old-access");
+                return Task.FromResult(new HttpResponseMessage(accessStatus));
+            }
+
             Calls++;
             var idToken = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
             {

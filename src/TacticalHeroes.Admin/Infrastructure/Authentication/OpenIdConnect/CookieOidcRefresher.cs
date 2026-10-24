@@ -1,5 +1,7 @@
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 
 using Microsoft.AspNetCore.Authentication;
@@ -29,20 +31,22 @@ internal sealed class CookieOidcRefresher(
     internal async Task ValidateOrRefreshCookieAsync(
         CookieValidatePrincipalContext context,
         string oidcScheme,
-        bool forceRefresh = false)
+        bool forceRefresh = false,
+        bool validateAccessToken = false)
     {
         var options = oidcOptionsMonitor.Get(oidcScheme);
         var now = options.TimeProvider!.GetUtcNow();
         if (!forceRefresh)
         {
             var expiresAtText = context.Properties.GetTokenValue(ExpiresAtTokenName);
-            if (!DateTimeOffset.TryParseExact(
+            var refreshDue = DateTimeOffset.TryParseExact(
                     expiresAtText,
                     RoundtripDateTimeFormat,
                     CultureInfo.InvariantCulture,
                     DateTimeStyles.None,
                     out var expiresAt)
-                || now + configuredOptions.Value.RefreshBeforeExpiration < expiresAt)
+                && now + configuredOptions.Value.RefreshBeforeExpiration >= expiresAt;
+            if (!refreshDue && (!validateAccessToken || await IsAccessTokenValidAsync(context, options)))
             {
                 return;
             }
@@ -83,6 +87,11 @@ internal sealed class CookieOidcRefresher(
 
         if (!response.IsSuccessStatusCode)
         {
+            if (response.StatusCode == HttpStatusCode.TooManyRequests || (int)response.StatusCode >= 500)
+            {
+                response.EnsureSuccessStatusCode();
+            }
+
             context.RejectPrincipal();
             return;
         }
@@ -161,5 +170,33 @@ internal sealed class CookieOidcRefresher(
                     CultureInfo.InvariantCulture),
             },
         ]);
+    }
+
+    private static async Task<bool> IsAccessTokenValidAsync(
+        CookieValidatePrincipalContext context,
+        OpenIdConnectOptions options)
+    {
+        var accessToken = context.Properties.GetTokenValue(OpenIdConnectParameterNames.AccessToken);
+        if (string.IsNullOrWhiteSpace(accessToken))
+        {
+            return false;
+        }
+
+        var configurationManager = options.ConfigurationManager ??
+            throw new InvalidOperationException("The OIDC configuration manager is missing.");
+        var configuration = await configurationManager.GetConfigurationAsync(context.HttpContext.RequestAborted);
+        var endpoint = configuration.UserInfoEndpoint ??
+            throw new InvalidOperationException("The OIDC user info endpoint is missing.");
+        using var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
+        request.Headers.Authorization = new AuthenticationHeaderValue(AuthenticationConstants.BearerScheme, accessToken);
+        using var response = await options.Backchannel.SendAsync(
+            request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return false;
+        }
+
+        response.EnsureSuccessStatusCode();
+        return true;
     }
 }

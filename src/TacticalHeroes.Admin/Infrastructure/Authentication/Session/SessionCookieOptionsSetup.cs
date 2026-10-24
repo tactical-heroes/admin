@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Options;
 
+using TacticalHeroes.Admin.Client.App.Routing;
 using TacticalHeroes.Admin.Infrastructure.Authentication.OpenIdConnect;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Options.Session;
 using TacticalHeroes.Admin.Modules.Identity;
@@ -43,11 +44,21 @@ internal sealed class SessionCookieOptionsSetup(
             await refresher.ValidateOrRefreshCookieAsync(
                 context,
                 AuthenticationConstants.OpenIdConnectScheme,
-                forceRefresh: context.Request.Path == IdentityRoutes.AuthenticationRefresh);
+                forceRefresh: context.Request.Path == IdentityRoutes.AuthenticationRefresh,
+                validateAccessToken: IsPageRequest(context.Request));
             if (context.Principal is null)
             {
                 await context.HttpContext.SignOutAsync(AuthenticationConstants.SessionScheme);
             }
         };
     }
+
+    private static bool IsPageRequest(HttpRequest request) =>
+        HttpMethods.IsGet(request.Method)
+        && request.Path != AdminRoutes.Error
+        && !request.Path.StartsWithSegments("/api")
+        && !request.Path.StartsWithSegments("/connect")
+        && !request.Path.StartsWithSegments(IdentityRoutes.Authentication)
+        && request.GetTypedHeaders().Accept?.Any(value =>
+            string.Equals(value.MediaType.Value, "text/html", StringComparison.OrdinalIgnoreCase)) == true;
 }
