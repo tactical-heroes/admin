@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 
 using Microsoft.AspNetCore.Authentication;
@@ -83,6 +84,11 @@ internal sealed class CookieOidcRefresher(
 
         if (!response.IsSuccessStatusCode)
         {
+            if (response.StatusCode == HttpStatusCode.TooManyRequests || (int)response.StatusCode >= 500)
+            {
+                response.EnsureSuccessStatusCode();
+            }
+
             context.RejectPrincipal();
             return;
         }

@@ -32,4 +32,4 @@ async function checkSession() {
 setInterval(checkSession, 30000);
 document.addEventListener("visibilitychange", checkSession);
 window.addEventListener("focus", checkSession);
-void checkSession();
+await checkSession();

@@ -34,6 +34,14 @@ Run tests:
 dotnet test TacticalHeroes.Admin.slnx --configuration Release
 ```
 
+Session-monitor JavaScript tests use the built-in Node.js 24 test runner:
+
+```bash
+node --experimental-vm-modules --test tests/TacticalHeroes.Admin.ComponentTests/JavaScript/SessionMonitor.test.mjs
+```
+
+CI merges their coverage with the .NET report before running SonarQube.
+
 Apply the [Admin migrations](#data-protection-keys), then run the application:
 
 ```bash

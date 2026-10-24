@@ -20,11 +20,42 @@ jobs:
       registry-user: ${{ secrets.REGISTRY_USER }}
       registry-token: ${{ secrets.REGISTRY_TOKEN }}
 
-  sonar:
+  javascript:
     needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Test session monitor and collect coverage
+        run: |
+          mkdir -p tests-report/javascript
+          node --experimental-vm-modules --test --experimental-test-coverage \
+            --test-coverage-include=src/TacticalHeroes.Admin/Components/SessionMonitor.razor.js \
+            --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 \
+            --test-reporter=spec --test-reporter-destination=stdout \
+            --test-reporter=lcov --test-reporter-destination=tests-report/javascript/coverage.lcov \
+            tests/TacticalHeroes.Admin.ComponentTests/JavaScript/SessionMonitor.test.mjs
+      - uses: actions/download-artifact@v8
+        with:
+          name: dotnet-coverage-sonarqube
+          path: tests-report/sonar
+      - name: Merge JavaScript coverage into Sonar report
+        run: node tests/TacticalHeroes.Admin.ComponentTests/JavaScript/merge-coverage.mjs tests-report/javascript/coverage.lcov tests-report/sonar/SonarQube.xml
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dotnet-and-javascript-coverage-sonarqube
+          path: tests-report/sonar/SonarQube.xml
+
+  sonar:
+    needs: [ tests, javascript ]
     uses: PANiXiDA-Infrastructure/ci-cd/.github/workflows/dotnet-sonar.yml@main
     with:
       project-key: ${{ vars.SONAR_PROJECT_KEY }}
+      coverage-artifact: dotnet-and-javascript-coverage-sonarqube
     secrets:
       sonar-token: ${{ secrets.SONAR_TOKEN }}
       registry-user: ${{ secrets.REGISTRY_USER }}

@@ -107,6 +107,28 @@ public sealed class CookieOidcRefresherTests
         handler.Calls.ShouldBe(0);
     }
 
+    [Theory(DisplayName = "Cookie refresh should preserve principal when token endpoint is temporarily unavailable")]
+    [InlineData(HttpStatusCode.TooManyRequests)]
+    [InlineData(HttpStatusCode.InternalServerError)]
+    [InlineData(HttpStatusCode.ServiceUnavailable)]
+    public async Task ValidateOrRefreshCookieAsync_Should_PreservePrincipal_When_TokenEndpointIsTemporarilyUnavailable(
+        HttpStatusCode status)
+    {
+        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SigningKeyText));
+        using var httpClient = new HttpClient(new TokenEndpointHandler(signingKey, status));
+        var (refresher, context) = CreateRefresh(httpClient, signingKey);
+
+        var error = await Should.ThrowAsync<HttpRequestException>(() =>
+            refresher.ValidateOrRefreshCookieAsync(context, "oidc", forceRefresh: true));
+
+        error.StatusCode.ShouldBe(status);
+        context.Principal.ShouldNotBeNull();
+        context.Principal.FindFirst("permission")!.Value.ShouldBe("old.permission");
+        context.ShouldRenew.ShouldBeFalse();
+        context.Properties.GetTokenValue("access_token").ShouldBe("old-access");
+        context.Properties.GetTokenValue("refresh_token").ShouldBe("old-refresh");
+    }
+
     private static (CookieOidcRefresher Refresher, CookieValidatePrincipalContext Context) CreateRefresh(
         HttpClient httpClient, SecurityKey signingKey, bool configureManager = true)
     {
