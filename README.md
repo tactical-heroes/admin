@@ -125,7 +125,8 @@ referenced by the WebAssembly client. Helm values send telemetry to the platform
 collector and set separate service names for development and production:
 `tactical-heroes-admin-development` and `tactical-heroes-admin-production`.
 
-The host also collects the built-in .NET 10 Blazor meters:
+Core's `AddAspNetCoreInstrumentation()` already subscribes to the built-in .NET 10
+Blazor meters; the admin does not need to register them again:
 
 - `Microsoft.AspNetCore.Components`: navigation and event-handler duration.
 - `Microsoft.AspNetCore.Components.Lifecycle`: parameter updates and render batches.

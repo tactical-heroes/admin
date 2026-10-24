@@ -8,10 +8,6 @@ internal static class ObservabilityConfiguration
     {
         builder.AddObservability();
         builder.Services.AddOpenTelemetry()
-            .WithMetrics(metrics => metrics.AddMeter(
-                "Microsoft.AspNetCore.Components",
-                "Microsoft.AspNetCore.Components.Lifecycle",
-                "Microsoft.AspNetCore.Components.Server.Circuits"))
             .WithTracing(tracing => tracing.AddSource("Yarp.ReverseProxy"));
 
         return builder;
