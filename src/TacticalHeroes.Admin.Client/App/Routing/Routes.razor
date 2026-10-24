@@ -1,4 +1,8 @@
-<SessionRefreshRedirect />
+<AuthorizeView>
+    <Authorized>
+        <SessionRefreshRedirect />
+    </Authorized>
+</AuthorizeView>
 
 <Router AppAssembly="typeof(Program).Assembly"
         AdditionalAssemblies="AdminModules.Assemblies"

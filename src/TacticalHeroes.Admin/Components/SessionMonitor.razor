@@ -1,0 +1,13 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@using TacticalHeroes.Admin.Modules.Identity
+@using TacticalHeroes.Admin.Infrastructure.Authentication.Session
+
+<AuthorizeView Context="authentication">
+    <Authorized>
+        <script type="module"
+                src="@Assets["Components/SessionMonitor.razor.js"]"
+                data-session-url="@IdentityRoutes.AuthenticationSession"
+                data-session-version="@SessionPermissionsVersion.Create(authentication.User)"
+                data-refresh-url="@IdentityRoutes.AuthenticationRefresh"></script>
+    </Authorized>
+</AuthorizeView>

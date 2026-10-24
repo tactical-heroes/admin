@@ -32,6 +32,8 @@ public static class IdentityRoutes
 
     public const string AuthenticationRefresh = $"{Authentication}/refresh";
 
+    public const string AuthenticationSession = $"{Authentication}/session";
+
     public static string Role(Guid id)
     {
         return $"{Roles}/{id:D}";

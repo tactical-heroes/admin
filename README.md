@@ -98,6 +98,12 @@ deploying this frontend, then sign in again.
 
 Successful API responses with `X-Session-Refresh-Required: true` trigger a session
 refresh and reload the current page, preserving its query string and fragment.
+Authenticated clients also refresh after API `401` responses. Visible browser tabs
+check the session every 30 seconds and when focus returns. Revoked sessions require
+sign-in again; temporary identity-provider or network failures do not sign users out.
+Tabs also reload when the session's effective permissions change, including when
+another tab has already refreshed the shared cookie. Token renewal alone does not
+reload tabs with unchanged permissions.
 
 The client shell and module RCLs follow Feature-Sliced Design. Each `Pages` slice
 owns its route, form models, validators, and API adapters. Create and update flows

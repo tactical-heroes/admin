@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Endpoints;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Login;
 using TacticalHeroes.Admin.Infrastructure.Authentication.OpenIdConnect;
+using TacticalHeroes.Admin.Infrastructure.Authentication.Session;
 
 namespace TacticalHeroes.Admin.UnitTests.Infrastructure.Authentication.Endpoints;
 
@@ -38,6 +39,7 @@ public sealed class AuthenticationEndpointRouteBuilderExtensionsTests
         builder.Services.AddAuthorization();
         builder.Services.AddHttpClient<IdentityLoginGateway>();
         builder.Services.AddSingleton<OpenIdConnectEndpointResolver>();
+        builder.Services.AddSingleton<SessionValidator>();
         await using var app = builder.Build();
         app.Urls.Add("http://127.0.0.1:0");
         app.UseAuthentication();

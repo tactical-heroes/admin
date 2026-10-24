@@ -1,3 +1,5 @@
+using System.Net;
+
 namespace TacticalHeroes.Admin.Api.Authentication;
 
 internal sealed class SessionRefreshHandler(SessionRefreshState refreshState) : DelegatingHandler
@@ -7,9 +9,10 @@ internal sealed class SessionRefreshHandler(SessionRefreshState refreshState) : 
         CancellationToken cancellationToken)
     {
         var response = await base.SendAsync(request, cancellationToken);
-        if (response.IsSuccessStatusCode
+        var refreshRequested = response.IsSuccessStatusCode
             && response.Headers.TryGetValues(SessionRefreshState.HeaderName, out var values)
-            && values.Any(value => string.Equals(value, "true", StringComparison.OrdinalIgnoreCase)))
+            && values.Any(value => string.Equals(value, "true", StringComparison.OrdinalIgnoreCase));
+        if (response.StatusCode == HttpStatusCode.Unauthorized || refreshRequested)
         {
             refreshState.RequireRefresh();
         }

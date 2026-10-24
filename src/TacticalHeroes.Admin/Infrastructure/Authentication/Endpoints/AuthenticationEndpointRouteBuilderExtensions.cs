@@ -8,6 +8,7 @@ using Microsoft.Net.Http.Headers;
 using TacticalHeroes.Admin.Client.App.Routing;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Login;
 using TacticalHeroes.Admin.Infrastructure.Authentication.OpenIdConnect;
+using TacticalHeroes.Admin.Infrastructure.Authentication.Session;
 using TacticalHeroes.Admin.Modules.Identity;
 using TacticalHeroes.Admin.Modules.Identity.Entities.Authentication.Model;
 
@@ -92,6 +93,22 @@ internal static class AuthenticationEndpointRouteBuilderExtensions
                 (string? returnUrl) => TypedResults.LocalRedirect(
                     returnUrl is not null && RedirectHttpResult.IsLocalUrl(returnUrl) ? returnUrl : AdminRoutes.Home))
             .RequireAuthorization();
+
+        endpoints.MapGet(
+                IdentityRoutes.AuthenticationSession,
+                async (HttpContext context, SessionValidator validator, CancellationToken cancellationToken) =>
+                {
+                    context.Response.Headers.CacheControl = "no-store";
+                    var status = await validator.ValidateAsync(context, cancellationToken);
+                    if (status == HttpStatusCode.NoContent)
+                    {
+                        context.Response.Headers[SessionPermissionsVersion.HeaderName] = SessionPermissionsVersion.Create(context.User);
+                    }
+
+                    return TypedResults.StatusCode((int)status);
+                })
+            .AllowAnonymous()
+            .WithMetadata(new SkipStatusCodePagesAttribute());
 
         return endpoints;
     }
