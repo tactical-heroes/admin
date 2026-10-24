@@ -117,12 +117,32 @@ Razor markup, component code, and isolated styles are kept in `.razor`,
 the allowed FSD folders, dependency direction, module isolation, typed route
 state, and Razor file conventions.
 
-### Proxy trace context
+### Observability
 
-The admin host does not export distributed traces. YARP therefore passes incoming
-trace headers through unchanged instead of generating an unsampled parent span.
-Requests without trace context let the API start and sample its own trace, so
-Grafana's log-to-trace links work for requests made through the admin. An explicit
-upstream sampling decision is preserved. If tracing is added to the admin host,
-configure ASP.NET Core, HTTP client, and YARP instrumentation together before
-enabling the proxy's activity propagation.
+The server host uses `PANiXiDA.Core.Observability` to export .NET runtime and HTTP
+metrics, application logs, and distributed traces over OTLP. This package is not
+referenced by the WebAssembly client. Helm values send telemetry to the platform
+collector and set separate service names for development and production:
+`tactical-heroes-admin-development` and `tactical-heroes-admin-production`.
+
+The host also collects the built-in .NET 10 Blazor meters:
+
+- `Microsoft.AspNetCore.Components`: navigation and event-handler duration.
+- `Microsoft.AspNetCore.Components.Lifecycle`: parameter updates and render batches.
+- `Microsoft.AspNetCore.Components.Server.Circuits`: active circuits in memory,
+  connected circuits, and circuit lifetime. A circuit represents a browser tab,
+  not a unique user. These measurements cover server execution, not browser WASM.
+
+YARP participates in tracing alongside ASP.NET Core and HTTP client instrumentation.
+Proxied API requests retain the trace ID and upstream sampling decision while
+receiving a child span context, so the admin and API spans belong to one trace.
+
+For local collection, set `OTEL_SERVICE_NAME=tactical-heroes-admin-local` and
+`OTEL_EXPORTER_OTLP_ENDPOINT` to an accessible collector (the SDK default is
+`http://localhost:4317`). No collector credentials belong in source control.
+
+After deployment, select the admin service in Application Telemetry and inspect
+runtime memory, GC, JIT, and HTTP metrics. Blazor circuit and component metrics
+are exported separately and need matching Grafana queries/panels. Compare a
+warmed-up process with connected and disconnected circuits when investigating
+memory; process memory growth is not a per-user allocation measurement.
