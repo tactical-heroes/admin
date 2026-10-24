@@ -98,6 +98,8 @@ deploying this frontend, then sign in again.
 
 Successful API responses with `X-Session-Refresh-Required: true` trigger a session
 refresh and reload the current page, preserving its query string and fragment.
+Authenticated clients also refresh after API `401` responses. Permission changes
+made in another session are detected on the next API request; there is no background polling.
 
 The client shell and module RCLs follow Feature-Sliced Design. Each `Pages` slice
 owns its route, form models, validators, and API adapters. Create and update flows
