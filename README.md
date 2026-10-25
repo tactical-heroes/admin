@@ -150,10 +150,10 @@ memory; process memory growth is not a per-user allocation measurement.
 
 ### WebAssembly telemetry through the BFF
 
-The WASM client uses `PANiXiDA.Core.Observability.WebAssembly` 1.1.0. Its
-`IHttpClientFactory` API clients create browser spans and forward trace context
-to the BFF. Published client metrics and `ILogger` records use the same OTLP
-pipeline. The client package does not bring server Npgsql instrumentation into
+The WASM client uses `PANiXiDA.Core.Observability.WebAssembly` 1.1.0. Its API clients
+use the standard .NET HTTP instrumentation to create browser spans and forward
+trace context to the BFF. Published client metrics and `ILogger` records use the
+same OTLP pipeline. The client package does not bring server Npgsql instrumentation into
 the WASM runtime.
 
 Browser exports use same-origin POST requests to `/telemetry/v1/logs`,
@@ -174,13 +174,19 @@ keeping browser data separate from server telemetry in the common backends.
 `tactical-heroes-admin-client-development` and `tactical-heroes-admin-client-production`
 service names.
 
-The browser queue is bounded and delivery is best effort. A missing Collector
-must not block UI requests; offline data and records pending when a tab closes
-can be lost. This integration collects .NET telemetry, not arbitrary JavaScript
-console events or Web Vitals.
+The client project explicitly enables `MetricsSupport`, `EventSourceSupport`, and
+`HttpActivityPropagationSupport`. The Core package does not inject build properties
+into consuming projects. OpenTelemetry 1.19.1 provides the standard HTTP
+instrumentation and OTLP export; no custom browser HTTP handler or transport is used.
+SDK log/trace queues are bounded and delivery is best effort. A missing Collector
+must not block UI requests; records pending when a tab closes can be lost.
+This integration collects .NET telemetry, not arbitrary JavaScript console events
+or Web Vitals. External API calls follow the runtime's trace propagation defaults
+and require compatible CORS policies.
 
 Release dependencies: merge server observability PR #65, publish the Core
 WebAssembly package 1.1.0, and deploy the core-platform frontend receiver before
 merging/deploying this client change. For local validation before publication,
-pack the Core browser project with `-p:PackageVersion=1.1.0`, restore the admin
-against that local feed, then run the normal Release solution build and tests.
+pack the Core browser project to a local feed, temporarily use its generated
+Nerdbank.GitVersioning package version in `Directory.Packages.props`, restore the
+admin against that feed, then run the normal Release solution build and tests.
