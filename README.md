@@ -100,6 +100,7 @@ Successful API responses with `X-Session-Refresh-Required: true` trigger a sessi
 refresh and reload the current page, preserving its query string and fragment.
 Authenticated clients also refresh after API `401` responses. HTML page loads,
 including F5, validate the access token through OIDC userinfo before rendering.
+Page requests are identified by Blazor endpoint metadata, without URL prefix checks.
 Revoked access tokens trigger a refresh that updates the session cookie and UI
 claims. API and OIDC protocol requests do not perform this additional check.
 There is no background polling. The API must preserve refresh tokens for normal

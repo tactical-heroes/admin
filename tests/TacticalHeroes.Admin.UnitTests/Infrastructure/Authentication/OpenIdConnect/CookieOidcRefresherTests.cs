@@ -7,6 +7,8 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Endpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -108,18 +110,21 @@ public sealed class CookieOidcRefresherTests
     }
 
     [Theory(DisplayName = "ValidatePrincipal should check access token only when html page is requested")]
-    [InlineData("GET", "/", "text/html", true)]
-    [InlineData("GET", "/heroes", "text/html,application/xhtml+xml", true)]
-    [InlineData("GET", "/", "TEXT/HTML", true)]
-    [InlineData("GET", "/", "application/json", false)]
-    [InlineData("GET", "/", "*/*", false)]
-    [InlineData("POST", "/", "text/html", false)]
-    [InlineData("GET", "/api/v1/heroes", "text/html", false)]
-    [InlineData("GET", "/connect/authorize", "text/html", false)]
-    [InlineData("GET", "/authentication/challenge", "text/html", false)]
-    [InlineData("GET", "/error", "text/html", false)]
+    [InlineData("GET", "/", "text/html", true, true)]
+    [InlineData("GET", "/heroes", "text/html,application/xhtml+xml", true, true)]
+    [InlineData("GET", "/", "TEXT/HTML", true, true)]
+    [InlineData("GET", "/", "application/json", true, false)]
+    [InlineData("GET", "/", "*/*", true, false)]
+    [InlineData("POST", "/", "text/html", true, false)]
+    [InlineData("GET", "/api/v1/heroes", "text/html", false, false)]
+    [InlineData("GET", "/connect/authorize", "text/html", false, false)]
+    [InlineData("GET", "/authentication/challenge", "text/html", false, false)]
+    [InlineData("GET", "/error", "text/html", true, false)]
+    [InlineData("GET", "/custom-endpoint", "text/html", false, false)]
+    [InlineData("GET", "/missing", "text/html", null, false)]
+    [InlineData("GET", "/api/component", "text/html", true, true)]
     public async Task ValidatePrincipal_Should_CheckAccessTokenOnly_When_HtmlPageIsRequested(
-        string method, string path, string accept, bool validate)
+        string method, string path, string accept, bool? componentEndpoint, bool validate)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SigningKeyText));
         using var handler = new TokenEndpointHandler(key, HttpStatusCode.OK);
@@ -135,6 +140,15 @@ public sealed class CookieOidcRefresherTests
         context.Request.Method = method;
         context.Request.Path = path;
         context.Request.Headers.Accept = accept;
+        if (componentEndpoint.HasValue)
+        {
+            context.HttpContext.SetEndpoint(new Endpoint(
+                null,
+                new EndpointMetadataCollection(componentEndpoint.Value
+                    ? [new ComponentTypeMetadata(typeof(ComponentBase))]
+                    : []),
+                "test-endpoint"));
+        }
 
         await context.Options.Events.OnValidatePrincipal(context);
 

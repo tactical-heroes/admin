@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Endpoints;
 using Microsoft.Extensions.Options;
 
 using TacticalHeroes.Admin.Client.App.Routing;
@@ -56,9 +57,7 @@ internal sealed class SessionCookieOptionsSetup(
     private static bool IsPageRequest(HttpRequest request) =>
         HttpMethods.IsGet(request.Method)
         && request.Path != AdminRoutes.Error
-        && !request.Path.StartsWithSegments("/api")
-        && !request.Path.StartsWithSegments("/connect")
-        && !request.Path.StartsWithSegments(IdentityRoutes.Authentication)
+        && request.HttpContext.GetEndpoint()?.Metadata.GetMetadata<ComponentTypeMetadata>() is not null
         && request.GetTypedHeaders().Accept?.Any(value =>
             string.Equals(value.MediaType.Value, "text/html", StringComparison.OrdinalIgnoreCase)) == true;
 }

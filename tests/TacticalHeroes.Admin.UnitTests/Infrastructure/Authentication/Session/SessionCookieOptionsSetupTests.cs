@@ -8,6 +8,8 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Endpoints;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -81,6 +83,7 @@ public sealed class SessionCookieOptionsSetupTests
         builder.Services.AddDataProtection().UseEphemeralDataProtectionProvider();
         await using var app = builder.Build();
         app.Urls.Add("http://127.0.0.1:0");
+        app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapGet(RefreshPath, () => Results.NoContent()).RequireAuthorization();
@@ -104,7 +107,8 @@ public sealed class SessionCookieOptionsSetupTests
         app.MapGet("/probe", async (HttpContext context) =>
             await context.Response.WriteAsJsonAsync(new SessionSnapshot(
                 await context.GetTokenAsync(AuthenticationConstants.SessionScheme, "access_token"),
-                context.User.FindFirst("permission")?.Value)));
+                context.User.FindFirst("permission")?.Value)))
+            .WithMetadata(new ComponentTypeMetadata(typeof(ComponentBase)));
         await app.StartAsync(ct);
         using var client = new HttpClient(new SocketsHttpHandler { AllowAutoRedirect = false })
         {
