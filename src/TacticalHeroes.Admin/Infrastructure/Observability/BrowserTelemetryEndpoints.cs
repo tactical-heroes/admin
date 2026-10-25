@@ -2,23 +2,29 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Threading.RateLimiting;
 
+using Microsoft.Extensions.Options;
+
 using OpenTelemetry;
+
+using TacticalHeroes.Admin.Infrastructure.Observability.Options.BrowserTelemetry;
 
 namespace TacticalHeroes.Admin.Infrastructure.Observability;
 
 internal static class BrowserTelemetryEndpoints
 {
     private const string ClientName = "BrowserTelemetryCollector";
-    private const int MaxBodyBytes = 64 * 1024;
 
     internal static bool IsTelemetryRequest(HttpRequest request) => request.Path.StartsWithSegments("/telemetry");
 
     internal static IServiceCollection AddBrowserTelemetry(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddSingleton<IValidateOptions<BrowserTelemetryOptions>, BrowserTelemetryOptionsValidator>();
+        services.AddOptions<BrowserTelemetryOptions>()
+            .Bind(configuration.GetSection(BrowserTelemetryOptions.SectionName))
+            .ValidateOnStart();
         services.AddHttpClient(ClientName, client =>
         {
-            client.BaseAddress = new Uri(configuration["BrowserTelemetry:CollectorEndpoint"] ??
-                "http://otel-collector.observability.svc.cluster.local:4319/");
+            client.BaseAddress = new Uri(configuration.GetRequiredSection("BrowserTelemetry:CollectorEndpoint").Value!);
             client.Timeout = TimeSpan.FromSeconds(5);
             client.DefaultRequestHeaders.Add("X-Frontend-Service", configuration["BrowserTelemetry:ServiceName"] ?? "tactical-heroes-admin-client");
             client.DefaultRequestHeaders.Add("X-Frontend-Environment", (configuration["ASPNETCORE_ENVIRONMENT"] ?? "Production").ToLowerInvariant());
@@ -50,9 +56,11 @@ internal static class BrowserTelemetryEndpoints
         return endpoints;
     }
 
-    private static async Task<IResult> ForwardAsync(string signal, HttpContext context, IHttpClientFactory clients)
+    private static async Task<IResult> ForwardAsync(string signal, HttpContext context, IHttpClientFactory clients,
+        IOptions<BrowserTelemetryOptions> options)
     {
-        if (ValidateRequest(signal, context) is { } rejection)
+        var maxBodyBytes = options.Value.MaxRequestBodySize;
+        if (ValidateRequest(signal, context, maxBodyBytes) is { } rejection)
         {
             return Results.StatusCode(rejection);
         }
@@ -62,7 +70,7 @@ internal static class BrowserTelemetryEndpoints
         int read;
         while ((read = await context.Request.Body.ReadAsync(buffer, context.RequestAborted)) != 0)
         {
-            if (body.Length + read > MaxBodyBytes)
+            if (body.Length + read > maxBodyBytes)
             {
                 return Results.StatusCode(StatusCodes.Status413PayloadTooLarge);
             }
@@ -91,7 +99,7 @@ internal static class BrowserTelemetryEndpoints
         }
     }
 
-    private static int? ValidateRequest(string signal, HttpContext context)
+    private static int? ValidateRequest(string signal, HttpContext context, int maxBodyBytes)
     {
         if (context.User.Identity?.IsAuthenticated != true)
         {
@@ -117,7 +125,7 @@ internal static class BrowserTelemetryEndpoints
             return StatusCodes.Status415UnsupportedMediaType;
         }
 
-        if (request.ContentLength is > MaxBodyBytes)
+        if (request.ContentLength is { } contentLength && contentLength > maxBodyBytes)
         {
             return StatusCodes.Status413PayloadTooLarge;
         }

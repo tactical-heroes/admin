@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using TacticalHeroes.Admin.Infrastructure.Observability;
 
@@ -14,6 +15,51 @@ namespace TacticalHeroes.Admin.UnitTests.Infrastructure.Observability;
 
 public sealed class BrowserTelemetryEndpointsTests
 {
+    [Theory(DisplayName = "Browser telemetry should enforce configured bytes when body limit is configured")]
+    [InlineData(1048576, 1048576, false, HttpStatusCode.OK)]
+    [InlineData(2097152, 1500000, false, HttpStatusCode.OK)]
+    [InlineData(2097152, 2097152, true, HttpStatusCode.OK)]
+    [InlineData(2097152, 2097153, false, HttpStatusCode.RequestEntityTooLarge)]
+    [InlineData(2097152, 2097153, true, HttpStatusCode.RequestEntityTooLarge)]
+    public async Task BrowserTelemetry_Should_EnforceConfiguredBytes_When_BodyLimitIsConfigured(
+        int limit, int size, bool chunked, HttpStatusCode expected)
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await using var fixture = await Fixture.StartAsync(cancellationToken, limit);
+        using var request = CreateRequest("logs", authenticated: true);
+        request.Content = chunked ? new ChunkedContent(size) : new ByteArrayContent(new byte[size]);
+        request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/x-protobuf");
+
+        using var response = await fixture.Client.SendAsync(request, cancellationToken);
+
+        response.StatusCode.ShouldBe(expected);
+        if (expected == HttpStatusCode.OK)
+        {
+            fixture.Received.ShouldHaveSingleItem().Body.Length.ShouldBe(size);
+        }
+        else
+        {
+            fixture.Received.ShouldBeEmpty();
+        }
+    }
+
+    [Theory(DisplayName = "Browser telemetry should reject startup when body limit is not positive")]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public async Task BrowserTelemetry_Should_RejectStartup_When_BodyLimitIsNotPositive(int limit)
+    {
+        var builder = WebApplication.CreateSlimBuilder();
+        builder.Logging.ClearProviders();
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["BrowserTelemetry:MaxRequestBodySize"] = limit.ToString(System.Globalization.CultureInfo.InvariantCulture)
+        });
+        builder.Services.AddBrowserTelemetry(builder.Configuration);
+        await using var app = builder.Build();
+
+        await Should.ThrowAsync<OptionsValidationException>(() => app.StartAsync(TestContext.Current.CancellationToken));
+    }
+
     [Theory(DisplayName = "Browser telemetry should forward only protobuf and server-owned identity when authenticated client exports")]
     [InlineData("logs")]
     [InlineData("metrics")]
@@ -43,7 +89,7 @@ public sealed class BrowserTelemetryEndpointsTests
     [InlineData(false, "logs", "application/x-protobuf", 3, false, HttpStatusCode.Unauthorized)]
     [InlineData(true, "unknown", "application/x-protobuf", 3, false, HttpStatusCode.NotFound)]
     [InlineData(true, "logs", "application/json", 3, false, HttpStatusCode.UnsupportedMediaType)]
-    [InlineData(true, "logs", "application/x-protobuf", 65537, false, HttpStatusCode.RequestEntityTooLarge)]
+    [InlineData(true, "logs", "application/x-protobuf", 1048577, false, HttpStatusCode.RequestEntityTooLarge)]
     [InlineData(true, "logs", "application/x-protobuf", 3, true, HttpStatusCode.Forbidden)]
     public async Task BrowserTelemetry_Should_RejectInvalidExports_When_AuthenticationOriginFormatOrSizeIsInvalid(
         bool authenticated, string signal, string contentType, int size, bool crossOrigin, HttpStatusCode expected)
@@ -70,7 +116,7 @@ public sealed class BrowserTelemetryEndpointsTests
         var cancellationToken = TestContext.Current.CancellationToken;
         await using var fixture = await Fixture.StartAsync(cancellationToken);
         using var request = CreateRequest("metrics", authenticated: true);
-        request.Content = new ChunkedContent();
+        request.Content = new ChunkedContent(1048577);
         request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/x-protobuf");
 
         using var response = await fixture.Client.SendAsync(request, cancellationToken);
@@ -120,7 +166,7 @@ public sealed class BrowserTelemetryEndpointsTests
         internal HttpClient Client => client;
         internal ConcurrentQueue<ReceivedExport> Received => received;
 
-        internal static async Task<Fixture> StartAsync(CancellationToken cancellationToken)
+        internal static async Task<Fixture> StartAsync(CancellationToken cancellationToken, int? bodyLimit = null)
         {
             var received = new ConcurrentQueue<ReceivedExport>();
             var backendBuilder = WebApplication.CreateSlimBuilder();
@@ -146,6 +192,10 @@ public sealed class BrowserTelemetryEndpointsTests
                 ["BrowserTelemetry:ServiceName"] = "tactical-heroes-admin-client-development",
                 ["ASPNETCORE_ENVIRONMENT"] = "Development"
             });
+            if (bodyLimit is { } limit)
+            {
+                builder.Configuration["BrowserTelemetry:MaxRequestBodySize"] = limit.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            }
             builder.Services.AddBrowserTelemetry(builder.Configuration);
             var bff = builder.Build();
             bff.Urls.Add("http://127.0.0.1:0");
@@ -173,9 +223,9 @@ public sealed class BrowserTelemetryEndpointsTests
         }
     }
 
-    private sealed class ChunkedContent : HttpContent
+    private sealed class ChunkedContent(int size) : HttpContent
     {
-        protected override Task SerializeToStreamAsync(Stream stream, TransportContext? context) => stream.WriteAsync(new byte[65537]).AsTask();
+        protected override Task SerializeToStreamAsync(Stream stream, TransportContext? context) => stream.WriteAsync(new byte[size]).AsTask();
 
         protected override bool TryComputeLength(out long length)
         {

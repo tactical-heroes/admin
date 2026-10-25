@@ -156,9 +156,12 @@ trace context to the BFF. Published client metrics and `ILogger` records use the
 same OTLP pipeline. The client package does not bring server Npgsql instrumentation into
 the WASM runtime.
 
+The public client `OTEL_EXPORTER_OTLP_ENDPOINT` is configured as `/telemetry`.
+Core resolves this path against the application's base address; no BFF URL is
+hardcoded in the library. Removing the endpoint disables client export.
 Browser exports use same-origin POST requests to `/telemetry/v1/logs`,
 `/telemetry/v1/metrics`, and `/telemetry/v1/traces`. The BFF accepts authenticated
-session cookies, protobuf bodies up to 64 KiB, and at most 120 requests per
+session cookies, protobuf bodies up to 1 MiB by default, and at most 120 requests per
 minute per user (or per IP for unauthenticated requests). It rejects cross-origin
 browser exports, unsupported encodings and other signal paths. Cookie expiry is
 still enforced, but telemetry requests do not renew the cookie or refresh OIDC
@@ -169,7 +172,7 @@ on port 4319; it does not forward browser cookies, Authorization, or client-supp
 metadata headers. The BFF sets `X-Frontend-Service` and `X-Frontend-Environment`.
 The Collector overwrites the incoming resource identity from these headers,
 keeping browser data separate from server telemetry in the common backends.
-`BrowserTelemetry:CollectorEndpoint` configures the internal receiver, and
+`BrowserTelemetry:CollectorEndpoint` in the host configuration sets the internal receiver, and
 `BrowserTelemetry:ServiceName` identifies the frontend. Helm sets separate
 `tactical-heroes-admin-client-development` and `tactical-heroes-admin-client-production`
 service names.
@@ -178,11 +181,23 @@ The client project explicitly enables `MetricsSupport`, `EventSourceSupport`, an
 `HttpActivityPropagationSupport`. The Core package does not inject build properties
 into consuming projects. OpenTelemetry 1.19.1 provides the standard HTTP
 instrumentation and OTLP export; no custom browser HTTP handler or transport is used.
-SDK log/trace queues are bounded and delivery is best effort. A missing Collector
+Blazor/HTTP sources, service instance grouping, batching and metric intervals
+follow the Microsoft client defaults. SDK queues are bounded and delivery is best effort. A missing Collector
 must not block UI requests; records pending when a tab closes can be lost.
 This integration collects .NET telemetry, not arbitrary JavaScript console events
 or Web Vitals. External API calls follow the runtime's trace propagation defaults
 and require compatible CORS policies.
+
+The body limit is configurable at every hop. Keep the client
+`OpenTelemetry:Otlp:MaxRequestSizeBytes` <= host `BrowserTelemetry:MaxRequestBodySize`
+<= Collector Helm value `observability.frontendTelemetry.maxRequestBodySize`.
+All three default to 1048576 bytes (1 MiB) for this deployment. Client configuration
+is served from `wwwroot/appsettings.json`; a host environment variable does not
+automatically change it. The host limit must be positive and is validated on startup;
+it can be overridden with `BrowserTelemetry__MaxRequestBodySize`. HTTP server and
+reverse-proxy limits also apply. The SDK supports a minimum of 750000 bytes, so the
+old 64 KiB receiver limit cannot be used with its request-size setting. Oversized
+batches are dropped by the SDK; oversized BFF requests receive 413 before forwarding.
 
 Release dependencies: merge server observability PR #65, publish the Core
 WebAssembly package 1.1.0, and deploy the core-platform frontend receiver before
