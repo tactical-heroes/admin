@@ -120,9 +120,9 @@ state, and Razor file conventions.
 ### Observability
 
 The server host uses `PANiXiDA.Core.Observability` to export .NET runtime and HTTP
-metrics, application logs, and distributed traces over OTLP. This package is not
-referenced by the WebAssembly client. Helm values send telemetry to the platform
-collector and set separate service names for development and production:
+metrics, application logs, and distributed traces over OTLP. The same NuGet package
+is referenced by the WebAssembly client with its browser extension. Helm values
+send telemetry to the platform collector and set separate service names for development and production:
 `tactical-heroes-admin-development` and `tactical-heroes-admin-production`.
 
 Core's `AddAspNetCoreInstrumentation()` already subscribes to the built-in .NET 10
@@ -150,11 +150,13 @@ memory; process memory growth is not a per-user allocation measurement.
 
 ### WebAssembly telemetry through the BFF
 
-The WASM client uses `PANiXiDA.Core.Observability.WebAssembly` 1.1.0. Its API clients
+The server and WASM client both use `PANiXiDA.Core.Observability` 1.1.0. Its API clients
 use the standard .NET HTTP instrumentation to create browser spans and forward
 trace context to the BFF. Published client metrics and `ILogger` records use the
-same OTLP pipeline. The client package does not bring server Npgsql instrumentation into
-the WASM runtime.
+same OTLP pipeline. Client registration does not enable server instrumentation.
+The shared package restores server dependencies too; Release trimming removes
+unreachable server code and reduces unused dependencies. Some small dependency
+assemblies can remain in the browser output.
 
 The public client `OTEL_EXPORTER_OTLP_ENDPOINT` is configured as `/telemetry`.
 Core resolves this path against the application's base address; no BFF URL is
@@ -178,8 +180,12 @@ keeping browser data separate from server telemetry in the common backends.
 service names.
 
 The client project explicitly enables `MetricsSupport`, `EventSourceSupport`, and
-`HttpActivityPropagationSupport`. The Core package does not inject build properties
-into consuming projects. OpenTelemetry 1.19.1 provides the standard HTTP
+`HttpActivityPropagationSupport`. For Blazor WebAssembly projects only, Core defaults
+the SDK's `DisableTransitiveFrameworkReferences` to `true`, preventing the server's
+transitive `Microsoft.AspNetCore.App` reference from requiring a browser runtime pack.
+This affects all transitive shared framework references in that client project;
+direct framework references and server projects are unchanged. An explicitly set
+property value is preserved. OpenTelemetry 1.19.1 provides the standard HTTP
 instrumentation and OTLP export; no custom browser HTTP handler or transport is used.
 Blazor/HTTP sources, service instance grouping, batching and metric intervals
 follow the Microsoft client defaults. SDK queues are bounded and delivery is best effort. A missing Collector
@@ -199,9 +205,9 @@ reverse-proxy limits also apply. The SDK supports a minimum of 750000 bytes, so 
 old 64 KiB receiver limit cannot be used with its request-size setting. Oversized
 batches are dropped by the SDK; oversized BFF requests receive 413 before forwarding.
 
-Release dependencies: merge server observability PR #65, publish the Core
-WebAssembly package 1.1.0, and deploy the core-platform frontend receiver before
+Release dependencies: merge server observability PR #65, publish the shared Core
+Observability package 1.1.0, and deploy the core-platform frontend receiver before
 merging/deploying this client change. For local validation before publication,
-pack the Core browser project to a local feed, temporarily use its generated
+pack the Core Observability project to a local feed, temporarily use its generated
 Nerdbank.GitVersioning package version in `Directory.Packages.props`, restore the
 admin against that feed, then run the normal Release solution build and tests.
