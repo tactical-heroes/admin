@@ -1,5 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
+  <Sdk Name="PANiXiDA.Core.Observability" />
+
   <PropertyGroup>
     <RequiresAspNetWebAssets>true</RequiresAspNetWebAssets>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
@@ -12,7 +14,6 @@
     <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
-    <PackageReference Include="PANiXiDA.Core.Observability" />
     <PackageReference Include="Yarp.ReverseProxy" />
     <ProjectReference Include="..\Modules\TacticalHeroes.Admin.Modules.Compendium\TacticalHeroes.Admin.Modules.Compendium.csproj" />
     <ProjectReference Include="..\Modules\TacticalHeroes.Admin.Modules.Identity\TacticalHeroes.Admin.Modules.Identity.csproj" />
