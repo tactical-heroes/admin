@@ -78,7 +78,7 @@ public sealed class BrowserTelemetryEndpointsTests
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         var received = fixture.Received.ShouldHaveSingleItem();
         received.Path.ShouldBe("/v1/" + signal);
-        received.Body.ShouldBe(new byte[] { 1, 2, 3 });
+        received.Body.ShouldBe([1, 2, 3]);
         received.Service.ShouldBe("tactical-heroes-admin-client-development");
         received.Environment.ShouldBe("development");
         received.Cookie.ShouldBeEmpty();
@@ -173,11 +173,11 @@ public sealed class BrowserTelemetryEndpointsTests
             backendBuilder.Logging.ClearProviders();
             var backend = backendBuilder.Build();
             backend.Urls.Add("http://127.0.0.1:0");
-            backend.MapPost("/v1/{signal}", async (HttpContext context) =>
+            backend.MapPost("/v1/{signal}", async (string signal, HttpContext context) =>
             {
                 await using var body = new MemoryStream();
                 await context.Request.Body.CopyToAsync(body, context.RequestAborted);
-                received.Enqueue(new ReceivedExport(context.Request.Path, body.ToArray(),
+                received.Enqueue(new ReceivedExport($"/v1/{signal}", body.ToArray(),
                     context.Request.Headers["X-Frontend-Service"].ToString(),
                     context.Request.Headers["X-Frontend-Environment"].ToString(),
                     context.Request.Headers.Cookie.ToString(), context.Request.Headers.Authorization.ToString()));
