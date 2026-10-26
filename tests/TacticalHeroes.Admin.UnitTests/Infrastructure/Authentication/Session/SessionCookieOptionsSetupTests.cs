@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
@@ -20,6 +21,8 @@ using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
+using PANiXiDA.Core.Observability;
+
 using TacticalHeroes.Admin.Infrastructure.Authentication;
 using TacticalHeroes.Admin.Infrastructure.Authentication.OpenIdConnect;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Options.OpenIdConnect;
@@ -31,6 +34,41 @@ namespace TacticalHeroes.Admin.UnitTests.Infrastructure.Authentication.Session;
 public sealed class SessionCookieOptionsSetupTests
 {
     private const string RefreshPath = "/authentication/refresh";
+
+    [Fact(DisplayName = "ValidatePrincipal should not renew the cookie or refresh tokens when telemetry is exported")]
+    public async Task ValidatePrincipal_Should_NotRenewCookieOrRefreshTokens_When_TelemetryIsExported()
+    {
+        var refresher = new CookieOidcRefresher(new FixedOptionsMonitor(new OpenIdConnectOptions()),
+            Microsoft.Extensions.Options.Options.Create(new AdminOpenIdConnectOptions()));
+        var setup = new SessionCookieOptionsSetup(
+            Microsoft.Extensions.Options.Options.Create(new AdminSessionOptions { CookieName = "test-session", Lifetime = TimeSpan.FromHours(1) }), refresher);
+        var options = new CookieAuthenticationOptions();
+        setup.Configure(AuthenticationConstants.SessionScheme, options);
+        var context = new DefaultHttpContext();
+        context.Request.Path = "/telemetry/v1/logs";
+        context.SetEndpoint(new Endpoint(_ => Task.CompletedTask, new EndpointMetadataCollection(BrowserTelemetryEndpointMetadata.Instance), "telemetry"));
+        var scheme = new AuthenticationScheme(AuthenticationConstants.SessionScheme, null, typeof(CookieAuthenticationHandler));
+        var properties = new AuthenticationProperties();
+        properties.StoreTokens([new AuthenticationToken
+        {
+            Name = "expires_at",
+            Value = DateTimeOffset.UtcNow.AddMinutes(-1).ToString("O", CultureInfo.InvariantCulture)
+        }]);
+        var ticket = new AuthenticationTicket(new ClaimsPrincipal(new ClaimsIdentity([new Claim("sub", "user")], "session")),
+            properties, AuthenticationConstants.SessionScheme);
+        var sliding = new CookieSlidingExpirationContext(context, scheme, options, ticket, TimeSpan.FromMinutes(40), TimeSpan.FromMinutes(20))
+        {
+            ShouldRenew = true
+        };
+        var validation = new CookieValidatePrincipalContext(context, scheme, options, ticket);
+
+        await options.Events.OnCheckSlidingExpiration(sliding);
+        await options.Events.OnValidatePrincipal(validation);
+
+        sliding.ShouldRenew.ShouldBeFalse();
+        validation.ShouldRenew.ShouldBeFalse();
+        validation.Principal.ShouldNotBeNull();
+    }
 
     [Theory(DisplayName = "ValidatePrincipal should renew or clear cookie when session is validated")]
     [InlineData(true, false, false)]

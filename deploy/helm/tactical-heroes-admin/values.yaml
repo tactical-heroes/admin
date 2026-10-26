@@ -30,6 +30,8 @@ env:
   values:
     ASPNETCORE_HTTP_PORTS: "8080"
     ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+    OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.observability.svc.cluster.local:4317
+    OTEL_EXPORTER_OTLP_PROTOCOL: grpc
 
 externalSecrets:
   enabled: true

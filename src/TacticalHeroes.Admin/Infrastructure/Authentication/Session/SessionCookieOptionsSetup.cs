@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Endpoints;
 using Microsoft.Extensions.Options;
 
+using PANiXiDA.Core.Observability;
+
 using TacticalHeroes.Admin.Client.App.Routing;
 using TacticalHeroes.Admin.Infrastructure.Authentication.OpenIdConnect;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Options.Session;
@@ -40,8 +42,22 @@ internal sealed class SessionCookieOptionsSetup(
         options.AccessDeniedPath = IdentityRoutes.Login;
         options.ExpireTimeSpan = settings.Lifetime;
         options.SlidingExpiration = true;
+        options.Events.OnCheckSlidingExpiration = context =>
+        {
+            if (context.Request.IsBrowserTelemetryRequest())
+            {
+                context.ShouldRenew = false;
+            }
+
+            return Task.CompletedTask;
+        };
         options.Events.OnValidatePrincipal = async context =>
         {
+            if (context.Request.IsBrowserTelemetryRequest())
+            {
+                return;
+            }
+
             await refresher.ValidateOrRefreshCookieAsync(
                 context,
                 AuthenticationConstants.OpenIdConnectScheme,

@@ -1,9 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
+	<Sdk Name="PANiXiDA.Core.Observability" />
+
 	<PropertyGroup>
 		<NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
 		<StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
 		<BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+		<MetricsSupport>true</MetricsSupport>
+		<EventSourceSupport>true</EventSourceSupport>
+		<HttpActivityPropagationSupport>true</HttpActivityPropagationSupport>
 	</PropertyGroup>
 
 	<ItemGroup>

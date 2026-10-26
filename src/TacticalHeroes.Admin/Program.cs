@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 
+using PANiXiDA.Core.Observability;
+
 using TacticalHeroes.Admin.Client.App.Composition;
 using TacticalHeroes.Admin.Client.App.Routing;
 using TacticalHeroes.Admin.Components;
@@ -12,6 +14,8 @@ using TacticalHeroes.Admin.Modules.Compendium;
 using TacticalHeroes.Admin.Modules.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddObservability();
 
 builder.Services.AddTacticalHeroesAdminClient(
     builder.Configuration,
@@ -50,6 +54,7 @@ app.MapHealthChecks("/health");
 app.MapReverseProxy()
     .WithMetadata(new SkipStatusCodePagesAttribute());
 app.MapAdminAuthentication();
+app.MapBrowserTelemetry();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()

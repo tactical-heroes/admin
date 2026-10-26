@@ -2,6 +2,9 @@ env:
   values:
     ASPNETCORE_ENVIRONMENT: Production
     DOTNET_ENVIRONMENT: Production
+    OTEL_SERVICE_NAME: tactical-heroes-admin-production
+    BrowserTelemetry__ServiceName: tactical-heroes-admin-client-production
+    OTEL_RESOURCE_ATTRIBUTES: deployment.environment=production,platform.name=core-platform
     TacticalHeroesApi__BaseUrl: https://api.tactical-heroes.panixida.ru
     Authentication__OpenIdConnect__Authority: https://api.tactical-heroes.panixida.ru
 
