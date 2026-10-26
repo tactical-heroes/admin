@@ -199,6 +199,7 @@ public sealed class BrowserTelemetryEndpointsTests
             builder.Services.AddBrowserTelemetry(builder.Configuration);
             var bff = builder.Build();
             bff.Urls.Add("http://127.0.0.1:0");
+            bff.UseStatusCodePagesWithReExecute("/status-code");
             bff.UseRouting();
             bff.Use(async (context, next) =>
             {
@@ -211,6 +212,7 @@ public sealed class BrowserTelemetryEndpointsTests
             });
             bff.UseRateLimiter();
             bff.MapBrowserTelemetry();
+            bff.MapMethods("/status-code", [HttpMethods.Get, HttpMethods.Post], () => Results.BadRequest());
             await bff.StartAsync(cancellationToken);
             return new Fixture(backend, bff, new HttpClient { BaseAddress = new Uri(bff.Urls.Single()) }, received);
         }
