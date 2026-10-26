@@ -150,7 +150,7 @@ memory; process memory growth is not a per-user allocation measurement.
 
 ### WebAssembly telemetry through the BFF
 
-The server and WASM client both use the `PANiXiDA.Core.Observability` 2.0.0 MSBuild SDK.
+The server and WASM client both use the `PANiXiDA.Core.Observability` 2.0.1 MSBuild SDK.
 Both `.csproj` files have `<Sdk Name="PANiXiDA.Core.Observability" />`, and the version
 is pinned once in `global.json` under `msbuild-sdks`. Its API clients
 use the standard .NET HTTP instrumentation to create browser spans and forward
@@ -204,10 +204,6 @@ reverse-proxy limits also apply. The SDK supports a minimum of 750000 bytes, so 
 old 64 KiB receiver limit cannot be used with its request-size setting. Oversized
 batches are dropped by the SDK; oversized BFF requests receive 413 before forwarding.
 
-Release dependencies: merge server observability PR #65, publish the shared Core
-Observability SDK package 2.0.0, and deploy the core-platform frontend receiver before
-merging/deploying this client change. For local validation before publication,
-pack the Core Observability project to a local feed, temporarily use its generated
-Nerdbank.GitVersioning package version under `msbuild-sdks` in `global.json`, and make
-that local feed available to the NuGet SDK resolver before evaluating the project.
-Then run the normal restore, Release solution build, tests, and host publish.
+The SDK is resolved from NuGet during project evaluation. Run the normal restore,
+Release solution build, tests, and host publish. The platform Collector must expose
+its frontend receiver on port 4319 before browser telemetry can be delivered.
