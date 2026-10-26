@@ -11,15 +11,17 @@ namespace TacticalHeroes.Admin.Api.UnitTests.Authentication;
 
 public sealed class SessionRefreshHandlerTests
 {
-    [Theory(DisplayName = "SendAsync should request refresh only when successful response contains refresh signal")]
+    [Theory(DisplayName = "SendAsync should request refresh when session is rejected or refresh signal is received")]
     [InlineData(204, "true", true)]
     [InlineData(200, "TRUE", true)]
     [InlineData(204, null, false)]
     [InlineData(204, "false", false)]
     [InlineData(400, "true", false)]
-    [InlineData(401, "true", false)]
+    [InlineData(401, "true", true)]
+    [InlineData(401, null, true)]
+    [InlineData(403, null, false)]
     [InlineData(500, "true", false)]
-    public async Task SendAsync_Should_RequestRefreshOnly_When_SuccessfulResponseContainsRefreshSignal(
+    public async Task SendAsync_Should_RequestRefresh_When_SessionIsRejectedOrRefreshSignalIsReceived(
         int statusCode, string? signal, bool expected)
     {
         await using var provider = CreateProvider((HttpStatusCode)statusCode, signal);

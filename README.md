@@ -98,6 +98,13 @@ deploying this frontend, then sign in again.
 
 Successful API responses with `X-Session-Refresh-Required: true` trigger a session
 refresh and reload the current page, preserving its query string and fragment.
+Authenticated clients also refresh after API `401` responses. HTML page loads,
+including F5, validate the access token through OIDC userinfo before rendering.
+Page requests are identified by Blazor endpoint metadata, without URL prefix checks.
+Revoked access tokens trigger a refresh that updates the session cookie and UI
+claims. API and OIDC protocol requests do not perform this additional check.
+There is no background polling. The API must preserve refresh tokens for normal
+permission changes; blocked users and revoked sessions must still fail refresh.
 
 The client shell and module RCLs follow Feature-Sliced Design. Each `Pages` slice
 owns its route, form models, validators, and API adapters. Create and update flows

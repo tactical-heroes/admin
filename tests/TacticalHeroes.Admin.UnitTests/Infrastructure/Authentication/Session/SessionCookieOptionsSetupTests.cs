@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Endpoints;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -68,12 +70,13 @@ public sealed class SessionCookieOptionsSetupTests
         validation.Principal.ShouldNotBeNull();
     }
 
-    [Theory(DisplayName = "ValidatePrincipal should renew or clear cookie when refresh endpoint is requested")]
-    [InlineData(true, false)]
-    [InlineData(true, true)]
-    [InlineData(false, false)]
-    public async Task ValidatePrincipal_Should_RenewOrClearCookie_When_RefreshEndpointIsRequested(
-        bool forceRefresh, bool refreshFails)
+    [Theory(DisplayName = "ValidatePrincipal should renew or clear cookie when session is validated")]
+    [InlineData(true, false, false)]
+    [InlineData(true, true, false)]
+    [InlineData(false, false, false)]
+    [InlineData(false, false, true)]
+    public async Task ValidatePrincipal_Should_RenewOrClearCookie_When_SessionIsValidated(
+        bool forceRefresh, bool refreshFails, bool pageLoad)
     {
         var ct = TestContext.Current.CancellationToken;
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("session-refresh-test-key-32-bytes"));
@@ -88,7 +91,8 @@ public sealed class SessionCookieOptionsSetupTests
                 new OpenIdConnectConfiguration
                 {
                     Issuer = "https://identity.example.test",
-                    TokenEndpoint = "https://identity.example.test/connect/token"
+                    TokenEndpoint = "https://identity.example.test/connect/token",
+                    UserInfoEndpoint = "https://identity.example.test/connect/userinfo"
                 }),
             TokenValidationParameters = new TokenValidationParameters
             {
@@ -117,6 +121,7 @@ public sealed class SessionCookieOptionsSetupTests
         builder.Services.AddDataProtection().UseEphemeralDataProtectionProvider();
         await using var app = builder.Build();
         app.Urls.Add("http://127.0.0.1:0");
+        app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapGet(RefreshPath, () => Results.NoContent()).RequireAuthorization();
@@ -135,12 +140,13 @@ public sealed class SessionCookieOptionsSetupTests
             ]);
             await context.SignInAsync(AuthenticationConstants.SessionScheme,
                 new ClaimsPrincipal(new ClaimsIdentity(
-                    [new Claim("sub", "user"), new Claim("permission", "old.permission")], "session")), properties);
+                    [new Claim("sub", "user"), .. (pageLoad ? [] : new[] { new Claim("permission", "old.permission") })], "session")), properties);
         });
         app.MapGet("/probe", async (HttpContext context) =>
             await context.Response.WriteAsJsonAsync(new SessionSnapshot(
                 await context.GetTokenAsync(AuthenticationConstants.SessionScheme, "access_token"),
-                context.User.FindFirst("permission")?.Value)));
+                context.User.FindFirst("permission")?.Value)))
+            .WithMetadata(new ComponentTypeMetadata(typeof(ComponentBase)));
         await app.StartAsync(ct);
         using var client = new HttpClient(new SocketsHttpHandler { AllowAutoRedirect = false })
         {
@@ -148,10 +154,25 @@ public sealed class SessionCookieOptionsSetupTests
         };
         using var login = await client.GetAsync("/login-test", ct);
         login.EnsureSuccessStatusCode();
+        if (pageLoad)
+        {
+            client.DefaultRequestHeaders.Accept.ParseAdd("text/html");
+        }
 
         using var response = await client.GetAsync(forceRefresh ? RefreshPath : "/probe", ct);
 
-        handler.Calls.ShouldBe(forceRefresh ? 1 : 0);
+        var refreshed = forceRefresh || pageLoad;
+        handler.Calls.ShouldBe(refreshed ? 1 : 0);
+        handler.ValidationCalls.ShouldBe(pageLoad ? 1 : 0);
+        if (pageLoad)
+        {
+            var page = await response.Content.ReadFromJsonAsync<SessionSnapshot>(cancellationToken: ct);
+            page.ShouldNotBeNull();
+            page.Permission.ShouldBe("new.permission");
+            page.AccessToken.ShouldBe("new-access");
+        }
+
+        client.DefaultRequestHeaders.Accept.Clear();
         var session = await client.GetFromJsonAsync<SessionSnapshot>("/probe", ct);
         session.ShouldNotBeNull();
         if (refreshFails)
@@ -165,9 +186,9 @@ public sealed class SessionCookieOptionsSetupTests
         else
         {
             response.IsSuccessStatusCode.ShouldBeTrue();
-            response.Headers.Contains("Set-Cookie").ShouldBe(forceRefresh);
-            session.AccessToken.ShouldBe(forceRefresh ? "new-access" : "old-access");
-            session.Permission.ShouldBe(forceRefresh ? "new.permission" : "old.permission");
+            response.Headers.Contains("Set-Cookie").ShouldBe(refreshed);
+            session.AccessToken.ShouldBe(refreshed ? "new-access" : "old-access");
+            session.Permission.ShouldBe(refreshed ? "new.permission" : "old.permission");
         }
     }
 
@@ -184,10 +205,17 @@ public sealed class SessionCookieOptionsSetupTests
     private sealed class TokenEndpointHandler(SecurityKey key, bool fails) : HttpMessageHandler
     {
         internal int Calls { get; private set; }
+        internal int ValidationCalls { get; private set; }
 
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            if (request.RequestUri!.AbsolutePath == "/connect/userinfo")
+            {
+                ValidationCalls++;
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.Unauthorized));
+            }
+
             Calls++;
             var idToken = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
             {
