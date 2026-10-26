@@ -10,7 +10,8 @@ using Microsoft.Extensions.Logging;
 using OpenTelemetry;
 using OpenTelemetry.Trace;
 
-using TacticalHeroes.Admin.Infrastructure.Observability;
+using PANiXiDA.Core.Observability;
+
 using TacticalHeroes.Admin.Infrastructure.Proxy;
 
 namespace TacticalHeroes.Admin.UnitTests.Infrastructure.Proxy;
@@ -45,7 +46,7 @@ public sealed class ProxyTraceContextTests
         });
         var activities = new ConcurrentBag<Activity>();
         using var exporter = new ActivityExporter(activities);
-        proxyBuilder.AddAdminObservability();
+        proxyBuilder.AddObservability();
         proxyBuilder.Services.AddOpenTelemetry().WithTracing(tracing =>
             tracing.AddProcessor(new SimpleActivityExportProcessor(exporter)));
         proxyBuilder.Services.AddTacticalHeroesProxy(proxyBuilder.Configuration);

@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 
+using PANiXiDA.Core.Observability;
+
 using TacticalHeroes.Admin.Client.App.Composition;
 using TacticalHeroes.Admin.Client.App.Routing;
 using TacticalHeroes.Admin.Components;
@@ -7,15 +9,13 @@ using TacticalHeroes.Admin.Infrastructure.Authentication.DependencyInjection;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Endpoints;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Tokens;
 using TacticalHeroes.Admin.Infrastructure.DataProtection;
-using TacticalHeroes.Admin.Infrastructure.Observability;
 using TacticalHeroes.Admin.Infrastructure.Proxy;
 using TacticalHeroes.Admin.Modules.Compendium;
 using TacticalHeroes.Admin.Modules.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.AddAdminObservability();
-builder.Services.AddBrowserTelemetry(builder.Configuration);
+builder.AddObservability();
 
 builder.Services.AddTacticalHeroesAdminClient(
     builder.Configuration,
@@ -47,7 +47,6 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseRateLimiter();
 app.UseAntiforgery();
 
 app.MapStaticAssets().ShortCircuit();

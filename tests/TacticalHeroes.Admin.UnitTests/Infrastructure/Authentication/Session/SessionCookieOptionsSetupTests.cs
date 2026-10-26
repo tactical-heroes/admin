@@ -19,6 +19,8 @@ using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
+using PANiXiDA.Core.Observability;
+
 using TacticalHeroes.Admin.Infrastructure.Authentication;
 using TacticalHeroes.Admin.Infrastructure.Authentication.OpenIdConnect;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Options.OpenIdConnect;
@@ -42,6 +44,7 @@ public sealed class SessionCookieOptionsSetupTests
         setup.Configure(AuthenticationConstants.SessionScheme, options);
         var context = new DefaultHttpContext();
         context.Request.Path = "/telemetry/v1/logs";
+        context.SetEndpoint(new Endpoint(_ => Task.CompletedTask, new EndpointMetadataCollection(BrowserTelemetryEndpointMetadata.Instance), "telemetry"));
         var scheme = new AuthenticationScheme(AuthenticationConstants.SessionScheme, null, typeof(CookieAuthenticationHandler));
         var properties = new AuthenticationProperties();
         properties.StoreTokens([new AuthenticationToken

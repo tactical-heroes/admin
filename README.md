@@ -154,6 +154,9 @@ The host and WASM client use the `PANiXiDA.Core.Observability` SDK, pinned in
 `global.json`. The client calls `builder.AddObservability()` before `Build()` and
 `host.UseObservability()` afterwards.
 
+The host enables the Core relay with `BrowserTelemetry:Enabled=true` and maps it
+with `app.MapBrowserTelemetry()`. `AuthorizationPolicy` selects the admin policy.
+
 Client `wwwroot/appsettings.json` sets `OTEL_EXPORTER_OTLP_ENDPOINT` to `/telemetry`.
 Blazor/HTTP traces, metrics, and `ILogger` records reach the Collector through the
 BFF after sign-in. Removing the endpoint disables export. Telemetry does not renew

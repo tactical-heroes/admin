@@ -2,9 +2,10 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Options;
 
+using PANiXiDA.Core.Observability;
+
 using TacticalHeroes.Admin.Infrastructure.Authentication.OpenIdConnect;
 using TacticalHeroes.Admin.Infrastructure.Authentication.Options.Session;
-using TacticalHeroes.Admin.Infrastructure.Observability;
 using TacticalHeroes.Admin.Modules.Identity;
 
 namespace TacticalHeroes.Admin.Infrastructure.Authentication.Session;
@@ -41,7 +42,7 @@ internal sealed class SessionCookieOptionsSetup(
         options.SlidingExpiration = true;
         options.Events.OnCheckSlidingExpiration = context =>
         {
-            if (BrowserTelemetryEndpoints.IsTelemetryRequest(context.Request))
+            if (context.Request.IsBrowserTelemetryRequest())
             {
                 context.ShouldRenew = false;
             }
@@ -50,7 +51,7 @@ internal sealed class SessionCookieOptionsSetup(
         };
         options.Events.OnValidatePrincipal = async context =>
         {
-            if (BrowserTelemetryEndpoints.IsTelemetryRequest(context.Request))
+            if (context.Request.IsBrowserTelemetryRequest())
             {
                 return;
             }

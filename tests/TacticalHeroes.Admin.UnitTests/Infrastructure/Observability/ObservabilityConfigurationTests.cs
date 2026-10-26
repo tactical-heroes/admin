@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 
-using TacticalHeroes.Admin.Infrastructure.Observability;
+using PANiXiDA.Core.Observability;
 
 namespace TacticalHeroes.Admin.UnitTests.Infrastructure.Observability;
 
@@ -24,7 +24,7 @@ public sealed class ObservabilityConfigurationTests
         {
             ["OTEL_EXPORTER_OTLP_TIMEOUT"] = "100"
         });
-        builder.AddAdminObservability();
+        builder.AddObservability();
         var metrics = new ConcurrentBag<(string Meter, string Name)>();
         using var exporter = new MetricExporter(metrics);
         using var reader = new BaseExportingMetricReader(exporter);
