@@ -4,7 +4,7 @@ env:
     DOTNET_ENVIRONMENT: Development
     OTEL_SERVICE_NAME: tactical-heroes-admin-development
     BrowserTelemetry__ServiceName: tactical-heroes-admin-client-development
-    OTEL_RESOURCE_ATTRIBUTES: deployment.environment=development,platform.name=core-platform
+    OTEL_RESOURCE_ATTRIBUTES: deployment.environment.name=development,platform.name=core-platform
     TacticalHeroesApi__BaseUrl: https://dev.api.tactical-heroes.panixida.ru
     Authentication__OpenIdConnect__Authority: https://dev.api.tactical-heroes.panixida.ru
 
