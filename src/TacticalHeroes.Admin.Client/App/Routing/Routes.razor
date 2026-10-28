@@ -8,22 +8,24 @@
         AdditionalAssemblies="AdminModules.Assemblies"
         NotFoundPage="typeof(Pages.NotFound.NotFoundPage)">
     <Found Context="routeData">
-        <AuthorizeRouteView RouteData="routeData"
-                            DefaultLayout="typeof(MainLayout)">
-            <NotAuthorized>
-                @if (context.User.Identity?.IsAuthenticated == true)
-                {
-                    <MudAlert Severity="Severity.Warning" Class="ma-6">
-                        Недостаточно прав для доступа к этой странице.
-                    </MudAlert>
-                }
-                else
-                {
-                    <RedirectToLogin />
-                }
-            </NotAuthorized>
-        </AuthorizeRouteView>
-        <FocusOnNavigate RouteData="routeData"
-                         Selector="h1" />
+        <PageLoadTelemetry>
+            <AuthorizeRouteView RouteData="routeData"
+                                DefaultLayout="typeof(MainLayout)">
+                <NotAuthorized>
+                    @if (context.User.Identity?.IsAuthenticated == true)
+                    {
+                        <MudAlert Severity="Severity.Warning" Class="ma-6">
+                            Недостаточно прав для доступа к этой странице.
+                        </MudAlert>
+                    }
+                    else
+                    {
+                        <RedirectToLogin />
+                    }
+                </NotAuthorized>
+            </AuthorizeRouteView>
+            <FocusOnNavigate RouteData="routeData"
+                             Selector="h1" />
+        </PageLoadTelemetry>
     </Found>
 </Router>

@@ -4,6 +4,25 @@ namespace TacticalHeroes.Admin.Shared.ComponentTests.Ui.Common;
 
 public sealed class LoadableContentTests : BunitContext
 {
+    [Theory(DisplayName = "Render should report page loading and errors when load changes")]
+    [InlineData(true, "Previous attempt failed", true, false)]
+    [InlineData(false, null, false, false)]
+    [InlineData(false, "Load failed", false, true)]
+    public void Render_Should_ReportPageState_When_LoadChanges(bool loading, string? error, bool expectedLoading, bool expectedError)
+    {
+        var state = new PageLoadState();
+
+        Render<LoadableContent>(parameters => parameters
+            .AddCascadingValue(state)
+            .Add(content => content.Loading, loading)
+            .Add(content => content.LoadError, error)
+            .Add(content => content.OnRetry, () => { })
+            .AddChildContent("<p>Ready</p>"));
+
+        state.IsLoading.ShouldBe(expectedLoading);
+        state.HasError.ShouldBe(expectedError);
+    }
+
     public LoadableContentTests()
     {
         Services.AddMudServices();

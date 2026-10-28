@@ -6,11 +6,37 @@ using TacticalHeroes.Admin.Client.App.Routing;
 using TacticalHeroes.Admin.Client.Pages.Home;
 using TacticalHeroes.Admin.Modules.Identity;
 using TacticalHeroes.Admin.Modules.Identity.Pages.LoginPage.Ui;
+using TacticalHeroes.Admin.Shared.Ui.Common;
 
 namespace TacticalHeroes.Admin.Client.ComponentTests.App.Routing;
 
 public sealed class RoutesTests : ClientComponentTestContext
 {
+    [Fact(DisplayName = "Render should isolate telemetry from unfinished loaders when route changes")]
+    public async Task Render_Should_IsolateTelemetry_When_RouteChanges()
+    {
+        AddAuthorization().SetAuthorized("Administrator");
+        var component = Render<Routes>();
+        var previous = component.FindComponent<PageLoadTelemetry>().Instance;
+        var previousState = component.FindComponent<CascadingValue<PageLoadState>>().Instance.Value.ShouldNotBeNull();
+        var lateLoader = Render<PageLoadReporter>(parameters => parameters
+            .AddCascadingValue(previousState)
+            .Add(reporter => reporter.Loading, true));
+        previousState.IsLoading.ShouldBeTrue();
+
+        await component.InvokeAsync(() => Services.GetRequiredService<NavigationManager>().NavigateTo(IdentityRoutes.Login));
+
+        component.WaitForAssertion(() => component.FindComponent<CascadingValue<PageLoadState>>().Instance.Value.ShouldNotBeSameAs(previousState));
+        component.FindComponent<PageLoadTelemetry>().Instance.ShouldBeSameAs(previous);
+        var current = component.FindComponent<CascadingValue<PageLoadState>>().Instance.Value.ShouldNotBeNull();
+        lateLoader.Render(parameters => parameters
+            .Add(reporter => reporter.Loading, false)
+            .Add(reporter => reporter.HasError, true));
+        previousState.HasError.ShouldBeTrue();
+        current.IsLoading.ShouldBeFalse();
+        current.HasError.ShouldBeFalse();
+    }
+
     [Fact(DisplayName = "Render should keep login page when anonymous request rejects credentials")]
     public async Task Render_Should_KeepLoginPage_When_AnonymousRequestRejectsCredentials()
     {

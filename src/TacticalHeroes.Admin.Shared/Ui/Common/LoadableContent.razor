@@ -1,3 +1,5 @@
+<PageLoadReporter Loading="Loading" HasError="@(!Loading && !string.IsNullOrWhiteSpace(LoadError))" />
+
 @if (Loading)
 {
     <MudSkeleton SkeletonType="SkeletonType.Rectangle"
