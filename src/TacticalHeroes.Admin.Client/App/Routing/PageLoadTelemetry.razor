@@ -1,0 +1,6 @@
+@using PANiXiDA.Core.Observability.WebAssembly
+
+<CascadingValue Value="_state" IsFixed="true">
+    <PageLoadObserver IsLoading="_state.IsLoading" HasError="_state.HasError" />
+    @ChildContent
+</CascadingValue>

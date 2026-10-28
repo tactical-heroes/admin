@@ -1,5 +1,7 @@
 @typeparam TItem
 
+<PageLoadReporter Loading="Loading" HasError="@(!Loading && !string.IsNullOrWhiteSpace(LoadError))" />
+
 <div class="entity-list-host">
 <MudPaper Elevation="0" Class="entity-list">
     <div class="list-toolbar">
