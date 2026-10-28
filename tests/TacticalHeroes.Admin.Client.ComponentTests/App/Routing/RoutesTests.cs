@@ -26,7 +26,8 @@ public sealed class RoutesTests : ClientComponentTestContext
 
         await component.InvokeAsync(() => Services.GetRequiredService<NavigationManager>().NavigateTo(IdentityRoutes.Login));
 
-        component.WaitForAssertion(() => component.FindComponent<PageLoadTelemetry>().Instance.ShouldNotBeSameAs(previous));
+        component.WaitForAssertion(() => component.FindComponent<CascadingValue<PageLoadState>>().Instance.Value.ShouldNotBeSameAs(previousState));
+        component.FindComponent<PageLoadTelemetry>().Instance.ShouldBeSameAs(previous);
         var current = component.FindComponent<CascadingValue<PageLoadState>>().Instance.Value.ShouldNotBeNull();
         lateLoader.Render(parameters => parameters
             .Add(reporter => reporter.Loading, false)

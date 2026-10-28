@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
+using Microsoft.Extensions.DependencyInjection;
 
 using TacticalHeroes.Admin.Client.App.Routing;
 using TacticalHeroes.Admin.Shared.Ui.Common;
@@ -47,8 +48,8 @@ public sealed class PageLoadTelemetryTests : ClientComponentTestContext
         });
     }
 
-    [Fact(DisplayName = "OnInitialized should provide page state when content is rendered")]
-    public void OnInitialized_Should_ProvidePageState_When_ContentIsRendered()
+    [Fact(DisplayName = "OnParametersSet should provide page state when content is rendered")]
+    public void OnParametersSet_Should_ProvidePageState_When_ContentIsRendered()
     {
         var component = Render<PageLoadTelemetry>(parameters => parameters.AddChildContent("Ready"));
 
@@ -57,6 +58,58 @@ public sealed class PageLoadTelemetryTests : ClientComponentTestContext
         state.IsLoading.ShouldBeFalse();
         state.HasError.ShouldBeFalse();
         component.Markup.ShouldContain("Ready");
+    }
+
+    [Theory(DisplayName = "OnParametersSet should isolate page state when address changes")]
+    [InlineData("/users/1", "/users/2")]
+    [InlineData("/users?page=1", "/users?page=2")]
+    [InlineData("/users#first", "/users#second")]
+    public async Task OnParametersSet_Should_IsolatePageState_When_AddressChanges(string previousUri, string currentUri)
+    {
+        var navigation = Services.GetRequiredService<NavigationManager>();
+        navigation.NavigateTo(previousUri);
+        var component = Render<PageLoadTelemetry>(parameters => parameters
+            .AddChildContent<PageLoadReporter>(reporter => reporter.Add(value => value.Loading, true)));
+        var previousState = component.FindComponent<CascadingValue<PageLoadState>>().Instance.Value.ShouldNotBeNull();
+        var previousLoader = component.FindComponent<PageLoadReporter>().Instance;
+
+        await component.InvokeAsync(() => navigation.NavigateTo(currentUri));
+        component.Render(parameters => parameters
+            .AddChildContent<PageLoadReporter>(reporter => reporter.Add(value => value.Loading, true)));
+
+        var currentState = component.FindComponent<CascadingValue<PageLoadState>>().Instance.Value.ShouldNotBeNull();
+        currentState.ShouldNotBeSameAs(previousState);
+        component.FindComponent<PageLoadReporter>().Instance.ShouldNotBeSameAs(previousLoader);
+        previousState.IsLoading.ShouldBeFalse();
+        currentState.IsLoading.ShouldBeTrue();
+        currentState.HasError.ShouldBeFalse();
+
+        int renderCount = component.RenderCount;
+        using var lateLoader = Render<PageLoadReporter>(parameters => parameters
+            .AddCascadingValue(previousState)
+            .Add(value => value.HasError, true));
+
+        previousState.HasError.ShouldBeTrue();
+        currentState.IsLoading.ShouldBeTrue();
+        currentState.HasError.ShouldBeFalse();
+        component.RenderCount.ShouldBe(renderCount);
+    }
+
+    [Fact(DisplayName = "OnParametersSet should preserve page state when address is unchanged")]
+    public void OnParametersSet_Should_PreservePageState_When_AddressIsUnchanged()
+    {
+        var component = Render<PageLoadTelemetry>(parameters => parameters
+            .AddChildContent<PageLoadReporter>(reporter => reporter.Add(value => value.Loading, true)));
+        var state = component.FindComponent<CascadingValue<PageLoadState>>().Instance.Value.ShouldNotBeNull();
+        var loader = component.FindComponent<PageLoadReporter>().Instance;
+
+        component.Render(parameters => parameters
+            .AddChildContent<PageLoadReporter>(reporter => reporter.Add(value => value.Loading, false)));
+
+        component.FindComponent<CascadingValue<PageLoadState>>().Instance.Value.ShouldBeSameAs(state);
+        component.FindComponent<PageLoadReporter>().Instance.ShouldBeSameAs(loader);
+        state.IsLoading.ShouldBeFalse();
+        state.HasError.ShouldBeFalse();
     }
 
     [Fact(DisplayName = "Dispose should stop observing when component is disposed")]
