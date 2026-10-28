@@ -4,7 +4,7 @@ using TacticalHeroes.Admin.Shared.Ui.Common;
 
 namespace TacticalHeroes.Admin.Client.App.Routing;
 
-public partial class PageLoadTelemetry : IDisposable
+public sealed partial class PageLoadTelemetry : IDisposable
 {
     private readonly PageLoadState _state = new();
 
@@ -24,5 +24,6 @@ public partial class PageLoadTelemetry : IDisposable
     public void Dispose()
     {
         _state.Changed -= OnStateChanged;
+        GC.SuppressFinalize(this);
     }
 }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Rendering;
 
 using TacticalHeroes.Admin.Client.App.Routing;
 using TacticalHeroes.Admin.Shared.Ui.Common;
@@ -12,7 +13,7 @@ public sealed class PageLoadTelemetryTests : ClientComponentTestContext
     {
         bool loading = true;
         bool optionsLoading = true;
-        RenderFragment content = builder =>
+        void Content(RenderTreeBuilder builder)
         {
             builder.OpenComponent<LoadableContent>(0);
             builder.AddAttribute(1, nameof(LoadableContent.Loading), loading);
@@ -27,8 +28,8 @@ public sealed class PageLoadTelemetryTests : ClientComponentTestContext
                 child.CloseComponent();
             }));
             builder.CloseComponent();
-        };
-        var component = Render<PageLoadTelemetry>(parameters => parameters.Add(value => value.ChildContent, content));
+        }
+        var component = Render<PageLoadTelemetry>(parameters => parameters.Add(value => value.ChildContent, Content));
         var state = component.FindComponent<CascadingValue<PageLoadState>>().Instance.Value.ShouldNotBeNull();
         state.IsLoading.ShouldBeTrue();
 
