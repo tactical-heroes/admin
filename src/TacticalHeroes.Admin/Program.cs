@@ -49,7 +49,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 
-app.MapStaticAssets().ShortCircuit();
+app.MapStaticAssets()
+    .GroupStaticAssetMetrics()
+    .ShortCircuit();
 app.MapHealthChecks("/health");
 app.MapReverseProxy()
     .WithMetadata(new SkipStatusCodePagesAttribute());
