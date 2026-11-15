@@ -1,6 +1,6 @@
 image:
-  tag: development-345
+  tag: development-347
 
 migrations:
   image:
-    tag: development-345
+    tag: development-347
